@@ -62,6 +62,32 @@ Sistema web con agente de inteligencia artificial que automatiza el flujo comple
 
 6. Probá que funciona entrando a `http://127.0.0.1:8000/health` en el navegador.
 
+## Cómo levantar el entorno de desarrollo (Frontend)
+
+### Requisitos previos
+- Node.js 18 o superior instalado
+- Git Bash (en Windows) o una terminal Unix
+
+### Pasos
+
+1. Cloná el repositorio (si todavía no lo hiciste) y entrá a la carpeta `frontend`:
+```bash
+   git clone <url-del-repo>
+   cd Proyecto-Final-AARI/frontend
+```
+
+2. Instalá las dependencias (solo la primera vez, o cuando se agregue una librería nueva):
+```bash
+   npm install
+```
+
+3. Levantá el servidor de desarrollo:
+```bash
+   npm run dev
+```
+
+4. Abrí `http://localhost:5173/` en el navegador para ver la aplicación.
+
 ## Estado del proyecto
 
 En desarrollo - Sprint 0
