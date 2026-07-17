@@ -25,9 +25,42 @@ Sistema web con agente de inteligencia artificial que automatiza el flujo comple
 ## Estructura del proyecto
 (Pegar estructura)
 
-## Cómo levantar el entorno de desarrollo
+## Cómo levantar el entorno de desarrollo (Backend)
 
-*(Esta sección se va a completar cuando armemos el Docker Compose)*
+### Requisitos previos
+- Python 3.10 o superior instalado
+- Git Bash (en Windows) o una terminal Unix
+
+### Pasos
+
+1. Cloná el repositorio y entrá a la carpeta `backend`:
+```bash
+   git clone <url-del-repo>
+   cd Proyecto-Final-AARI/backend
+```
+
+2. Creá el entorno virtual (solo la primera vez):
+```bash
+   python -m venv venv
+```
+
+3. Activá el entorno virtual (cada vez que trabajes en el proyecto):
+```bash
+   source venv/Scripts/activate
+```
+   Vas a ver `(venv)` al principio de la línea de la terminal si funcionó.
+
+4. Instalá las dependencias:
+```bash
+   pip install -r requirements.txt
+```
+
+5. Levantá el servidor:
+```bash
+   uvicorn app.main:app --reload
+```
+
+6. Probá que funciona entrando a `http://127.0.0.1:8000/health` en el navegador.
 
 ## Estado del proyecto
 
