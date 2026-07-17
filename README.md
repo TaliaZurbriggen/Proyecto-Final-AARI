@@ -50,17 +50,23 @@ Sistema web con agente de inteligencia artificial que automatiza el flujo comple
 ```
    Vas a ver `(venv)` al principio de la línea de la terminal si funcionó.
 
-4. Instalá las dependencias:
+4. Copiá el archivo de variables de entorno de ejemplo y completalo con tus valores reales:
+```bash
+   cp .env.example .env
+```
+   Vas a necesitar la connection string de Supabase y las claves de API (pedíselas a tu compañero de equipo).
+
+5. Instalá las dependencias:
 ```bash
    pip install -r requirements.txt
 ```
 
-5. Levantá el servidor:
+6. Levantá el servidor:
 ```bash
    uvicorn app.main:app --reload
 ```
 
-6. Probá que funciona entrando a `http://127.0.0.1:8000/health` en el navegador.
+7. Probá que funciona entrando a `http://127.0.0.1:8000/health` en el navegador.
 
 ## Cómo levantar el entorno de desarrollo (Frontend)
 
@@ -75,18 +81,22 @@ Sistema web con agente de inteligencia artificial que automatiza el flujo comple
    git clone <url-del-repo>
    cd Proyecto-Final-AARI/frontend
 ```
+2. Copiá el archivo de variables de entorno de ejemplo:
+```bash
+   cp .env.example .env
+```
 
-2. Instalá las dependencias (solo la primera vez, o cuando se agregue una librería nueva):
+3. Instalá las dependencias (solo la primera vez, o cuando se agregue una librería nueva):
 ```bash
    npm install
 ```
 
-3. Levantá el servidor de desarrollo:
+4. Levantá el servidor de desarrollo:
 ```bash
    npm run dev
 ```
 
-4. Abrí `http://localhost:5173/` en el navegador para ver la aplicación.
+5. Abrí `http://localhost:5173/` en el navegador para ver la aplicación.
 
 ## Estado del proyecto
 
