@@ -68,6 +68,16 @@ Sistema web con agente de inteligencia artificial que automatiza el flujo comple
 
 7. Probá que funciona entrando a `http://127.0.0.1:8000/health` en el navegador.
 
+### Alternativa: levantar el backend con Docker
+
+Si preferís no instalar Python localmente, podés usar Docker:
+
+```bash
+cd backend
+docker build -t aari-backend .
+docker run -p 8000:8000 --env-file .env aari-backend
+```
+
 ## Cómo levantar el entorno de desarrollo (Frontend)
 
 ### Requisitos previos
