@@ -148,6 +148,7 @@ docker build -t aari-frontend .
 docker run -p 5173:5173 aari-frontend
 ```
 
+
 ## Estado del proyecto
 
 En desarrollo - Sprint 0
