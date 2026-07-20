@@ -28,8 +28,29 @@ Sistema web con agente de inteligencia artificial que automatiza el flujo comple
 ## Cómo levantar el entorno de desarrollo (Backend)
 
 ### Requisitos previos
-- Python 3.10 o superior instalado
-- Git Bash (en Windows) o una terminal Unix
+Antes de seguir las instrucciones de abajo, asegurate de tener instalado:
+
+1. **Git** — para clonar el repositorio y manejar versiones.
+   - Descarga: https://git-scm.com/download/win
+   - Verificar instalación: `git --version`
+   - En Windows, usar **Git Bash** como terminal (viene incluido en la instalación) en vez de PowerShell o CMD, para que los comandos de este README funcionen tal cual están escritos.
+
+2. **Python 3.10 o superior** — para correr el backend.
+   - Descarga: https://www.python.org/downloads/
+   - Verificar instalación: `python --version`
+
+3. **Node.js 18 o superior** — para correr el frontend.
+   - Descarga: https://nodejs.org/ (elegir la versión LTS)
+   - Verificar instalación: `node --version` y `npm --version`
+
+4. **Docker Desktop** — para correr el proyecto con contenedores (opcional para desarrollo básico, pero recomendado).
+   - Descarga: https://www.docker.com/products/docker-desktop/
+   - Requiere WSL2 en Windows — el instalador de Docker guía este paso, o se puede instalar antes manualmente con `wsl --install` desde PowerShell como administrador.
+   - Verificar instalación: `docker --version`
+   - Después de instalar, abrir Docker Desktop y esperar a que la esquina inferior izquierda diga "Engine running" antes de usar comandos `docker`.
+   - **Importante:** puede pedir reiniciar la computadora más de una vez durante la instalación (por WSL2). Es normal.
+
+Una vez instalado todo esto, segui con las secciones de abajo.
 
 ### Pasos
 
@@ -56,17 +77,30 @@ Sistema web con agente de inteligencia artificial que automatiza el flujo comple
 ```
    Vas a necesitar la connection string de Supabase y las claves de API (pedíselas a tu compañero de equipo).
 
-5. Instalá las dependencias:
+5. Completá `DATABASE_URL` en tu `.env` con la connection string de Supabase (pedísela a un compañero del equipo). Tené en cuenta:
+   - Sacá el parámetro `?pgbouncer=true` del final si lo copiaste directo desde Supabase — `psycopg2` no lo reconoce y falla la conexión.
+   - Si la contraseña de la base de datos tiene caracteres especiales (`%`, `#`, `!`, `+`, espacios, etc.), hay que codificarlos (URL encoding) o la conexión no va a parsear bien. Tabla de reemplazos común:
+     | Carácter | Reemplazo |
+     |----------|-----------|
+     | `%`      | `%25`     |
+     | `#`      | `%23`     |
+     | `!`      | `%21`     |
+     | `+`      | `%2B`     |
+     | espacio  | `%20`     |
+
+6. Probá la conexión levantando el servidor y entrando a `http://127.0.0.1:8000/health/db`. Si ves `{"status":"ok",...}`, la conexión funciona.
+
+7. Instalá las dependencias:
 ```bash
    pip install -r requirements.txt
 ```
 
-6. Levantá el servidor:
+8. Levantá el servidor:
 ```bash
    uvicorn app.main:app --reload
 ```
 
-7. Probá que funciona entrando a `http://127.0.0.1:8000/health` en el navegador.
+9. Probá que funciona entrando a `http://127.0.0.1:8000/health` en el navegador.
 
 ### Alternativa: levantar el backend con Docker
 
