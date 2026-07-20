@@ -114,10 +114,6 @@ docker run -p 8000:8000 --env-file .env aari-backend
 
 ## Cómo levantar el entorno de desarrollo (Frontend)
 
-### Requisitos previos
-- Node.js 18 o superior instalado
-- Git Bash (en Windows) o una terminal Unix
-
 ### Pasos
 
 1. Cloná el repositorio (si todavía no lo hiciste) y entrá a la carpeta `frontend`:
@@ -141,6 +137,16 @@ docker run -p 8000:8000 --env-file .env aari-backend
 ```
 
 5. Abrí `http://localhost:5173/` en el navegador para ver la aplicación.
+
+### Alternativa: levantar el frontend con Docker
+
+Si preferís no instalar Node localmente, podés usar Docker:
+
+```bash
+cd frontend
+docker build -t aari-frontend .
+docker run -p 5173:5173 aari-frontend
+```
 
 ## Estado del proyecto
 
