@@ -147,7 +147,34 @@ cd frontend
 docker build -t aari-frontend .
 docker run -p 5173:5173 aari-frontend
 ```
+## Cómo levantar el proyecto completo (recomendado)
 
+Con Docker Compose podés levantar el backend y el frontend juntos, ya conectados entre sí, con un solo comando.
+
+### Requisitos
+- Docker Desktop instalado y corriendo (ver "Requisitos previos" abajo)
+- Los archivos `.env` creados en `backend/` y `frontend/` (a partir de sus `.env.example`, con los valores reales completados)
+
+### Pasos
+
+1. Cloná el repositorio:
+```bash
+   git clone <url-del-repo>
+   cd Proyecto-Final-AARI
+```
+
+2. Levantá todo:
+```bash
+   docker-compose up --build
+```
+
+3. Accedé a:
+   - Frontend: http://localhost:5173/
+   - Backend: http://localhost:8000/health y http://localhost:8000/health/db
+
+4. Para detener todo, presioná `Ctrl + C` en la terminal.
+
+> Las secciones de abajo explican cómo levantar cada parte por separado, sin Docker, si lo preferís para desarrollar.
 
 ## Estado del proyecto
 
