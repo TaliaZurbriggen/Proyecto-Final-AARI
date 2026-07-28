@@ -1,13 +1,40 @@
 {
-  "version": "1.0",
+  "version": "1.1",
   "fecha_creacion": "2026-07-27",
-  "proposito": "Conjunto de prueba para medir precision del clasificador (criterio de aceptacion HU9: >=85%) y calibrar el umbral de confianza para escalado. Pendiente de validacion con Oikos Negocios Inmobiliarios antes de usarse como medicion oficial.",
+  "fecha_actualizacion": "2026-07-28",
+  "proposito": "Conjunto de prueba para medir precision del clasificador (criterio de aceptacion HU9: >=85%) y calibrar el umbral de confianza para escalado.",
+  "estado": "borrador - validacion parcial con Oikos. No usar como medicion oficial de HU9 hasta cerrar el punto pendiente.",
+  "validacion_oikos": {
+    "confirmado": [
+      "Los contratos residenciales de Oikos son estandarizados por tipo de servicio y en general NO incluyen clausulas de excepcion (a servicios iguales, contratos iguales). Por eso la mayoria de los casos del conjunto tienen clausulas_contrato=[] a proposito: es la situacion normal, no una senal de incertidumbre.",
+      "Los casos ambiguos hoy los resuelve la inmobiliaria manualmente; esperan que la IA derive por incertidumbre en vez de decidir sola. Confirma el diseno de escalado conservador (RS-10).",
+      "Las condiciones estandar del contrato estan documentadas y accesibles para Oikos (no implica que existan clausulas de excepcion por propiedad, solo que el contrato tipo esta disponible)."
+    ],
+    "pendiente": [
+      "Confirmar si un reclamo de olor a gas o riesgo electrico grave recibe atencion inmediata fuera del circuito habitual, o sigue el mismo proceso que un reclamo normal. La pregunta original no se entendio en la sesion de relevamiento y hay que reformularla en terminos concretos (ej.: 'si un inquilino avisa olor a gas, ¿lo llaman en el momento o esperan el circuito habitual?')."
+    ]
+  },
+  "prioridad_motivos_escalado": {
+    "orden": ["riesgo_seguridad", "multiples_rubros", "causa_no_identificable", "confianza_insuficiente"],
+    "criterio": "Cuando un caso podria disparar mas de un motivo de escalado en simultaneo, se espera que el agente reporte el de mayor prioridad segun este orden. El campo 'motivos_aceptables' (cuando esta presente en un caso) lista todos los motivos validos para ese caso especifico, para los casos donde se tolera mas de una respuesta correcta en la evaluacion."
+  },
+  "cobertura_clausulas_contractuales": {
+    "casos_con_clausula_cargada": 8,
+    "tipos_cubiertos": [
+      "override_valido_a_ordinario (casos 51, 57)",
+      "override_valido_a_extraordinario (caso 52)",
+      "override_valido_a_expensa (caso 54)",
+      "clausula_cargada_no_aplicable_al_rubro_del_reclamo (casos 53, 58)",
+      "clausula_dudosa_o_no_permitida_que_debe_escalar (casos 55, 56)"
+    ]
+  },
+  "nota_metricas": "La distribucion entre categorias no es uniforme (menos casos de expensa que de ordinario/extraordinario). Medir solo precision global puede ocultar que el clasificador falla sistematicamente en una categoria con pocos casos. Se recomienda reportar precision por categoria (ordinario, extraordinario, expensa, escalar) ademas del promedio macro entre categorias, no solo el porcentaje global sobre el total de 61 casos.",
   "distribucion": {
-    "ordinario": 15,
-    "extraordinario": 15,
-    "expensa": 5,
-    "escalar": 15,
-    "total": 50
+    "ordinario": 18,
+    "extraordinario": 17,
+    "expensa": 9,
+    "escalar": 17,
+    "total": 61
   },
   "casos": [
     {
@@ -120,12 +147,12 @@
     },
     {
       "id": "caso-13",
-      "descripcion": "Un vidrio de la puerta corrediza del balcón está rajado, no sabemos bien cuándo pasó pero nadie lo golpeó.",
+      "descripcion": "Encontramos rajado el vidrio de la puerta corrediza del balcón. No hubo ningún golpe, no se cayó nada encima y no identificamos ninguna causa externa; parece que se rajó solo.",
       "rubro_declarado": "estructural",
       "clausulas_contrato": [],
       "categoria_esperada": "ordinario",
       "escalar_esperado": false,
-      "justificacion": "Rotura de vidrio sin causa externa identificada (regla estructural-03, default ordinario)."
+      "justificacion": "Rotura de vidrio sin causa externa identificada; coincide directamente con el default de la regla estructural-03. Descripción ajustada para eliminar la ambigüedad original (no dejar lugar a interpretar una causa externa no atribuible)."
     },
     {
       "id": "caso-14",
@@ -165,12 +192,12 @@
     },
     {
       "id": "caso-18",
-      "descripcion": "El tablero eléctrico es viejísimo, ya hacía un ruido raro hace tiempo y ahora se cortó la luz de toda la casa.",
+      "descripcion": "El tablero eléctrico es viejísimo, tiene más de 20 años. Ahora se cortó la luz de toda la casa y no vuelve al subir la llave térmica; no hay olor a quemado ni chispas, solo dejó de funcionar.",
       "rubro_declarado": "electricidad",
       "clausulas_contrato": [],
       "categoria_esperada": "extraordinario",
       "escalar_esperado": false,
-      "justificacion": "Falla de instalación fija por antigüedad (regla electricidad-02)."
+      "justificacion": "Falla de instalación fija por antigüedad, sin indicios de riesgo de seguridad inminente (regla electricidad-02). Descripción ajustada para descartar explícitamente la lectura de riesgo eléctrico grave."
     },
     {
       "id": "caso-19",
@@ -192,12 +219,12 @@
     },
     {
       "id": "caso-21",
-      "descripcion": "Apareció una grieta grande en la pared del dormitorio, cruza de arriba a abajo.",
+      "descripcion": "Apareció una grieta en la pared del dormitorio que cruza de arriba a abajo. Es superficial, solo en la capa de revoque y pintura; no se mueve nada de la pared ni hay riesgo de derrumbe.",
       "rubro_declarado": "estructural",
       "clausulas_contrato": [],
       "categoria_esperada": "extraordinario",
       "escalar_esperado": false,
-      "justificacion": "Problema estructural (regla estructural-01)."
+      "justificacion": "Problema estructural de mampostería/revoque (regla estructural-01), sin riesgo de seguridad inminente. Descripción ajustada para descartar explícitamente la lectura de riesgo de derrumbe."
     },
     {
       "id": "caso-22",
@@ -352,8 +379,9 @@
       "clausulas_contrato": [],
       "categoria_esperada": null,
       "escalar_esperado": true,
-      "motivo_escalado_esperado": "multiples_rubros",
-      "justificacion": "Combina más de un problema de rubro distinto, además de posible riesgo de seguridad."
+      "motivo_escalado_esperado": "riesgo_seguridad",
+      "motivos_aceptables": ["riesgo_seguridad", "multiples_rubros"],
+      "justificacion": "El caso dispara dos motivos de escalado a la vez (posible riesgo de seguridad por el olor, y mezcla de más de un rubro). Por la prioridad definida (riesgo_seguridad > multiples_rubros), el motivo esperado es riesgo_seguridad; se acepta también multiples_rubros como respuesta válida en la evaluación."
     },
     {
       "id": "caso-39",
@@ -474,6 +502,123 @@
       "escalar_esperado": true,
       "motivo_escalado_esperado": "causa_no_identificable",
       "justificacion": "Incertidumbre explícita entre ámbito privado y común, y ubicación no concluyente (pasillo)."
+    },
+    {
+      "id": "caso-51",
+      "descripcion": "El termotanque dejó de darnos agua caliente, no funciona más.",
+      "rubro_declarado": "plomeria",
+      "clausulas_contrato": [
+        { "rubro": "plomeria", "override": "ordinario", "detalle": "mantenimiento y reposición del termotanque a cargo del inquilino según cláusula 8 del contrato" }
+      ],
+      "categoria_esperada": "ordinario",
+      "escalar_esperado": false,
+      "justificacion": "La cláusula contractual de la propiedad sobrescribe el default de la base de conocimiento (plomeria-05, normalmente extraordinario) y pone el termotanque a cargo del inquilino."
+    },
+    {
+      "id": "caso-52",
+      "descripcion": "La cerradura de la puerta de entrada está muy gastada, cuesta un montón girar la llave.",
+      "rubro_declarado": "estructural",
+      "clausulas_contrato": [
+        { "rubro": "estructural", "override": "extraordinario", "detalle": "reposición de cerraduras de puertas de acceso a cargo del propietario según cláusula 5 del contrato" }
+      ],
+      "categoria_esperada": "extraordinario",
+      "escalar_esperado": false,
+      "justificacion": "La cláusula contractual sobrescribe el default general (estructural-04, normalmente ordinario) y pone la cerradura a cargo del propietario."
+    },
+    {
+      "id": "caso-53",
+      "descripcion": "Cada vez que prendo el microondas y la pava eléctrica al mismo tiempo salta la térmica de la cocina.",
+      "rubro_declarado": "electricidad",
+      "clausulas_contrato": [
+        { "rubro": "pintura", "override": "ordinario", "detalle": "pintura interior a cargo del inquilino cada dos años según cláusula 11 del contrato" }
+      ],
+      "categoria_esperada": "ordinario",
+      "escalar_esperado": false,
+      "justificacion": "La cláusula cargada corresponde al rubro pintura, no a electricidad; no es aplicable a este reclamo y se usa la regla general (electricidad-01)."
+    },
+    {
+      "id": "caso-54",
+      "descripcion": "Hace un mes que no se limpia el hall de entrada del edificio, según el contrato eso nos corresponde pagarlo a nosotros.",
+      "rubro_declarado": "otro",
+      "clausulas_contrato": [
+        { "rubro": "expensas", "override": "expensa", "detalle": "limpieza de espacios comunes a cargo del inquilino según cláusula 12 del contrato" }
+      ],
+      "categoria_esperada": "expensa",
+      "escalar_esperado": false,
+      "justificacion": "Gasto habitual del consorcio con cláusula contractual cargada que lo asocia al inquilino (regla expensas-01)."
+    },
+    {
+      "id": "caso-55",
+      "descripcion": "El administrador anunció una obra grande para reforzar los cimientos del edificio y nos van a cobrar expensas extraordinarias por eso, pero en el contrato dice que las expensas extraordinarias las paga el inquilino.",
+      "rubro_declarado": "otro",
+      "clausulas_contrato": [
+        { "rubro": "expensas", "override": "ordinario", "detalle": "expensas extraordinarias a cargo del inquilino según cláusula 20 del contrato" }
+      ],
+      "categoria_esperada": null,
+      "escalar_esperado": true,
+      "motivo_escalado_esperado": "confianza_insuficiente",
+      "justificacion": "La cláusula pretende pactar en contra de una regla que no admite excepción contractual (expensas-02: gasto no habitual del consorcio, siempre a cargo del propietario). El agente no debe aplicar la cláusula automáticamente; requiere validación humana."
+    },
+    {
+      "id": "caso-56",
+      "descripcion": "Se rompió el aire acondicionado que vino con el departamento, no sabemos bien por qué dejó de andar.",
+      "rubro_declarado": "electrodomesticos",
+      "clausulas_contrato": [
+        { "rubro": "electrodomesticos", "override": "a criterio del propietario", "detalle": "reposición de artefactos según evaluación caso por caso del propietario, cláusula 15 del contrato" }
+      ],
+      "categoria_esperada": null,
+      "escalar_esperado": true,
+      "motivo_escalado_esperado": "confianza_insuficiente",
+      "justificacion": "La cláusula cargada no define un override claro entre las tres categorías válidas (queda sujeta a evaluación discrecional del propietario), por lo que no puede aplicarse de forma automática."
+    },
+    {
+      "id": "caso-57",
+      "descripcion": "Las paredes del pasillo están amarillentas y descascaradas, nunca se pintaron desde que vivimos acá hace 6 años.",
+      "rubro_declarado": "pintura",
+      "clausulas_contrato": [
+        { "rubro": "pintura", "override": "ordinario", "detalle": "mantenimiento de pintura cada 3 años a cargo del inquilino según cláusula 3 del contrato" }
+      ],
+      "categoria_esperada": "ordinario",
+      "escalar_esperado": false,
+      "justificacion": "La cláusula contractual sobrescribe el default general (pintura-01, normalmente extraordinario por vetustez) y pone el mantenimiento periódico de pintura a cargo del inquilino."
+    },
+    {
+      "id": "caso-58",
+      "descripcion": "Apareció una grieta en la pared del dormitorio, cruza de un costado al otro, se nota bastante.",
+      "rubro_declarado": "estructural",
+      "clausulas_contrato": [
+        { "rubro": "plomeria", "override": "ordinario", "detalle": "mantenimiento de grifería a cargo del inquilino según cláusula 8 del contrato" }
+      ],
+      "categoria_esperada": "extraordinario",
+      "escalar_esperado": false,
+      "justificacion": "La cláusula cargada corresponde al rubro plomería, no aplica a este reclamo estructural; se usa la regla general (estructural-01)."
+    },
+    {
+      "id": "caso-59",
+      "descripcion": "El portón eléctrico del garage del edificio dejó de funcionar, no es solo el de nuestra cochera, es el de entrada general.",
+      "rubro_declarado": "electricidad",
+      "clausulas_contrato": [],
+      "categoria_esperada": "expensa",
+      "escalar_esperado": false,
+      "justificacion": "Parte común del edificio, administrada por el consorcio."
+    },
+    {
+      "id": "caso-60",
+      "descripcion": "Se rompió la caldera central que le da calefacción a todo el edificio.",
+      "rubro_declarado": "gas",
+      "clausulas_contrato": [],
+      "categoria_esperada": "expensa",
+      "escalar_esperado": false,
+      "justificacion": "Instalación común del edificio (calefacción central), administrada por el consorcio."
+    },
+    {
+      "id": "caso-61",
+      "descripcion": "Las luces del pasillo del piso están todas quemadas, no las cambia nadie hace semanas.",
+      "rubro_declarado": "electricidad",
+      "clausulas_contrato": [],
+      "categoria_esperada": "expensa",
+      "escalar_esperado": false,
+      "justificacion": "Parte común del edificio, administrada por el consorcio."
     }
   ]
 }
