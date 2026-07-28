@@ -1,0 +1,479 @@
+{
+  "version": "1.0",
+  "fecha_creacion": "2026-07-27",
+  "proposito": "Conjunto de prueba para medir precision del clasificador (criterio de aceptacion HU9: >=85%) y calibrar el umbral de confianza para escalado. Pendiente de validacion con Oikos Negocios Inmobiliarios antes de usarse como medicion oficial.",
+  "distribucion": {
+    "ordinario": 15,
+    "extraordinario": 15,
+    "expensa": 5,
+    "escalar": 15,
+    "total": 50
+  },
+  "casos": [
+    {
+      "id": "caso-01",
+      "descripcion": "La canilla de la cocina gotea desde hace unos días, no es mucho pero no para.",
+      "rubro_declarado": "plomeria",
+      "clausulas_contrato": [],
+      "categoria_esperada": "ordinario",
+      "escalar_esperado": false,
+      "justificacion": "Desgaste de uso normal en griferia (regla plomeria-01)."
+    },
+    {
+      "id": "caso-02",
+      "descripcion": "El inodoro no para de tirar agua, se ve que es el flotante que quedó trabado.",
+      "rubro_declarado": "plomeria",
+      "clausulas_contrato": [],
+      "categoria_esperada": "ordinario",
+      "escalar_esperado": false,
+      "justificacion": "Mecanismo interno por desgaste (regla plomeria-03)."
+    },
+    {
+      "id": "caso-03",
+      "descripcion": "Se tapó el caño del baño, mi hija le tiró un juguete al inodoro sin que nos diéramos cuenta.",
+      "rubro_declarado": "plomeria",
+      "clausulas_contrato": [],
+      "categoria_esperada": "ordinario",
+      "escalar_esperado": false,
+      "justificacion": "Causa explícita atribuible al inquilino (regla plomeria-04)."
+    },
+    {
+      "id": "caso-04",
+      "descripcion": "Cada vez que prendo el microondas y la pava eléctrica al mismo tiempo salta la térmica de la cocina.",
+      "rubro_declarado": "electricidad",
+      "clausulas_contrato": [],
+      "categoria_esperada": "ordinario",
+      "escalar_esperado": false,
+      "justificacion": "Sobrecarga puntual por uso (regla electricidad-01)."
+    },
+    {
+      "id": "caso-05",
+      "descripcion": "Se quemó la lámpara del living, hay que cambiar la bombita nomás.",
+      "rubro_declarado": "electricidad",
+      "clausulas_contrato": [],
+      "categoria_esperada": "ordinario",
+      "escalar_esperado": false,
+      "justificacion": "Reposición de consumible (regla electricidad-03)."
+    },
+    {
+      "id": "caso-06",
+      "descripcion": "Raspé la pared del pasillo moviendo un mueble y quedó una marca fea.",
+      "rubro_declarado": "pintura",
+      "clausulas_contrato": [],
+      "categoria_esperada": "ordinario",
+      "escalar_esperado": false,
+      "justificacion": "Daño puntual con causa explícita atribuible al inquilino (regla pintura-02)."
+    },
+    {
+      "id": "caso-07",
+      "descripcion": "La puerta del dormitorio no cierra del todo bien, está como floja de la bisagra.",
+      "rubro_declarado": "estructural",
+      "clausulas_contrato": [],
+      "categoria_esperada": "ordinario",
+      "escalar_esperado": false,
+      "justificacion": "Desajuste menor de bisagra (regla estructural-02)."
+    },
+    {
+      "id": "caso-08",
+      "descripcion": "Se rompió el vidrio de la ventana de la cocina, se me cayó una maceta pesada encima sin querer.",
+      "rubro_declarado": "estructural",
+      "clausulas_contrato": [],
+      "categoria_esperada": "ordinario",
+      "escalar_esperado": false,
+      "justificacion": "Rotura de vidrio con causa atribuible al inquilino mencionada explícitamente (regla estructural-03)."
+    },
+    {
+      "id": "caso-09",
+      "descripcion": "La cerradura de la puerta de entrada está muy gastada, cuesta un montón girar la llave.",
+      "rubro_declarado": "estructural",
+      "clausulas_contrato": [],
+      "categoria_esperada": "ordinario",
+      "escalar_esperado": false,
+      "justificacion": "Desgaste de uso normal (regla estructural-04)."
+    },
+    {
+      "id": "caso-10",
+      "descripcion": "El aire acondicionado tira poco frío, creo que hay que limpiarle los filtros porque hace tiempo no se hace.",
+      "rubro_declarado": "electrodomesticos",
+      "clausulas_contrato": [],
+      "categoria_esperada": "ordinario",
+      "escalar_esperado": false,
+      "justificacion": "Mantenimiento preventivo de rutina (regla electrodomesticos-02)."
+    },
+    {
+      "id": "caso-11",
+      "descripcion": "La ducha pierde agua por la base, parece que es la goma que ya está gastada.",
+      "rubro_declarado": "plomeria",
+      "clausulas_contrato": [],
+      "categoria_esperada": "ordinario",
+      "escalar_esperado": false,
+      "justificacion": "Desgaste de uso normal en griferia (regla plomeria-01)."
+    },
+    {
+      "id": "caso-12",
+      "descripcion": "El tomacorriente del living dejó de andar, capaz se recalentó porque siempre tengo enchufada ahí la estufa eléctrica todo el día.",
+      "rubro_declarado": "electricidad",
+      "clausulas_contrato": [],
+      "categoria_esperada": "ordinario",
+      "escalar_esperado": false,
+      "justificacion": "Sobrecarga por uso, causa mencionada por el propio inquilino (regla electricidad-01)."
+    },
+    {
+      "id": "caso-13",
+      "descripcion": "Un vidrio de la puerta corrediza del balcón está rajado, no sabemos bien cuándo pasó pero nadie lo golpeó.",
+      "rubro_declarado": "estructural",
+      "clausulas_contrato": [],
+      "categoria_esperada": "ordinario",
+      "escalar_esperado": false,
+      "justificacion": "Rotura de vidrio sin causa externa identificada (regla estructural-03, default ordinario)."
+    },
+    {
+      "id": "caso-14",
+      "descripcion": "La heladera hace un ruido raro, pero creo que es porque hace mucho que no la descongelamos.",
+      "rubro_declarado": "electrodomesticos",
+      "clausulas_contrato": [],
+      "categoria_esperada": "ordinario",
+      "escalar_esperado": false,
+      "justificacion": "Mantenimiento de rutina atribuible al uso (regla electrodomesticos-02)."
+    },
+    {
+      "id": "caso-15",
+      "descripcion": "Se rompió la llave en la cerradura de la puerta de calle, ya la sentíamos muy gastada hace rato.",
+      "rubro_declarado": "estructural",
+      "clausulas_contrato": [],
+      "categoria_esperada": "ordinario",
+      "escalar_esperado": false,
+      "justificacion": "Desgaste de uso normal (regla estructural-04)."
+    },
+    {
+      "id": "caso-16",
+      "descripcion": "Hay una mancha de humedad enorme en la pared del living, parece que hay una cañería rota adentro de la pared.",
+      "rubro_declarado": "plomeria",
+      "clausulas_contrato": [],
+      "categoria_esperada": "extraordinario",
+      "escalar_esperado": false,
+      "justificacion": "Cañería de la instalación fija (regla plomeria-02)."
+    },
+    {
+      "id": "caso-17",
+      "descripcion": "El termotanque tiene como 15 años y dejó de calentar de un día para el otro, sin razón aparente.",
+      "rubro_declarado": "plomeria",
+      "clausulas_contrato": [],
+      "categoria_esperada": "extraordinario",
+      "escalar_esperado": false,
+      "justificacion": "Antigüedad mencionada explícitamente, reduce la ambigüedad del caso base plomeria-05."
+    },
+    {
+      "id": "caso-18",
+      "descripcion": "El tablero eléctrico es viejísimo, ya hacía un ruido raro hace tiempo y ahora se cortó la luz de toda la casa.",
+      "rubro_declarado": "electricidad",
+      "clausulas_contrato": [],
+      "categoria_esperada": "extraordinario",
+      "escalar_esperado": false,
+      "justificacion": "Falla de instalación fija por antigüedad (regla electricidad-02)."
+    },
+    {
+      "id": "caso-19",
+      "descripcion": "La estufa no prende, vino un gasista particular y dijo que es un problema del quemador, es una estufa vieja que ya estaba cuando alquilamos.",
+      "rubro_declarado": "gas",
+      "clausulas_contrato": [],
+      "categoria_esperada": "extraordinario",
+      "escalar_esperado": false,
+      "justificacion": "Falla de fábrica/antigüedad en artefacto provisto (regla gas-02)."
+    },
+    {
+      "id": "caso-20",
+      "descripcion": "La pintura del techo del living está toda descascarada, hace años que no se pinta.",
+      "rubro_declarado": "pintura",
+      "clausulas_contrato": [],
+      "categoria_esperada": "extraordinario",
+      "escalar_esperado": false,
+      "justificacion": "Vetustez (regla pintura-01)."
+    },
+    {
+      "id": "caso-21",
+      "descripcion": "Apareció una grieta grande en la pared del dormitorio, cruza de arriba a abajo.",
+      "rubro_declarado": "estructural",
+      "clausulas_contrato": [],
+      "categoria_esperada": "extraordinario",
+      "escalar_esperado": false,
+      "justificacion": "Problema estructural (regla estructural-01)."
+    },
+    {
+      "id": "caso-22",
+      "descripcion": "El techo tiene una filtración, cuando llueve mucho gotea en el living.",
+      "rubro_declarado": "estructural",
+      "clausulas_contrato": [],
+      "categoria_esperada": "extraordinario",
+      "escalar_esperado": false,
+      "justificacion": "Problema estructural de techo (regla estructural-01)."
+    },
+    {
+      "id": "caso-23",
+      "descripcion": "La cocina que vino con el departamento dejó de encender, no es por falta de gas porque revisamos la garrafa.",
+      "rubro_declarado": "electrodomesticos",
+      "clausulas_contrato": [],
+      "categoria_esperada": "extraordinario",
+      "escalar_esperado": false,
+      "justificacion": "Artefacto provisto que falla por causa propia (regla electrodomesticos-01)."
+    },
+    {
+      "id": "caso-24",
+      "descripcion": "El calefactor que ya estaba instalado cuando alquilamos dejó de funcionar solo, no lo tocamos.",
+      "rubro_declarado": "electrodomesticos",
+      "clausulas_contrato": [],
+      "categoria_esperada": "extraordinario",
+      "escalar_esperado": false,
+      "justificacion": "Artefacto provisto que falla por causa propia (regla electrodomesticos-01)."
+    },
+    {
+      "id": "caso-25",
+      "descripcion": "Explotó una cañería en el patio, salió agua de golpe por todos lados.",
+      "rubro_declarado": "plomeria",
+      "clausulas_contrato": [],
+      "categoria_esperada": "extraordinario",
+      "escalar_esperado": false,
+      "justificacion": "Cañería de instalación fija (regla plomeria-02)."
+    },
+    {
+      "id": "caso-26",
+      "descripcion": "Se está despegando el revoque de una pared exterior, se ven los ladrillos.",
+      "rubro_declarado": "estructural",
+      "clausulas_contrato": [],
+      "categoria_esperada": "extraordinario",
+      "escalar_esperado": false,
+      "justificacion": "Problema estructural (regla estructural-01)."
+    },
+    {
+      "id": "caso-27",
+      "descripcion": "Las paredes del pasillo están amarillentas y descascaradas, nunca se pintaron desde que vivimos acá hace 6 años.",
+      "rubro_declarado": "pintura",
+      "clausulas_contrato": [],
+      "categoria_esperada": "extraordinario",
+      "escalar_esperado": false,
+      "justificacion": "Vetustez, tiempo prolongado sin mantenimiento (regla pintura-01)."
+    },
+    {
+      "id": "caso-28",
+      "descripcion": "El termotanque eléctrico que vino con la casa hace un ruido fuerte y perdió presión de golpe.",
+      "rubro_declarado": "electrodomesticos",
+      "clausulas_contrato": [],
+      "categoria_esperada": "extraordinario",
+      "escalar_esperado": false,
+      "justificacion": "Artefacto provisto que falla por causa propia (regla electrodomesticos-01)."
+    },
+    {
+      "id": "caso-29",
+      "descripcion": "Una baldosa del piso de la cocina se levantó sola, no la pisamos fuerte ni nada raro.",
+      "rubro_declarado": "estructural",
+      "clausulas_contrato": [],
+      "categoria_esperada": "extraordinario",
+      "escalar_esperado": false,
+      "justificacion": "Problema estructural sin causa atribuible al inquilino (regla estructural-01)."
+    },
+    {
+      "id": "caso-30",
+      "descripcion": "Hay olor a humedad fuerte en el placard del dormitorio, parece que viene de una cañería de la pared medianera.",
+      "rubro_declarado": "plomeria",
+      "clausulas_contrato": [],
+      "categoria_esperada": "extraordinario",
+      "escalar_esperado": false,
+      "justificacion": "Cañería de instalación fija (regla plomeria-02)."
+    },
+    {
+      "id": "caso-31",
+      "descripcion": "Se rompió el portero eléctrico de la entrada del edificio, no es solo el mío, es el de todo el edificio.",
+      "rubro_declarado": "electricidad",
+      "clausulas_contrato": [],
+      "categoria_esperada": "expensa",
+      "escalar_esperado": false,
+      "justificacion": "Parte común del edificio, administrada por el consorcio."
+    },
+    {
+      "id": "caso-32",
+      "descripcion": "El ascensor del edificio quedó fuera de servicio hace tres días.",
+      "rubro_declarado": "otro",
+      "clausulas_contrato": [],
+      "categoria_esperada": "expensa",
+      "escalar_esperado": false,
+      "justificacion": "Parte común del edificio, administrada por el consorcio."
+    },
+    {
+      "id": "caso-33",
+      "descripcion": "Hay una gotera en el pasillo común del piso, no es dentro de mi departamento.",
+      "rubro_declarado": "estructural",
+      "clausulas_contrato": [],
+      "categoria_esperada": "expensa",
+      "escalar_esperado": false,
+      "justificacion": "Parte común del edificio, administrada por el consorcio."
+    },
+    {
+      "id": "caso-34",
+      "descripcion": "La bomba de agua del edificio se rompió y no sube presión a ningún piso.",
+      "rubro_declarado": "plomeria",
+      "clausulas_contrato": [],
+      "categoria_esperada": "expensa",
+      "escalar_esperado": false,
+      "justificacion": "Instalación común del edificio, administrada por el consorcio."
+    },
+    {
+      "id": "caso-35",
+      "descripcion": "Se cortó la luz de la escalera y el palier, el resto del edificio está bien.",
+      "rubro_declarado": "electricidad",
+      "clausulas_contrato": [],
+      "categoria_esperada": "expensa",
+      "escalar_esperado": false,
+      "justificacion": "Parte común del edificio, administrada por el consorcio."
+    },
+    {
+      "id": "caso-36",
+      "descripcion": "No tengo agua caliente.",
+      "rubro_declarado": "plomeria",
+      "clausulas_contrato": [],
+      "categoria_esperada": null,
+      "escalar_esperado": true,
+      "motivo_escalado_esperado": "causa_no_identificable",
+      "justificacion": "Sin contexto sobre la causa (uso vs. antigüedad/falla), caso ambiguo por diseño (regla plomeria-05)."
+    },
+    {
+      "id": "caso-37",
+      "descripcion": "Siento olor a gas en la cocina, no muy fuerte pero está.",
+      "rubro_declarado": "gas",
+      "clausulas_contrato": [],
+      "categoria_esperada": null,
+      "escalar_esperado": true,
+      "motivo_escalado_esperado": "riesgo_seguridad",
+      "justificacion": "Riesgo de seguridad, escalado obligatorio sin excepción (regla gas-01)."
+    },
+    {
+      "id": "caso-38",
+      "descripcion": "Se rompió el caño del baño y además noto un olor raro en la cocina, no sé si es gas o no.",
+      "rubro_declarado": "otro",
+      "clausulas_contrato": [],
+      "categoria_esperada": null,
+      "escalar_esperado": true,
+      "motivo_escalado_esperado": "multiples_rubros",
+      "justificacion": "Combina más de un problema de rubro distinto, además de posible riesgo de seguridad."
+    },
+    {
+      "id": "caso-39",
+      "descripcion": "Se rompió la canilla de la cocina, no sé bien qué pasó, de repente empezó a perder feo.",
+      "rubro_declarado": "plomeria",
+      "clausulas_contrato": [],
+      "categoria_esperada": null,
+      "escalar_esperado": true,
+      "motivo_escalado_esperado": "causa_no_identificable",
+      "justificacion": "\"Se rompió\" sin más contexto no permite distinguir entre desgaste normal y rotura por otra causa."
+    },
+    {
+      "id": "caso-40",
+      "descripcion": "El termotanque no anda, dejó de calentar de golpe.",
+      "rubro_declarado": "plomeria",
+      "clausulas_contrato": [],
+      "categoria_esperada": null,
+      "escalar_esperado": true,
+      "motivo_escalado_esperado": "confianza_insuficiente",
+      "justificacion": "Propiedad sin cláusulas contractuales cargadas y regla general de confianza baja para este caso (plomeria-05)."
+    },
+    {
+      "id": "caso-41",
+      "descripcion": "La puerta del balcón no cierra bien, antes cerraba perfecto y ahora está como torcida.",
+      "rubro_declarado": "estructural",
+      "clausulas_contrato": [],
+      "categoria_esperada": null,
+      "escalar_esperado": true,
+      "motivo_escalado_esperado": "causa_no_identificable",
+      "justificacion": "No distingue entre desajuste menor (ordinario) y deformación estructural (extraordinario)."
+    },
+    {
+      "id": "caso-42",
+      "descripcion": "Hay manchas de humedad en el techo del baño, no sé si es de una cañería mía o del vecino de arriba.",
+      "rubro_declarado": "plomeria",
+      "clausulas_contrato": [],
+      "categoria_esperada": null,
+      "escalar_esperado": true,
+      "motivo_escalado_esperado": "causa_no_identificable",
+      "justificacion": "El propio inquilino declara no saber si la causa es privada o común."
+    },
+    {
+      "id": "caso-43",
+      "descripcion": "Se rompió un azulejo del baño, cerca de la ducha.",
+      "rubro_declarado": "estructural",
+      "clausulas_contrato": [],
+      "categoria_esperada": null,
+      "escalar_esperado": true,
+      "motivo_escalado_esperado": "causa_no_identificable",
+      "justificacion": "No hay indicio de causa (golpe, desgaste, defecto de colocación)."
+    },
+    {
+      "id": "caso-44",
+      "descripcion": "El aire acondicionado no enfría nada, ya hace bastante que lo tenemos así.",
+      "rubro_declarado": "electrodomesticos",
+      "clausulas_contrato": [],
+      "categoria_esperada": null,
+      "escalar_esperado": true,
+      "motivo_escalado_esperado": "causa_no_identificable",
+      "justificacion": "No distingue entre falta de mantenimiento (ordinario) y falla por antigüedad del equipo (extraordinario)."
+    },
+    {
+      "id": "caso-45",
+      "descripcion": "La persiana de la habitación se trabó y no sube ni baja.",
+      "rubro_declarado": "estructural",
+      "clausulas_contrato": [],
+      "categoria_esperada": null,
+      "escalar_esperado": true,
+      "motivo_escalado_esperado": "causa_no_identificable",
+      "justificacion": "Mecanismo sin causa clara de falla."
+    },
+    {
+      "id": "caso-46",
+      "descripcion": "Encontramos una filtración de agua en el placard pero no sabemos de dónde viene.",
+      "rubro_declarado": "plomeria",
+      "clausulas_contrato": [],
+      "categoria_esperada": null,
+      "escalar_esperado": true,
+      "motivo_escalado_esperado": "causa_no_identificable",
+      "justificacion": "El propio relato declara desconocer el origen del problema."
+    },
+    {
+      "id": "caso-47",
+      "descripcion": "El piso de la cocina está flojo en una parte, se hunde un poco al pisar ahí.",
+      "rubro_declarado": "estructural",
+      "clausulas_contrato": [],
+      "categoria_esperada": null,
+      "escalar_esperado": true,
+      "motivo_escalado_esperado": "causa_no_identificable",
+      "justificacion": "No distingue entre problema estructural y desgaste de la instalación del piso."
+    },
+    {
+      "id": "caso-48",
+      "descripcion": "El propietario nos dijo de palabra que la pintura corre por nuestra cuenta según el contrato, pero no tenemos copia para confirmarlo.",
+      "rubro_declarado": "pintura",
+      "clausulas_contrato": [],
+      "categoria_esperada": null,
+      "escalar_esperado": true,
+      "motivo_escalado_esperado": "confianza_insuficiente",
+      "justificacion": "Se menciona una posible cláusula de excepción no cargada ni verificable en el sistema."
+    },
+    {
+      "id": "caso-49",
+      "descripcion": "Tenemos varios problemas: la puerta del baño no cierra bien, hay una gotera en la cocina y el timbre no anda.",
+      "rubro_declarado": "otro",
+      "clausulas_contrato": [],
+      "categoria_esperada": null,
+      "escalar_esperado": true,
+      "motivo_escalado_esperado": "multiples_rubros",
+      "justificacion": "Combina varios problemas de rubros distintos en un solo reclamo."
+    },
+    {
+      "id": "caso-50",
+      "descripcion": "No sé si esto lo tengo que reportar yo o el encargado del edificio, hay un problema con el agua en el pasillo de mi piso.",
+      "rubro_declarado": "plomeria",
+      "clausulas_contrato": [],
+      "categoria_esperada": null,
+      "escalar_esperado": true,
+      "motivo_escalado_esperado": "causa_no_identificable",
+      "justificacion": "Incertidumbre explícita entre ámbito privado y común, y ubicación no concluyente (pasillo)."
+    }
+  ]
+}
