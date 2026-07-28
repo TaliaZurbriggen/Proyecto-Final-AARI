@@ -23,7 +23,44 @@ Sistema web con agente de inteligencia artificial que automatiza el flujo comple
 - **Control de versiones:** GitHub
 
 ## Estructura del proyecto
-(Pegar estructura)
+
+```text
+Proyecto-Final-AARI/
+├── backend/
+│   ├── app/
+│   │   ├── agents/
+│   │   │   └── classification/  # Grafo y estado del agente clasificador
+│   │   │       ├── graph.py
+│   │   │       ├── nodes.py
+│   │   │       └── state.py
+│   │   ├── api/                 # Rutas de la API
+│   │   ├── core/                # Configuración compartida
+│   │   ├── db/                  # Conexión a base de datos
+│   │   ├── models/              # Modelos de persistencia
+│   │   ├── schemas/             # Esquemas de entrada y salida
+│   │   └── main.py              # Punto de entrada de FastAPI
+│   ├── migrations/              # Esquema y datos iniciales de Supabase
+│   ├── tests/                   # Pruebas automatizadas
+│   ├── Dockerfile
+│   └── requirements.txt
+├── frontend/
+│   ├── public/                  # Recursos estáticos
+│   ├── src/                     # Aplicación React
+│   ├── Dockerfile
+│   └── package.json
+├── docker-compose.yml           # Levanta frontend y backend juntos
+└── README.md
+```
+
+### Agente de clasificación
+
+El primer flujo del agente está implementado con LangGraph:
+
+```text
+Inicio → clasificar_reclamo → Fin
+```
+
+Por ahora el nodo deja el reclamo en estado `pendiente_modelo`. La conexión con Gemini y la clasificación real se incorporarán en las tareas siguientes del Sprint 1.
 
 ## Cómo levantar el entorno de desarrollo (Backend)
 
@@ -178,4 +215,8 @@ Con Docker Compose podés levantar el backend y el frontend juntos, ya conectado
 
 ## Estado del proyecto
 
-En desarrollo - Sprint 0
+**Sprint 1 — En curso**
+
+- Completado: base del proyecto, migraciones SQL, backend FastAPI, frontend React y entorno Docker.
+- Completado: grafo inicial de clasificación con LangGraph y su prueba automatizada.
+- Próximo: integración del modelo Gemini, clasificación con nivel de confianza y persistencia del resultado.
