@@ -1,14 +1,22 @@
 """Nodos del flujo de clasificación."""
 
+from .llm import ClaimClassifier, build_classification_prompt, get_gemini_classifier
+from .schemas import ModelClassification
 from .state import ClassificationState
 
 
-def classify_claim(state: ClassificationState) -> dict[str, str]:
-    """Representa el punto de clasificación dentro del flujo.
+def classify_claim(
+    state: ClassificationState,
+    classifier: ClaimClassifier | None = None,
+) -> dict[str, object]:
+    """Clasifica un reclamo mediante Gemini y devuelve datos validados.
 
-    AARI-106 solo construye y verifica el grafo. La integración con Claude se
-    incorporará en AARI-107, por lo que este nodo no toma aún decisiones de
-    negocio ni realiza llamadas externas.
+    El clasificador es inyectable para que las pruebas no realicen llamadas a
+    proveedores externos ni requieran una clave de API.
     """
 
-    return {"estado_clasificacion": "pendiente_modelo"}
+    active_classifier = classifier or get_gemini_classifier()
+    response = active_classifier.invoke(build_classification_prompt(state))
+    classification = ModelClassification.model_validate(response)
+
+    return classification.model_dump()

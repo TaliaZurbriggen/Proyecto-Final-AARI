@@ -13,8 +13,8 @@ class ClassificationState(TypedDict):
     """Datos que acompañan a un reclamo durante su clasificación.
 
     Los campos de salida son opcionales porque el reclamo ingresa al grafo sin
-    clasificar. Se completarán cuando se integre el modelo en AARI-107 y la
-    lógica de escalado en AARI-108.
+    clasificar. AARI-107 completa los datos devueltos por Gemini y AARI-108
+    decidirá si corresponde escalar el caso según su confianza.
     """
 
     descripcion: str
