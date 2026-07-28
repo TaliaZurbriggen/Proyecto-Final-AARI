@@ -1,0 +1,188 @@
+{
+  "version": "1.0",
+  "fecha_actualizacion": "2026-07-23",
+  "marco_legal": "Codigo Civil y Comercial (arts. 1187-1226, esp. 1201), DNU 70/2023, libertad contractual. Reemplaza referencias previas a la derogada Ley 27.551.",
+  "categorias_validas": ["ordinario", "extraordinario", "expensa"],
+
+  "principio_general": {
+    "extraordinario": "Deterioro originado por la calidad o estado de la cosa, por vetustez, caso fortuito, fuerza mayor, o defecto preexistente no causado por el inquilino (CCyC art. 1201).",
+    "ordinario": "Mantenimiento derivado del uso normal y habitual de la vivienda, o dano causado por culpa del inquilino, su familia, dependientes o visitas (CCyC art. 1206).",
+    "expensa": "Gasto correspondiente a partes comunes de un edificio bajo propiedad horizontal, administrado por el consorcio."
+  },
+
+  "reglas": [
+    {
+      "id": "plomeria-01",
+      "rubro": "plomeria",
+      "descripcion": "Perdida en canilla, griferia o flexible por desgaste de uso",
+      "clasificacion_default": "ordinario",
+      "confianza_base": "alta",
+      "keywords": ["canilla", "griferia", "flexible", "gotea", "pierde agua"]
+    },
+    {
+      "id": "plomeria-02",
+      "rubro": "plomeria",
+      "descripcion": "Caneria rota o con perdida dentro de pared o piso",
+      "clasificacion_default": "extraordinario",
+      "confianza_base": "alta",
+      "keywords": ["caneria rota", "caneria", "perdida en la pared", "perdida en el piso"]
+    },
+    {
+      "id": "plomeria-03",
+      "rubro": "plomeria",
+      "descripcion": "Inodoro o mochila que no descarga o pierde por mecanismo interno",
+      "clasificacion_default": "ordinario",
+      "confianza_base": "media",
+      "keywords": ["inodoro", "mochila", "flotante", "no descarga"]
+    },
+    {
+      "id": "plomeria-04",
+      "rubro": "plomeria",
+      "descripcion": "Destape de canerias con causa atribuible al inquilino mencionada en el relato",
+      "clasificacion_default": "ordinario",
+      "confianza_base": "media",
+      "requiere_causa_explicita": true
+    },
+    {
+      "id": "plomeria-05",
+      "rubro": "plomeria",
+      "descripcion": "Termotanque sin agua caliente, causa no especificada",
+      "clasificacion_default": "extraordinario",
+      "confianza_base": "baja",
+      "escalar_si_falta_contexto": true,
+      "nota": "Zona gris frecuente segun relevamiento con la inmobiliaria"
+    },
+    {
+      "id": "electricidad-01",
+      "rubro": "electricidad",
+      "descripcion": "Llave termica que salta por sobrecarga puntual de uso",
+      "clasificacion_default": "ordinario",
+      "confianza_base": "media",
+      "keywords": ["se corta la luz", "salta la termica", "tablero"]
+    },
+    {
+      "id": "electricidad-02",
+      "rubro": "electricidad",
+      "descripcion": "Falla en tablero electrico general o cableado por antiguedad",
+      "clasificacion_default": "extraordinario",
+      "confianza_base": "alta",
+      "keywords": ["tablero", "cableado viejo", "cortocircuito"]
+    },
+    {
+      "id": "electricidad-03",
+      "rubro": "electricidad",
+      "descripcion": "Bombilla o consumible de artefacto de iluminacion quemado",
+      "clasificacion_default": "ordinario",
+      "confianza_base": "alta",
+      "keywords": ["bombilla", "lampara quemada"]
+    },
+    {
+      "id": "gas-01",
+      "rubro": "gas",
+      "descripcion": "Olor a gas o principio de fuga",
+      "clasificacion_default": null,
+      "accion": "escalar_urgente",
+      "confianza_base": "n/a",
+      "nota": "No se clasifica de forma automatica. Requiere atencion prioritaria fuera del ciclo normal."
+    },
+    {
+      "id": "gas-02",
+      "rubro": "gas",
+      "descripcion": "Falla de calefon o estufa por antiguedad o defecto de fabrica",
+      "clasificacion_default": "extraordinario",
+      "confianza_base": "media"
+    },
+    {
+      "id": "pintura-01",
+      "rubro": "pintura",
+      "descripcion": "Desgaste de pintura por paso del tiempo",
+      "clasificacion_default": "extraordinario",
+      "confianza_base": "media"
+    },
+    {
+      "id": "pintura-02",
+      "rubro": "pintura",
+      "descripcion": "Marcas o danos puntuales causados por el inquilino, mencionados en el relato",
+      "clasificacion_default": "ordinario",
+      "confianza_base": "alta",
+      "requiere_causa_explicita": true
+    },
+    {
+      "id": "estructural-01",
+      "rubro": "estructural",
+      "descripcion": "Grietas, rajaduras, problemas de techo o losa",
+      "clasificacion_default": "extraordinario",
+      "confianza_base": "alta"
+    },
+    {
+      "id": "estructural-02",
+      "rubro": "estructural",
+      "descripcion": "Puerta o ventana que no cierra bien por desajuste menor de bisagras",
+      "clasificacion_default": "ordinario",
+      "confianza_base": "media"
+    },
+    {
+      "id": "estructural-03",
+      "rubro": "estructural",
+      "descripcion": "Rotura de vidrio sin causa externa mencionada",
+      "clasificacion_default": "ordinario",
+      "confianza_base": "media"
+    },
+    {
+      "id": "estructural-04",
+      "rubro": "estructural",
+      "descripcion": "Cerradura de puerta de acceso rota o vencida por desgaste",
+      "clasificacion_default": "ordinario",
+      "confianza_base": "alta"
+    },
+    {
+      "id": "electrodomesticos-01",
+      "rubro": "electrodomesticos",
+      "descripcion": "Artefacto provisto por el propietario que deja de funcionar por falla propia",
+      "clasificacion_default": "extraordinario",
+      "confianza_base": "media"
+    },
+    {
+      "id": "electrodomesticos-02",
+      "rubro": "electrodomesticos",
+      "descripcion": "Mantenimiento preventivo de rutina (ej. limpieza de filtros de aire acondicionado)",
+      "clasificacion_default": "ordinario",
+      "confianza_base": "alta"
+    },
+    {
+      "id": "expensas-01",
+      "rubro": "expensas",
+      "descripcion": "Gasto habitual del consorcio pactado a cargo del inquilino en el contrato",
+      "clasificacion_default": "expensa",
+      "requiere_clausula_contractual": true,
+      "confianza_base": "alta"
+    },
+    {
+      "id": "expensas-02",
+      "rubro": "expensas",
+      "descripcion": "Gasto no habitual del consorcio (obra estructural, fondo de reserva extraordinario)",
+      "clasificacion_default": "expensa",
+      "confianza_base": "alta",
+      "nota": "No admite pacto en contrario, siempre a cargo del propietario"
+    }
+  ],
+
+  "excepciones_contractuales": {
+    "aplica_si": "existe clausula_override cargada para la propiedad y el rubro del reclamo",
+    "prioridad": "sobrescribe clasificacion_default de la regla general",
+    "fuente_dato": "tabla contratos / clausulas, modulo de Administracion (Sprint 2)"
+  },
+
+  "disparadores_escalado_obligatorio": [
+    "causa_no_identificable",
+    "riesgo_seguridad",
+    "multiples_rubros_en_un_reclamo",
+    "contrato_sin_clausulas_cargadas_y_regla_general_no_aplica_directo",
+    "confianza_modelo_menor_a_umbral_configurado"
+  ],
+
+  "umbral_confianza_escalado": {
+    "valor": null,
+    "nota": "A calibrar empiricamente durante la medicion de precision del Sprint 1 sobre el conjunto de 50 casos. No hardcodear un numero hasta tener el primer resultado real."
+  }
+}
