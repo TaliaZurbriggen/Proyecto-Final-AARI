@@ -8,6 +8,7 @@ greenlet==3.5.3
 h11==0.16.0
 idna==3.18
 langgraph==1.2.9
+langchain-google-genai==4.3.2
 psycopg2-binary==2.9.12
 pydantic==2.13.4
 pydantic_core==2.46.4
