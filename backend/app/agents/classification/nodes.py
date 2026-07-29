@@ -5,6 +5,19 @@ from .schemas import ModelClassification
 from .state import ClassificationState
 
 
+def _invalid_model_response() -> dict[str, object]:
+    """Devuelve un resultado seguro sin exponer detalles internos del proveedor."""
+
+    return {
+        "tipo_gasto": None,
+        "confianza": None,
+        "fundamento": None,
+        "debe_escalar": True,
+        "motivo_escalado": "respuesta_modelo_invalida",
+        "estado_clasificacion": "escalado",
+    }
+
+
 def classify_claim(
     state: ClassificationState,
     classifier: ClaimClassifier | None = None,
@@ -16,7 +29,14 @@ def classify_claim(
     """
 
     active_classifier = classifier or get_gemini_classifier()
-    response = active_classifier.invoke(build_classification_prompt(state))
-    classification = ModelClassification.model_validate(response)
+    prompt = build_classification_prompt(state)
+
+    try:
+        response = active_classifier.invoke(prompt)
+        classification = ModelClassification.model_validate(response)
+    except Exception:
+        # Los proveedores pueden lanzar errores diferentes en este límite externo.
+        # Se aplica un fallback único y no se exponen detalles internos.
+        return _invalid_model_response()
 
     return classification.model_dump()
