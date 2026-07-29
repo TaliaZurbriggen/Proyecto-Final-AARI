@@ -7,6 +7,7 @@ from typing_extensions import NotRequired, TypedDict
 
 TipoGasto = Literal["ordinario", "extraordinario", "expensa"]
 EstadoClasificacion = Literal["pendiente_modelo", "clasificado", "escalado"]
+MotivoEscalado = Literal["respuesta_modelo_invalida"]
 
 
 class ClassificationState(TypedDict):
@@ -24,5 +25,5 @@ class ClassificationState(TypedDict):
     confianza: NotRequired[float | None]
     fundamento: NotRequired[str | None]
     debe_escalar: NotRequired[bool]
-    motivo_escalado: NotRequired[str | None]
+    motivo_escalado: NotRequired[MotivoEscalado | None]
     estado_clasificacion: NotRequired[EstadoClasificacion]
