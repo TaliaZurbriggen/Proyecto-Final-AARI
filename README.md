@@ -40,6 +40,9 @@ Proyecto-Final-AARI/
 │   │   ├── schemas/             # Esquemas de entrada y salida
 │   │   └── main.py              # Punto de entrada de FastAPI
 │   ├── migrations/              # Esquema y datos iniciales de Supabase
+│   ├── config/                  # Base de conocimiento configurable del clasificador
+│   ├── prompts/                 # Prompt versionado del clasificador
+│   ├── scripts/                 # Validadores locales sin dependencias externas
 │   ├── tests/                   # Pruebas automatizadas
 │   ├── Dockerfile
 │   └── requirements.txt

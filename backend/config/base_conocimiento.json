@@ -1,13 +1,20 @@
 {
-  "version": "1.0",
-  "fecha_actualizacion": "2026-07-23",
-  "marco_legal": "Codigo Civil y Comercial (arts. 1187-1226, esp. 1201), DNU 70/2023, libertad contractual. Reemplaza referencias previas a la derogada Ley 27.551.",
+  "version": "1.1",
+  "fecha_actualizacion": "2026-07-28",
+  "marco_legal": "Codigo Civil y Comercial de la Nacion, Libro III, Titulo IV, Capitulo 4 (Locacion de cosas), arts. 1187-1226. DNU 70/2023 (deroga la Ley 27.551 y devuelve la materia a la libertad contractual dentro del CCyC). Articulos de referencia directa para la clasificacion ordinario/extraordinario: art. 1201 (obligacion del locador de conservar la cosa con aptitud para el uso convenido: base de los gastos extraordinarios/necesarios a su cargo), art. 1206 (obligacion del locatario de conservar la cosa y responder por deterioros causados por el, su familia, dependientes o visitantes: base de los gastos ordinarios por culpa del inquilino), art. 1207 (obligacion del locatario de afrontar las mejoras de mero mantenimiento en inmuebles: base de los gastos ordinarios por uso normal y habitual), art. 1209 (cargas y contribuciones originadas en el destino dado a la cosa, a cargo del locatario) y art. 1210 (restitucion de la cosa, excluyendo deterioros por el mero transcurso del tiempo y el uso regular, que quedan a cargo del locador). Fuente oficial: https://www.argentina.gob.ar/normativa/nacional/ley-26994-235975/actualizacion",
   "categorias_validas": ["ordinario", "extraordinario", "expensa"],
 
   "principio_general": {
-    "extraordinario": "Deterioro originado por la calidad o estado de la cosa, por vetustez, caso fortuito, fuerza mayor, o defecto preexistente no causado por el inquilino (CCyC art. 1201).",
-    "ordinario": "Mantenimiento derivado del uso normal y habitual de la vivienda, o dano causado por culpa del inquilino, su familia, dependientes o visitas (CCyC art. 1206).",
+    "extraordinario": "Deterioro originado por la calidad o estado de la cosa, por vetustez, caso fortuito, fuerza mayor, o defecto preexistente no causado por el inquilino, en tanto obligacion de conservacion del locador (CCyC art. 1201); incluye los deterioros por el mero transcurso del tiempo y el uso regular que el locatario no debe resarcir al restituir la cosa (CCyC art. 1210).",
+    "ordinario": "Dos fuentes distintas dentro del CCyC, que conviene no confundir: (a) las mejoras de mero mantenimiento del inmueble, originadas en su uso normal y habitual, a cargo del locatario (CCyC art. 1207); y (b) el dano causado por culpa del inquilino, su familia, dependientes o visitas, por incumplimiento del deber de conservar la cosa en el estado en que la recibio (CCyC art. 1206). Las cargas y contribuciones que se originen en el destino dado al inmueble tambien estan a cargo del locatario (CCyC art. 1209).",
     "expensa": "Gasto correspondiente a partes comunes de un edificio bajo propiedad horizontal, administrado por el consorcio."
+  },
+
+  "validacion_dominio": {
+    "estado": "pendiente",
+    "nota": "Las reglas marcadas con revision_pendiente=true aplican una clasificacion por defecto razonable segun el CCyC, pero no fueron aun confirmadas con Oikos Negocios Inmobiliarios ni revisadas por un profesional del derecho. No deben tratarse como definitivas hasta que validado_por y fecha_validacion esten completos.",
+    "validado_por": null,
+    "fecha_validacion": null
   },
 
   "reglas": [
@@ -16,65 +23,81 @@
       "rubro": "plomeria",
       "descripcion": "Perdida en canilla, griferia o flexible por desgaste de uso",
       "clasificacion_default": "ordinario",
+      "fundamento_legal": "CCyC art. 1207 (mero mantenimiento por uso normal)",
       "confianza_base": "alta",
-      "keywords": ["canilla", "griferia", "flexible", "gotea", "pierde agua"]
+      "keywords": ["canilla", "griferia", "flexible", "gotea", "pierde agua"],
+      "revision_pendiente": false
     },
     {
       "id": "plomeria-02",
       "rubro": "plomeria",
       "descripcion": "Caneria rota o con perdida dentro de pared o piso",
       "clasificacion_default": "extraordinario",
+      "fundamento_legal": "CCyC art. 1201 (conservacion a cargo del locador)",
       "confianza_base": "alta",
-      "keywords": ["caneria rota", "caneria", "perdida en la pared", "perdida en el piso"]
+      "keywords": ["caneria rota", "caneria", "perdida en la pared", "perdida en el piso"],
+      "revision_pendiente": false
     },
     {
       "id": "plomeria-03",
       "rubro": "plomeria",
       "descripcion": "Inodoro o mochila que no descarga o pierde por mecanismo interno",
       "clasificacion_default": "ordinario",
+      "fundamento_legal": "CCyC art. 1207 (mero mantenimiento), a confirmar segun antiguedad del mecanismo",
       "confianza_base": "media",
-      "keywords": ["inodoro", "mochila", "flotante", "no descarga"]
+      "keywords": ["inodoro", "mochila", "flotante", "no descarga"],
+      "revision_pendiente": true
     },
     {
       "id": "plomeria-04",
       "rubro": "plomeria",
       "descripcion": "Destape de canerias con causa atribuible al inquilino mencionada en el relato",
       "clasificacion_default": "ordinario",
+      "fundamento_legal": "CCyC art. 1206 (responsabilidad por deterioro atribuible al locatario)",
       "confianza_base": "media",
-      "requiere_causa_explicita": true
+      "requiere_causa_explicita": true,
+      "revision_pendiente": false
     },
     {
       "id": "plomeria-05",
       "rubro": "plomeria",
       "descripcion": "Termotanque sin agua caliente, causa no especificada",
       "clasificacion_default": "extraordinario",
+      "fundamento_legal": "CCyC art. 1201, salvo que se identifique causa atribuible al inquilino (art. 1206)",
       "confianza_base": "baja",
       "escalar_si_falta_contexto": true,
-      "nota": "Zona gris frecuente segun relevamiento con la inmobiliaria"
+      "nota": "Zona gris frecuente segun relevamiento con la inmobiliaria",
+      "revision_pendiente": true
     },
     {
       "id": "electricidad-01",
       "rubro": "electricidad",
       "descripcion": "Llave termica que salta por sobrecarga puntual de uso",
       "clasificacion_default": "ordinario",
+      "fundamento_legal": "CCyC art. 1207 (mero mantenimiento por uso normal), a confirmar que no derive de falla de instalacion",
       "confianza_base": "media",
-      "keywords": ["se corta la luz", "salta la termica", "tablero"]
+      "keywords": ["se corta la luz", "salta la termica", "tablero"],
+      "revision_pendiente": true
     },
     {
       "id": "electricidad-02",
       "rubro": "electricidad",
       "descripcion": "Falla en tablero electrico general o cableado por antiguedad",
       "clasificacion_default": "extraordinario",
+      "fundamento_legal": "CCyC art. 1201 (conservacion a cargo del locador)",
       "confianza_base": "alta",
-      "keywords": ["tablero", "cableado viejo", "cortocircuito"]
+      "keywords": ["tablero", "cableado viejo", "cortocircuito"],
+      "revision_pendiente": false
     },
     {
       "id": "electricidad-03",
       "rubro": "electricidad",
       "descripcion": "Bombilla o consumible de artefacto de iluminacion quemado",
       "clasificacion_default": "ordinario",
+      "fundamento_legal": "CCyC art. 1207 (mero mantenimiento)",
       "confianza_base": "alta",
-      "keywords": ["bombilla", "lampara quemada"]
+      "keywords": ["bombilla", "lampara quemada"],
+      "revision_pendiente": false
     },
     {
       "id": "gas-01",
@@ -82,72 +105,93 @@
       "descripcion": "Olor a gas o principio de fuga",
       "clasificacion_default": null,
       "accion": "escalar_urgente",
+      "fundamento_legal": "No aplica clasificacion economica; prevalece la seguridad (riesgo_seguridad)",
       "confianza_base": "n/a",
-      "nota": "No se clasifica de forma automatica. Requiere atencion prioritaria fuera del ciclo normal."
+      "nota": "No se clasifica de forma automatica. Requiere atencion prioritaria fuera del ciclo normal.",
+      "revision_pendiente": false
     },
     {
       "id": "gas-02",
       "rubro": "gas",
       "descripcion": "Falla de calefon o estufa por antiguedad o defecto de fabrica",
       "clasificacion_default": "extraordinario",
-      "confianza_base": "media"
+      "fundamento_legal": "CCyC art. 1201 (conservacion a cargo del locador)",
+      "confianza_base": "media",
+      "revision_pendiente": false
     },
     {
       "id": "pintura-01",
       "rubro": "pintura",
       "descripcion": "Desgaste de pintura por paso del tiempo",
       "clasificacion_default": "extraordinario",
-      "confianza_base": "media"
+      "fundamento_legal": "CCyC art. 1210 (deterioro por mero transcurso del tiempo, no imputable al locatario al restituir)",
+      "confianza_base": "media",
+      "nota": "A confirmar con Oikos: en la practica local es frecuente pactar este gasto en el contrato; verificar excepcion_contractual antes de aplicar el default.",
+      "revision_pendiente": true
     },
     {
       "id": "pintura-02",
       "rubro": "pintura",
       "descripcion": "Marcas o danos puntuales causados por el inquilino, mencionados en el relato",
       "clasificacion_default": "ordinario",
+      "fundamento_legal": "CCyC art. 1206 (responsabilidad por deterioro atribuible al locatario)",
       "confianza_base": "alta",
-      "requiere_causa_explicita": true
+      "requiere_causa_explicita": true,
+      "revision_pendiente": false
     },
     {
       "id": "estructural-01",
       "rubro": "estructural",
       "descripcion": "Grietas, rajaduras, problemas de techo o losa",
       "clasificacion_default": "extraordinario",
-      "confianza_base": "alta"
+      "fundamento_legal": "CCyC art. 1201 (conservacion a cargo del locador)",
+      "confianza_base": "alta",
+      "revision_pendiente": false
     },
     {
       "id": "estructural-02",
       "rubro": "estructural",
       "descripcion": "Puerta o ventana que no cierra bien por desajuste menor de bisagras",
       "clasificacion_default": "ordinario",
-      "confianza_base": "media"
+      "fundamento_legal": "CCyC art. 1207 (mero mantenimiento), a confirmar que no derive de vicio estructural",
+      "confianza_base": "media",
+      "revision_pendiente": true
     },
     {
       "id": "estructural-03",
       "rubro": "estructural",
       "descripcion": "Rotura de vidrio sin causa externa mencionada",
       "clasificacion_default": "ordinario",
-      "confianza_base": "media"
+      "fundamento_legal": "Sin causa identificada, se presume uso/manipulacion del locatario (CCyC art. 1206); pendiente de confirmar criterio con Oikos, ya que sin causa explicita tambien podria tratarse via escalado por causa_no_identificable",
+      "confianza_base": "media",
+      "revision_pendiente": true
     },
     {
       "id": "estructural-04",
       "rubro": "estructural",
       "descripcion": "Cerradura de puerta de acceso rota o vencida por desgaste",
       "clasificacion_default": "ordinario",
-      "confianza_base": "alta"
+      "fundamento_legal": "CCyC art. 1207 (mero mantenimiento), salvo que sea la cerradura de seguridad original y su falla derive de vetustez, a confirmar con Oikos",
+      "confianza_base": "alta",
+      "revision_pendiente": true
     },
     {
       "id": "electrodomesticos-01",
       "rubro": "electrodomesticos",
       "descripcion": "Artefacto provisto por el propietario que deja de funcionar por falla propia",
       "clasificacion_default": "extraordinario",
-      "confianza_base": "media"
+      "fundamento_legal": "CCyC art. 1201, por analogia (el bien es provisto por el propietario como parte de lo locado)",
+      "confianza_base": "media",
+      "revision_pendiente": false
     },
     {
       "id": "electrodomesticos-02",
       "rubro": "electrodomesticos",
       "descripcion": "Mantenimiento preventivo de rutina (ej. limpieza de filtros de aire acondicionado)",
       "clasificacion_default": "ordinario",
-      "confianza_base": "alta"
+      "fundamento_legal": "CCyC art. 1207 (mero mantenimiento)",
+      "confianza_base": "alta",
+      "revision_pendiente": false
     },
     {
       "id": "expensas-01",
@@ -155,21 +199,32 @@
       "descripcion": "Gasto habitual del consorcio pactado a cargo del inquilino en el contrato",
       "clasificacion_default": "expensa",
       "requiere_clausula_contractual": true,
-      "confianza_base": "alta"
+      "fundamento_legal": "Libertad contractual (DNU 70/2023); admite pacto en contrario por tratarse de expensas ordinarias/habituales",
+      "confianza_base": "alta",
+      "revision_pendiente": false
     },
     {
       "id": "expensas-02",
       "rubro": "expensas",
       "descripcion": "Gasto no habitual del consorcio (obra estructural, fondo de reserva extraordinario)",
       "clasificacion_default": "expensa",
+      "fundamento_legal": "Norma imperativa: no admite pacto en contrario, siempre a cargo del propietario",
       "confianza_base": "alta",
-      "nota": "No admite pacto en contrario, siempre a cargo del propietario"
+      "nota": "No admite pacto en contrario, siempre a cargo del propietario",
+      "admite_override_contractual": false,
+      "revision_pendiente": false
     }
   ],
 
   "excepciones_contractuales": {
-    "aplica_si": "existe clausula_override cargada para la propiedad y el rubro del reclamo",
-    "prioridad": "sobrescribe clasificacion_default de la regla general",
+    "aplica_si": "existe clausula_override cargada para la propiedad y el rubro del reclamo, Y la regla correspondiente no tiene admite_override_contractual=false",
+    "prioridad": "sobrescribe clasificacion_default de la regla general solo cuando la clausula es valida; una clausula no sobrescribe una regla marcada admite_override_contractual=false (norma imperativa, ej. expensas-02) ni una regla con accion=escalar_urgente (ej. gas-01)",
+    "condiciones_de_validez": [
+      "la clausula debe estar vigente y cargada en el modulo de Administracion para esa propiedad y rubro",
+      "la clausula no debe contradecir una norma imperativa del CCyC (por ejemplo, expensas extraordinarias de propiedad horizontal, que siempre son a cargo del propietario)",
+      "la redaccion de la clausula debe ser inequivoca respecto del rubro y la responsabilidad asignada"
+    ],
+    "si_la_clausula_es_dudosa_o_contradictoria": "escalar al operador humano en lugar de aplicar el override; no se resuelve la ambiguedad de forma automatica",
     "fuente_dato": "tabla contratos / clausulas, modulo de Administracion (Sprint 2)"
   },
 
@@ -178,6 +233,7 @@
     "riesgo_seguridad",
     "multiples_rubros_en_un_reclamo",
     "contrato_sin_clausulas_cargadas_y_regla_general_no_aplica_directo",
+    "clausula_contractual_dudosa_o_potencialmente_contraria_a_norma_imperativa",
     "confianza_modelo_menor_a_umbral_configurado"
   ],
 
