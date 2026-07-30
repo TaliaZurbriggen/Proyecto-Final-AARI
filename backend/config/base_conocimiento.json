@@ -238,7 +238,7 @@
   ],
 
   "umbral_confianza_escalado": {
-    "valor": null,
-    "nota": "A calibrar empiricamente durante la medicion de precision del Sprint 1 sobre el conjunto de 50 casos. No hardcodear un numero hasta tener el primer resultado real."
+    "valor": 0.75,
+    "nota": "Valor inicial conservador acordado para AARI-108. Se recalibrar? durante AARI-111 con el conjunto sint?tico de 61 casos."
   }
 }

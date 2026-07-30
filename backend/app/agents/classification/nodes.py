@@ -1,6 +1,7 @@
-"""Nodos del flujo de clasificación."""
+"""Nodos del flujo de clasificaci?n."""
 
 from .llm import ClaimClassifier, build_classification_prompt, get_gemini_classifier
+from .resources import get_confidence_threshold, validate_confidence_threshold
 from .schemas import ModelClassification
 from .state import ClassificationState
 
@@ -18,25 +19,46 @@ def _invalid_model_response() -> dict[str, object]:
     }
 
 
+def _apply_confidence_threshold(
+    classification: ModelClassification,
+    confidence_threshold: float,
+) -> dict[str, object]:
+    """Escala clasificaciones de baja confianza sin perder su fundamento."""
+
+    result = classification.model_dump()
+    if classification.debe_escalar:
+        return {**result, "estado_clasificacion": "escalado"}
+    if classification.confianza < confidence_threshold:
+        return {
+            **result,
+            "tipo_gasto": None,
+            "debe_escalar": True,
+            "motivo_escalado": "confianza_insuficiente",
+            "estado_clasificacion": "escalado",
+        }
+    return {**result, "estado_clasificacion": "clasificado"}
+
+
 def classify_claim(
     state: ClassificationState,
     classifier: ClaimClassifier | None = None,
+    confidence_threshold: float | None = None,
 ) -> dict[str, object]:
-    """Clasifica un reclamo mediante Gemini y devuelve datos validados.
-
-    El clasificador es inyectable para que las pruebas no realicen llamadas a
-    proveedores externos ni requieran una clave de API.
-    """
-
-    active_classifier = classifier or get_gemini_classifier()
-    prompt = build_classification_prompt(state)
+    """Clasifica o escala un reclamo mediante Gemini y salida validada."""
 
     try:
+        active_classifier = classifier or get_gemini_classifier()
+        threshold = (
+            validate_confidence_threshold(confidence_threshold)
+            if confidence_threshold is not None
+            else get_confidence_threshold()
+        )
+        prompt = build_classification_prompt(state, threshold)
         response = active_classifier.invoke(prompt)
         classification = ModelClassification.model_validate(response)
     except Exception:
-        # Los proveedores pueden lanzar errores diferentes en este límite externo.
-        # Se aplica un fallback único y no se exponen detalles internos.
+        # Los proveedores pueden lanzar errores diferentes en este l?mite externo.
+        # Se aplica un fallback ?nico y no se exponen detalles internos.
         return _invalid_model_response()
 
-    return classification.model_dump()
+    return _apply_confidence_threshold(classification, threshold)
