@@ -1,11 +1,18 @@
-"""Adaptador de Gemini para el agente de clasificación."""
+"""Adaptador de Gemini para el agente de clasificaci?n."""
 
+import json
 import os
 from typing import Protocol
 
 from dotenv import load_dotenv
 from langchain_google_genai import ChatGoogleGenerativeAI
 
+from .resources import (
+    get_confidence_threshold,
+    load_knowledge_base,
+    load_prompt_template,
+    validate_confidence_threshold,
+)
 from .schemas import ModelClassification
 from .state import ClassificationState
 
@@ -15,24 +22,39 @@ DEFAULT_GEMINI_MODEL = "gemini-3.5-flash"
 
 
 class ClaimClassifier(Protocol):
-    """Interfaz mínima que necesita el nodo de LangGraph."""
+    """Interfaz m?nima que necesita el nodo de LangGraph."""
 
     def invoke(self, prompt: str) -> dict[str, object]:
-        """Devuelve una clasificación estructurada para el reclamo recibido."""
+        """Devuelve una clasificaci?n estructurada para el reclamo recibido."""
 
 
-def build_classification_prompt(state: ClassificationState) -> str:
-    """Crea el mensaje técnico; los criterios de negocio se refinan en AARI-105."""
+def build_classification_prompt(
+    state: ClassificationState,
+    confidence_threshold: float | None = None,
+) -> str:
+    """Construye el prompt v2 con los recursos externos al c?digo."""
 
-    return f"""Clasificá el siguiente reclamo de una inmobiliaria.
-
-Descripción: {state['descripcion']}
-Urgencia declarada: {state['urgencia']}
-
-Devolvé exclusivamente los campos definidos por el esquema: tipo_gasto
-(ordinario, extraordinario o expensa), confianza entre 0 y 1, y un fundamento
-breve. No incluyas datos personales ni inventes información ausente.
-"""
+    threshold = (
+        validate_confidence_threshold(confidence_threshold)
+        if confidence_threshold is not None
+        else get_confidence_threshold()
+    )
+    replacements = {
+        "{{BASE_CONOCIMIENTO_JSON}}": json.dumps(
+            load_knowledge_base(), ensure_ascii=False, separators=(",", ":")
+        ),
+        "{{descripcion}}": state["descripcion"],
+        "{{urgencia}}": state["urgencia"],
+        "{{rubro_declarado}}": state.get("rubro_declarado") or "no disponible",
+        "{{clausulas_contrato}}": json.dumps(
+            state.get("clausulas_contrato", []), ensure_ascii=False
+        ),
+        "{{umbral_confianza}}": f"{threshold:.2f}",
+    }
+    prompt = load_prompt_template()
+    for placeholder, value in replacements.items():
+        prompt = prompt.replace(placeholder, value)
+    return prompt
 
 
 def get_gemini_classifier() -> ClaimClassifier:
