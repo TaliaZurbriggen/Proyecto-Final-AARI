@@ -63,7 +63,17 @@ El primer flujo del agente está implementado con LangGraph:
 Inicio → clasificar_reclamo → Fin
 ```
 
-Por ahora el nodo deja el reclamo en estado `pendiente_modelo`. La conexión con Gemini y la clasificación real se incorporarán en las tareas siguientes del Sprint 1.
+El grafo usa Gemini con salida estructurada, la base de conocimiento v1.1 y un umbral de confianza configurable (`0.75` inicial). Las respuestas inválidas o de confianza insuficiente se escalan de manera segura.
+
+### Endpoint de clasificación
+
+Con el backend levantado y un reclamo existente en Supabase, se puede ejecutar:
+
+```bash
+POST /reclamos/{reclamo_id}/clasificar
+```
+
+El endpoint obtiene el reclamo, invoca el grafo y guarda el resultado. Devuelve `Clasificado` o `Escalado`, junto con el tipo de gasto cuando corresponda, la confianza, el fundamento y el motivo de escalado. La migración `backend/migrations/06_clasificacion_agente.sql` debe haberse aplicado una vez antes de utilizarlo. Cada cambio de estado queda registrado con origen `agente`.
 
 ## Cómo levantar el entorno de desarrollo (Backend)
 
@@ -222,4 +232,5 @@ Con Docker Compose podés levantar el backend y el frontend juntos, ya conectado
 
 - Completado: base del proyecto, migraciones SQL, backend FastAPI, frontend React y entorno Docker.
 - Completado: grafo inicial de clasificación con LangGraph y su prueba automatizada.
-- Próximo: integración del modelo Gemini, clasificación con nivel de confianza y persistencia del resultado.
+- Completado: integración con Gemini, clasificación estructurada, umbral de confianza y manejo seguro de respuestas inválidas.
+- Implementado y validado en rama: endpoint y persistencia trazable (AARI-109); pendiente de commit y PR.

@@ -1,8 +1,11 @@
 from fastapi import FastAPI
 from sqlalchemy import text
+
+from app.api.reclamos import router as reclamos_router
 from app.db.database import engine
 
 app = FastAPI(title="AARI - Automatización y Asistencia en Reclamos Inmobiliarios")
+app.include_router(reclamos_router)
 
 
 @app.get("/health")
