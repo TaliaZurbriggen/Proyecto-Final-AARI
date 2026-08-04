@@ -34,3 +34,5 @@ Thumbs.db
 # Editores de código
 .vscode/
 .idea/
+# Evidencia detallada de ejecuciones locales del clasificador
+backend/artifacts/

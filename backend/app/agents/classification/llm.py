@@ -72,6 +72,6 @@ def get_gemini_classifier() -> ClaimClassifier:
         temperature=0,
     )
     return model.with_structured_output(
-        schema=ModelClassification.model_json_schema(),
+        schema=ModelClassification,
         method="json_schema",
     )
