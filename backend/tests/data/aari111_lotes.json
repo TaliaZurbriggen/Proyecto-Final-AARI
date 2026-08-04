@@ -1,0 +1,10 @@
+{
+  "version": "1.0",
+  "proposito": "Plan de ejecucion de AARI-111: hasta 20 casos por dia con cobertura representativa y sin repeticiones.",
+  "lotes": {
+    "lote-1": ["caso-01", "caso-04", "caso-08", "caso-11", "caso-14", "caso-51", "caso-16", "caso-19", "caso-22", "caso-25", "caso-28", "caso-52", "caso-31", "caso-33", "caso-35", "caso-36", "caso-37", "caso-39", "caso-49", "caso-55"],
+    "lote-2": ["caso-02", "caso-05", "caso-09", "caso-12", "caso-15", "caso-53", "caso-17", "caso-20", "caso-23", "caso-26", "caso-29", "caso-58", "caso-32", "caso-34", "caso-54", "caso-38", "caso-40", "caso-42", "caso-45", "caso-56"],
+    "lote-3": ["caso-03", "caso-06", "caso-07", "caso-10", "caso-13", "caso-57", "caso-18", "caso-21", "caso-24", "caso-27", "caso-30", "caso-59", "caso-60", "caso-61", "caso-41", "caso-43", "caso-44", "caso-46", "caso-47", "caso-48"],
+    "lote-4": ["caso-50"]
+  }
+}

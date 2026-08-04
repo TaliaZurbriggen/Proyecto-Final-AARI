@@ -1,0 +1,252 @@
+{
+  "version_formato": "1.0",
+  "estado_corrida": "completa",
+  "ejecutado_en_utc": "2026-08-03T17:56:21.546821+00:00",
+  "modelo": "gemini-3.5-flash",
+  "umbral_confianza": 0.75,
+  "urgencia_fija": "media",
+  "conjunto_prueba": {
+    "version": "1.1",
+    "cantidad_casos": 61,
+    "estado": "borrador - validacion parcial con Oikos. No usar como medicion oficial de HU9 hasta cerrar el punto pendiente."
+  },
+  "lote": "lote-3",
+  "cantidad_casos_lote": 20,
+  "casos_pendientes": [],
+  "metricas": {
+    "total_casos": 20,
+    "aciertos": 11,
+    "exactitud_global": 0.55,
+    "exactitud_macro": 0.6,
+    "por_categoria": {
+      "ordinario": {
+        "total": 6,
+        "aciertos": 4,
+        "exactitud": 0.6666666666666666
+      },
+      "extraordinario": {
+        "total": 5,
+        "aciertos": 2,
+        "exactitud": 0.4
+      },
+      "expensa": {
+        "total": 3,
+        "aciertos": 3,
+        "exactitud": 1.0
+      },
+      "escalar": {
+        "total": 6,
+        "aciertos": 2,
+        "exactitud": 0.3333333333333333
+      }
+    },
+    "errores_por_tipo": {
+      "escalado_indebido": 5,
+      "motivo_escalado_incorrecto": 4
+    },
+    "confianza_promedio": 0.78125,
+    "respuestas_modelo_invalidas": 4
+  },
+  "resultados_por_caso": [
+    {
+      "id": "caso-03",
+      "categoria_esperada": "ordinario",
+      "categoria_obtenida": "ordinario",
+      "motivo_escalado_obtenido": null,
+      "confianza": 0.9,
+      "respuesta_modelo_invalida": false,
+      "correcto": true,
+      "tipo_error": null
+    },
+    {
+      "id": "caso-06",
+      "categoria_esperada": "ordinario",
+      "categoria_obtenida": "ordinario",
+      "motivo_escalado_obtenido": null,
+      "confianza": 0.95,
+      "respuesta_modelo_invalida": false,
+      "correcto": true,
+      "tipo_error": null
+    },
+    {
+      "id": "caso-07",
+      "categoria_esperada": "ordinario",
+      "categoria_obtenida": "escalar",
+      "motivo_escalado_obtenido": "confianza_insuficiente",
+      "confianza": 0.7,
+      "respuesta_modelo_invalida": false,
+      "correcto": false,
+      "tipo_error": "escalado_indebido"
+    },
+    {
+      "id": "caso-10",
+      "categoria_esperada": "ordinario",
+      "categoria_obtenida": "ordinario",
+      "motivo_escalado_obtenido": null,
+      "confianza": 0.9,
+      "respuesta_modelo_invalida": false,
+      "correcto": true,
+      "tipo_error": null
+    },
+    {
+      "id": "caso-13",
+      "categoria_esperada": "ordinario",
+      "categoria_obtenida": "escalar",
+      "motivo_escalado_obtenido": "causa_no_identificable",
+      "confianza": 0.6,
+      "respuesta_modelo_invalida": false,
+      "correcto": false,
+      "tipo_error": "escalado_indebido"
+    },
+    {
+      "id": "caso-18",
+      "categoria_esperada": "extraordinario",
+      "categoria_obtenida": "extraordinario",
+      "motivo_escalado_obtenido": null,
+      "confianza": 0.9,
+      "respuesta_modelo_invalida": false,
+      "correcto": true,
+      "tipo_error": null
+    },
+    {
+      "id": "caso-21",
+      "categoria_esperada": "extraordinario",
+      "categoria_obtenida": "extraordinario",
+      "motivo_escalado_obtenido": null,
+      "confianza": 0.9,
+      "respuesta_modelo_invalida": false,
+      "correcto": true,
+      "tipo_error": null
+    },
+    {
+      "id": "caso-24",
+      "categoria_esperada": "extraordinario",
+      "categoria_obtenida": "escalar",
+      "motivo_escalado_obtenido": "confianza_insuficiente",
+      "confianza": 0.6,
+      "respuesta_modelo_invalida": false,
+      "correcto": false,
+      "tipo_error": "escalado_indebido"
+    },
+    {
+      "id": "caso-27",
+      "categoria_esperada": "extraordinario",
+      "categoria_obtenida": "escalar",
+      "motivo_escalado_obtenido": "confianza_insuficiente",
+      "confianza": 0.6,
+      "respuesta_modelo_invalida": false,
+      "correcto": false,
+      "tipo_error": "escalado_indebido"
+    },
+    {
+      "id": "caso-30",
+      "categoria_esperada": "extraordinario",
+      "categoria_obtenida": "escalar",
+      "motivo_escalado_obtenido": "causa_no_identificable",
+      "confianza": 0.6,
+      "respuesta_modelo_invalida": false,
+      "correcto": false,
+      "tipo_error": "escalado_indebido"
+    },
+    {
+      "id": "caso-41",
+      "categoria_esperada": "escalar",
+      "categoria_obtenida": "escalar",
+      "motivo_escalado_obtenido": "causa_no_identificable",
+      "confianza": 0.6,
+      "respuesta_modelo_invalida": false,
+      "correcto": true,
+      "tipo_error": null
+    },
+    {
+      "id": "caso-43",
+      "categoria_esperada": "escalar",
+      "categoria_obtenida": "escalar",
+      "motivo_escalado_obtenido": "causa_no_identificable",
+      "confianza": 0.5,
+      "respuesta_modelo_invalida": false,
+      "correcto": true,
+      "tipo_error": null
+    },
+    {
+      "id": "caso-44",
+      "categoria_esperada": "escalar",
+      "categoria_obtenida": "escalar",
+      "motivo_escalado_obtenido": "respuesta_modelo_invalida",
+      "confianza": null,
+      "respuesta_modelo_invalida": true,
+      "correcto": false,
+      "tipo_error": "motivo_escalado_incorrecto"
+    },
+    {
+      "id": "caso-46",
+      "categoria_esperada": "escalar",
+      "categoria_obtenida": "escalar",
+      "motivo_escalado_obtenido": "respuesta_modelo_invalida",
+      "confianza": null,
+      "respuesta_modelo_invalida": true,
+      "correcto": false,
+      "tipo_error": "motivo_escalado_incorrecto"
+    },
+    {
+      "id": "caso-47",
+      "categoria_esperada": "escalar",
+      "categoria_obtenida": "escalar",
+      "motivo_escalado_obtenido": "respuesta_modelo_invalida",
+      "confianza": null,
+      "respuesta_modelo_invalida": true,
+      "correcto": false,
+      "tipo_error": "motivo_escalado_incorrecto"
+    },
+    {
+      "id": "caso-48",
+      "categoria_esperada": "escalar",
+      "categoria_obtenida": "escalar",
+      "motivo_escalado_obtenido": "respuesta_modelo_invalida",
+      "confianza": null,
+      "respuesta_modelo_invalida": true,
+      "correcto": false,
+      "tipo_error": "motivo_escalado_incorrecto"
+    },
+    {
+      "id": "caso-57",
+      "categoria_esperada": "ordinario",
+      "categoria_obtenida": "ordinario",
+      "motivo_escalado_obtenido": null,
+      "confianza": 0.95,
+      "respuesta_modelo_invalida": false,
+      "correcto": true,
+      "tipo_error": null
+    },
+    {
+      "id": "caso-59",
+      "categoria_esperada": "expensa",
+      "categoria_obtenida": "expensa",
+      "motivo_escalado_obtenido": null,
+      "confianza": 0.95,
+      "respuesta_modelo_invalida": false,
+      "correcto": true,
+      "tipo_error": null
+    },
+    {
+      "id": "caso-60",
+      "categoria_esperada": "expensa",
+      "categoria_obtenida": "expensa",
+      "motivo_escalado_obtenido": null,
+      "confianza": 0.95,
+      "respuesta_modelo_invalida": false,
+      "correcto": true,
+      "tipo_error": null
+    },
+    {
+      "id": "caso-61",
+      "categoria_esperada": "expensa",
+      "categoria_obtenida": "expensa",
+      "motivo_escalado_obtenido": null,
+      "confianza": 0.9,
+      "respuesta_modelo_invalida": false,
+      "correcto": true,
+      "tipo_error": null
+    }
+  ]
+}

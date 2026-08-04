@@ -1,0 +1,61 @@
+{
+  "version_formato": "1.0",
+  "estado_corrida": "completa",
+  "ejecutado_en_utc": "2026-08-04T21:36:53.589438+00:00",
+  "modelo": "gemini-3.5-flash",
+  "umbral_confianza": 0.75,
+  "urgencia_fija": "media",
+  "conjunto_prueba": {
+    "version": "1.1",
+    "cantidad_casos": 61,
+    "estado": "borrador - validacion parcial con Oikos. No usar como medicion oficial de HU9 hasta cerrar el punto pendiente."
+  },
+  "lote": "lote-4",
+  "cantidad_casos_lote": 1,
+  "casos_pendientes": [],
+  "metricas": {
+    "total_casos": 1,
+    "aciertos": 0,
+    "exactitud_global": 0.0,
+    "exactitud_macro": 0.0,
+    "por_categoria": {
+      "ordinario": {
+        "total": 0,
+        "aciertos": 0,
+        "exactitud": null
+      },
+      "extraordinario": {
+        "total": 0,
+        "aciertos": 0,
+        "exactitud": null
+      },
+      "expensa": {
+        "total": 0,
+        "aciertos": 0,
+        "exactitud": null
+      },
+      "escalar": {
+        "total": 1,
+        "aciertos": 0,
+        "exactitud": 0.0
+      }
+    },
+    "errores_por_tipo": {
+      "motivo_escalado_incorrecto": 1
+    },
+    "confianza_promedio": null,
+    "respuestas_modelo_invalidas": 1
+  },
+  "resultados_por_caso": [
+    {
+      "id": "caso-50",
+      "categoria_esperada": "escalar",
+      "categoria_obtenida": "escalar",
+      "motivo_escalado_obtenido": "respuesta_modelo_invalida",
+      "confianza": null,
+      "respuesta_modelo_invalida": true,
+      "correcto": false,
+      "tipo_error": "motivo_escalado_incorrecto"
+    }
+  ]
+}
