@@ -1,4 +1,4 @@
-﻿"""Ejecuta una medicion recuperable del clasificador sobre casos sinteticos.
+"""Ejecuta una medicion recuperable del clasificador sobre casos sinteticos.
 
 Este script llama a Gemini y no debe ejecutarse dentro de pytest. La opcion
 --validar-conjunto permite revisar datos y lotes sin consumir cuota.

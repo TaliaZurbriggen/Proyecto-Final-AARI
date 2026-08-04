@@ -1,4 +1,4 @@
-﻿"""Pruebas locales del mecanismo de lotes y checkpoints de AARI-111."""
+"""Pruebas locales del mecanismo de lotes y checkpoints de AARI-111."""
 
 import importlib.util
 import json
