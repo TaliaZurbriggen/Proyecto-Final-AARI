@@ -9,7 +9,7 @@ from typing import Any
 
 BACKEND_DIR = Path(__file__).resolve().parents[3]
 KNOWLEDGE_BASE_PATH = BACKEND_DIR / "config" / "base_conocimiento.json"
-PROMPT_PATH = BACKEND_DIR / "prompts" / "prompt_clasificacion_v2.md"
+PROMPT_PATH = BACKEND_DIR / "prompts" / "prompt_clasificacion_v3.md"
 
 
 def validate_confidence_threshold(value: object) -> float:
