@@ -69,6 +69,7 @@ def _correr_lote(casos: list[dict], desde: int, hasta: int) -> None:
             "esperado": {
                 "categoria": caso["categoria_esperada"],
                 "escalar": caso["escalar_esperado"],
+                "motivo_esperado": caso.get("motivo_escalado_esperado"),
                 "motivos_aceptables": caso.get("motivos_aceptables"),
             },
             "obtenido": {
@@ -86,6 +87,25 @@ def _correr_lote(casos: list[dict], desde: int, hasta: int) -> None:
 
     _guardar_parciales(parciales)
     print(f"\nGuardado en {PARCIALES_PATH} ({len(parciales)}/{len(casos)} casos medidos)")
+
+
+def _es_resultado_correcto(
+    categoria_esperada: str | None,
+    escalar_esperado: bool,
+    motivos_validos: list[str],
+    obtenido: dict,
+) -> bool:
+    """Evalúa una respuesta válida con el mismo contrato que el conjunto de prueba."""
+
+    if escalar_esperado:
+        return (
+            obtenido["debe_escalar"] is True
+            and obtenido["motivo_escalado"] in motivos_validos
+        )
+    return (
+        obtenido["debe_escalar"] is False
+        and obtenido["tipo_gasto"] == categoria_esperada
+    )
 
 
 def _generar_reporte_final(casos: list[dict]) -> None:
@@ -107,6 +127,7 @@ def _generar_reporte_final(casos: list[dict]) -> None:
         esperado_cat = p["esperado"]["categoria"]
         esperado_escalar = p["esperado"]["escalar"]
         motivos_ok = p["esperado"]["motivos_aceptables"]
+        motivo_esperado = p["esperado"].get("motivo_esperado")
         obtenido = p["obtenido"]
 
         clave_cat = "escalar" if esperado_escalar else esperado_cat
@@ -115,20 +136,17 @@ def _generar_reporte_final(casos: list[dict]) -> None:
 
         if obtenido["motivo_escalado"] == "respuesta_modelo_invalida":
             invalidas.append({"id": caso["id"], **p})
-            continue  # no cuenta como error de prompt, ver sección 4.3 del prompt v3
+            # Es un fallo de punta a punta: no cuenta como correcto para HU9,
+            # aunque se diagnostique aparte de la calidad semántica del prompt.
+            continue
 
-        es_correcto = False
-        if esperado_escalar:
-            if obtenido["debe_escalar"] is True:
-                if motivos_ok:
-                    es_correcto = obtenido["motivo_escalado"] in motivos_ok
-                else:
-                    es_correcto = True
-        else:
-            es_correcto = (
-                obtenido["debe_escalar"] is False
-                and obtenido["tipo_gasto"] == esperado_cat
-            )
+        motivos_validos = motivos_ok or ([motivo_esperado] if motivo_esperado else [])
+        es_correcto = _es_resultado_correcto(
+            esperado_cat,
+            esperado_escalar,
+            motivos_validos,
+            obtenido,
+        )
 
         if es_correcto:
             correctos_total += 1
@@ -140,24 +158,38 @@ def _generar_reporte_final(casos: list[dict]) -> None:
                 else "motivo_o_categoria_incorrecta"
             ), **p})
 
-    total_medibles = len(casos) - len(invalidas)
+    total = len(casos)
+    total_respuestas_validas = total - len(invalidas)
+    precision_macro = (
+        sum(valores["correctos"] / valores["total"] for valores in por_categoria.values())
+        / len(por_categoria)
+        if por_categoria else None
+    )
     resultado = {
         "prompt_version": "v3",
-        "linea_base_v2": {"correctos": 35, "total": 61, "precision": round(35 / 61, 4)},
+        "linea_base_v2": {
+            "correctos": 35,
+            "total": 61,
+            "precision": round(35 / 61, 4),
+            "precision_macro": 0.6119,
+        },
         "v3": {
             "correctos": correctos_total,
-            "total_medibles": total_medibles,
-            "total_con_invalidas": len(casos),
-            "invalidas_excluidas": len(invalidas),
-            "precision_sobre_medibles": round(correctos_total / total_medibles, 4)
-            if total_medibles else None,
+            "total": total,
+            "precision": round(correctos_total / total, 4) if total else None,
+            "respuestas_invalidas": len(invalidas),
+            "precision_sobre_respuestas_validas": (
+                round(correctos_total / total_respuestas_validas, 4)
+                if total_respuestas_validas else None
+            ),
+            "precision_macro": round(precision_macro, 4) if precision_macro is not None else None,
         },
         "por_categoria": {
             k: {**v, "precision": round(v["correctos"] / v["total"], 4) if v["total"] else None}
             for k, v in por_categoria.items()
         },
         "criterio_aceptacion_hu9": {"umbral": 0.85, "cumple": (
-            (correctos_total / total_medibles) >= 0.85 if total_medibles else False
+            (correctos_total / total) >= 0.85 if total else False
         )},
     }
 

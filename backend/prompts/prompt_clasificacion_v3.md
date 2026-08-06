@@ -39,6 +39,9 @@ limitan cuándo una regla aplica:
   no se puede asumir.
 - `"admite_override_contractual": false` (ej. `expensas-02`) → ninguna cláusula contractual
   puede sobrescribir esta regla, aunque exista y sea válida para el rubro.
+- `"requiere_clausula_contractual": true` (ej. `expensas-01`) → la regla solo puede usar
+  una excepción contractual si la cláusula está cargada, es válida y aplica al rubro. Una
+  cláusula solamente mencionada en el relato no está verificada y debe escalarse.
 
 Si el prompt no lee estos campos, el modelo puede clasificar casos que la propia base de
 conocimiento marca como "no clasificar automáticamente" — que es exactamente el tipo de
@@ -131,7 +134,11 @@ mejor encaja con el reclamo tiene alguno de estos campos:
   escalá si ninguna aplica.
 - "admite_override_contractual": false → ninguna cláusula contractual puede modificar la
   clasificación de esta regla, aunque exista una cláusula cargada y válida para ese rubro.
-  Es una norma imperativa: aplicá siempre "clasificacion_default".
+  Si una cláusula pretende contradecir una norma imperativa, no apliques ni el override ni
+  el default de forma automática: escalá por "confianza_insuficiente" para validación humana.
+- "requiere_clausula_contractual": true → solo usá la regla junto con una cláusula
+  cargada, válida y claramente aplicable al rubro. Si falta esa cláusula, buscá otra regla
+  directa aplicable; si no existe, escalá por "causa_no_identificable".
 
 Para decidir, seguí este orden obligatorio. Evaluá cada paso en secuencia y aplicá el
 primero que corresponda — no sigas evaluando pasos posteriores una vez que uno aplica.
@@ -149,12 +156,14 @@ Si recibís cláusulas contractuales para la propiedad, alguna es válida y apli
 clara al rubro del reclamo, Y la regla de la base de conocimiento correspondiente a ese
 rubro NO tiene "admite_override_contractual": false, esa cláusula tiene prioridad sobre la
 regla general; clasificá según ella.
-Si la cláusula es dudosa, ambigua, no aplica claramente al rubro, o la regla correspondiente
-tiene "admite_override_contractual": false, ignorá la cláusula y seguí al paso 3 aplicando
-la regla general (si la cláusula además contradice una norma imperativa, escalá por
-"causa_no_identificable" en vez de aplicar cualquiera de las dos de forma automática).
-Si no recibís cláusulas contractuales (campo vacío o ausente), no asumas que su ausencia
-significa que no hay excepción: pasá directamente al paso 3 aplicando solo la regla general.
+Si la cláusula es dudosa, ambigua o no aplica claramente al rubro, ignorala y seguí al paso 3
+aplicando la regla general. Si la cláusula pretende contradecir una regla con
+"admite_override_contractual": false, escalá por "confianza_insuficiente" en vez de aplicar
+cualquiera de las dos de forma automática.
+Si el relato afirma que existe una cláusula, pero no recibís una cláusula cargada y
+verificable para la propiedad, tratala como dudosa y escalá por "confianza_insuficiente".
+Si no recibís cláusulas contractuales (campo vacío o ausente) y el relato tampoco menciona
+una excepción contractual, pasá al paso 3 aplicando solo la regla general.
 
 PASO 3 — Regla directa de la base de conocimiento:
 Si la descripción encaja de forma clara con una regla que tiene "clasificacion_default", y
@@ -308,7 +317,7 @@ Total de casos de regresión atribuibles a la calidad de decisión del prompt: *
 ### 4.3 Respuestas inválidas del proveedor — fuera de alcance de v3
 
 Los 5 casos de `respuesta_modelo_invalida` se registran en
-`docs/evaluaciones/aari112/respuestas_invalidas_v2.json` como seguimiento aparte. Si se
+`docs/evaluaciones/aari112/respuestas_invalidas_v3.json` como seguimiento aparte. Si se
 repiten con v3 en la misma proporción, es indicio de un problema de formato de salida o
 disponibilidad del proveedor (Gemini), a investigar independientemente del contenido del
 prompt — por ejemplo, revisando el uso de `with_structured_output(method="json_schema")`
