@@ -44,10 +44,16 @@ def _cargar_parciales() -> dict[str, dict]:
 
 
 def _guardar_parciales(parciales: dict[str, dict]) -> None:
+    """Persiste cada avance sin dejar un checkpoint parcialmente escrito."""
+
     EVAL_DIR.mkdir(parents=True, exist_ok=True)
-    PARCIALES_PATH.write_text(
-        json.dumps(parciales, ensure_ascii=False, indent=2), encoding="utf-8"
+    temporal = PARCIALES_PATH.with_suffix(".tmp")
+    temporal.write_text(
+        json.dumps(parciales, ensure_ascii=False, indent=2),
+        encoding="utf-8",
+        newline="\n",
     )
+    temporal.replace(PARCIALES_PATH)
 
 
 def _correr_lote(casos: list[dict], desde: int, hasta: int) -> None:
@@ -79,13 +85,13 @@ def _correr_lote(casos: list[dict], desde: int, hasta: int) -> None:
                 "confianza": resultado.get("confianza"),
             },
         }
+        _guardar_parciales(parciales)
         print(f"{caso['id']}: esperado={caso['categoria_esperada']}/"
               f"escalar={caso['escalar_esperado']} -> "
               f"obtenido={resultado.get('tipo_gasto')}/"
               f"escalar={resultado.get('debe_escalar')}/"
               f"{resultado.get('motivo_escalado')}")
 
-    _guardar_parciales(parciales)
     print(f"\nGuardado en {PARCIALES_PATH} ({len(parciales)}/{len(casos)} casos medidos)")
 
 
