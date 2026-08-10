@@ -32,7 +32,7 @@ def build_classification_prompt(
     state: ClassificationState,
     confidence_threshold: float | None = None,
 ) -> str:
-    """Construye el prompt v2 con los recursos externos al c?digo."""
+    """Construye el prompt vigente con los recursos externos al código."""
 
     threshold = (
         validate_confidence_threshold(confidence_threshold)

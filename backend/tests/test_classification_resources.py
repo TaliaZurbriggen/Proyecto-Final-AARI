@@ -14,8 +14,8 @@ from app.agents.classification.resources import (
 from app.agents.classification.llm import build_classification_prompt
 
 
-def test_prompt_path_apunta_a_v3():
-    assert PROMPT_PATH.name == "prompt_clasificacion_v3.md"
+def test_prompt_path_apunta_a_v4():
+    assert PROMPT_PATH.name == "prompt_clasificacion_v4.md"
 
 
 def test_load_prompt_template_no_lanza_y_tiene_los_4_pasos():
@@ -38,6 +38,24 @@ def test_prompt_lee_campos_especiales_de_la_kb():
         "requiere_clausula_contractual",
     ):
         assert campo in prompt, f"El prompt no menciona el campo especial '{campo}'"
+
+
+def test_prompt_v4_exige_condiciones_materiales_y_no_palabras_aisladas():
+    prompt = " ".join(load_prompt_template().split())
+
+    assert "condiciones materiales" in prompt
+    assert "una coincidencia de palabras no prueba" in prompt
+    assert "no demuestra por sí solo desgaste" in prompt
+    assert "hecho concreto del relato" in prompt
+
+
+def test_prompt_v4_distingue_motivos_de_ambiguedad():
+    prompt = " ".join(load_prompt_template().split())
+
+    assert 'motivo_escalado="causa_no_identificable"' in prompt
+    assert 'motivo_escalado="confianza_insuficiente"' in prompt
+    assert 'significa "falta información del problema"' in prompt
+    assert 'significa "hay información, pero la regla o cláusula' in prompt
 
 
 def test_prompt_no_le_pide_al_modelo_respuesta_modelo_invalida():

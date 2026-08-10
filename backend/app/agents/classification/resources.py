@@ -9,11 +9,11 @@ from typing import Any
 
 BACKEND_DIR = Path(__file__).resolve().parents[3]
 KNOWLEDGE_BASE_PATH = BACKEND_DIR / "config" / "base_conocimiento.json"
-PROMPT_PATH = BACKEND_DIR / "prompts" / "prompt_clasificacion_v3.md"
+PROMPT_PATH = BACKEND_DIR / "prompts" / "prompt_clasificacion_v4.md"
 
 # Agnóstico de versión a propósito: al pasar de v2 a v3, el header dejó de
 # coincidir con un patrón que tenía "(v2)" fijo y el loader rompía al iniciar
-# (AARI-112). Con \d+ el próximo bump de versión no vuelve a romper esto —
+# (AARI-112). Con \d+ el cambio a v4 no requiere modificar el patrón —
 # la única fuente de verdad de qué versión se usa es PROMPT_PATH.
 _PROMPT_HEADER_PATTERN = re.compile(
     r"## 2\. Prompt de sistema \(v\d+\)\s*```\s*(.*?)\s*```",
