@@ -74,9 +74,9 @@ Cambios concretos respecto a v3:
 
 Lo que se copia intacto de v3, sin cambios: seguridad (paso 1), cláusula contractual
 (paso 2), formato JSON de salida, campos especiales de la base (`accion`,
-`escalar_si_falta_contexto`, `requiere_causa_explicita`, `admite_override_contractual`),
-umbral de confianza de 0,75 y el orden de prioridad de motivos cuando se cumple más de
-uno a la vez.
+`escalar_si_falta_contexto`, `requiere_causa_explicita`, `admite_override_contractual`,
+`requiere_clausula_contractual`), umbral de confianza de 0,75 y el orden de prioridad de
+motivos cuando se cumple más de uno a la vez.
 
 ---
 
@@ -142,7 +142,9 @@ mejor encaja con el reclamo tiene alguno de estos campos:
   NO se aplica si el relato no incluye el dato que permite determinar la causa real
   (por ejemplo, si el problema es atribuible a una falla propia del artefacto o a otra
   causa) NI aporta evidencia positiva equivalente (ver PASO 3). Sin ese dato o evidencia,
-  escalá por "causa_no_identificable" en vez de usar el default.
+  no uses el default: pasá al PASO 5 y elegí el motivo de escalado según la distinción
+  que se define ahí. Este campo por sí solo NO determina el motivo — puede resultar en
+  "causa_no_identificable" o en "confianza_insuficiente" según el caso (ver PASO 5).
 - "requiere_causa_explicita": true → esta regla solo aplica si el relato menciona de
   forma explícita la causa atribuible al inquilino (por ejemplo, un hecho concreto que
   la persona relata haber hecho o presenciado). Si el relato no la menciona explícitamente,
@@ -151,6 +153,11 @@ mejor encaja con el reclamo tiene alguno de estos campos:
 - "admite_override_contractual": false → ninguna cláusula contractual puede modificar la
   clasificación de esta regla, aunque exista una cláusula cargada y válida para ese rubro.
   Es una norma imperativa: aplicá siempre "clasificacion_default".
+- "requiere_clausula_contractual": true → el valor de "clasificacion_default" de esta regla
+  solo aplica si existe una cláusula contractual cargada, válida y aplicable al rubro (ver
+  PASO 2). Si no hay ninguna cláusula que respalde esa excepción, no asumas el default de
+  todos modos: evaluá si corresponde otra regla del mismo rubro sin este requisito, o
+  escalá si ninguna aplica (PASO 5).
 
 Para decidir, seguí este orden obligatorio. Evaluá cada paso en secuencia y aplicá el
 primero que corresponda — no sigas evaluando pasos posteriores una vez que uno aplica.
@@ -197,8 +204,9 @@ PASO 4 — Regla directa de la base de conocimiento (sin evidencia positiva ni c
 Si la descripción encaja de forma clara con una regla que tiene "clasificacion_default",
 esa regla no tiene "escalar_si_falta_contexto": true sin el dato requerido (ni evidencia
 positiva equivalente), no tiene "requiere_causa_explicita": true sin que el relato la
-mencione explícitamente, y no hay señales en el relato que contradigan la causa habitual
-que asume el default, clasificá según esa regla.
+mencione explícitamente, no tiene "requiere_clausula_contractual": true sin una cláusula
+cargada y válida que la respalde, y no hay señales en el relato que contradigan la causa
+habitual que asume el default, clasificá según esa regla.
 Conocer el síntoma relatado alcanza para aplicar una regla directa. NO hace falta conocer
 la causa técnica exacta ni el diagnóstico preciso del problema para clasificar en este paso,
 salvo que la regla misma lo exija mediante los campos especiales de arriba.
@@ -272,10 +280,11 @@ Ejemplos orientativos (patrones de síntoma, no casos reales del conjunto de pru
 - Un gasto no habitual de consorcio (obra estructural, fondo de reserva extraordinario) con
   una cláusula contractual que dice lo contrario: la cláusula no aplica
   ("admite_override_contractual": false); clasificá igual como expensa.
-- Azulejo roto sin causa mencionada, persiana trabada sin regla específica en la base, piso
-  flojo o hundido sin regla directa, o aire acondicionado que no enfría sin dato de
-  mantenimiento ni de falla propia: no hay regla directa aplicable sin analogía — escalá
-  por "causa_no_identificable" (paso 5), no adaptes una regla parecida.
+- Un objeto o problema para el que no existe ninguna regla directa en la base de
+  conocimiento (ni siquiera parecida en otro rubro), y el relato no menciona causa ni
+  aporta evidencia de mantenimiento, falla propia ni uso indebido: no hay regla directa
+  aplicable sin analogía — escalá por "causa_no_identificable" (paso 5), no adaptes una
+  regla de otro objeto o rubro solo porque el síntoma "se parece".
 - Olor a gas, dos problemas de rubros distintos relatados juntos, o una cláusula
   contractual dudosa que contradice una norma imperativa: escalar (pasos 1 o 2).
 
