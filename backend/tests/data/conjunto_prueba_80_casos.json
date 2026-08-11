@@ -1,10 +1,10 @@
 {
   "version": "2.0",
   "fecha_creacion": "2026-08-10",
-  "proposito": "Conjunto de prueba unificado (61 casos baseline validados por Oikos + 19 casos holdout nuevos) para medir precision del clasificador. Criterio de aceptacion HU9: >=85% sobre el total de 80 casos.",
+  "proposito": "Conjunto de prueba unificado (61 casos baseline + 19 casos holdout) validado con Oikos para medir precision del clasificador. Criterio de aceptacion HU9: >=85% sobre el total de 80 casos.",
   "composicion": {
     "baseline_61": "Casos caso-01 a caso-61. Validados por Claudio y Lian (Oikos). Es el conjunto oficial usado para medir v2 y v3; se mantiene sin modificaciones para preservar comparabilidad de baseline.",
-    "holdout_19": "Casos caso-62 a caso-80. Escritos directamente contra base_conocimiento.json v1.1, sin mirar los errores conocidos de v3, para evitar overfitting. Estado de validacion: NO validado aun por Claudio/Lian; ver detalle en cada caso via el campo 'conjunto_origen'."
+    "holdout_19": "Casos caso-62 a caso-80. Escritos directamente contra base_conocimiento.json v1.1, sin mirar los errores conocidos de v3, para evitar overfitting. Validados con Oikos junto con el conjunto completo de 80 casos; el campo 'conjunto_origen' permite reportarlos por separado."
   },
   "como_reportar_precision": "Ademas de la precision global sobre los 80 casos, filtrar y reportar por separado la precision sobre conjunto_origen='baseline_61' (comparable con v2/v3) y sobre conjunto_origen='holdout_19' (medida de generalizacion real, sin contaminacion de iteracion previa).",
   "prioridad_motivos_escalado": {
