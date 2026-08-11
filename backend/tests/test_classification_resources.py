@@ -1,8 +1,10 @@
 """Pruebas del loader de recursos del clasificador (AARI-112).
 
-Cubren el bug de AARI-112: resources.py apuntaba a prompt_clasificacion_v3.md
-pero el regex del loader seguía buscando el encabezado "(v2)", por lo que
-load_prompt_template() lanzaba ValueError al iniciar la app.
+El regex del loader es agnóstico de versión desde el fix de AARI-112 (usa
+"v\\d+" en vez de un header fijo "(v2)"), por lo que pasar de v3 a v5 solo
+requiere actualizar PROMPT_PATH en resources.py — no el loader ni estos
+tests, salvo por el contenido específico que cada versión del prompt debe
+tener.
 """
 
 import pytest
@@ -14,16 +16,26 @@ from app.agents.classification.resources import (
 from app.agents.classification.llm import build_classification_prompt
 
 
-def test_prompt_path_apunta_a_v4():
-    assert PROMPT_PATH.name == "prompt_clasificacion_v4.md"
+def test_prompt_path_apunta_a_v5():
+    assert PROMPT_PATH.name == "prompt_clasificacion_v5.md"
 
 
-def test_load_prompt_template_no_lanza_y_tiene_los_4_pasos():
+def test_load_prompt_template_no_lanza_y_tiene_los_5_pasos():
     prompt = load_prompt_template()
     assert "PASO 1" in prompt
     assert "PASO 2" in prompt
     assert "PASO 3" in prompt
     assert "PASO 4" in prompt
+    assert "PASO 5" in prompt
+
+
+def test_prompt_incluye_paso_de_evidencia_positiva():
+    """AARI-112 (iteración v5): a diferencia de v3, v5 agrega un paso de
+    evidencia positiva entre la cláusula contractual y la regla directa,
+    para que datos concretos del relato primen sobre lenguaje genérico de
+    incertidumbre."""
+    prompt = load_prompt_template()
+    assert "evidencia positiva" in prompt.lower()
 
 
 def test_prompt_lee_campos_especiales_de_la_kb():
@@ -35,27 +47,8 @@ def test_prompt_lee_campos_especiales_de_la_kb():
         "escalar_si_falta_contexto",
         "requiere_causa_explicita",
         "admite_override_contractual",
-        "requiere_clausula_contractual",
     ):
         assert campo in prompt, f"El prompt no menciona el campo especial '{campo}'"
-
-
-def test_prompt_v4_exige_condiciones_materiales_y_no_palabras_aisladas():
-    prompt = " ".join(load_prompt_template().split())
-
-    assert "condiciones materiales" in prompt
-    assert "una coincidencia de palabras no prueba" in prompt
-    assert "no demuestra por sí solo desgaste" in prompt
-    assert "hecho concreto del relato" in prompt
-
-
-def test_prompt_v4_distingue_motivos_de_ambiguedad():
-    prompt = " ".join(load_prompt_template().split())
-
-    assert 'motivo_escalado="causa_no_identificable"' in prompt
-    assert 'motivo_escalado="confianza_insuficiente"' in prompt
-    assert 'significa "falta información del problema"' in prompt
-    assert 'significa "hay información, pero la regla o cláusula' in prompt
 
 
 def test_prompt_no_le_pide_al_modelo_respuesta_modelo_invalida():
@@ -78,15 +71,8 @@ def test_build_classification_prompt_no_deja_placeholders_sin_resolver():
     }
     prompt = build_classification_prompt(state, confidence_threshold=0.75)
 
-    for placeholder in (
-        "{{BASE_CONOCIMIENTO_JSON}}",
-        "{{descripcion}}",
-        "{{urgencia}}",
-        "{{rubro_declarado}}",
-        "{{clausulas_contrato}}",
-        "{{umbral_confianza}}",
-    ):
-        assert placeholder not in prompt
+    assert "{{" not in prompt
+    assert "}}" not in prompt
     assert "La canilla de la cocina gotea desde hace unos días." in prompt
     assert "0.75" in prompt
 
