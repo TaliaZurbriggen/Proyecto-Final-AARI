@@ -340,46 +340,52 @@ Sin cambios respecto a v3.
 
 ## 4. Medición
 
-### 4.1 Conjunto de prueba
+### 4.1 Conjunto y criterio
 
-Decisión pendiente de confirmar en Notion antes de medir (ver memoria de decisión de
-alcance): medir v5 primero contra el conjunto vigente de 61 casos
-(`conjunto_prueba_61_casos.json`), en lotes de 20 y solo con autorización explícita antes de
-cada tanda, dado el consumo de créditos de API (límite diario de Gemini 2.5 en el tier
-actual: 20 tests/día).
+La evaluación de v5 usa `conjunto_prueba_80_casos.json`: 61 casos de línea base y 19
+casos holdout. Los 80 casos, sus categorías y sus motivos esperados de escalado fueron
+validados con Oikos. El reporte separa ambos orígenes para detectar una mejora limitada
+a los casos ya conocidos.
 
-Criterio de corte propuesto: no avanzar al resto de los 61 casos (ni a los 19 casos
-holdout que amplían el conjunto a 80) hasta obtener al menos 17/20 en el primer lote.
-Si el primer lote no alcanza ese piso, se re-evalúa el prompt antes de seguir gastando
-cuota.
+La ejecución se realiza en cuatro lotes de hasta 20 llamadas (`0:20`, `20:40`, `40:60` y
+`60:80`) y requiere autorización explícita antes de cada uno, porque consume cuota de
+Gemini. Al completarse el primer lote, el ejecutor informa el piso orientativo de 17/20.
+No bloquea el proceso: si no se alcanza, el equipo revisa el prompt y decide si autoriza
+más llamadas.
 
-Los 19 casos holdout nuevos (si se incorporan) deben redactarse sin referencia a los
-errores conocidos de v3/v4, para que sigan sirviendo como control de sobreajuste una vez
-que v5 se mida también contra ellos.
+La métrica principal es `correctos / 80`. Una respuesta inválida cuenta como error en
+ese denominador, aunque también se informa una métrica secundaria sobre respuestas
+válidas para diagnosticar fallas del proveedor. En un escalamiento, el motivo debe
+coincidir con `motivo_escalado_esperado`, salvo cuando el caso declare de forma explícita
+`motivos_aceptables`.
 
-### 4.2 Ejecución
+### 4.2 Ejecución y evidencia
 
-Igual que v3: `backend/tests/data/measure_precision_v3.py` (o su equivalente renombrado
-para v5) genera:
-- `docs/evaluaciones/aari112/resultados_v5.json`: precisión global y por categoría
-  (ordinario / extraordinario / expensa / escalar), sin sobrescribir `resultados_v3.json`
-  ni los resultados de AARI-111.
-- `docs/evaluaciones/aari112/casos_regresion_v5.json`: generado automáticamente a partir de
-  los casos donde `categoria_esperada`/`escalar_esperado` no coincide con la salida real.
+`backend/tests/data/measure_precision_v5.py` conserva un checkpoint atómico después de
+cada respuesta. Así, una interrupción no pierde los casos ya ejecutados. Genera:
+
+- `docs/evaluaciones/aari112/resultados_v5_parciales.json`: checkpoint incremental.
+- `docs/evaluaciones/aari112/resultados_v5.json`: precisión global, por categoría y por
+  origen (`baseline_61` / `holdout_19`).
+- `docs/evaluaciones/aari112/casos_regresion_v5.json`: respuestas válidas que no
+  coinciden con el resultado esperado.
+- `docs/evaluaciones/aari112/respuestas_invalidas_v5.json`: fallas de proveedor o de
+  validación, que permanecen incluidas como errores en la métrica principal.
+
+El umbral de aceptación de HU9 es 85% sobre los 80 casos validados. La referencia
+observada de v3 es 48/60 (80%); v3 se cerró antes del caso 61, por lo que no existe una
+medición observada de v3 sobre 61 u 80 casos.
 
 ---
 
 ## 5. Pendientes para cerrar esta iteración
 
-- [ ] Confirmar en Notion la decisión de medir primero el lote de 20 antes de comprometer
-      el resto de la cuota diaria.
-- [ ] Correr el primer lote de 20 casos con `prompt_clasificacion_v5.md` y comparar contra
-      v3 (~82,5%) y v4 (~60%) en el mismo lote.
-- [ ] Si el primer lote alcanza ≥17/20, continuar con el resto de los 61 casos; si no,
-      revisar el prompt antes de seguir midiendo.
-- [ ] Verificar en los resultados que no aparezcan casos con confianza ≥0,85 y
-      `debe_escalar=true` por `causa_no_identificable` (la contradicción detectada en v4).
-- [ ] Registrar en Notion la decisión sobre expandir el conjunto de prueba a 80 casos
-      (61 + 19 holdout) antes de descartar los resultados de v3 como línea base.
-- [ ] Cerrar AARI-112 solo con la evidencia de `resultados_v5.json` y la conclusión sobre
-      el objetivo de 85%, no antes.
+- [ ] Ejecutar el primer lote de 20 casos con v5, con autorización explícita.
+- [ ] Analizar el resultado del primer lote y decidir si se autoriza el siguiente.
+- [ ] Completar los cuatro lotes autorizados y generar `resultados_v5.json`.
+- [ ] Revisar regresiones e inválidas, con especial atención a escalados por
+      `causa_no_identificable` y `confianza_insuficiente`.
+- [ ] Comparar la precisión global, la de línea base y la de holdout contra el umbral de
+      HU9; registrar la conclusión en Notion.
+- [ ] Cerrar AARI-112 únicamente con la evidencia completa y la conclusión sobre el
+      objetivo de 85%.

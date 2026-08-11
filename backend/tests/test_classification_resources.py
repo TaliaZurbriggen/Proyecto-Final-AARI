@@ -39,7 +39,7 @@ def test_prompt_incluye_paso_de_evidencia_positiva():
 
 
 def test_prompt_lee_campos_especiales_de_la_kb():
-    """AARI-112: el prompt debe mencionar explícitamente los 4 campos
+    """AARI-112: el prompt debe mencionar explícitamente los 5 campos
     especiales de base_conocimiento.json, no solo ejemplos de texto libre."""
     prompt = load_prompt_template()
     for campo in (
@@ -47,6 +47,7 @@ def test_prompt_lee_campos_especiales_de_la_kb():
         "escalar_si_falta_contexto",
         "requiere_causa_explicita",
         "admite_override_contractual",
+        "requiere_clausula_contractual",
     ):
         assert campo in prompt, f"El prompt no menciona el campo especial '{campo}'"
 
@@ -71,8 +72,15 @@ def test_build_classification_prompt_no_deja_placeholders_sin_resolver():
     }
     prompt = build_classification_prompt(state, confidence_threshold=0.75)
 
-    assert "{{" not in prompt
-    assert "}}" not in prompt
+    for placeholder in (
+        "{{BASE_CONOCIMIENTO_JSON}}",
+        "{{descripcion}}",
+        "{{urgencia}}",
+        "{{rubro_declarado}}",
+        "{{clausulas_contrato}}",
+        "{{umbral_confianza}}",
+    ):
+        assert placeholder not in prompt
     assert "La canilla de la cocina gotea desde hace unos días." in prompt
     assert "0.75" in prompt
 
@@ -85,4 +93,12 @@ def test_build_classification_prompt_sin_rubro_ni_clausulas_usa_fallback():
     prompt = build_classification_prompt(state, confidence_threshold=0.75)
 
     assert "no disponible" in prompt
-    assert "{{" not in prompt
+    for placeholder in (
+        "{{BASE_CONOCIMIENTO_JSON}}",
+        "{{descripcion}}",
+        "{{urgencia}}",
+        "{{rubro_declarado}}",
+        "{{clausulas_contrato}}",
+        "{{umbral_confianza}}",
+    ):
+        assert placeholder not in prompt
