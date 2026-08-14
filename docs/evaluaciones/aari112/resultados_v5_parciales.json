@@ -558,5 +558,288 @@
       "motivo_escalado": "causa_no_identificable",
       "confianza": 0.5
     }
+  },
+  "caso-21": {
+    "esperado": {
+      "categoria": "extraordinario",
+      "escalar": false,
+      "motivo_esperado": null,
+      "motivos_aceptables": null
+    },
+    "obtenido": {
+      "tipo_gasto": "extraordinario",
+      "debe_escalar": false,
+      "motivo_escalado": null,
+      "confianza": 0.8
+    }
+  },
+  "caso-22": {
+    "esperado": {
+      "categoria": "extraordinario",
+      "escalar": false,
+      "motivo_esperado": null,
+      "motivos_aceptables": null
+    },
+    "obtenido": {
+      "tipo_gasto": "extraordinario",
+      "debe_escalar": false,
+      "motivo_escalado": null,
+      "confianza": 0.8
+    }
+  },
+  "caso-23": {
+    "esperado": {
+      "categoria": "extraordinario",
+      "escalar": false,
+      "motivo_esperado": null,
+      "motivos_aceptables": null
+    },
+    "obtenido": {
+      "tipo_gasto": "extraordinario",
+      "debe_escalar": false,
+      "motivo_escalado": null,
+      "confianza": 0.85
+    }
+  },
+  "caso-24": {
+    "esperado": {
+      "categoria": "extraordinario",
+      "escalar": false,
+      "motivo_esperado": null,
+      "motivos_aceptables": null
+    },
+    "obtenido": {
+      "tipo_gasto": "extraordinario",
+      "debe_escalar": false,
+      "motivo_escalado": null,
+      "confianza": 0.9
+    }
+  },
+  "caso-25": {
+    "esperado": {
+      "categoria": "extraordinario",
+      "escalar": false,
+      "motivo_esperado": null,
+      "motivos_aceptables": null
+    },
+    "obtenido": {
+      "tipo_gasto": "extraordinario",
+      "debe_escalar": false,
+      "motivo_escalado": null,
+      "confianza": 0.9
+    }
+  },
+  "caso-26": {
+    "esperado": {
+      "categoria": "extraordinario",
+      "escalar": false,
+      "motivo_esperado": null,
+      "motivos_aceptables": null
+    },
+    "obtenido": {
+      "tipo_gasto": "extraordinario",
+      "debe_escalar": false,
+      "motivo_escalado": null,
+      "confianza": 0.8
+    }
+  },
+  "caso-27": {
+    "esperado": {
+      "categoria": "extraordinario",
+      "escalar": false,
+      "motivo_esperado": null,
+      "motivos_aceptables": null
+    },
+    "obtenido": {
+      "tipo_gasto": "extraordinario",
+      "debe_escalar": false,
+      "motivo_escalado": null,
+      "confianza": 0.9
+    }
+  },
+  "caso-28": {
+    "esperado": {
+      "categoria": "extraordinario",
+      "escalar": false,
+      "motivo_esperado": null,
+      "motivos_aceptables": null
+    },
+    "obtenido": {
+      "tipo_gasto": "extraordinario",
+      "debe_escalar": false,
+      "motivo_escalado": null,
+      "confianza": 0.9
+    }
+  },
+  "caso-29": {
+    "esperado": {
+      "categoria": "extraordinario",
+      "escalar": false,
+      "motivo_esperado": null,
+      "motivos_aceptables": null
+    },
+    "obtenido": {
+      "tipo_gasto": null,
+      "debe_escalar": true,
+      "motivo_escalado": "causa_no_identificable",
+      "confianza": 0.6
+    }
+  },
+  "caso-30": {
+    "esperado": {
+      "categoria": "extraordinario",
+      "escalar": false,
+      "motivo_esperado": null,
+      "motivos_aceptables": null
+    },
+    "obtenido": {
+      "tipo_gasto": "extraordinario",
+      "debe_escalar": false,
+      "motivo_escalado": null,
+      "confianza": 0.85
+    }
+  },
+  "caso-31": {
+    "esperado": {
+      "categoria": "expensa",
+      "escalar": false,
+      "motivo_esperado": null,
+      "motivos_aceptables": null
+    },
+    "obtenido": {
+      "tipo_gasto": "expensa",
+      "debe_escalar": false,
+      "motivo_escalado": null,
+      "confianza": 0.85
+    }
+  },
+  "caso-32": {
+    "esperado": {
+      "categoria": "expensa",
+      "escalar": false,
+      "motivo_esperado": null,
+      "motivos_aceptables": null
+    },
+    "obtenido": {
+      "tipo_gasto": "expensa",
+      "debe_escalar": false,
+      "motivo_escalado": null,
+      "confianza": 0.8
+    }
+  },
+  "caso-33": {
+    "esperado": {
+      "categoria": "expensa",
+      "escalar": false,
+      "motivo_esperado": null,
+      "motivos_aceptables": null
+    },
+    "obtenido": {
+      "tipo_gasto": "expensa",
+      "debe_escalar": false,
+      "motivo_escalado": null,
+      "confianza": 0.9
+    }
+  },
+  "caso-34": {
+    "esperado": {
+      "categoria": "expensa",
+      "escalar": false,
+      "motivo_esperado": null,
+      "motivos_aceptables": null
+    },
+    "obtenido": {
+      "tipo_gasto": "expensa",
+      "debe_escalar": false,
+      "motivo_escalado": null,
+      "confianza": 0.8
+    }
+  },
+  "caso-35": {
+    "esperado": {
+      "categoria": "expensa",
+      "escalar": false,
+      "motivo_esperado": null,
+      "motivos_aceptables": null
+    },
+    "obtenido": {
+      "tipo_gasto": "expensa",
+      "debe_escalar": false,
+      "motivo_escalado": null,
+      "confianza": 0.8
+    }
+  },
+  "caso-36": {
+    "esperado": {
+      "categoria": null,
+      "escalar": true,
+      "motivo_esperado": "causa_no_identificable",
+      "motivos_aceptables": null
+    },
+    "obtenido": {
+      "tipo_gasto": null,
+      "debe_escalar": true,
+      "motivo_escalado": "confianza_insuficiente",
+      "confianza": 0.6
+    }
+  },
+  "caso-37": {
+    "esperado": {
+      "categoria": null,
+      "escalar": true,
+      "motivo_esperado": "riesgo_seguridad",
+      "motivos_aceptables": null
+    },
+    "obtenido": {
+      "tipo_gasto": null,
+      "debe_escalar": true,
+      "motivo_escalado": "riesgo_seguridad",
+      "confianza": 1.0
+    }
+  },
+  "caso-38": {
+    "esperado": {
+      "categoria": null,
+      "escalar": true,
+      "motivo_esperado": "riesgo_seguridad",
+      "motivos_aceptables": [
+        "riesgo_seguridad",
+        "multiples_rubros"
+      ]
+    },
+    "obtenido": {
+      "tipo_gasto": null,
+      "debe_escalar": true,
+      "motivo_escalado": "riesgo_seguridad",
+      "confianza": 1.0
+    }
+  },
+  "caso-39": {
+    "esperado": {
+      "categoria": null,
+      "escalar": true,
+      "motivo_esperado": "causa_no_identificable",
+      "motivos_aceptables": null
+    },
+    "obtenido": {
+      "tipo_gasto": null,
+      "debe_escalar": true,
+      "motivo_escalado": "causa_no_identificable",
+      "confianza": 0.6
+    }
+  },
+  "caso-40": {
+    "esperado": {
+      "categoria": null,
+      "escalar": true,
+      "motivo_esperado": "confianza_insuficiente",
+      "motivos_aceptables": null
+    },
+    "obtenido": {
+      "tipo_gasto": null,
+      "debe_escalar": true,
+      "motivo_escalado": "confianza_insuficiente",
+      "confianza": 0.6
+    }
   }
 }
