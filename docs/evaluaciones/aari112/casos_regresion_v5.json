@@ -1,0 +1,172 @@
+[
+  {
+    "id": "caso-12",
+    "conjunto_origen": "baseline_61",
+    "descripcion_error": "sobreescalado",
+    "esperado": {
+      "categoria": "ordinario",
+      "escalar": false,
+      "motivo_esperado": null,
+      "motivos_aceptables": null
+    },
+    "obtenido": {
+      "tipo_gasto": null,
+      "debe_escalar": true,
+      "motivo_escalado": "causa_no_identificable",
+      "confianza": 0.5
+    }
+  },
+  {
+    "id": "caso-13",
+    "conjunto_origen": "baseline_61",
+    "descripcion_error": "sobreescalado",
+    "esperado": {
+      "categoria": "ordinario",
+      "escalar": false,
+      "motivo_esperado": null,
+      "motivos_aceptables": null
+    },
+    "obtenido": {
+      "tipo_gasto": null,
+      "debe_escalar": true,
+      "motivo_escalado": "causa_no_identificable",
+      "confianza": 0.6
+    }
+  },
+  {
+    "id": "caso-29",
+    "conjunto_origen": "baseline_61",
+    "descripcion_error": "sobreescalado",
+    "esperado": {
+      "categoria": "extraordinario",
+      "escalar": false,
+      "motivo_esperado": null,
+      "motivos_aceptables": null
+    },
+    "obtenido": {
+      "tipo_gasto": null,
+      "debe_escalar": true,
+      "motivo_escalado": "causa_no_identificable",
+      "confianza": 0.6
+    }
+  },
+  {
+    "id": "caso-36",
+    "conjunto_origen": "baseline_61",
+    "descripcion_error": "motivo_o_categoria_incorrecta",
+    "esperado": {
+      "categoria": null,
+      "escalar": true,
+      "motivo_esperado": "causa_no_identificable",
+      "motivos_aceptables": null
+    },
+    "obtenido": {
+      "tipo_gasto": null,
+      "debe_escalar": true,
+      "motivo_escalado": "confianza_insuficiente",
+      "confianza": 0.6
+    }
+  },
+  {
+    "id": "caso-41",
+    "conjunto_origen": "baseline_61",
+    "descripcion_error": "escalamiento_omitido",
+    "esperado": {
+      "categoria": null,
+      "escalar": true,
+      "motivo_esperado": "causa_no_identificable",
+      "motivos_aceptables": null
+    },
+    "obtenido": {
+      "tipo_gasto": "ordinario",
+      "debe_escalar": false,
+      "motivo_escalado": null,
+      "confianza": 0.8
+    }
+  },
+  {
+    "id": "caso-48",
+    "conjunto_origen": "baseline_61",
+    "descripcion_error": "motivo_o_categoria_incorrecta",
+    "esperado": {
+      "categoria": null,
+      "escalar": true,
+      "motivo_esperado": "confianza_insuficiente",
+      "motivos_aceptables": null
+    },
+    "obtenido": {
+      "tipo_gasto": null,
+      "debe_escalar": true,
+      "motivo_escalado": "causa_no_identificable",
+      "confianza": 0.3
+    }
+  },
+  {
+    "id": "caso-55",
+    "conjunto_origen": "baseline_61",
+    "descripcion_error": "motivo_o_categoria_incorrecta",
+    "esperado": {
+      "categoria": null,
+      "escalar": true,
+      "motivo_esperado": "confianza_insuficiente",
+      "motivos_aceptables": null
+    },
+    "obtenido": {
+      "tipo_gasto": null,
+      "debe_escalar": true,
+      "motivo_escalado": "causa_no_identificable",
+      "confianza": 0.7
+    }
+  },
+  {
+    "id": "caso-56",
+    "conjunto_origen": "baseline_61",
+    "descripcion_error": "escalamiento_omitido",
+    "esperado": {
+      "categoria": null,
+      "escalar": true,
+      "motivo_esperado": "confianza_insuficiente",
+      "motivos_aceptables": null
+    },
+    "obtenido": {
+      "tipo_gasto": "extraordinario",
+      "debe_escalar": false,
+      "motivo_escalado": null,
+      "confianza": 0.85
+    }
+  },
+  {
+    "id": "caso-73",
+    "conjunto_origen": "holdout_19",
+    "descripcion_error": "sobreescalado",
+    "esperado": {
+      "categoria": "expensa",
+      "escalar": false,
+      "motivo_esperado": null,
+      "motivos_aceptables": null
+    },
+    "obtenido": {
+      "tipo_gasto": null,
+      "debe_escalar": true,
+      "motivo_escalado": "causa_no_identificable",
+      "confianza": 0.6
+    }
+  },
+  {
+    "id": "caso-80",
+    "conjunto_origen": "holdout_19",
+    "descripcion_error": "motivo_o_categoria_incorrecta",
+    "esperado": {
+      "categoria": null,
+      "escalar": true,
+      "motivo_esperado": "confianza_insuficiente",
+      "motivos_aceptables": null
+    },
+    "obtenido": {
+      "tipo_gasto": null,
+      "debe_escalar": true,
+      "motivo_escalado": "causa_no_identificable",
+      "confianza": 0.5
+    }
+  }
+]
