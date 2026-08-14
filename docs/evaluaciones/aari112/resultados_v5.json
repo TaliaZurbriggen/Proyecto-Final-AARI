@@ -1,0 +1,130 @@
+{
+  "prompt_version": "v5",
+  "referencia_v3_observada": {
+    "correctos": 48,
+    "total_ejecutado": 60,
+    "precision": 0.8,
+    "nota": "V3 se cerró antes del caso 61; no existe resultado observado sobre 61."
+  },
+  "v5": {
+    "correctos": 70,
+    "total": 80,
+    "precision": 0.875,
+    "respuestas_invalidas": 0,
+    "precision_sobre_respuestas_validas": 0.875,
+    "precision_macro": 0.8808
+  },
+  "por_origen": {
+    "baseline_61": {
+      "total": 61,
+      "correctos": 53,
+      "respuestas_invalidas": 0,
+      "precision": 0.8689,
+      "precision_sobre_respuestas_validas": 0.8689
+    },
+    "holdout_19": {
+      "total": 19,
+      "correctos": 17,
+      "respuestas_invalidas": 0,
+      "precision": 0.8947,
+      "precision_sobre_respuestas_validas": 0.8947
+    }
+  },
+  "por_categoria": {
+    "ordinario": {
+      "total": 23,
+      "correctos": 21,
+      "respuestas_invalidas": 0,
+      "precision": 0.913,
+      "precision_sobre_respuestas_validas": 0.913
+    },
+    "extraordinario": {
+      "total": 22,
+      "correctos": 21,
+      "respuestas_invalidas": 0,
+      "precision": 0.9545,
+      "precision_sobre_respuestas_validas": 0.9545
+    },
+    "expensa": {
+      "total": 12,
+      "correctos": 11,
+      "respuestas_invalidas": 0,
+      "precision": 0.9167,
+      "precision_sobre_respuestas_validas": 0.9167
+    },
+    "escalar": {
+      "total": 23,
+      "correctos": 17,
+      "respuestas_invalidas": 0,
+      "precision": 0.7391,
+      "precision_sobre_respuestas_validas": 0.7391
+    }
+  },
+  "por_origen_y_categoria": {
+    "baseline_61": {
+      "ordinario": {
+        "total": 18,
+        "correctos": 16,
+        "respuestas_invalidas": 0,
+        "precision": 0.8889,
+        "precision_sobre_respuestas_validas": 0.8889
+      },
+      "extraordinario": {
+        "total": 17,
+        "correctos": 16,
+        "respuestas_invalidas": 0,
+        "precision": 0.9412,
+        "precision_sobre_respuestas_validas": 0.9412
+      },
+      "expensa": {
+        "total": 9,
+        "correctos": 9,
+        "respuestas_invalidas": 0,
+        "precision": 1.0,
+        "precision_sobre_respuestas_validas": 1.0
+      },
+      "escalar": {
+        "total": 17,
+        "correctos": 12,
+        "respuestas_invalidas": 0,
+        "precision": 0.7059,
+        "precision_sobre_respuestas_validas": 0.7059
+      }
+    },
+    "holdout_19": {
+      "ordinario": {
+        "total": 5,
+        "correctos": 5,
+        "respuestas_invalidas": 0,
+        "precision": 1.0,
+        "precision_sobre_respuestas_validas": 1.0
+      },
+      "extraordinario": {
+        "total": 5,
+        "correctos": 5,
+        "respuestas_invalidas": 0,
+        "precision": 1.0,
+        "precision_sobre_respuestas_validas": 1.0
+      },
+      "expensa": {
+        "total": 3,
+        "correctos": 2,
+        "respuestas_invalidas": 0,
+        "precision": 0.6667,
+        "precision_sobre_respuestas_validas": 0.6667
+      },
+      "escalar": {
+        "total": 6,
+        "correctos": 5,
+        "respuestas_invalidas": 0,
+        "precision": 0.8333,
+        "precision_sobre_respuestas_validas": 0.8333
+      }
+    }
+  },
+  "criterio_aceptacion_hu9": {
+    "umbral": 0.85,
+    "universo": "80 casos validados con Oikos",
+    "cumple": true
+  }
+}
