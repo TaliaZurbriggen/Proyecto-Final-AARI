@@ -1,0 +1,44 @@
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--aari-space-2);
+  width: fit-content;
+  min-height: 1.75rem;
+  padding-inline: var(--aari-space-3);
+  border-radius: var(--aari-radius-full);
+  font-size: var(--aari-font-size-xs);
+  font-weight: var(--aari-font-weight-semibold);
+  line-height: 1;
+}
+
+.dot {
+  width: 0.45rem;
+  height: 0.45rem;
+  background: currentcolor;
+  border-radius: var(--aari-radius-full);
+}
+
+.neutral {
+  color: var(--aari-color-text);
+  background: var(--aari-color-neutral-soft);
+}
+
+.info {
+  color: var(--aari-color-info);
+  background: var(--aari-color-info-soft);
+}
+
+.success {
+  color: var(--aari-color-primary-strong);
+  background: var(--aari-color-primary-soft);
+}
+
+.warning {
+  color: var(--aari-color-warning);
+  background: var(--aari-color-warning-soft);
+}
+
+.danger {
+  color: var(--aari-color-danger-hover);
+  background: var(--aari-color-danger-soft);
+}

@@ -1,0 +1,61 @@
+.button {
+  display: inline-grid;
+  flex: 0 0 auto;
+  place-items: center;
+  padding: 0;
+  color: var(--aari-color-ink);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--aari-radius-md);
+  transition:
+    color var(--aari-transition-fast),
+    background-color var(--aari-transition-fast),
+    border-color var(--aari-transition-fast),
+    box-shadow var(--aari-transition-fast);
+}
+
+.button:focus-visible {
+  outline: none;
+  box-shadow: var(--aari-shadow-focus);
+}
+
+.button:disabled {
+  opacity: 0.5;
+}
+
+.button svg {
+  width: 1.2rem;
+  height: 1.2rem;
+  stroke-width: 2;
+}
+
+.sm {
+  width: var(--aari-control-height-sm);
+  height: var(--aari-control-height-sm);
+}
+
+.md {
+  width: var(--aari-control-height-md);
+  height: var(--aari-control-height-md);
+}
+
+.ghost:hover:not(:disabled) {
+  background: var(--aari-color-primary-soft);
+}
+
+.secondary {
+  background: var(--aari-color-surface);
+  border-color: var(--aari-color-border);
+}
+
+.secondary:hover:not(:disabled) {
+  border-color: var(--aari-color-primary);
+}
+
+.danger {
+  color: var(--aari-color-danger);
+}
+
+.danger:hover:not(:disabled) {
+  background: var(--aari-color-danger-soft);
+}

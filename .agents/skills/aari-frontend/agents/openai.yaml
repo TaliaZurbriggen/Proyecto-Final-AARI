@@ -1,0 +1,4 @@
+interface:
+  display_name: "AARI Frontend"
+  short_description: "Diseña interfaces consistentes para AARI"
+  default_prompt: "Use $aari-frontend para diseñar o implementar una interfaz coherente con el sistema visual de AARI."

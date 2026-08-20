@@ -1,0 +1,33 @@
+.field {
+  display: grid;
+  gap: var(--aari-space-2);
+}
+
+.label {
+  color: var(--aari-color-ink);
+  font-size: var(--aari-font-size-sm);
+  font-weight: var(--aari-font-weight-semibold);
+}
+
+.required {
+  margin-left: var(--aari-space-1);
+  color: var(--aari-color-danger);
+}
+
+.hint,
+.error {
+  font-size: var(--aari-font-size-xs);
+}
+
+.hint {
+  color: var(--aari-color-muted);
+}
+
+.error {
+  color: var(--aari-color-danger-hover);
+  font-weight: var(--aari-font-weight-medium);
+}
+
+.field :global([aria-invalid='true']) {
+  border-color: var(--aari-color-danger);
+}

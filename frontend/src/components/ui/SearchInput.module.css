@@ -1,0 +1,73 @@
+.wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-width: 12rem;
+}
+
+.input {
+  width: 100%;
+  min-height: var(--aari-control-height-md);
+  padding: 0 var(--aari-space-6) 0 var(--aari-space-7);
+  color: var(--aari-color-text);
+  background: var(--aari-color-surface-soft);
+  border: 1px solid transparent;
+  border-radius: var(--aari-radius-md);
+  outline: none;
+  transition:
+    background-color var(--aari-transition-fast),
+    border-color var(--aari-transition-fast),
+    box-shadow var(--aari-transition-fast);
+}
+
+.input::placeholder {
+  color: var(--aari-color-muted);
+}
+
+.input:hover {
+  border-color: var(--aari-color-border-strong);
+}
+
+.input:focus {
+  background: var(--aari-color-surface);
+  border-color: var(--aari-color-focus);
+  box-shadow: var(--aari-shadow-focus);
+}
+
+.input::-webkit-search-cancel-button {
+  display: none;
+}
+
+.searchIcon {
+  position: absolute;
+  z-index: 1;
+  left: var(--aari-space-3);
+  width: 1.15rem;
+  height: 1.15rem;
+  color: var(--aari-color-muted);
+  pointer-events: none;
+}
+
+.clearButton {
+  position: absolute;
+  right: var(--aari-space-2);
+  display: grid;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  place-items: center;
+  color: var(--aari-color-muted);
+  background: transparent;
+  border: 0;
+  border-radius: var(--aari-radius-sm);
+}
+
+.clearButton:hover {
+  color: var(--aari-color-ink);
+  background: var(--aari-color-neutral-soft);
+}
+
+.clearButton svg {
+  width: 1rem;
+  height: 1rem;
+}

@@ -1,0 +1,68 @@
+:root {
+  color-scheme: light;
+
+  --aari-color-canvas: #f8faf6;
+  --aari-color-surface: #ffffff;
+  --aari-color-surface-soft: #f1f5ed;
+  --aari-color-ink: #14324a;
+  --aari-color-text: #2f4658;
+  --aari-color-muted: #6b7b87;
+  --aari-color-primary: #7aa34b;
+  --aari-color-primary-hover: #688d3e;
+  --aari-color-primary-strong: #547632;
+  --aari-color-primary-soft: #eaf2e2;
+  --aari-color-danger: #e76855;
+  --aari-color-danger-hover: #cb4f3e;
+  --aari-color-danger-soft: #fcebe7;
+  --aari-color-warning: #d99028;
+  --aari-color-warning-soft: #fff2db;
+  --aari-color-info: #3c7fc4;
+  --aari-color-info-soft: #e8f1fa;
+  --aari-color-neutral-soft: #edf1ef;
+  --aari-color-border: #dfe7de;
+  --aari-color-border-strong: #cbd7ca;
+  --aari-color-focus: #2367a6;
+  --aari-color-overlay: rgb(20 50 74 / 48%);
+
+  --aari-font-sans: 'Inter Variable', Inter, system-ui, -apple-system,
+    BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --aari-font-size-xs: 0.75rem;
+  --aari-font-size-sm: 0.875rem;
+  --aari-font-size-md: 1rem;
+  --aari-font-size-lg: 1.125rem;
+  --aari-font-size-xl: 1.5rem;
+  --aari-font-size-2xl: clamp(1.75rem, 1.5rem + 1vw, 2.5rem);
+  --aari-line-height-tight: 1.2;
+  --aari-line-height-body: 1.55;
+  --aari-font-weight-regular: 400;
+  --aari-font-weight-medium: 550;
+  --aari-font-weight-semibold: 650;
+  --aari-font-weight-bold: 750;
+
+  --aari-space-1: 0.25rem;
+  --aari-space-2: 0.5rem;
+  --aari-space-3: 0.75rem;
+  --aari-space-4: 1rem;
+  --aari-space-5: 1.5rem;
+  --aari-space-6: 2rem;
+  --aari-space-7: 2.5rem;
+  --aari-space-8: 3rem;
+  --aari-space-9: 4rem;
+
+  --aari-radius-sm: 0.5rem;
+  --aari-radius-md: 0.75rem;
+  --aari-radius-lg: 1rem;
+  --aari-radius-full: 999px;
+
+  --aari-shadow-sm: 0 1px 2px rgb(20 50 74 / 8%);
+  --aari-shadow-md: 0 12px 32px rgb(20 50 74 / 10%);
+  --aari-shadow-focus: 0 0 0 3px rgb(35 103 166 / 22%);
+
+  --aari-control-height-sm: 2.25rem;
+  --aari-control-height-md: 2.75rem;
+  --aari-control-height-lg: 3.125rem;
+  --aari-header-height: 5rem;
+  --aari-content-max: 90rem;
+  --aari-content-gutter: clamp(1rem, 4vw, 4rem);
+  --aari-transition-fast: 160ms ease;
+}

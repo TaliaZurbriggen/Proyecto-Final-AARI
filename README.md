@@ -26,6 +26,8 @@ Sistema web con agente de inteligencia artificial que automatiza el flujo comple
 
 ```text
 Proyecto-Final-AARI/
+├── .agents/
+│   └── skills/aari-frontend/   # Skill y referencia visual compartidas
 ├── backend/
 │   ├── app/
 │   │   ├── agents/
@@ -48,12 +50,28 @@ Proyecto-Final-AARI/
 │   └── requirements.txt
 ├── frontend/
 │   ├── public/                  # Recursos estáticos
-│   ├── src/                     # Aplicación React
+│   ├── src/
+│   │   ├── components/          # UI y layouts reutilizables
+│   │   ├── pages/               # Pantallas de la aplicación
+│   │   └── styles/              # Tokens y estilos globales
+│   ├── AGENTS.md                # Reglas específicas del frontend
 │   ├── Dockerfile
 │   └── package.json
 ├── docker-compose.yml           # Levanta frontend y backend juntos
 └── README.md
 ```
+
+### Sistema visual del frontend
+
+La identidad visual de AARI está centralizada para que los agentes y el equipo construyan pantallas consistentes:
+
+- `.agents/skills/aari-frontend/`: skill que Codex detecta desde el repositorio, con criterios de diseño, accesibilidad y responsive.
+- `frontend/AGENTS.md`: reglas obligatorias para cualquier cambio dentro del frontend.
+- `frontend/src/styles/tokens.css`: fuente única de colores, tipografía, espaciado, radios y sombras.
+- `frontend/src/components/`: componentes de interfaz y layout que deben reutilizarse antes de crear alternativas.
+- `frontend/src/pages/DesignSystemPreview.jsx`: vista ejecutable para revisar la dirección visual y los estados principales.
+
+La referencia aprobada se conserva dentro de la skill. Si una historia necesita apartarse de esa dirección, la decisión debe acordarse antes de implementarla.
 
 ### Agente de clasificación
 
