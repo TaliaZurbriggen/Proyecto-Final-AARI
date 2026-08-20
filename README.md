@@ -75,6 +75,22 @@ POST /reclamos/{reclamo_id}/clasificar
 
 El endpoint obtiene el reclamo, invoca el grafo y guarda el resultado. Devuelve `Clasificado` o `Escalado`, junto con el tipo de gasto cuando corresponda, la confianza, el fundamento y el motivo de escalado. La migración `backend/migrations/06_clasificacion_agente.sql` debe haberse aplicado una vez antes de utilizarlo. Cada cambio de estado queda registrado con origen `agente`.
 
+### Pruebas automáticas del clasificador
+
+Desde `backend/`, la suite completa se ejecuta con:
+
+```bash
+python -m pytest -q
+```
+
+Las pruebas automatizadas usan proveedores y repositorios controlados: no
+consumen cuota de Gemini ni modifican Supabase. Incluyen recorridos integrados
+del endpoint, el servicio y el LangGraph real, además de una prueba de aceptación
+que reproduce la precisión final del prompt v5 a partir de los 80 resultados ya
+guardados. La evidencia detallada está en
+`docs/evaluaciones/aari112/informe_final_v5.md` y
+`docs/evaluaciones/aari113/informe_pruebas.md`.
+
 ## Cómo levantar el entorno de desarrollo (Backend)
 
 ### Requisitos previos
@@ -233,4 +249,7 @@ Con Docker Compose podés levantar el backend y el frontend juntos, ya conectado
 - Completado: base del proyecto, migraciones SQL, backend FastAPI, frontend React y entorno Docker.
 - Completado: grafo inicial de clasificación con LangGraph y su prueba automatizada.
 - Completado: integración con Gemini, clasificación estructurada, umbral de confianza y manejo seguro de respuestas inválidas.
-- Implementado y validado en rama: endpoint y persistencia trazable (AARI-109); pendiente de commit y PR.
+- Completado: endpoint y persistencia trazable de la clasificación (AARI-109).
+- Completado: evaluación del prompt v5 sobre 80 casos, con 70/80 aciertos (87,50 %) y cumplimiento del umbral de HU9 (AARI-112).
+- En curso: pruebas automatizadas de integración y aceptación del clasificador (AARI-113).
+- Pendiente: documentación final de la base de conocimiento (AARI-115).
