@@ -1,0 +1,102 @@
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--aari-space-2);
+  min-width: max-content;
+  border: 1px solid transparent;
+  border-radius: var(--aari-radius-md);
+  font-weight: var(--aari-font-weight-semibold);
+  line-height: 1;
+  transition:
+    color var(--aari-transition-fast),
+    background-color var(--aari-transition-fast),
+    border-color var(--aari-transition-fast),
+    box-shadow var(--aari-transition-fast),
+    transform var(--aari-transition-fast);
+}
+
+.button:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.button:focus-visible {
+  outline: none;
+  box-shadow: var(--aari-shadow-focus);
+}
+
+.button:disabled {
+  opacity: 0.52;
+}
+
+.sm {
+  min-height: var(--aari-control-height-sm);
+  padding-inline: var(--aari-space-3);
+  font-size: var(--aari-font-size-sm);
+}
+
+.md {
+  min-height: var(--aari-control-height-md);
+  padding-inline: var(--aari-space-4);
+  font-size: var(--aari-font-size-sm);
+}
+
+.lg {
+  min-height: var(--aari-control-height-lg);
+  padding-inline: var(--aari-space-5);
+  font-size: var(--aari-font-size-md);
+}
+
+.primary {
+  color: var(--aari-color-surface);
+  background: var(--aari-color-primary);
+  box-shadow: var(--aari-shadow-sm);
+}
+
+.primary:hover:not(:disabled) {
+  background: var(--aari-color-primary-hover);
+}
+
+.secondary {
+  color: var(--aari-color-ink);
+  background: var(--aari-color-surface);
+  border-color: var(--aari-color-border-strong);
+}
+
+.secondary:hover:not(:disabled) {
+  background: var(--aari-color-surface-soft);
+  border-color: var(--aari-color-primary);
+}
+
+.ghost {
+  color: var(--aari-color-ink);
+  background: transparent;
+}
+
+.ghost:hover:not(:disabled) {
+  background: var(--aari-color-primary-soft);
+}
+
+.danger {
+  color: var(--aari-color-surface);
+  background: var(--aari-color-danger);
+}
+
+.danger:hover:not(:disabled) {
+  background: var(--aari-color-danger-hover);
+}
+
+.icon {
+  display: inline-grid;
+  place-items: center;
+}
+
+.icon svg {
+  width: 1.1rem;
+  height: 1.1rem;
+  stroke-width: 2;
+}

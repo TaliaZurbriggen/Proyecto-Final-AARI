@@ -1,0 +1,49 @@
+.heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--aari-space-6);
+  padding-bottom: var(--aari-space-6);
+  border-bottom: 1px solid var(--aari-color-border);
+}
+
+.copy {
+  display: grid;
+  gap: var(--aari-space-2);
+  max-width: 50rem;
+}
+
+.eyebrow {
+  color: var(--aari-color-primary-strong);
+  font-size: var(--aari-font-size-xs);
+  font-weight: var(--aari-font-weight-bold);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.title {
+  font-size: var(--aari-font-size-2xl);
+  font-weight: var(--aari-font-weight-bold);
+  letter-spacing: -0.035em;
+}
+
+.description {
+  color: var(--aari-color-muted);
+  font-size: var(--aari-font-size-md);
+}
+
+.action {
+  flex: 0 0 auto;
+}
+
+@media (max-width: 48rem) {
+  .heading {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .action,
+  .action > * {
+    width: 100%;
+  }
+}

@@ -1,0 +1,11 @@
+.container {
+  width: min(100%, var(--aari-content-max));
+  margin-inline: auto;
+  padding: var(--aari-space-7) var(--aari-content-gutter) var(--aari-space-9);
+}
+
+@media (max-width: 48rem) {
+  .container {
+    padding-top: var(--aari-space-6);
+  }
+}
