@@ -1,8 +1,9 @@
+import { forwardRef } from 'react'
 import styles from './Button.module.css'
 
 const joinClassNames = (...classNames) => classNames.filter(Boolean).join(' ')
 
-function Button({
+const Button = forwardRef(function Button({
   children,
   className,
   leadingIcon,
@@ -10,7 +11,7 @@ function Button({
   type = 'button',
   variant = 'primary',
   ...props
-}) {
+}, ref) {
   return (
     <button
       className={joinClassNames(
@@ -19,6 +20,7 @@ function Button({
         styles[size],
         className,
       )}
+      ref={ref}
       type={type}
       {...props}
     >
@@ -30,6 +32,6 @@ function Button({
       <span>{children}</span>
     </button>
   )
-}
+})
 
 export default Button

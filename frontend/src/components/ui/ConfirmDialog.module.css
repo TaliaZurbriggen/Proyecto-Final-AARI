@@ -1,0 +1,67 @@
+.backdrop {
+  position: fixed;
+  z-index: 20;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: var(--aari-space-4);
+  background: var(--aari-color-overlay);
+}
+
+.dialog {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--aari-space-4);
+  width: min(100%, 32rem);
+  padding: var(--aari-space-6);
+  background: var(--aari-color-surface);
+  border-radius: var(--aari-radius-lg);
+  box-shadow: var(--aari-shadow-md);
+}
+
+.icon {
+  display: grid;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  color: var(--aari-color-danger);
+  background: var(--aari-color-danger-soft);
+  border-radius: var(--aari-radius-md);
+}
+
+.icon svg {
+  width: 1.4rem;
+  height: 1.4rem;
+}
+
+.copy {
+  display: grid;
+  gap: var(--aari-space-2);
+}
+
+.copy h2 {
+  font-size: var(--aari-font-size-lg);
+}
+
+.copy p {
+  color: var(--aari-color-muted);
+}
+
+.actions {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--aari-space-3);
+  margin-top: var(--aari-space-2);
+}
+
+@media (max-width: 32rem) {
+  .dialog {
+    grid-template-columns: 1fr;
+    padding: var(--aari-space-5);
+  }
+
+  .actions {
+    display: grid;
+  }
+}

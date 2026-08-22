@@ -93,6 +93,21 @@ POST /reclamos/{reclamo_id}/clasificar
 
 El endpoint obtiene el reclamo, invoca el grafo y guarda el resultado. Devuelve `Clasificado` o `Escalado`, junto con el tipo de gasto cuando corresponda, la confianza, el fundamento y el motivo de escalado. La migración `backend/migrations/06_clasificacion_agente.sql` debe haberse aplicado una vez antes de utilizarlo. Cada cambio de estado queda registrado con origen `agente`.
 
+### Gestión de propietarios
+
+El Sprint 2 incorpora el primer módulo funcional de administración. La API
+expone alta, listado paginado con búsqueda, detalle con inmuebles asociados,
+edición y eliminación de propietarios. La eliminación se bloquea cuando existen
+propiedades relacionadas.
+
+El frontend utiliza las rutas `/propietarios`, `/propietarios/nuevo`,
+`/propietarios/:id` y `/propietarios/:id/editar`, con validaciones accesibles,
+estados de carga/error/vacío y una presentación responsive.
+
+En instalaciones que ya ejecutaron el módulo de administración se debe aplicar
+una vez `backend/migrations/07_propietarios_email_unico.sql`. La migración
+normaliza el email y garantiza su unicidad sin reemplazar la migración original.
+
 ### Pruebas automáticas del clasificador
 
 Desde `backend/`, la suite completa se ejecuta con:
@@ -222,6 +237,18 @@ docker run -p 8000:8000 --env-file .env aari-backend
 
 5. Abrí `http://localhost:5173/` en el navegador para ver la aplicación.
 
+### Validaciones del frontend
+
+Desde `frontend/`:
+
+```bash
+npm run lint
+npm run test
+npm run build
+```
+
+Las pruebas usan respuestas HTTP simuladas y no modifican Supabase.
+
 ### Alternativa: levantar el frontend con Docker
 
 Si preferís no instalar Node localmente, podés usar Docker:
@@ -262,12 +289,10 @@ Con Docker Compose podés levantar el backend y el frontend juntos, ya conectado
 
 ## Estado del proyecto
 
-**Sprint 1 — En curso**
+**Sprint 2 — En curso (18/08/2026 al 15/09/2026)**
 
-- Completado: base del proyecto, migraciones SQL, backend FastAPI, frontend React y entorno Docker.
-- Completado: grafo inicial de clasificación con LangGraph y su prueba automatizada.
-- Completado: integración con Gemini, clasificación estructurada, umbral de confianza y manejo seguro de respuestas inválidas.
-- Completado: endpoint y persistencia trazable de la clasificación (AARI-109).
-- Completado: evaluación del prompt v5 sobre 80 casos, con 70/80 aciertos (87,50 %) y cumplimiento del umbral de HU9 (AARI-112).
-- En curso: pruebas automatizadas de integración y aceptación del clasificador (AARI-113).
-- Pendiente: documentación final de la base de conocimiento (AARI-115).
+- **Sprint 1 finalizado:** grafo LangGraph, integración con Gemini, clasificación estructurada, umbral de confianza, persistencia trazable, manejo seguro de respuestas inválidas y evaluación del prompt v5 sobre 80 casos (70/80; 87,50 %).
+- **Base compartida del Sprint 2 completada:** sistema visual, skill de frontend, tokens y componentes reutilizables.
+- **En curso:** AARI-9 / HU1, gestión integral de propietarios.
+- **Siguiente secuencia del módulo de administración:** propiedades, inquilinos y proveedores.
+- **Trabajo paralelo:** autenticación, acceso por roles, operadores y alta de reclamos.

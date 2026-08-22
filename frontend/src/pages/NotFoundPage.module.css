@@ -1,0 +1,17 @@
+.link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--aari-control-height-md);
+  padding-inline: var(--aari-space-4);
+  color: var(--aari-color-surface);
+  font-size: var(--aari-font-size-sm);
+  font-weight: var(--aari-font-weight-semibold);
+  text-decoration: none;
+  background: var(--aari-color-primary);
+  border-radius: var(--aari-radius-md);
+}
+
+.link:hover {
+  background: var(--aari-color-primary-hover);
+}

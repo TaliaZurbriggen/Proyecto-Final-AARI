@@ -23,6 +23,7 @@ function AppHeader({
   onSearchClear,
   profileName = 'Usuario AARI',
   profileRole = 'Administración',
+  searchPlaceholder = 'Buscar reclamo o propiedad',
   searchValue,
 }) {
   const handleNavigation = (event, item) => {
@@ -68,7 +69,7 @@ function AppHeader({
           label="Buscar en AARI"
           onChange={onSearchChange}
           onClear={onSearchClear}
-          placeholder="Buscar reclamo o propiedad"
+          placeholder={searchPlaceholder}
           value={searchValue}
         />
 
@@ -92,6 +93,7 @@ function AppHeader({
           </div>
 
           <button
+            aria-label={`Abrir perfil de ${profileName}`}
             className={styles.profile}
             onClick={onProfileClick}
             type="button"
