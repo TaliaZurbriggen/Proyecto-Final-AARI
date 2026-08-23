@@ -70,6 +70,11 @@ create trigger trg_propietarios_updated_at
 before update on propietarios
 for each row execute function set_updated_at();
 
+-- El email se utilizará como identidad de acceso en HU6. La normalización en
+-- backend y este índice evitan duplicados que solo difieran por mayúsculas.
+create unique index uq_propietarios_email_normalizado
+    on propietarios (lower(email));
+
 
 -- ------------------------------------------------------------
 -- 3. propiedades (HU2)

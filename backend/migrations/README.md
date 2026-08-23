@@ -16,3 +16,7 @@ Scripts SQL para crear el esquema completo en Supabase. Ejecutar en este orden d
 
 5\. `05\_seed\_admin.sql` — reemplazar el email y la contraseña de placeholder por valores reales antes de ejecutar.
 
+6\. `06\_clasificacion\_agente.sql`
+
+7\. `07\_propietarios\_email\_unico.sql` — aplicar en instalaciones existentes para normalizar y hacer único el email de propietarios.
+

@@ -168,7 +168,7 @@
   font-size: var(--aari-font-size-sm);
 }
 
-@media (max-width: 72rem) {
+@media (max-width: 82rem) {
   .inner {
     flex-wrap: wrap;
     gap: var(--aari-space-3);
