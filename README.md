@@ -108,6 +108,34 @@ En instalaciones que ya ejecutaron el módulo de administración se debe aplicar
 una vez `backend/migrations/07_propietarios_email_unico.sql`. La migración
 normaliza el email y garantiza su unicidad sin reemplazar la migración original.
 
+### Gestión de propiedades
+
+La API de propiedades permite registrar, buscar, consultar, editar y eliminar
+inmuebles asociados a un propietario. Cada ubicación registra provincia y
+localidad obligatorias, y un barrio opcional que se guarda vacío cuando no
+corresponde. Dirección, localidad y barrio deben contener al menos una letra:
+se rechazan valores como `444`, pero se aceptan nombres reales que incluyen
+números, como `Ruta 9`, `9 de Julio` o `Barrio 300 Viviendas`. La dirección se
+normaliza para evitar duplicados que solo difieran en mayúsculas o espacios; su
+identidad incluye provincia y localidad y, en departamentos, también el piso y
+el número de unidad. El piso es un entero y `0` representa planta baja; la
+unidad admite letras, números o combinaciones. La eliminación se bloquea cuando
+existen reclamos históricos o un inquilino activo.
+
+El frontend incorpora `/propiedades`, `/propiedades/nueva`,
+`/propiedades/:id` y `/propiedades/:id/editar`. Las pantallas reutilizan el
+sistema visual de AARI y conectan la navegación entre propiedades y
+propietarios.
+
+En bases existentes, la migración
+`backend/migrations/08_propiedades_integridad.sql` debe aplicarse una vez para
+normalizar los datos y reemplazar los índices de unicidad anteriores. Después
+se aplica `backend/migrations/09_ubicacion_propiedades.sql`, que incorpora la
+ubicación precisa y convierte el piso a entero. Si ya hubiera propiedades, la
+migración 09 exige completar provincia y localidad antes de continuar. Por
+último, `backend/migrations/10_ubicacion_propiedades_con_letras.sql` agrega las
+restricciones de contenido descriptivo para dirección, localidad y barrio.
+
 ### Pruebas automáticas del clasificador
 
 Desde `backend/`, la suite completa se ejecuta con:
@@ -293,6 +321,8 @@ Con Docker Compose podés levantar el backend y el frontend juntos, ya conectado
 
 - **Sprint 1 finalizado:** grafo LangGraph, integración con Gemini, clasificación estructurada, umbral de confianza, persistencia trazable, manejo seguro de respuestas inválidas y evaluación del prompt v5 sobre 80 casos (70/80; 87,50 %).
 - **Base compartida del Sprint 2 completada:** sistema visual, skill de frontend, tokens y componentes reutilizables.
-- **En curso:** AARI-9 / HU1, gestión integral de propietarios.
-- **Siguiente secuencia del módulo de administración:** propiedades, inquilinos y proveedores.
+- **Completada y fusionada:** AARI-9 / HU1, gestión integral de propietarios.
+- **En curso:** AARI-22 / HU2, implementación y validaciones completas;
+  pendiente de revisión por Pull Request y merge.
+- **Siguiente secuencia del módulo de administración:** inquilinos y proveedores.
 - **Trabajo paralelo:** autenticación, acceso por roles, operadores y alta de reclamos.

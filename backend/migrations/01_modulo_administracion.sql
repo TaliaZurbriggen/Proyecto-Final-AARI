@@ -84,29 +84,68 @@ create type tipo_propiedad as enum ('departamento', 'casa', 'local', 'otro');
 create table propiedades (
     id              uuid primary key default gen_random_uuid(),
     direccion       text not null,
-    zona            text not null,
+    provincia       text not null,
+    localidad       text not null,
+    barrio          text,
     tipo            tipo_propiedad not null,
-    piso            text,               -- solo aplica si tipo = 'departamento'
+    piso            integer,            -- 0 representa planta baja
     numero          text,               -- solo aplica si tipo = 'departamento'
     propietario_id  uuid not null references propietarios(id) on delete restrict,
     created_at      timestamptz not null default now(),
     updated_at      timestamptz not null default now(),
 
-    constraint chk_propiedades_direccion_largo check (char_length(direccion) <= 200)
+    constraint chk_propiedades_direccion_largo
+        check (char_length(btrim(direccion)) between 2 and 200),
+    constraint chk_propiedades_direccion_con_letra
+        check (direccion ~ '[[:alpha:]]'),
+    constraint chk_propiedades_provincia_largo
+        check (char_length(btrim(provincia)) between 2 and 100),
+    constraint chk_propiedades_provincia_valida
+        check (provincia in (
+            'Buenos Aires', 'Ciudad Autónoma de Buenos Aires', 'Catamarca',
+            'Chaco', 'Chubut', 'Córdoba', 'Corrientes', 'Entre Ríos',
+            'Formosa', 'Jujuy', 'La Pampa', 'La Rioja', 'Mendoza',
+            'Misiones', 'Neuquén', 'Río Negro', 'Salta', 'San Juan',
+            'San Luis', 'Santa Cruz', 'Santa Fe', 'Santiago del Estero',
+            'Tierra del Fuego, Antártida e Islas del Atlántico Sur',
+            'Tucumán'
+        )),
+    constraint chk_propiedades_localidad_largo
+        check (char_length(btrim(localidad)) between 2 and 100),
+    constraint chk_propiedades_localidad_con_letra
+        check (localidad ~ '[[:alpha:]]'),
+    constraint chk_propiedades_barrio_largo
+        check (barrio is null or char_length(btrim(barrio)) between 2 and 100),
+    constraint chk_propiedades_barrio_con_letra
+        check (barrio is null or barrio ~ '[[:alpha:]]'),
+    constraint chk_propiedades_numero_largo
+        check (numero is null or char_length(btrim(numero)) between 1 and 30),
+    constraint chk_propiedades_unidad_segun_tipo
+        check (tipo = 'departamento' or (piso is null and numero is null))
 );
 
 create trigger trg_propiedades_updated_at
 before update on propiedades
 for each row execute function set_updated_at();
 
--- Unicidad de dirección: si es depto, la combinación direccion+piso+numero debe ser única;
--- si no es depto, la dirección sola debe ser única.
-create unique index uq_propiedades_direccion_depto
-    on propiedades (direccion, piso, numero)
+-- La identidad geográfica incluye provincia y localidad. Para departamentos
+-- también se consideran piso y número de unidad.
+create unique index uq_propiedades_direccion_depto_normalizada
+    on propiedades (
+        lower(btrim(provincia)),
+        lower(btrim(localidad)),
+        lower(btrim(direccion)),
+        coalesce(piso, -2147483648),
+        lower(coalesce(btrim(numero), ''))
+    )
     where tipo = 'departamento';
 
-create unique index uq_propiedades_direccion_no_depto
-    on propiedades (direccion)
+create unique index uq_propiedades_direccion_no_depto_normalizada
+    on propiedades (
+        lower(btrim(provincia)),
+        lower(btrim(localidad)),
+        lower(btrim(direccion))
+    )
     where tipo <> 'departamento';
 
 

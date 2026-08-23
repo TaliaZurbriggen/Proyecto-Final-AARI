@@ -19,6 +19,12 @@
   border-color: var(--aari-color-primary);
 }
 
+.alert[data-tone='warning'] {
+  color: var(--aari-color-ink);
+  background: var(--aari-color-warning-soft);
+  border-color: var(--aari-color-warning);
+}
+
 .alert svg {
   flex: 0 0 auto;
   width: 1.25rem;

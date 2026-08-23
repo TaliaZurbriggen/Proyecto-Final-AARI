@@ -143,7 +143,7 @@ function PropietarioDetailPage() {
                     <strong>{property.direccion}</strong>
                     <p>
                       <MapPin aria-hidden="true" />
-                      {property.zona} · {property.tipo}
+                      {property.localidad}, {property.provincia} · {property.tipo}
                     </p>
                   </div>
                   <Link to={`/propiedades/${property.id}`}>Ver inmueble</Link>

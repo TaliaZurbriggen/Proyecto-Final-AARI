@@ -111,10 +111,11 @@ class SqlAlchemyPropietariosRepository:
         )
         properties_statement = text(
             """
-            SELECT id, direccion, zona, CAST(tipo AS TEXT) AS tipo, piso, numero
+            SELECT id, direccion, provincia, localidad, barrio,
+                   CAST(tipo AS TEXT) AS tipo, piso, numero
             FROM propiedades
             WHERE propietario_id = :propietario_id
-            ORDER BY lower(direccion), id
+            ORDER BY lower(provincia), lower(localidad), lower(direccion), id
             """
         )
         params = {"propietario_id": str(propietario_id)}
