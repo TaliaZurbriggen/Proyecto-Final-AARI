@@ -49,9 +49,11 @@ def repository() -> SqlAlchemyPropietariosRepository:
                 CREATE TABLE propiedades (
                     id TEXT PRIMARY KEY,
                     direccion TEXT NOT NULL,
-                    zona TEXT NOT NULL,
+                    provincia TEXT NOT NULL,
+                    localidad TEXT NOT NULL,
+                    barrio TEXT,
                     tipo TEXT NOT NULL,
-                    piso TEXT,
+                    piso INTEGER,
                     numero TEXT,
                     propietario_id TEXT NOT NULL REFERENCES propietarios(id)
                 )
@@ -110,6 +112,41 @@ def test_repository_rejects_email_duplicates_ignoring_case(
     assert error.value.field == "email"
 
 
+def test_repository_detail_includes_property_location(
+    repository: SqlAlchemyPropietariosRepository,
+) -> None:
+    created = repository.create(owner_data())
+    propietario_id = UUID(str(created["id"]))
+    with repository.session_factory.begin() as session:
+        session.execute(
+            text(
+                """
+                INSERT INTO propiedades
+                    (id, direccion, provincia, localidad, barrio, tipo, piso,
+                     numero, propietario_id)
+                VALUES
+                    ('prop-detail', 'Av. Central 123', 'Santa Fe',
+                     'San Francisco', 'Centro', 'departamento', 0, 'A', :owner)
+                """
+            ),
+            {"owner": str(propietario_id)},
+        )
+
+    detail = repository.get_detail(propietario_id)
+
+    assert detail is not None
+    assert detail["propiedades"][0] == {
+        "id": "prop-detail",
+        "direccion": "Av. Central 123",
+        "provincia": "Santa Fe",
+        "localidad": "San Francisco",
+        "barrio": "Centro",
+        "tipo": "departamento",
+        "piso": 0,
+        "numero": "A",
+    }
+
+
 def test_repository_blocks_deletion_when_property_exists(
     repository: SqlAlchemyPropietariosRepository,
 ) -> None:
@@ -120,9 +157,11 @@ def test_repository_blocks_deletion_when_property_exists(
             text(
                 """
                 INSERT INTO propiedades
-                    (id, direccion, zona, tipo, propietario_id)
+                    (id, direccion, provincia, localidad, barrio, tipo,
+                     propietario_id)
                 VALUES
-                    ('prop-1', 'Av. Central 123', 'Centro', 'departamento', :owner)
+                    ('prop-1', 'Av. Central 123', 'Santa Fe', 'San Francisco',
+                     'Centro', 'departamento', :owner)
                 """
             ),
             {"owner": str(propietario_id)},

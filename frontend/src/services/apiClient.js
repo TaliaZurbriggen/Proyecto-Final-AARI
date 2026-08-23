@@ -13,14 +13,23 @@ export class ApiError extends Error {
 }
 
 export async function apiRequest(path, options = {}) {
-  const response = await fetch(`${API_URL}${path}`, {
-    credentials: 'include',
-    ...options,
-    headers: {
-      ...(options.body ? { 'Content-Type': 'application/json' } : {}),
-      ...options.headers,
-    },
-  })
+  let response
+  try {
+    response = await fetch(`${API_URL}${path}`, {
+      credentials: 'include',
+      ...options,
+      headers: {
+        ...(options.body ? { 'Content-Type': 'application/json' } : {}),
+        ...options.headers,
+      },
+    })
+  } catch (error) {
+    if (error.name === 'AbortError') throw error
+    throw new ApiError(
+      'No pudimos conectarnos con el servidor. Verificá que el backend esté activo.',
+      { body: null, status: 0 },
+    )
+  }
 
   if (response.status === 204) return null
 

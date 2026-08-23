@@ -39,9 +39,11 @@ class PropiedadResumen(BaseModel):
 
     id: UUID
     direccion: str
-    zona: str
+    provincia: str
+    localidad: str
+    barrio: str | None = None
     tipo: str
-    piso: str | None = None
+    piso: int | None = None
     numero: str | None = None
 
 

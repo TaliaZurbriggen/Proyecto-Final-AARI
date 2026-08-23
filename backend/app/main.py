@@ -4,6 +4,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
 
+from app.api.propiedades import router as propiedades_router
 from app.api.propietarios import router as propietarios_router
 from app.api.reclamos import router as reclamos_router
 from app.db.database import engine
@@ -24,6 +25,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+app.include_router(propiedades_router)
 app.include_router(propietarios_router)
 app.include_router(reclamos_router)
 
