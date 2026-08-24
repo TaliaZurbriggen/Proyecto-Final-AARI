@@ -3,18 +3,18 @@ const DNI_PATTERN = /^[0-9]{7,8}$/
 const PERSON_NAME_PATTERN = /^\p{L}+(?:[ '\u2019-]\p{L}+)*$/u
 const PERSON_NAME_ERROR =
   'Ingresá un nombre válido usando solo letras, espacios, apóstrofes o guiones.'
+const asText = (value) => String(value ?? '')
+const normalizeText = (value) => asText(value).trim().replace(/\s+/g, ' ')
 
-const normalizeText = (value) => String(value ?? '').trim().replace(/\s+/g, ' ')
-
-export function validatePropietario(values) {
+export function validateInquilino(values, { propertyRequired = true } = {}) {
   const errors = {}
   const nombre = normalizeText(values.nombre_completo)
-  const dni = values.dni.trim()
-  const email = values.email.trim()
-  const telefono = values.telefono.trim()
+  const dni = asText(values.dni).trim()
+  const email = asText(values.email).trim()
+  const telefono = asText(values.telefono).trim()
 
   if (nombre.length < 2) {
-    errors.nombre_completo = 'Ingresá el nombre completo del propietario.'
+    errors.nombre_completo = 'Ingresá el nombre completo del inquilino.'
   } else if (nombre.length > 120) {
     errors.nombre_completo = 'El nombre no puede superar los 120 caracteres.'
   } else if (!PERSON_NAME_PATTERN.test(nombre)) {
@@ -35,14 +35,19 @@ export function validatePropietario(values) {
     errors.telefono = 'El teléfono no puede superar los 30 caracteres.'
   }
 
+  if (propertyRequired && !values.propiedad_id) {
+    errors.propiedad_id = 'Seleccioná una propiedad disponible.'
+  }
+
   return errors
 }
 
-export function normalizePropietario(values) {
+export function normalizeInquilino(values) {
   return {
     nombre_completo: normalizeText(values.nombre_completo),
-    dni: values.dni.trim(),
-    email: values.email.trim().toLowerCase(),
-    telefono: values.telefono.trim(),
+    dni: asText(values.dni).trim(),
+    email: asText(values.email).trim().toLowerCase(),
+    telefono: normalizeText(values.telefono),
+    propiedad_id: values.propiedad_id || null,
   }
 }

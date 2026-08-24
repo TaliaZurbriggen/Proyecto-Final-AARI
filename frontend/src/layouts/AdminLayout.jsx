@@ -4,13 +4,21 @@ import { AppHeader } from '../components/layout/index.js'
 const navigationItems = [
   { href: '/propietarios', label: 'Propietarios' },
   { href: '/propiedades', label: 'Propiedades' },
+  { href: '/inquilinos', label: 'Inquilinos' },
 ]
 
 function AdminLayout() {
   const location = useLocation()
   const navigate = useNavigate()
   const isProperties = location.pathname.startsWith('/propiedades')
-  const activeModule = isProperties
+  const isTenants = location.pathname.startsWith('/inquilinos')
+  const activeModule = isTenants
+    ? {
+        href: '/inquilinos',
+        label: 'Inquilinos',
+        placeholder: 'Buscar inquilino, DNI o propiedad',
+      }
+    : isProperties
     ? {
         href: '/propiedades',
         label: 'Propiedades',

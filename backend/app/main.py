@@ -4,6 +4,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
 
+from app.api.inquilinos import property_router as property_tenant_router
+from app.api.inquilinos import router as inquilinos_router
 from app.api.propiedades import router as propiedades_router
 from app.api.propietarios import router as propietarios_router
 from app.api.reclamos import router as reclamos_router
@@ -26,7 +28,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 app.include_router(propiedades_router)
+app.include_router(property_tenant_router)
 app.include_router(propietarios_router)
+app.include_router(inquilinos_router)
 app.include_router(reclamos_router)
 
 

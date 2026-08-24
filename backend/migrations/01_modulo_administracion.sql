@@ -61,6 +61,13 @@ create table propietarios (
     created_at      timestamptz not null default now(),
     updated_at      timestamptz not null default now(),
 
+    constraint chk_propietarios_nombre_largo
+        check (char_length(btrim(nombre_completo)) between 2 and 120),
+    constraint chk_propietarios_nombre_formato
+        check (
+            btrim(nombre_completo)
+            ~ '^[[:alpha:]]+([- ''’][[:alpha:]]+)*$'
+        ),
     constraint chk_propietarios_dni_formato check (dni ~ '^[0-9]{7,8}$'),
     constraint chk_propietarios_email_formato
         check (email ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$')
@@ -166,9 +173,23 @@ create table inquilinos (
     created_at      timestamptz not null default now(),
     updated_at      timestamptz not null default now(),
 
+    constraint chk_inquilinos_nombre_largo
+        check (char_length(btrim(nombre_completo)) between 2 and 120),
+    constraint chk_inquilinos_nombre_formato
+        check (
+            btrim(nombre_completo)
+            ~ '^[[:alpha:]]+([- ''’][[:alpha:]]+)*$'
+        ),
     constraint chk_inquilinos_dni_formato check (dni ~ '^[0-9]{7,8}$'),
     constraint chk_inquilinos_email_formato
-        check (email ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$')
+        check (email ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$'),
+    constraint chk_inquilinos_telefono_largo
+        check (char_length(btrim(telefono)) between 6 and 30),
+    constraint chk_inquilinos_estado_propiedad check (
+        (propiedad_id is not null and estado = 'activo')
+        or
+        (propiedad_id is null and estado = 'sin_propiedad_asignada')
+    )
 );
 
 create trigger trg_inquilinos_updated_at
@@ -180,6 +201,10 @@ for each row execute function set_updated_at();
 create unique index uq_inquilinos_propiedad_activa
     on inquilinos (propiedad_id)
     where estado = 'activo';
+
+-- El email será la identidad de acceso del inquilino en HU7.
+create unique index uq_inquilinos_email_normalizado
+    on inquilinos (lower(email));
 
 
 -- ------------------------------------------------------------

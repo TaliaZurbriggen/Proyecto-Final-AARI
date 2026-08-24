@@ -2,8 +2,8 @@
 .secondaryLink,
 .backLink,
 .iconLink,
-.propertyLink,
-.ownerLink {
+.tenantLink,
+.propertyLink {
   text-decoration: none;
 }
 
@@ -52,8 +52,10 @@
 .secondaryLink:focus-visible,
 .backLink:focus-visible,
 .iconLink:focus-visible,
+.tenantLink:focus-visible,
 .propertyLink:focus-visible,
-.ownerLink:focus-visible {
+.detailList a:focus-visible,
+.propertyCard a:focus-visible {
   outline: none;
   box-shadow: var(--aari-shadow-focus);
 }
@@ -108,13 +110,13 @@
 .listSummary h2,
 .sectionHeading h2,
 .formIntro h2,
-.dangerZone h2 {
+.managementZone h2 {
   font-size: var(--aari-font-size-lg);
 }
 
 .listSummary p,
 .formIntro p,
-.dangerZone p {
+.managementZone p {
   margin-top: var(--aari-space-1);
   color: var(--aari-color-muted);
   font-size: var(--aari-font-size-sm);
@@ -158,14 +160,14 @@
   border-bottom: 0;
 }
 
-.propertyLink,
-.ownerLink {
+.tenantLink,
+.propertyLink {
   color: var(--aari-color-ink);
   font-weight: var(--aari-font-weight-semibold);
 }
 
-.propertyLink:hover,
-.ownerLink:hover {
+.tenantLink:hover,
+.propertyLink:hover {
   color: var(--aari-color-primary-strong);
 }
 
@@ -300,7 +302,13 @@
   overflow-wrap: anywhere;
 }
 
-.ownerCard {
+.detailList a,
+.propertyCard a {
+  color: var(--aari-color-primary-strong);
+  font-weight: var(--aari-font-weight-semibold);
+}
+
+.propertyCard {
   display: grid;
   grid-template-columns: auto 1fr auto;
   align-items: center;
@@ -311,24 +319,16 @@
   border-radius: var(--aari-radius-md);
 }
 
-.ownerCard > div {
-  min-width: 0;
-}
-
-.ownerCard p {
+.propertyCard p,
+.propertyCard small,
+.unassignedState p {
+  display: block;
   margin-top: var(--aari-space-1);
   color: var(--aari-color-muted);
   font-size: var(--aari-font-size-sm);
-  overflow-wrap: anywhere;
 }
 
-.ownerCard a {
-  color: var(--aari-color-primary-strong);
-  font-size: var(--aari-font-size-sm);
-  font-weight: var(--aari-font-weight-semibold);
-}
-
-.ownerIcon {
+.propertyIcon {
   display: grid;
   place-items: center;
   width: 2.75rem;
@@ -338,9 +338,26 @@
   border-radius: var(--aari-radius-md);
 }
 
-.ownerIcon svg {
+.propertyIcon svg {
   width: 1.25rem;
   height: 1.25rem;
+}
+
+.unassignedState {
+  display: flex;
+  align-items: center;
+  gap: var(--aari-space-3);
+  margin: var(--aari-space-5);
+  padding: var(--aari-space-4);
+  color: var(--aari-color-muted);
+  background: var(--aari-color-warning-soft);
+  border-radius: var(--aari-radius-md);
+}
+
+.unassignedState svg {
+  flex: 0 0 auto;
+  width: 1.5rem;
+  height: 1.5rem;
 }
 
 .relationsSummary {
@@ -354,25 +371,21 @@
   border-top: 1px solid var(--aari-color-border);
 }
 
-.relationsSummary svg {
-  width: 1rem;
-  height: 1rem;
-}
-
-.dangerZone {
+.managementZone {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: var(--aari-space-5);
   margin-top: var(--aari-space-6);
   padding: var(--aari-space-5);
-  background: var(--aari-color-danger-soft);
-  border: 1px solid var(--aari-color-danger);
+  background: var(--aari-color-surface);
+  border: 1px solid var(--aari-color-border);
   border-radius: var(--aari-radius-lg);
 }
 
-.tenantPanel {
-  margin-top: var(--aari-space-5);
+.managementActions {
+  display: flex;
+  gap: var(--aari-space-3);
 }
 
 @media (max-width: 64rem) {
@@ -388,13 +401,14 @@
   }
 
   .formActions,
-  .dangerZone {
+  .managementZone,
+  .managementActions {
     align-items: stretch;
     flex-direction: column;
   }
 
   .formActions > *,
-  .dangerZone > button {
+  .managementActions > * {
     width: 100%;
   }
 
@@ -452,11 +466,11 @@
     padding-inline: var(--aari-space-4);
   }
 
-  .ownerCard {
+  .propertyCard {
     grid-template-columns: auto 1fr;
   }
 
-  .ownerCard a {
+  .propertyCard a {
     grid-column: 2;
   }
 }

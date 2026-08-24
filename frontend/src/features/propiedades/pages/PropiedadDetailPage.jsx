@@ -1,5 +1,13 @@
 import { useEffect, useState } from 'react'
-import { ArrowLeft, Building2, MapPin, Pencil, Trash2, UserRound } from 'lucide-react'
+import {
+  ArrowLeft,
+  Building2,
+  MapPin,
+  Pencil,
+  Trash2,
+  UserPlus,
+  UserRound,
+} from 'lucide-react'
 import { Link, useLocation, useNavigate, useParams } from 'react-router'
 import { PageContainer, PageHeading } from '../../../components/layout/index.js'
 import {
@@ -9,6 +17,7 @@ import {
   LoadingState,
   StatusBadge,
 } from '../../../components/ui/index.js'
+import { getPropertyTenant } from '../../inquilinos/api/inquilinosApi.js'
 import { deletePropiedad, getPropiedad } from '../api/propiedadesApi.js'
 import styles from './Propiedades.module.css'
 
@@ -38,6 +47,7 @@ function PropiedadDetailPage() {
   const location = useLocation()
   const navigate = useNavigate()
   const [property, setProperty] = useState(null)
+  const [tenant, setTenant] = useState(null)
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(true)
   const [isDeleteOpen, setIsDeleteOpen] = useState(false)
@@ -46,9 +56,15 @@ function PropiedadDetailPage() {
   useEffect(() => {
     const controller = new AbortController()
     let isActive = true
-    getPropiedad(propiedadId, { signal: controller.signal })
-      .then((response) => {
-        if (isActive) setProperty(response)
+    Promise.all([
+      getPropiedad(propiedadId, { signal: controller.signal }),
+      getPropertyTenant(propiedadId, { signal: controller.signal }),
+    ])
+      .then(([propertyResponse, tenantResponse]) => {
+        if (isActive) {
+          setProperty(propertyResponse)
+          setTenant(tenantResponse)
+        }
       })
       .catch((requestError) => {
         if (isActive && requestError.name !== 'AbortError') {
@@ -98,7 +114,7 @@ function PropiedadDetailPage() {
 
   const deletionReason = property.cantidad_reclamos > 0
     ? 'Tiene reclamos históricos asociados y debe conservarse para mantener la trazabilidad.'
-    : property.tiene_inquilino_activo
+    : tenant
       ? 'Tiene un inquilino activo. Primero debe resolverse esa asociación.'
       : ''
 
@@ -125,9 +141,6 @@ function PropiedadDetailPage() {
           <AlertMessage tone="success">{location.state.notice}</AlertMessage>
         ) : null}
         {error ? <AlertMessage>{error}</AlertMessage> : null}
-        {deletionReason ? (
-          <AlertMessage tone="warning">{deletionReason}</AlertMessage>
-        ) : null}
       </div>
 
       <div className={styles.detailGrid}>
@@ -192,6 +205,43 @@ function PropiedadDetailPage() {
           </div>
         </section>
       </div>
+
+      <section
+        className={`${styles.detailPanel} ${styles.tenantPanel}`}
+        aria-labelledby="tenant-title"
+      >
+        <div className={styles.sectionHeading}>
+          <div>
+            <p className={styles.eyebrow}>Ocupación actual</p>
+            <h2 id="tenant-title">Inquilino asociado</h2>
+          </div>
+          <StatusBadge tone={tenant ? 'success' : 'neutral'}>
+            {tenant ? 'Ocupada' : 'Disponible'}
+          </StatusBadge>
+        </div>
+        <div className={styles.ownerCard}>
+          <span className={styles.ownerIcon} aria-hidden="true">
+            {tenant ? <UserRound /> : <UserPlus />}
+          </span>
+          <div>
+            <strong>{tenant ? tenant.nombre_completo : 'Sin inquilino activo'}</strong>
+            <p>
+              {tenant
+                ? `${tenant.email} · DNI ${tenant.dni}`
+                : 'La propiedad está disponible para una nueva asociación.'}
+            </p>
+          </div>
+          <Link
+            to={
+              tenant
+                ? `/inquilinos/${tenant.id}`
+                : `/inquilinos/nuevo?propiedad_id=${property.id}`
+            }
+          >
+            {tenant ? 'Ver inquilino' : 'Asignar inquilino'}
+          </Link>
+        </div>
+      </section>
 
       <section className={styles.dangerZone} aria-labelledby="danger-title">
         <div>
