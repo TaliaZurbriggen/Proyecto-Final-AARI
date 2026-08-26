@@ -115,7 +115,13 @@ def test_create_propietario_normalizes_email_and_returns_201(
 
 @pytest.mark.parametrize(
     ("field", "value"),
-    [("dni", "123"), ("dni", "30.123.456"), ("email", "correo-invalido")],
+    [
+        ("nombre_completo", "43428013"),
+        ("nombre_completo", "Juan123"),
+        ("dni", "123"),
+        ("dni", "30.123.456"),
+        ("email", "correo-invalido"),
+    ],
 )
 def test_create_propietario_rejects_invalid_fields(
     client: TestClient, field: str, value: str

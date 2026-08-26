@@ -14,8 +14,8 @@ Ejecutar desde el SQL Editor, en este orden:
 6. `06_clasificacion_agente.sql`
 
 El módulo de administración inicial ya incorpora el resultado de las
-migraciones incrementales 07, 08, 09 y 10. No deben repetirse en una instalación
-nueva.
+migraciones incrementales 07, 08, 09, 10, 11 y 12. No deben repetirse en una
+instalación nueva.
 
 ## Instalación existente
 
@@ -27,6 +27,12 @@ Aplicar únicamente las migraciones pendientes y respetar este orden:
    zona por barrio opcional y convierte el piso a entero (`0` representa PB).
 4. `10_ubicacion_propiedades_con_letras.sql` — impide direcciones, localidades
    y barrios formados únicamente por números o símbolos.
+5. `11_inquilinos_integridad.sql` — normaliza los datos de inquilinos, hace
+   único el email y mantiene consistente el estado con la propiedad asignada.
+6. `12_nombres_personas_validos.sql` — normaliza espacios y restringe los
+   nombres de propietarios e inquilinos a letras, espacios, apóstrofes y
+   guiones. Se detiene si existen registros incompatibles para evitar
+   corregir nombres reales de forma automática.
 
 La migración 09 se detiene si encuentra propiedades existentes porque provincia
 y localidad no pueden inferirse de manera segura. Esos registros deben

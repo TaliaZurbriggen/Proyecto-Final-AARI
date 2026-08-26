@@ -1,7 +1,8 @@
-"""Contratos HTTP para la gestión de propietarios."""
+"""Contratos HTTP para la gestión de inquilinos."""
 
 import re
 from datetime import datetime
+from enum import Enum
 from math import ceil
 from uuid import UUID
 
@@ -14,8 +15,15 @@ PERSON_NAME_ERROR = (
 )
 
 
-class PropietarioInput(BaseModel):
-    """Campos editables compartidos por el alta y la modificación."""
+class EstadoInquilino(str, Enum):
+    """Estados derivados de la asociación actual con una propiedad."""
+
+    ACTIVO = "activo"
+    SIN_PROPIEDAD_ASIGNADA = "sin_propiedad_asignada"
+
+
+class InquilinoContactInput(BaseModel):
+    """Datos personales compartidos por alta y edición."""
 
     nombre_completo: str = Field(min_length=2, max_length=120)
     dni: str = Field(pattern=r"^[0-9]{7,8}$")
@@ -25,7 +33,9 @@ class PropietarioInput(BaseModel):
     @field_validator("nombre_completo", "dni", "telefono", mode="before")
     @classmethod
     def normalize_text_fields(cls, value: object) -> object:
-        return " ".join(value.split()) if isinstance(value, str) else value
+        if not isinstance(value, str):
+            return value
+        return " ".join(value.split())
 
     @field_validator("nombre_completo", mode="after")
     @classmethod
@@ -40,16 +50,20 @@ class PropietarioInput(BaseModel):
         return str(value).strip().lower()
 
 
-class PropietarioCreate(PropietarioInput):
-    """Solicitud de alta de un propietario."""
+class InquilinoCreate(InquilinoContactInput):
+    """Alta de un inquilino con una propiedad disponible obligatoria."""
+
+    propiedad_id: UUID
 
 
-class PropietarioUpdate(PropietarioInput):
-    """Solicitud de reemplazo de los datos editables de un propietario."""
+class InquilinoUpdate(InquilinoContactInput):
+    """Edición de datos y reasignación opcional de una propiedad."""
+
+    propiedad_id: UUID | None = None
 
 
-class PropiedadResumen(BaseModel):
-    """Datos mínimos de una propiedad asociada para la vista de detalle."""
+class PropiedadInquilinoResumen(BaseModel):
+    """Ubicación mínima mostrada junto al inquilino."""
 
     id: UUID
     direccion: str
@@ -61,25 +75,21 @@ class PropiedadResumen(BaseModel):
     numero: str | None = None
 
 
-class PropietarioResponse(PropietarioInput):
-    """Representación pública resumida de un propietario."""
+class InquilinoResponse(InquilinoContactInput):
+    """Representación pública de un inquilino y su asociación actual."""
 
     id: UUID
-    cantidad_inmuebles: int = Field(ge=0)
+    propiedad: PropiedadInquilinoResumen | None = None
+    estado: EstadoInquilino
+    cantidad_reclamos: int = Field(ge=0)
     created_at: datetime
     updated_at: datetime
 
 
-class PropietarioDetailResponse(PropietarioResponse):
-    """Detalle de propietario con sus propiedades asociadas."""
+class InquilinosPage(BaseModel):
+    """Página estable para el listado administrativo."""
 
-    propiedades: list[PropiedadResumen]
-
-
-class PropietariosPage(BaseModel):
-    """Página estable para listados del frontend."""
-
-    items: list[PropietarioResponse]
+    items: list[InquilinoResponse]
     page: int = Field(ge=1)
     page_size: int = Field(ge=1)
     total: int = Field(ge=0)
@@ -93,9 +103,9 @@ class PropietariosPage(BaseModel):
         page: int,
         page_size: int,
         total: int,
-    ) -> "PropietariosPage":
+    ) -> "InquilinosPage":
         return cls(
-            items=[PropietarioResponse.model_validate(item) for item in items],
+            items=[InquilinoResponse.model_validate(item) for item in items],
             page=page,
             page_size=page_size,
             total=total,

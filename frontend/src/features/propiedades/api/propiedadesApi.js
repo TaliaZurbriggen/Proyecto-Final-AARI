@@ -9,6 +9,18 @@ export function listPropiedades({ page = 1, pageSize = 10, search = '', signal }
   return apiRequest(`/propiedades?${params.toString()}`, { signal })
 }
 
+export async function listAllPropiedades({ signal } = {}) {
+  const firstPage = await listPropiedades({ pageSize: 100, signal })
+  if (firstPage.total_pages <= 1) return firstPage.items
+
+  const remainingPages = await Promise.all(
+    Array.from({ length: firstPage.total_pages - 1 }, (_, index) =>
+      listPropiedades({ page: index + 2, pageSize: 100, signal }),
+    ),
+  )
+  return [firstPage, ...remainingPages].flatMap((page) => page.items)
+}
+
 export function getPropiedad(propiedadId, { signal } = {}) {
   return apiRequest(`/propiedades/${propiedadId}`, { signal })
 }

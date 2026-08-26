@@ -51,6 +51,22 @@ describe('formulario de propietario', () => {
     expect(fetchMock).not.toHaveBeenCalled()
   })
 
+  it('rechaza un DNI ingresado como nombre y no llama a la API', async () => {
+    const user = userEvent.setup()
+    const fetchMock = vi.spyOn(globalThis, 'fetch')
+    renderForm()
+
+    await user.type(screen.getByRole('textbox', { name: /Nombre completo/ }), '43428013')
+    await user.click(screen.getByRole('button', { name: 'Guardar propietario' }))
+
+    expect(
+      await screen.findByText(
+        'Ingresá un nombre válido usando solo letras, espacios, apóstrofes o guiones.',
+      ),
+    ).toBeInTheDocument()
+    expect(fetchMock).not.toHaveBeenCalled()
+  })
+
   it('normaliza, envía y redirige después de un alta correcta', async () => {
     const user = userEvent.setup()
     const fetchMock = vi

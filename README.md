@@ -104,6 +104,10 @@ El frontend utiliza las rutas `/propietarios`, `/propietarios/nuevo`,
 `/propietarios/:id` y `/propietarios/:id/editar`, con validaciones accesibles,
 estados de carga/error/vacío y una presentación responsive.
 
+Los nombres de propietarios e inquilinos admiten letras Unicode, espacios,
+apóstrofes y guiones. Se rechazan valores numéricos o mezclas como `43428013`
+y `Juan123` tanto en el frontend como en la API y la base de datos.
+
 En instalaciones que ya ejecutaron el módulo de administración se debe aplicar
 una vez `backend/migrations/07_propietarios_email_unico.sql`. La migración
 normaliza el email y garantiza su unicidad sin reemplazar la migración original.
@@ -135,6 +139,30 @@ ubicación precisa y convierte el piso a entero. Si ya hubiera propiedades, la
 migración 09 exige completar provincia y localidad antes de continuar. Por
 último, `backend/migrations/10_ubicacion_propiedades_con_letras.sql` agrega las
 restricciones de contenido descriptivo para dirección, localidad y barrio.
+
+### Gestión de inquilinos
+
+La API de inquilinos permite registrar, buscar, consultar, editar, desasociar y
+eliminar personas inquilinas. El DNI y el email son únicos. En el alta se exige
+una propiedad disponible y el sistema impide que dos inquilinos activos ocupen
+el mismo inmueble. La edición permite cambiar la asociación o dejar al
+inquilino con estado `sin_propiedad_asignada`; la eliminación se bloquea si el
+registro tiene reclamos históricos.
+
+El frontend incorpora `/inquilinos`, `/inquilinos/nuevo`,
+`/inquilinos/:id` y `/inquilinos/:id/editar`, además del acceso al inquilino
+activo desde la ficha de cada propiedad. Incluye listado paginado, búsqueda,
+estados de carga/error/vacío, confirmaciones para acciones sensibles y diseño
+responsive basado en el sistema visual compartido.
+
+En bases existentes debe aplicarse una vez
+`backend/migrations/11_inquilinos_integridad.sql`. La migración normaliza los
+datos previos, valida la coherencia entre estado y propiedad y garantiza la
+unicidad del email sin reemplazar el índice existente que limita una ocupación
+activa por propiedad. A continuación se aplica
+`backend/migrations/12_nombres_personas_validos.sql`, que incorpora el formato
+de nombres a propietarios e inquilinos y se detiene si encuentra datos que no
+puede corregir de manera segura.
 
 ### Pruebas automáticas del clasificador
 
@@ -322,7 +350,8 @@ Con Docker Compose podés levantar el backend y el frontend juntos, ya conectado
 - **Sprint 1 finalizado:** grafo LangGraph, integración con Gemini, clasificación estructurada, umbral de confianza, persistencia trazable, manejo seguro de respuestas inválidas y evaluación del prompt v5 sobre 80 casos (70/80; 87,50 %).
 - **Base compartida del Sprint 2 completada:** sistema visual, skill de frontend, tokens y componentes reutilizables.
 - **Completada y fusionada:** AARI-9 / HU1, gestión integral de propietarios.
-- **En curso:** AARI-22 / HU2, implementación y validaciones completas;
-  pendiente de revisión por Pull Request y merge.
-- **Siguiente secuencia del módulo de administración:** inquilinos y proveedores.
+- **Completada y fusionada:** AARI-22 / HU2, gestión integral de propiedades.
+- **En curso:** AARI-34 / HU3, gestión integral de inquilinos; implementación
+  terminada y pendiente de revisión antes del Pull Request.
+- **Siguiente secuencia del módulo de administración:** proveedores.
 - **Trabajo paralelo:** autenticación, acceso por roles, operadores y alta de reclamos.
