@@ -1,4 +1,4 @@
-import { Bell, Building2 } from 'lucide-react'
+import { Bell, Building2, LogOut } from 'lucide-react'
 import { IconButton, SearchInput } from '../ui/index.js'
 import styles from './AppHeader.module.css'
 
@@ -18,6 +18,7 @@ function AppHeader({
   notificationCount = 0,
   onNavigate,
   onNotificationsClick,
+  onLogout,
   onProfileClick,
   onSearchChange,
   onSearchClear,
@@ -106,6 +107,11 @@ function AppHeader({
               <small>{profileRole}</small>
             </span>
           </button>
+          {onLogout ? (
+            <IconButton label="Cerrar sesión" onClick={onLogout}>
+              <LogOut />
+            </IconButton>
+          ) : null}
         </div>
       </div>
     </header>

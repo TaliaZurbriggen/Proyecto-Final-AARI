@@ -164,6 +164,20 @@ activa por propiedad. A continuación se aplica
 de nombres a propietarios e inquilinos y se detiene si encuentra datos que no
 puede corregir de manera segura.
 
+### Autenticación del administrador
+
+El acceso administrativo utiliza `POST /auth/login`, una sesión JWT almacenada
+en una cookie `httpOnly` y autorización por rol. Tres intentos fallidos
+consecutivos bloquean temporalmente la cuenta durante 15 minutos. El frontend
+expone `/login`, recupera la sesión con `GET /auth/me` y la elimina mediante
+`POST /auth/logout`.
+
+Para ejecutar el flujo se deben configurar `JWT_SECRET` con al menos 32
+caracteres y, opcionalmente, `JWT_EXPIRE_MINUTES`. En bases existentes debe
+aplicarse una vez `backend/migrations/13_autenticacion_usuarios.sql`. En
+producción, `ENVIRONMENT` debe usar un valor distinto de `development`,
+`local` o `test` para que la cookie se emita con el atributo `Secure`.
+
 ### Pruebas automáticas del clasificador
 
 Desde `backend/`, la suite completa se ejecuta con:
@@ -194,7 +208,7 @@ Antes de seguir las instrucciones de abajo, asegurate de tener instalado:
    - Descarga: https://www.python.org/downloads/
    - Verificar instalación: `python --version`
 
-3. **Node.js 18 o superior** — para correr el frontend.
+3. **Node.js 22.22 o superior** — para correr el frontend.
    - Descarga: https://nodejs.org/ (elegir la versión LTS)
    - Verificar instalación: `node --version` y `npm --version`
 
