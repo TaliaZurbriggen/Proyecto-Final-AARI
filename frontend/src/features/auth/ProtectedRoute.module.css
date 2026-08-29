@@ -1,0 +1,7 @@
+.loading {
+  display: grid;
+  min-height: 100vh;
+  padding: var(--aari-space-6);
+  place-items: center;
+  background: var(--aari-color-canvas);
+}

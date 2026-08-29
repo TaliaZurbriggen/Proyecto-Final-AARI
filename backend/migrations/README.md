@@ -13,6 +13,9 @@ Ejecutar desde el SQL Editor, en este orden:
 5. `05_seed_admin.sql` — reemplazar los valores de ejemplo antes de ejecutarlo.
 6. `06_clasificacion_agente.sql`
 
+La instalación nueva debe aplicar además `13_autenticacion_usuarios.sql` para
+agregar las restricciones e índices de acceso seguro.
+
 El módulo de administración inicial ya incorpora el resultado de las
 migraciones incrementales 07, 08, 09, 10, 11 y 12. No deben repetirse en una
 instalación nueva.
@@ -33,6 +36,8 @@ Aplicar únicamente las migraciones pendientes y respetar este orden:
    nombres de propietarios e inquilinos a letras, espacios, apóstrofes y
    guiones. Se detiene si existen registros incompatibles para evitar
    corregir nombres reales de forma automática.
+7. `13_autenticacion_usuarios.sql` — normaliza el email de acceso y agrega
+   restricciones e índices para intentos fallidos y bloqueos temporales.
 
 La migración 09 se detiene si encuentra propiedades existentes porque provincia
 y localidad no pueden inferirse de manera segura. Esos registros deben

@@ -11,40 +11,54 @@ import PropiedadesListPage from './features/propiedades/pages/PropiedadesListPag
 import InquilinoDetailPage from './features/inquilinos/pages/InquilinoDetailPage.jsx'
 import InquilinoFormPage from './features/inquilinos/pages/InquilinoFormPage.jsx'
 import InquilinosListPage from './features/inquilinos/pages/InquilinosListPage.jsx'
+import { AuthProvider } from './features/auth/AuthContext.jsx'
+import ProtectedRoute from './features/auth/ProtectedRoute.jsx'
+import LoginPage from './features/auth/pages/LoginPage.jsx'
 
 function App() {
   return (
-    <Routes>
-      <Route element={<AdminLayout />}>
-        <Route index element={<Navigate replace to="/propietarios" />} />
-        <Route path="propietarios" element={<PropietariosListPage />} />
-        <Route path="propietarios/nuevo" element={<PropietarioFormPage />} />
-        <Route
-          path="propietarios/:propietarioId"
-          element={<PropietarioDetailPage />}
-        />
-        <Route
-          path="propietarios/:propietarioId/editar"
-          element={<PropietarioFormPage />}
-        />
-        <Route path="propiedades" element={<PropiedadesListPage />} />
-        <Route path="propiedades/nueva" element={<PropiedadFormPage />} />
-        <Route path="propiedades/:propiedadId" element={<PropiedadDetailPage />} />
-        <Route
-          path="propiedades/:propiedadId/editar"
-          element={<PropiedadFormPage />}
-        />
-        <Route path="inquilinos" element={<InquilinosListPage />} />
-        <Route path="inquilinos/nuevo" element={<InquilinoFormPage />} />
-        <Route path="inquilinos/:inquilinoId" element={<InquilinoDetailPage />} />
-        <Route
-          path="inquilinos/:inquilinoId/editar"
-          element={<InquilinoFormPage />}
-        />
-        <Route path="*" element={<NotFoundPage />} />
-      </Route>
-      <Route path="design-system" element={<DesignSystemPreview />} />
-    </Routes>
+    <AuthProvider>
+      <Routes>
+        <Route path="login" element={<LoginPage />} />
+        <Route element={<ProtectedRoute allowedRoles={['administrador']} />}>
+          <Route element={<AdminLayout />}>
+            <Route index element={<Navigate replace to="/propietarios" />} />
+            <Route path="propietarios" element={<PropietariosListPage />} />
+            <Route path="propietarios/nuevo" element={<PropietarioFormPage />} />
+            <Route
+              path="propietarios/:propietarioId"
+              element={<PropietarioDetailPage />}
+            />
+            <Route
+              path="propietarios/:propietarioId/editar"
+              element={<PropietarioFormPage />}
+            />
+            <Route path="propiedades" element={<PropiedadesListPage />} />
+            <Route path="propiedades/nueva" element={<PropiedadFormPage />} />
+            <Route
+              path="propiedades/:propiedadId"
+              element={<PropiedadDetailPage />}
+            />
+            <Route
+              path="propiedades/:propiedadId/editar"
+              element={<PropiedadFormPage />}
+            />
+            <Route path="inquilinos" element={<InquilinosListPage />} />
+            <Route path="inquilinos/nuevo" element={<InquilinoFormPage />} />
+            <Route
+              path="inquilinos/:inquilinoId"
+              element={<InquilinoDetailPage />}
+            />
+            <Route
+              path="inquilinos/:inquilinoId/editar"
+              element={<InquilinoFormPage />}
+            />
+            <Route path="*" element={<NotFoundPage />} />
+          </Route>
+        </Route>
+        <Route path="design-system" element={<DesignSystemPreview />} />
+      </Routes>
+    </AuthProvider>
   )
 }
 

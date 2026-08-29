@@ -1,5 +1,6 @@
 import { Outlet, useLocation, useNavigate } from 'react-router'
 import { AppHeader } from '../components/layout/index.js'
+import { useAuth } from '../features/auth/authContext.js'
 
 const navigationItems = [
   { href: '/propietarios', label: 'Propietarios' },
@@ -8,6 +9,7 @@ const navigationItems = [
 ]
 
 function AdminLayout() {
+  const { logout, user } = useAuth()
   const location = useLocation()
   const navigate = useNavigate()
   const isProperties = location.pathname.startsWith('/propiedades')
@@ -38,15 +40,21 @@ function AdminLayout() {
     navigate(`${activeModule.href}${suffix}`, { replace: true })
   }
 
+  const handleLogout = async () => {
+    await logout()
+    navigate('/login', { replace: true })
+  }
+
   return (
     <>
       <AppHeader
         activeItem={activeModule.label}
         items={navigationItems}
         onNavigate={(item) => navigate(item.href)}
+        onLogout={handleLogout}
         onSearchChange={(event) => updateSearch(event.target.value)}
         onSearchClear={() => updateSearch('')}
-        profileName="Usuario administrador"
+        profileName={user?.email ?? 'Usuario administrador'}
         profileRole="Administración"
         searchPlaceholder={activeModule.placeholder}
         searchValue={searchValue}

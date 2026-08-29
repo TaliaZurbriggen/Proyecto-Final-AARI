@@ -1,9 +1,10 @@
 import os
 
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
 
+from app.api.auth import require_admin, router as auth_router
 from app.api.inquilinos import property_router as property_tenant_router
 from app.api.inquilinos import router as inquilinos_router
 from app.api.propiedades import router as propiedades_router
@@ -27,10 +28,12 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-app.include_router(propiedades_router)
-app.include_router(property_tenant_router)
-app.include_router(propietarios_router)
-app.include_router(inquilinos_router)
+app.include_router(auth_router)
+admin_dependencies = [Depends(require_admin)]
+app.include_router(propiedades_router, dependencies=admin_dependencies)
+app.include_router(property_tenant_router, dependencies=admin_dependencies)
+app.include_router(propietarios_router, dependencies=admin_dependencies)
+app.include_router(inquilinos_router, dependencies=admin_dependencies)
 app.include_router(reclamos_router)
 
 
