@@ -43,6 +43,12 @@ create table proveedor_especialidades (
     primary key (proveedor_id, especialidad_id)
 );
 
+grant all privileges on table
+    proveedores,
+    especialidades,
+    proveedor_especialidades
+to anon, authenticated;
+
 insert into proveedores (
     nombre_razon_social,
     telefono,
@@ -101,6 +107,49 @@ def test_two_phase_provider_migration_preserves_existing_records() -> None:
             (schema,),
         )
         assert cursor.fetchone() == (2,)
+
+        cursor.execute(
+            """
+            select c.relname, c.relrowsecurity
+            from pg_class c
+            join pg_namespace n on n.oid = c.relnamespace
+            where n.nspname = %s
+              and c.relname in (
+                  'proveedores',
+                  'especialidades',
+                  'proveedor_especialidades',
+                  'proveedor_coberturas',
+                  'proveedor_cobertura_barrios'
+              )
+            order by c.relname
+            """,
+            (schema,),
+        )
+        assert cursor.fetchall() == [
+            ("especialidades", True),
+            ("proveedor_cobertura_barrios", True),
+            ("proveedor_coberturas", True),
+            ("proveedor_especialidades", True),
+            ("proveedores", True),
+        ]
+
+        cursor.execute(
+            """
+            select count(*)
+            from information_schema.role_table_grants
+            where table_schema = %s
+              and table_name in (
+                  'proveedores',
+                  'especialidades',
+                  'proveedor_especialidades',
+                  'proveedor_coberturas',
+                  'proveedor_cobertura_barrios'
+              )
+              and grantee in ('anon', 'authenticated')
+            """,
+            (schema,),
+        )
+        assert cursor.fetchone() == (0,)
 
         cursor.execute(
             """

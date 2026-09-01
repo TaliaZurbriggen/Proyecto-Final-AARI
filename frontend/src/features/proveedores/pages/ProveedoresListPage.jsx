@@ -47,6 +47,7 @@ function ProveedoresListPage() {
   const [data, setData] = useState(null)
   const [specialties, setSpecialties] = useState([])
   const [error, setError] = useState('')
+  const [filterError, setFilterError] = useState('')
   const [notice] = useState(location.state?.notice ?? '')
   const [loadedQuery, setLoadedQuery] = useState('')
   const queryKey = [page, search, especialidadId, provincia, localidad, barrio, activo].join(':')
@@ -65,6 +66,7 @@ function ProveedoresListPage() {
         })
         .catch((requestError) => {
           if (requestError.name !== 'AbortError') {
+            setData(null)
             setError(requestError.message)
             setLoadedQuery(queryKey)
           }
@@ -81,6 +83,12 @@ function ProveedoresListPage() {
 
   const applyFilters = (event) => {
     event.preventDefault()
+    if (filters.barrio.trim() && (!filters.provincia.trim() || !filters.localidad.trim())) {
+      setFilterError('Seleccioná provincia y localidad para filtrar por barrio.')
+      return
+    }
+
+    setFilterError('')
     const params = new URLSearchParams()
     if (search.trim()) params.set('search', search.trim())
     Object.entries(filters).forEach(([key, value]) => {
@@ -94,6 +102,7 @@ function ProveedoresListPage() {
 
   const clearFilters = () => {
     setFilters({ especialidadId: '', provincia: '', localidad: '', barrio: '', activo: '' })
+    setFilterError('')
     setSearchParams({})
   }
 
@@ -123,7 +132,8 @@ function ProveedoresListPage() {
 
       <div className={styles.feedbackStack}>
         {notice ? <AlertMessage tone="success">{notice}</AlertMessage> : null}
-        {error ? <AlertMessage>{error}</AlertMessage> : null}
+        {filterError ? <AlertMessage>{filterError}</AlertMessage> : null}
+        {!isLoading && error ? <AlertMessage>{error}</AlertMessage> : null}
       </div>
 
       <form className={styles.filtersPanel} onSubmit={applyFilters}>
@@ -183,7 +193,7 @@ function ProveedoresListPage() {
         />
       ) : null}
 
-      {!isLoading && providers.length ? (
+      {!isLoading && !error && providers.length ? (
         <section className={styles.listPanel} aria-labelledby="providers-list-title">
           <div className={styles.listSummary}>
             <div><h2 id="providers-list-title">Proveedores registrados</h2><p>{data.total} registros en total</p></div>

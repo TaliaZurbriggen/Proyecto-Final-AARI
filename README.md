@@ -188,7 +188,14 @@ obligatorios y el fin debe ser posterior al inicio dentro del mismo día.
 El frontend incorpora `/proveedores`, `/proveedores/nuevo`,
 `/proveedores/:id` y `/proveedores/:id/editar`. Incluye filtros combinables por
 especialidad, provincia, localidad, barrio y estado, además de pantallas
-responsive para alta, edición, detalle y activación o desactivación.
+responsive para alta, edición, detalle y activación o desactivación. El filtro
+por barrio exige indicar también provincia y localidad para evitar coincidencias
+entre barrios homónimos o proveedores que cubren otra ciudad completa.
+
+Las cinco tablas del módulo de proveedores tienen RLS habilitado y no conceden
+permisos a los roles `anon` ni `authenticated` del Data API de Supabase. La
+aplicación accede a ellas exclusivamente mediante FastAPI y la conexión segura
+del backend; no se definen políticas públicas para acceso directo.
 
 En bases existentes, la actualización se realiza en dos etapas. La migración
 `backend/migrations/15_proveedores_cobertura_horario.sql` crea las coberturas

@@ -332,6 +332,27 @@ def test_list_provider_combines_search_and_coverage_filters(
     )
 
 
+@pytest.mark.parametrize(
+    "params",
+    [
+        {"barrio": "Centro"},
+        {"provincia": "Córdoba", "barrio": "Centro"},
+        {"localidad": "San Francisco", "barrio": "Centro"},
+    ],
+)
+def test_list_provider_requires_geographic_context_for_neighborhood(
+    client: TestClient, params: dict[str, str]
+) -> None:
+    response = client.get("/proveedores", params=params)
+
+    assert response.status_code == 422
+    assert response.json()["detail"] == {
+        "code": "incomplete_neighborhood_filter",
+        "field": "barrio",
+        "message": "Seleccioná provincia y localidad para filtrar por barrio.",
+    }
+
+
 def test_get_update_and_status_change_provider(
     client: TestClient, repository: FakeProveedoresRepository
 ) -> None:

@@ -83,6 +83,20 @@ def list_proveedores(
     activo: bool | None = None,
     service: ProveedoresService = Depends(get_proveedores_service),
 ) -> ProveedoresPage:
+    if barrio and barrio.strip() and (
+        provincia is None or not localidad or not localidad.strip()
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail={
+                "code": "incomplete_neighborhood_filter",
+                "field": "barrio",
+                "message": (
+                    "Seleccioná provincia y localidad para filtrar por barrio."
+                ),
+            },
+        )
+
     return service.list(
         page=page,
         page_size=page_size,

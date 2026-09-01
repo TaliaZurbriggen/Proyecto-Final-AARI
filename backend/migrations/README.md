@@ -51,6 +51,12 @@ La migración 09 se detiene si encuentra propiedades existentes porque provincia
 y localidad no pueden inferirse de manera segura. Esos registros deben
 completarse antes de volver a ejecutarla.
 
+Las migraciones 01 y 15 habilitan RLS en las cinco tablas de proveedores y
+revocan sus permisos a los roles `anon` y `authenticated`. El módulo se consume
+exclusivamente a través de FastAPI; por eso no deben agregarse políticas públicas
+del Data API sin una nueva decisión de arquitectura y su correspondiente revisión
+de seguridad.
+
 La zona anterior no se convierte automáticamente porque un texto libre no
 permite inferir con seguridad provincia, localidad, alcance completo y barrios.
 Después de aplicar la migración 15, esta consulta identifica los registros que

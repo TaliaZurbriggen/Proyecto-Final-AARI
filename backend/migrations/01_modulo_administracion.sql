@@ -327,6 +327,26 @@ create table proveedor_especialidades (
 
 
 -- ------------------------------------------------------------
+-- Seguridad de proveedores en el esquema expuesto por Supabase
+-- ------------------------------------------------------------
+-- El módulo accede a estas tablas exclusivamente desde FastAPI mediante la
+-- conexión del backend. Los roles del Data API no deben leerlas ni escribirlas.
+alter table proveedores enable row level security;
+alter table especialidades enable row level security;
+alter table proveedor_especialidades enable row level security;
+alter table proveedor_coberturas enable row level security;
+alter table proveedor_cobertura_barrios enable row level security;
+
+revoke all privileges on table
+    proveedores,
+    especialidades,
+    proveedor_especialidades,
+    proveedor_coberturas,
+    proveedor_cobertura_barrios
+from anon, authenticated;
+
+
+-- ------------------------------------------------------------
 -- Índices adicionales para búsquedas frecuentes
 -- ------------------------------------------------------------
 create index idx_propiedades_propietario on propiedades (propietario_id);

@@ -119,4 +119,21 @@ insert into especialidades (nombre) values
     ('otros')
 on conflict do nothing;
 
+-- Estas tablas se consultan únicamente desde FastAPI. Se explicita la
+-- protección para que una instalación nueva o actualizada no dependa de la
+-- configuración manual del panel de Supabase.
+alter table proveedores enable row level security;
+alter table especialidades enable row level security;
+alter table proveedor_especialidades enable row level security;
+alter table proveedor_coberturas enable row level security;
+alter table proveedor_cobertura_barrios enable row level security;
+
+revoke all privileges on table
+    proveedores,
+    especialidades,
+    proveedor_especialidades,
+    proveedor_coberturas,
+    proveedor_cobertura_barrios
+from anon, authenticated;
+
 commit;
