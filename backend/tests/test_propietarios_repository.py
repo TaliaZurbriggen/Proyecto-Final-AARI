@@ -25,12 +25,52 @@ def repository() -> SqlAlchemyPropietariosRepository:
         connection.execute(
             text(
                 """
+                CREATE TABLE usuarios (
+                    id TEXT PRIMARY KEY,
+                    email TEXT NOT NULL UNIQUE,
+                    password_hash TEXT NOT NULL,
+                    rol TEXT NOT NULL,
+                    primer_ingreso BOOLEAN NOT NULL DEFAULT 1,
+                    activo BOOLEAN NOT NULL DEFAULT 1,
+                    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+                )
+                """
+            )
+        )
+        connection.execute(
+            text(
+                "CREATE UNIQUE INDEX uq_usuarios_email_normalizado "
+                "ON usuarios (lower(email))"
+            )
+        )
+        connection.execute(
+            text(
+                """
+                CREATE TABLE entregas_credenciales (
+                    id TEXT PRIMARY KEY,
+                    usuario_id TEXT NOT NULL UNIQUE REFERENCES usuarios(id),
+                    destinatario_email TEXT NOT NULL,
+                    estado TEXT NOT NULL,
+                    intentos INTEGER NOT NULL DEFAULT 0,
+                    ultimo_error TEXT,
+                    enviado_en TEXT,
+                    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+                )
+                """
+            )
+        )
+        connection.execute(
+            text(
+                """
                 CREATE TABLE propietarios (
                     id TEXT PRIMARY KEY,
                     nombre_completo TEXT NOT NULL,
                     dni TEXT NOT NULL UNIQUE,
                     email TEXT NOT NULL,
                     telefono TEXT NOT NULL,
+                    usuario_id TEXT REFERENCES usuarios(id),
                     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
                     updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
                 )
@@ -91,9 +131,12 @@ def test_repository_runs_full_crud_and_pagination(
     assert total == 1
     assert len(items) == 1
     assert detail is not None and detail["propiedades"] == []
+    assert detail is not None and detail["acceso"]["estado"] == "pendiente"
     assert updated is not None and updated["telefono"] == "+54 9 3564 111111"
     assert repository.delete(propietario_id) is True
     assert repository.get_detail(propietario_id) is None
+    with repository.session_factory() as session:
+        assert session.execute(text("SELECT COUNT(*) FROM usuarios")).scalar_one() == 0
 
 
 def test_repository_rejects_email_duplicates_ignoring_case(

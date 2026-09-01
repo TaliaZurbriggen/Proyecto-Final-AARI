@@ -30,3 +30,9 @@ export function updatePropietario(propietarioId, payload) {
 export function deletePropietario(propietarioId) {
   return apiRequest(`/propietarios/${propietarioId}`, { method: 'DELETE' })
 }
+
+export function retryPropietarioAccess(propietarioId) {
+  return apiRequest(`/propietarios/${propietarioId}/acceso/reintentar`, {
+    method: 'POST',
+  })
+}

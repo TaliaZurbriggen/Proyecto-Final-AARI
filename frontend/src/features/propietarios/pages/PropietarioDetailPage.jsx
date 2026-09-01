@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { ArrowLeft, Building2, Mail, MapPin, Pencil, Phone, Trash2 } from 'lucide-react'
 import { Link, useLocation, useNavigate, useParams } from 'react-router'
 import { PageContainer, PageHeading } from '../../../components/layout/index.js'
+import AccessDeliveryPanel from '../../access/components/AccessDeliveryPanel.jsx'
 import {
   AlertMessage,
   Button,
@@ -9,7 +10,11 @@ import {
   EmptyState,
   LoadingState,
 } from '../../../components/ui/index.js'
-import { deletePropietario, getPropietario } from '../api/propietariosApi.js'
+import {
+  deletePropietario,
+  getPropietario,
+  retryPropietarioAccess,
+} from '../api/propietariosApi.js'
 import styles from './Propietarios.module.css'
 
 function PropietarioDetailPage() {
@@ -18,9 +23,11 @@ function PropietarioDetailPage() {
   const navigate = useNavigate()
   const [owner, setOwner] = useState(null)
   const [error, setError] = useState('')
+  const [notice, setNotice] = useState(location.state?.notice ?? '')
   const [isLoading, setIsLoading] = useState(true)
   const [isDeleteOpen, setIsDeleteOpen] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
+  const [isRetryingAccess, setIsRetryingAccess] = useState(false)
 
   useEffect(() => {
     const controller = new AbortController()
@@ -59,6 +66,24 @@ function PropietarioDetailPage() {
     }
   }
 
+  const handleRetryAccess = async () => {
+    setIsRetryingAccess(true)
+    setError('')
+    try {
+      const updatedOwner = await retryPropietarioAccess(propietarioId)
+      setOwner(updatedOwner)
+      setNotice(
+        updatedOwner.acceso?.estado === 'enviado'
+          ? 'Las credenciales se enviaron correctamente.'
+          : 'El correo sigue sin poder entregarse. Revisá la configuración e intentá nuevamente.',
+      )
+    } catch (requestError) {
+      setError(requestError.message)
+    } finally {
+      setIsRetryingAccess(false)
+    }
+  }
+
   if (isLoading) {
     return (
       <PageContainer>
@@ -94,11 +119,19 @@ function PropietarioDetailPage() {
       />
 
       <div className={styles.feedbackStack}>
-        {location.state?.notice ? (
-          <AlertMessage tone="success">{location.state.notice}</AlertMessage>
+        {notice ? (
+          <AlertMessage tone={owner.acceso?.estado === 'fallido' ? 'warning' : 'success'}>
+            {notice}
+          </AlertMessage>
         ) : null}
         {error ? <AlertMessage>{error}</AlertMessage> : null}
       </div>
+
+      <AccessDeliveryPanel
+        access={owner.acceso}
+        isRetrying={isRetryingAccess}
+        onRetry={handleRetryAccess}
+      />
 
       <div className={styles.detailGrid}>
         <section className={styles.detailPanel} aria-labelledby="contact-title">

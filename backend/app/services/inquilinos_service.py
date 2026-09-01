@@ -3,6 +3,7 @@
 from typing import Protocol
 from uuid import UUID
 
+from app.services.access_service import AccessInvitationService
 from app.schemas.inquilinos import (
     InquilinoCreate,
     InquilinoResponse,
@@ -62,12 +63,35 @@ class InquilinosRepository(Protocol):
 class InquilinosService:
     """Orquesta asociaciones, estados y contratos de respuesta."""
 
-    def __init__(self, repository: InquilinosRepository) -> None:
+    def __init__(
+        self,
+        repository: InquilinosRepository,
+        access_service: AccessInvitationService | None = None,
+    ) -> None:
         self.repository = repository
+        self.access_service = access_service
 
     def create(self, payload: InquilinoCreate) -> InquilinoResponse:
         record = self.repository.create(payload.model_dump(mode="json"))
+        if self.access_service is not None:
+            self.access_service.deliver(
+                user_id=UUID(str(record["usuario_id"])),
+                recipient=payload.email,
+                person_name=payload.nombre_completo,
+                temporary_password=payload.dni,
+            )
+            refreshed = self.repository.get_detail(UUID(str(record["id"])))
+            if refreshed is not None:
+                record = refreshed
         return InquilinoResponse.model_validate(record)
+
+    def retry_access(self, inquilino_id: UUID) -> InquilinoResponse:
+        if self.repository.get_detail(inquilino_id) is None:
+            raise InquilinoNotFoundError
+        if self.access_service is None:  # pragma: no cover - error de composición
+            raise RuntimeError("El servicio de acceso no está configurado.")
+        self.access_service.retry(entity="inquilino", entity_id=inquilino_id)
+        return self.get_detail(inquilino_id)
 
     def list(
         self, *, page: int, page_size: int, search: str | None

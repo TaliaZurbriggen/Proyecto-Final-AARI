@@ -3,12 +3,13 @@ from uuid import UUID
 
 import pytest
 
-from app.schemas.auth import LoginRequest
+from app.schemas.auth import ChangePasswordRequest, LoginRequest
 from app.services.auth_service import (
     AccountLockedError,
     AuthService,
     InactiveAccountError,
     InvalidCredentialsError,
+    InvalidCurrentPasswordError,
 )
 
 
@@ -21,6 +22,8 @@ class FakeUsuariosRepository:
         self.record = record
         self.failed_attempts = 0
         self.reset_calls = 0
+        self.password_change_result = True
+        self.password_changes = []
 
     def find_for_login(self, email, password):
         del email, password
@@ -38,6 +41,12 @@ class FakeUsuariosRepository:
     def reset_failed_attempts(self, user_id, *, now):
         del user_id, now
         self.reset_calls += 1
+
+    def change_password(self, user_id, *, current_password, new_password):
+        self.password_changes.append((user_id, current_password, new_password))
+        if self.password_change_result and self.record:
+            self.record["primer_ingreso"] = False
+        return self.password_change_result
 
 
 def user_record(**changes):
@@ -115,3 +124,30 @@ def test_login_rejects_inactive_account():
         AuthService(FakeUsuariosRepository(user_record(activo=False))).login(
             credentials(), now=NOW
         )
+
+
+def test_change_password_activates_account_and_returns_updated_user():
+    repository = FakeUsuariosRepository(user_record(primer_ingreso=True))
+    payload = ChangePasswordRequest(
+        password_actual="30123456",
+        password_nueva="segura123",
+        confirmacion_password="segura123",
+    )
+
+    user = AuthService(repository).change_password(USER_ID, payload)
+
+    assert user.primer_ingreso is False
+    assert repository.password_changes == [(USER_ID, "30123456", "segura123")]
+
+
+def test_change_password_rejects_invalid_current_password():
+    repository = FakeUsuariosRepository(user_record(primer_ingreso=True))
+    repository.password_change_result = False
+    payload = ChangePasswordRequest(
+        password_actual="incorrecta",
+        password_nueva="segura123",
+        confirmacion_password="segura123",
+    )
+
+    with pytest.raises(InvalidCurrentPasswordError):
+        AuthService(repository).change_password(USER_ID, payload)

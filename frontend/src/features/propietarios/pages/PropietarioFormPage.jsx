@@ -10,6 +10,7 @@ import {
   TextInput,
 } from '../../../components/ui/index.js'
 import { ApiError } from '../../../services/apiClient.js'
+import { accessNotice } from '../../access/accessNotice.js'
 import {
   createPropietario,
   getPropietario,
@@ -102,9 +103,10 @@ function PropietarioFormPage() {
       navigate(`/propietarios/${owner.id}`, {
         replace: true,
         state: {
-          notice: isEditing
-            ? 'Los datos del propietario se actualizaron correctamente.'
-            : 'El propietario se registró correctamente.',
+          notice: accessNotice(owner.acceso, {
+            entityLabel: 'propietario',
+            isEditing,
+          }),
         },
       })
     } catch (error) {

@@ -178,6 +178,49 @@ aplicarse una vez `backend/migrations/13_autenticacion_usuarios.sql`. En
 producción, `ENVIRONMENT` debe usar un valor distinto de `development`,
 `local` o `test` para que la cookie se emita con el atributo `Secure`.
 
+### Acceso de propietarios e inquilinos
+
+Al registrar un propietario o inquilino, el backend crea en la misma
+transacción una cuenta vinculada. El email es el usuario y el DNI se utiliza
+como contraseña temporal protegida con `pgcrypto`. En el primer ingreso la
+persona debe reemplazarla por una contraseña de al menos 8 caracteres y un
+número antes de acceder a su portal. Después del cambio, la contraseña temporal
+deja de ser válida y la navegación dirige a cada persona según su rol.
+
+El correo de bienvenida se configura con `SMTP_HOST`, `SMTP_PORT`,
+`SMTP_USERNAME`, `SMTP_PASSWORD`, `SMTP_FROM`, `SMTP_STARTTLS` y
+`APP_LOGIN_URL`. Si SMTP no está disponible, el alta y la cuenta se conservan:
+el estado queda como `fallido` y administración puede reintentar el envío desde
+la ficha del propietario o inquilino. Las pruebas automatizadas usan dobles y
+no envían correos reales.
+
+Para usar el correo institucional del proyecto en desarrollo, cada integrante
+debe copiar estas variables únicamente en `backend/.env`:
+
+```env
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USERNAME=proyectofinalaari@gmail.com
+SMTP_PASSWORD=LA_CLAVE_DE_APLICACION
+SMTP_FROM=AARI <proyectofinalaari@gmail.com>
+SMTP_STARTTLS=true
+APP_LOGIN_URL=http://127.0.0.1:5173/login
+```
+
+`SMTP_PASSWORD` debe contener una contraseña de aplicación de Google generada
+para la cuenta del proyecto, no su contraseña normal. El valor real se comparte
+por un medio seguro y nunca se guarda en Git, Jira, Notion ni capturas. En el
+archivo `.env` solo deben existir asignaciones `CLAVE=VALOR` y comentarios que
+comiencen con `#`; no se deben pegar encabezados como `=== backend/.env ===`.
+Estas variables no pertenecen a `frontend/.env`. Para un entorno publicado,
+`APP_LOGIN_URL` debe reemplazarse por la URL real del login.
+
+Las bases existentes deben aplicar una vez
+`backend/migrations/14_acceso_propietarios_inquilinos.sql`. La migración crea y
+vincula cuentas faltantes usando el DNI vigente como clave temporal, registra
+los envíos previos como pendientes y se detiene ante emails de acceso
+duplicados para no inferir una identidad incorrecta.
+
 ### Pruebas automáticas del clasificador
 
 Desde `backend/`, la suite completa se ejecuta con:
@@ -365,6 +408,8 @@ Con Docker Compose podés levantar el backend y el frontend juntos, ya conectado
 - **Base compartida del Sprint 2 completada:** sistema visual, skill de frontend, tokens y componentes reutilizables.
 - **Completada y fusionada:** AARI-9 / HU1, gestión integral de propietarios.
 - **Completada y fusionada:** AARI-22 / HU2, gestión integral de propiedades.
+- **Completada y fusionada:** AARI-56 / HU5, autenticación administrativa.
+- **En curso:** AARI-68 / HU6, acceso de propietarios e inquilinos.
 - **En curso:** AARI-34 / HU3, gestión integral de inquilinos; implementación
   terminada y pendiente de revisión antes del Pull Request.
 - **Siguiente secuencia del módulo de administración:** proveedores.

@@ -40,6 +40,11 @@ export function AuthProvider({ children }) {
           setUser(null)
         }
       },
+      async changePassword(payload) {
+        const response = await authApi.changePassword(payload)
+        setUser(response.user)
+        return response.user
+      },
     }),
     [isLoading, user],
   )

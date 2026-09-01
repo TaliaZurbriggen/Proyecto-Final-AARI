@@ -110,6 +110,10 @@
   gap: var(--aari-space-2);
 }
 
+.accountAtEnd {
+  margin-left: auto;
+}
+
 .notification {
   position: relative;
 }

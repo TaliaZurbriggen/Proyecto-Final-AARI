@@ -4,6 +4,7 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 
+from app.db.access import SqlAlchemyAccessRepository
 from app.db.propietarios import SqlAlchemyPropietariosRepository
 from app.schemas.propietarios import (
     PropietarioCreate,
@@ -18,12 +19,24 @@ from app.services.propietarios_service import (
     PropietarioNotFoundError,
     PropietariosService,
 )
+from app.services.access_service import (
+    AccessAlreadyActivatedError,
+    AccessInvitationService,
+    AccessNotFoundError,
+    SmtpWelcomeEmailSender,
+)
 
 router = APIRouter(prefix="/propietarios", tags=["propietarios"])
 
 
 def get_propietarios_service() -> PropietariosService:
-    return PropietariosService(SqlAlchemyPropietariosRepository())
+    return PropietariosService(
+        SqlAlchemyPropietariosRepository(),
+        AccessInvitationService(
+            SqlAlchemyAccessRepository(),
+            SmtpWelcomeEmailSender(),
+        ),
+    )
 
 
 def _duplicate_value_error(error: DuplicatePropietarioValueError) -> HTTPException:
@@ -73,6 +86,31 @@ def get_propietario(
         return service.get_detail(propietario_id)
     except PropietarioNotFoundError as error:
         raise HTTPException(status_code=404, detail="Propietario no encontrado.") from error
+
+
+@router.post(
+    "/{propietario_id}/acceso/reintentar",
+    response_model=PropietarioDetailResponse,
+)
+def retry_propietario_access(
+    propietario_id: UUID,
+    service: PropietariosService = Depends(get_propietarios_service),
+) -> PropietarioDetailResponse:
+    try:
+        return service.retry_access(propietario_id)
+    except (PropietarioNotFoundError, AccessNotFoundError) as error:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="No encontramos una cuenta vinculada al propietario.",
+        ) from error
+    except AccessAlreadyActivatedError as error:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail={
+                "code": "access_already_activated",
+                "message": "La cuenta ya fue activada y no usa la contraseña temporal.",
+            },
+        ) from error
 
 
 @router.put("/{propietario_id}", response_model=PropietarioResponse)

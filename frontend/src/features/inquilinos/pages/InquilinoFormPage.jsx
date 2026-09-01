@@ -12,6 +12,7 @@ import {
   TextInput,
 } from '../../../components/ui/index.js'
 import { ApiError } from '../../../services/apiClient.js'
+import { accessNotice } from '../../access/accessNotice.js'
 import { listAllPropiedades } from '../../propiedades/api/propiedadesApi.js'
 import {
   createInquilino,
@@ -135,9 +136,10 @@ function InquilinoFormPage() {
       navigate(`/inquilinos/${tenant.id}`, {
         replace: true,
         state: {
-          notice: isEditing
-            ? 'Los datos del inquilino se actualizaron correctamente.'
-            : 'El inquilino se registró y quedó asociado a la propiedad.',
+          notice: accessNotice(tenant.acceso, {
+            entityLabel: 'inquilino',
+            isEditing,
+          }),
         },
       })
     } catch (error) {

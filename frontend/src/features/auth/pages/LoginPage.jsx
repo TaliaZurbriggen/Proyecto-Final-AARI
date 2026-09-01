@@ -6,6 +6,7 @@ import Button from '../../../components/ui/Button.jsx'
 import FormField from '../../../components/ui/FormField.jsx'
 import TextInput from '../../../components/ui/TextInput.jsx'
 import { useAuth } from '../authContext.js'
+import { destinationForUser } from '../routing.js'
 import styles from './LoginPage.module.css'
 
 function LoginPage() {
@@ -17,8 +18,8 @@ function LoginPage() {
   const [error, setError] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  if (!isLoading && user?.rol === 'administrador') {
-    return <Navigate replace to="/propietarios" />
+  if (!isLoading && user) {
+    return <Navigate replace to={destinationForUser(user)} />
   }
 
   const handleSubmit = async (event) => {
@@ -26,8 +27,11 @@ function LoginPage() {
     setError('')
     setIsSubmitting(true)
     try {
-      await login({ email, password })
-      const destination = location.state?.from?.pathname ?? '/propietarios'
+      const authenticatedUser = await login({ email, password })
+      const requestedDestination = location.state?.from?.pathname
+      const destination = authenticatedUser.primer_ingreso
+        ? '/cambiar-contrasena'
+        : requestedDestination ?? destinationForUser(authenticatedUser)
       navigate(destination, { replace: true })
     } catch (requestError) {
       setError(requestError.message)

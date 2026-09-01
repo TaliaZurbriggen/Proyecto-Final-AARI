@@ -5,6 +5,11 @@ from uuid import UUID, uuid4
 from sqlalchemy import text
 from sqlalchemy.exc import IntegrityError
 
+from app.db.access import (
+    access_from_row,
+    create_access_account,
+    sync_pending_access_account,
+)
 from app.db.database import SessionLocal
 from app.services.inquilinos_service import (
     InquilinoDuplicateDniError,
@@ -33,6 +38,12 @@ class SqlAlchemyInquilinosRepository:
             constraint == "uq_inquilinos_email_normalizado"
             or "uq_inquilinos_email_normalizado" in message
             or "index 'uq_inquilinos_email_normalizado'" in message
+        ):
+            raise InquilinoDuplicateEmailError from error
+        if (
+            constraint in {"usuarios_email_key", "uq_usuarios_email_normalizado"}
+            or "usuarios.email" in message
+            or "uq_usuarios_email_normalizado" in message
         ):
             raise InquilinoDuplicateEmailError from error
         if (
@@ -97,6 +108,7 @@ class SqlAlchemyInquilinosRepository:
             "propiedad": property_data,
             "estado": record["estado"],
             "cantidad_reclamos": int(record["cantidad_reclamos"]),
+            "acceso": access_from_row(record),
             "created_at": record["created_at"],
             "updated_at": record["updated_at"],
         }
@@ -118,9 +130,16 @@ class SqlAlchemyInquilinosRepository:
                    CAST((
                        SELECT COUNT(*) FROM reclamos r
                        WHERE r.inquilino_id = i.id
-                   ) AS INTEGER) AS cantidad_reclamos
+                   ) AS INTEGER) AS cantidad_reclamos,
+                   CAST(ec.estado AS TEXT) AS acceso_estado,
+                   ec.intentos AS acceso_intentos,
+                   ec.ultimo_error AS acceso_ultimo_error,
+                   ec.enviado_en AS acceso_enviado_en,
+                   u.primer_ingreso AS acceso_primer_ingreso
             FROM inquilinos i
             LEFT JOIN propiedades p ON p.id = i.propiedad_id
+            LEFT JOIN usuarios u ON u.id = i.usuario_id
+            LEFT JOIN entregas_credenciales ec ON ec.usuario_id = u.id
         """
 
     def create(self, data: dict[str, object]) -> dict[str, object]:
@@ -128,24 +147,33 @@ class SqlAlchemyInquilinosRepository:
         statement = text(
             """
             INSERT INTO inquilinos
-                (id, nombre_completo, dni, email, telefono, propiedad_id, estado)
+                (id, nombre_completo, dni, email, telefono, propiedad_id,
+                 estado, usuario_id)
             VALUES
                 (:id, :nombre_completo, :dni, :email, :telefono,
-                 :propiedad_id, 'activo')
+                 :propiedad_id, 'activo', :usuario_id)
             """
         )
-        params = {"id": inquilino_id, **data}
         try:
             with self.session_factory.begin() as session:
                 self._ensure_property_available(session, data["propiedad_id"])
-                session.execute(statement, params)
+                user_id = create_access_account(
+                    session,
+                    email=str(data["email"]),
+                    temporary_password=str(data["dni"]),
+                    role="inquilino",
+                )
+                session.execute(
+                    statement,
+                    {"id": inquilino_id, "usuario_id": user_id, **data},
+                )
         except IntegrityError as error:
             self._translate_integrity_error(error)
 
         record = self.get_detail(UUID(inquilino_id))
         if record is None:  # pragma: no cover - defensa ante una BD inconsistente
             raise RuntimeError("El inquilino creado no pudo recuperarse.")
-        return record
+        return {**record, "usuario_id": user_id}
 
     def list(
         self, *, page: int, page_size: int, search: str | None
@@ -248,11 +276,14 @@ class SqlAlchemyInquilinosRepository:
         }
         try:
             with self.session_factory.begin() as session:
-                exists = session.execute(
-                    text("SELECT 1 FROM inquilinos WHERE id = :inquilino_id"),
+                current = session.execute(
+                    text(
+                        "SELECT email, dni, usuario_id FROM inquilinos "
+                        "WHERE id = :inquilino_id"
+                    ),
                     {"inquilino_id": str(inquilino_id)},
-                ).scalar_one_or_none()
-                if exists is None:
+                ).mappings().one_or_none()
+                if current is None:
                     return None
                 if property_id is not None:
                     self._ensure_property_available(
@@ -261,6 +292,15 @@ class SqlAlchemyInquilinosRepository:
                         excluding_tenant_id=inquilino_id,
                     )
                 session.execute(statement, params)
+                if current["usuario_id"] is not None:
+                    sync_pending_access_account(
+                        session,
+                        user_id=current["usuario_id"],
+                        email=str(data["email"]),
+                        temporary_password=str(data["dni"]),
+                        email_changed=str(current["email"]).lower() != str(data["email"]).lower(),
+                        dni_changed=str(current["dni"]) != str(data["dni"]),
+                    )
         except IntegrityError as error:
             self._translate_integrity_error(error)
         return self.get_detail(inquilino_id)
@@ -286,10 +326,14 @@ class SqlAlchemyInquilinosRepository:
     def delete(self, inquilino_id: UUID) -> bool:
         params = {"inquilino_id": str(inquilino_id)}
         with self.session_factory.begin() as session:
-            exists = session.execute(
-                text("SELECT 1 FROM inquilinos WHERE id = :inquilino_id"), params
-            ).scalar_one_or_none()
-            if exists is None:
+            current = session.execute(
+                text(
+                    "SELECT usuario_id FROM inquilinos "
+                    "WHERE id = :inquilino_id"
+                ),
+                params,
+            ).mappings().one_or_none()
+            if current is None:
                 return False
             claims_count = int(
                 session.execute(
@@ -305,4 +349,9 @@ class SqlAlchemyInquilinosRepository:
             result = session.execute(
                 text("DELETE FROM inquilinos WHERE id = :inquilino_id"), params
             )
+            if result.rowcount > 0 and current["usuario_id"] is not None:
+                session.execute(
+                    text("DELETE FROM usuarios WHERE id = :user_id"),
+                    {"user_id": str(current["usuario_id"])},
+                )
             return result.rowcount > 0
