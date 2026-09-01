@@ -11,6 +11,9 @@ import PropiedadesListPage from './features/propiedades/pages/PropiedadesListPag
 import InquilinoDetailPage from './features/inquilinos/pages/InquilinoDetailPage.jsx'
 import InquilinoFormPage from './features/inquilinos/pages/InquilinoFormPage.jsx'
 import InquilinosListPage from './features/inquilinos/pages/InquilinosListPage.jsx'
+import ProveedorDetailPage from './features/proveedores/pages/ProveedorDetailPage.jsx'
+import ProveedorFormPage from './features/proveedores/pages/ProveedorFormPage.jsx'
+import ProveedoresListPage from './features/proveedores/pages/ProveedoresListPage.jsx'
 import { AuthProvider } from './features/auth/AuthContext.jsx'
 import ProtectedRoute from './features/auth/ProtectedRoute.jsx'
 import LoginPage from './features/auth/pages/LoginPage.jsx'
@@ -52,6 +55,16 @@ function App() {
             <Route
               path="inquilinos/:inquilinoId/editar"
               element={<InquilinoFormPage />}
+            />
+            <Route path="proveedores" element={<ProveedoresListPage />} />
+            <Route path="proveedores/nuevo" element={<ProveedorFormPage />} />
+            <Route
+              path="proveedores/:proveedorId"
+              element={<ProveedorDetailPage />}
+            />
+            <Route
+              path="proveedores/:proveedorId/editar"
+              element={<ProveedorFormPage />}
             />
             <Route path="*" element={<NotFoundPage />} />
           </Route>

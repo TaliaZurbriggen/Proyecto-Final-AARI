@@ -215,12 +215,24 @@ create table proveedores (
     nombre_razon_social     text not null,
     matricula               text,               -- opcional, según especialidad
     telefono                text not null unique,
-    zona_cobertura          text not null,
     activo                  boolean not null default true,
+    hora_inicio             time,
+    hora_fin                time,
     created_at              timestamptz not null default now(),
     updated_at              timestamptz not null default now(),
 
-    constraint chk_proveedores_zona_largo check (char_length(zona_cobertura) <= 100)
+    constraint chk_proveedores_nombre_largo
+        check (char_length(btrim(nombre_razon_social)) between 2 and 150),
+    constraint chk_proveedores_nombre_con_letra
+        check (nombre_razon_social ~ '[[:alpha:]]'),
+    constraint chk_proveedores_matricula_largo
+        check (matricula is null or char_length(btrim(matricula)) between 1 and 80),
+    constraint chk_proveedores_telefono_whatsapp
+        check (telefono ~ '^\+[0-9]{8,15}$'),
+    constraint chk_proveedores_horario_completo
+        check ((hora_inicio is null) = (hora_fin is null)),
+    constraint chk_proveedores_horario_orden
+        check (hora_inicio is null or hora_fin > hora_inicio)
 );
 
 create trigger trg_proveedores_updated_at
@@ -229,12 +241,70 @@ for each row execute function set_updated_at();
 
 
 -- ------------------------------------------------------------
+-- 5.a. proveedor_coberturas — localidades atendidas
+-- ------------------------------------------------------------
+create table proveedor_coberturas (
+    id                      uuid primary key default gen_random_uuid(),
+    proveedor_id            uuid not null references proveedores(id) on delete cascade,
+    provincia               text not null,
+    localidad               text not null,
+    cubre_toda_localidad    boolean not null default true,
+
+    constraint chk_proveedor_cobertura_provincia_valida
+        check (provincia in (
+            'Buenos Aires', 'Ciudad Autónoma de Buenos Aires', 'Catamarca',
+            'Chaco', 'Chubut', 'Córdoba', 'Corrientes', 'Entre Ríos',
+            'Formosa', 'Jujuy', 'La Pampa', 'La Rioja', 'Mendoza',
+            'Misiones', 'Neuquén', 'Río Negro', 'Salta', 'San Juan',
+            'San Luis', 'Santa Cruz', 'Santa Fe', 'Santiago del Estero',
+            'Tierra del Fuego, Antártida e Islas del Atlántico Sur',
+            'Tucumán'
+        )),
+    constraint chk_proveedor_cobertura_localidad_largo
+        check (char_length(btrim(localidad)) between 2 and 100),
+    constraint chk_proveedor_cobertura_localidad_con_letra
+        check (localidad ~ '[[:alpha:]]')
+);
+
+create unique index uq_proveedor_cobertura_localidad_normalizada
+    on proveedor_coberturas (
+        proveedor_id, lower(btrim(provincia)), lower(btrim(localidad))
+    );
+
+
+-- ------------------------------------------------------------
+-- 5.b. proveedor_cobertura_barrios — alcance parcial
+-- ------------------------------------------------------------
+create table proveedor_cobertura_barrios (
+    id              uuid primary key default gen_random_uuid(),
+    cobertura_id    uuid not null references proveedor_coberturas(id) on delete cascade,
+    barrio          text not null,
+
+    constraint chk_proveedor_cobertura_barrio_largo
+        check (char_length(btrim(barrio)) between 2 and 100),
+    constraint chk_proveedor_cobertura_barrio_con_letra
+        check (barrio ~ '[[:alpha:]]')
+);
+
+create unique index uq_proveedor_cobertura_barrio_normalizado
+    on proveedor_cobertura_barrios (cobertura_id, lower(btrim(barrio)));
+
+
+-- ------------------------------------------------------------
 -- 6. especialidades (HU4) — catálogo predefinido + personalizadas
 -- ------------------------------------------------------------
 create table especialidades (
     id      uuid primary key default gen_random_uuid(),
-    nombre  text not null unique
+    nombre  text not null,
+
+    constraint chk_especialidades_nombre_largo
+        check (char_length(btrim(nombre)) between 2 and 80),
+    constraint chk_especialidades_nombre_con_letra
+        check (nombre ~ '[[:alpha:]]')
 );
+
+create unique index uq_especialidades_nombre_normalizado
+    on especialidades (lower(btrim(nombre)));
 
 insert into especialidades (nombre) values
     ('plomería'),
@@ -261,5 +331,8 @@ create table proveedor_especialidades (
 -- ------------------------------------------------------------
 create index idx_propiedades_propietario on propiedades (propietario_id);
 create index idx_inquilinos_propiedad on inquilinos (propiedad_id);
-create index idx_proveedores_zona on proveedores (zona_cobertura);
 create index idx_proveedores_activo on proveedores (activo);
+create index idx_proveedor_coberturas_ubicacion
+    on proveedor_coberturas (provincia, localidad);
+create index idx_proveedor_cobertura_barrios_barrio
+    on proveedor_cobertura_barrios (barrio);

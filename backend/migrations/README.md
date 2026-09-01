@@ -17,8 +17,8 @@ La instalación nueva debe aplicar además `13_autenticacion_usuarios.sql` para
 agregar las restricciones e índices de acceso seguro.
 
 El módulo de administración inicial ya incorpora el resultado de las
-migraciones incrementales 07, 08, 09, 10, 11 y 12. No deben repetirse en una
-instalación nueva.
+migraciones incrementales 07, 08, 09, 10, 11, 12 y 15. No deben repetirse en
+una instalación nueva.
 
 ## Instalación existente
 
@@ -38,7 +38,15 @@ Aplicar únicamente las migraciones pendientes y respetar este orden:
    corregir nombres reales de forma automática.
 7. `13_autenticacion_usuarios.sql` — normaliza el email de acceso y agrega
    restricciones e índices para intentos fallidos y bloqueos temporales.
+8. `15_proveedores_cobertura_horario.sql` — reemplaza la zona libre por
+   coberturas de provincia, localidad y barrios; agrega el horario habitual y
+   refuerza el catálogo de especialidades.
 
 La migración 09 se detiene si encuentra propiedades existentes porque provincia
 y localidad no pueden inferirse de manera segura. Esos registros deben
 completarse antes de volver a ejecutarla.
+
+La migración 15 también se detiene si encuentra proveedores existentes: una
+zona escrita como texto libre no permite inferir con seguridad provincia,
+localidad, alcance completo y barrios. Esos registros deben revisarse y
+migrarse manualmente antes de aplicarla nuevamente.
