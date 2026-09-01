@@ -1,5 +1,4 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
-import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import ProveedorFormPage from './ProveedorFormPage.jsx'
@@ -69,22 +68,21 @@ describe('formulario de proveedor', () => {
   })
 
   it('envía contacto, especialidad, horario y cobertura normalizados', async () => {
-    const user = userEvent.setup()
     const fetchMock = vi
       .spyOn(globalThis, 'fetch')
       .mockResolvedValueOnce(jsonResponse([specialty]))
       .mockResolvedValueOnce(jsonResponse(provider, 201))
     renderForm()
 
-    await user.type(await screen.findByRole('textbox', { name: /Nombre o razón social/ }), ' Servicios del Centro ')
-    await user.type(screen.getByRole('textbox', { name: /Matrícula/ }), ' mp 1234 ')
-    await user.type(screen.getByRole('textbox', { name: /Teléfono de WhatsApp/ }), '+54 9 3564 555555')
-    await user.click(screen.getByRole('checkbox', { name: 'plomería' }))
-    await user.selectOptions(screen.getByRole('combobox', { name: /Provincia/ }), 'Córdoba')
-    await user.type(screen.getByRole('textbox', { name: /Localidad/ }), ' San Francisco ')
+    fireEvent.change(await screen.findByRole('textbox', { name: /Nombre o razón social/ }), { target: { value: ' Servicios del Centro ' } })
+    fireEvent.change(screen.getByRole('textbox', { name: /Matrícula/ }), { target: { value: ' mp 1234 ' } })
+    fireEvent.change(screen.getByRole('textbox', { name: /Teléfono de WhatsApp/ }), { target: { value: '+54 9 3564 555555' } })
+    fireEvent.click(screen.getByRole('checkbox', { name: 'plomería' }))
+    fireEvent.change(screen.getByRole('combobox', { name: /Provincia/ }), { target: { value: 'Córdoba' } })
+    fireEvent.change(screen.getByRole('textbox', { name: /Localidad/ }), { target: { value: ' San Francisco ' } })
     fireEvent.change(document.getElementById('hora_inicio'), { target: { value: '08:00' } })
     fireEvent.change(document.getElementById('hora_fin'), { target: { value: '17:30' } })
-    await user.click(screen.getByRole('button', { name: 'Guardar proveedor' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Guardar proveedor' }))
 
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2))
     expect(JSON.parse(fetchMock.mock.calls[1][1].body)).toMatchObject({
@@ -104,5 +102,30 @@ describe('formulario de proveedor', () => {
       ],
     })
     expect(await screen.findByText('Detalle listo')).toBeInTheDocument()
+  })
+
+  it('muestra junto al selector una especialidad eliminada por otro usuario', async () => {
+    const message = 'Una de las especialidades seleccionadas ya no existe.'
+    const fetchMock = vi
+      .spyOn(globalThis, 'fetch')
+      .mockResolvedValueOnce(jsonResponse([specialty]))
+      .mockResolvedValueOnce(jsonResponse({
+        detail: {
+          code: 'specialty_not_found',
+          field: 'especialidad_ids',
+          message,
+        },
+      }, 422))
+    renderForm()
+
+    fireEvent.change(await screen.findByRole('textbox', { name: /Nombre o razón social/ }), { target: { value: 'Servicios del Centro' } })
+    fireEvent.change(screen.getByRole('textbox', { name: /Teléfono de WhatsApp/ }), { target: { value: '+54 9 3564 555555' } })
+    fireEvent.click(screen.getByRole('checkbox', { name: 'plomería' }))
+    fireEvent.change(screen.getByRole('combobox', { name: /Provincia/ }), { target: { value: 'Córdoba' } })
+    fireEvent.change(screen.getByRole('textbox', { name: /Localidad/ }), { target: { value: 'San Francisco' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Guardar proveedor' }))
+
+    expect(await screen.findByText(message)).toBeInTheDocument()
+    expect(fetchMock).toHaveBeenCalledTimes(2)
   })
 })

@@ -21,6 +21,10 @@ import {
 import { normalizeProveedor, validateProveedor } from '../validation.js'
 import styles from './Proveedores.module.css'
 
+const SERVER_FIELD_ALIASES = {
+  especialidad_ids: 'especialidades',
+}
+
 const newCoverage = () => ({
   key: crypto.randomUUID(),
   provincia: '',
@@ -174,9 +178,10 @@ function ProveedorFormPage() {
       })
     } catch (error) {
       if (error instanceof ApiError && error.body?.detail?.field) {
+        const field = SERVER_FIELD_ALIASES[error.body.detail.field] ?? error.body.detail.field
         setErrors((current) => ({
           ...current,
-          [error.body.detail.field]: error.message,
+          [field]: error.message,
         }))
       } else {
         setSubmitError(error.message || 'No pudimos guardar el proveedor.')

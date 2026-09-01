@@ -1,28 +1,40 @@
 -- ============================================================
--- AARI-46 — Proveedores, cobertura estructurada y horario habitual
--- Migración incremental para bases creadas con 01_modulo_administracion.sql
+-- AARI-46 — Preparación de cobertura estructurada y horario habitual
+-- Fase 1 para bases creadas con 01_modulo_administracion.sql.
+-- Conserva temporalmente zona_cobertura para migrar proveedores existentes.
 -- ============================================================
 
 begin;
 
--- La columna libre no puede convertirse de forma confiable a provincia,
--- localidad y barrios. Evitamos perder datos si ya hubiera proveedores.
+-- Los proveedores nuevos ya escriben coberturas estructuradas. La columna
+-- anterior queda nullable y disponible únicamente como referencia durante la
+-- migración manual. La fase 2 (migración 16) la elimina cuando no quedan
+-- proveedores sin cobertura estructurada.
 do $$
 begin
-    if exists (select 1 from proveedores limit 1) then
-        raise exception using
-            message = 'AARI-46 requiere revisar los proveedores existentes antes de reemplazar zona_cobertura.';
+    if exists (
+        select 1
+        from information_schema.columns
+        where table_schema = current_schema()
+          and table_name = 'proveedores'
+          and column_name = 'zona_cobertura'
+    ) then
+        alter table proveedores alter column zona_cobertura drop not null;
     end if;
 end
 $$;
 
-drop index if exists idx_proveedores_zona;
-
 alter table proveedores
-    drop constraint if exists chk_proveedores_zona_largo,
-    drop column if exists zona_cobertura,
     add column if not exists hora_inicio time,
     add column if not exists hora_fin time;
+
+alter table proveedores
+    drop constraint if exists chk_proveedores_nombre_largo,
+    drop constraint if exists chk_proveedores_nombre_con_letra,
+    drop constraint if exists chk_proveedores_matricula_largo,
+    drop constraint if exists chk_proveedores_telefono_whatsapp,
+    drop constraint if exists chk_proveedores_horario_completo,
+    drop constraint if exists chk_proveedores_horario_orden;
 
 alter table proveedores
     add constraint chk_proveedores_nombre_largo
@@ -84,7 +96,10 @@ create unique index if not exists uq_proveedor_cobertura_barrio_normalizado
 create index if not exists idx_proveedor_cobertura_barrios_barrio
     on proveedor_cobertura_barrios (barrio);
 
-alter table especialidades drop constraint if exists especialidades_nombre_key;
+alter table especialidades
+    drop constraint if exists especialidades_nombre_key,
+    drop constraint if exists chk_especialidades_nombre_largo,
+    drop constraint if exists chk_especialidades_nombre_con_letra;
 alter table especialidades
     add constraint chk_especialidades_nombre_largo
         check (char_length(btrim(nombre)) between 2 and 80),

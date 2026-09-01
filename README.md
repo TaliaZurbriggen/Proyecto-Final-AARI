@@ -190,11 +190,13 @@ El frontend incorpora `/proveedores`, `/proveedores/nuevo`,
 especialidad, provincia, localidad, barrio y estado, además de pantallas
 responsive para alta, edición, detalle y activación o desactivación.
 
-En bases existentes debe aplicarse una vez
-`backend/migrations/15_proveedores_cobertura_horario.sql`. La migración se
-detiene si encuentra proveedores porque la antigua `zona_cobertura` libre no
-puede transformarse de manera confiable a provincia, localidad y barrios. Esos
-registros deben revisarse y migrarse manualmente antes de volver a ejecutarla.
+En bases existentes, la actualización se realiza en dos etapas. La migración
+`backend/migrations/15_proveedores_cobertura_horario.sql` crea las coberturas
+estructuradas y conserva temporalmente `zona_cobertura` para revisar los datos
+anteriores. Después de completar la cobertura de cada proveedor se ejecuta
+`backend/migrations/16_finalizar_cobertura_proveedores.sql`, que verifica que
+no falten datos antes de eliminar la columna libre. El procedimiento y la
+consulta de control están documentados en `backend/migrations/README.md`.
 
 ### Autenticación del administrador
 
