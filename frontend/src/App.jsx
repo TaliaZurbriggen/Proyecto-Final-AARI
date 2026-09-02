@@ -17,15 +17,30 @@ import ProveedoresListPage from './features/proveedores/pages/ProveedoresListPag
 import { AuthProvider } from './features/auth/AuthContext.jsx'
 import ProtectedRoute from './features/auth/ProtectedRoute.jsx'
 import LoginPage from './features/auth/pages/LoginPage.jsx'
+import ChangePasswordPage from './features/auth/pages/ChangePasswordPage.jsx'
+import RoleHomePage from './features/auth/pages/RoleHomePage.jsx'
+import RoleLayout from './layouts/RoleLayout.jsx'
+import { useAuth } from './features/auth/authContext.js'
+import { destinationForUser } from './features/auth/routing.js'
+
+function SessionHomeRedirect() {
+  const { user } = useAuth()
+  return <Navigate replace to={destinationForUser(user)} />
+}
 
 function App() {
   return (
     <AuthProvider>
       <Routes>
         <Route path="login" element={<LoginPage />} />
+        <Route element={<ProtectedRoute allowFirstLogin />}>
+          <Route path="cambiar-contrasena" element={<ChangePasswordPage />} />
+        </Route>
+        <Route element={<ProtectedRoute />}>
+          <Route index element={<SessionHomeRedirect />} />
+        </Route>
         <Route element={<ProtectedRoute allowedRoles={['administrador']} />}>
           <Route element={<AdminLayout />}>
-            <Route index element={<Navigate replace to="/propietarios" />} />
             <Route path="propietarios" element={<PropietariosListPage />} />
             <Route path="propietarios/nuevo" element={<PropietarioFormPage />} />
             <Route
@@ -67,6 +82,21 @@ function App() {
               element={<ProveedorFormPage />}
             />
             <Route path="*" element={<NotFoundPage />} />
+          </Route>
+        </Route>
+        <Route element={<ProtectedRoute allowedRoles={['propietario']} />}>
+          <Route element={<RoleLayout />}>
+            <Route path="propietario" element={<RoleHomePage />} />
+          </Route>
+        </Route>
+        <Route element={<ProtectedRoute allowedRoles={['inquilino']} />}>
+          <Route element={<RoleLayout />}>
+            <Route path="inquilino" element={<RoleHomePage />} />
+          </Route>
+        </Route>
+        <Route element={<ProtectedRoute allowedRoles={['operador']} />}>
+          <Route element={<RoleLayout />}>
+            <Route path="operador" element={<RoleHomePage />} />
           </Route>
         </Route>
         <Route path="design-system" element={<DesignSystemPreview />} />

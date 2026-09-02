@@ -1,0 +1,101 @@
+.notice {
+  margin-bottom: var(--aari-space-5);
+}
+
+.summary {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--aari-space-4);
+  align-items: start;
+  padding: var(--aari-space-6);
+  background: var(--aari-color-surface);
+  border: 1px solid var(--aari-color-border);
+  border-radius: var(--aari-radius-lg);
+  box-shadow: var(--aari-shadow-sm);
+}
+
+.summaryIcon {
+  display: grid;
+  width: 3rem;
+  height: 3rem;
+  place-items: center;
+  color: var(--aari-color-primary-strong);
+  background: var(--aari-color-primary-soft);
+  border-radius: var(--aari-radius-md);
+}
+
+.summaryIcon svg {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.summary h2 {
+  margin-bottom: var(--aari-space-2);
+  color: var(--aari-color-ink);
+  font-size: var(--aari-font-size-xl);
+}
+
+.summary p:not(.eyebrow),
+.cards p {
+  color: var(--aari-color-muted);
+}
+
+.eyebrow {
+  margin-bottom: var(--aari-space-1);
+  color: var(--aari-color-primary-strong);
+  font-size: var(--aari-font-size-xs);
+  font-weight: var(--aari-font-weight-bold);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--aari-space-5);
+  margin-top: var(--aari-space-5);
+}
+
+.cards article {
+  padding: var(--aari-space-5);
+  background: var(--aari-color-surface);
+  border: 1px solid var(--aari-color-border);
+  border-radius: var(--aari-radius-lg);
+}
+
+.cards svg {
+  width: 1.5rem;
+  height: 1.5rem;
+  margin-bottom: var(--aari-space-3);
+  color: var(--aari-color-primary-strong);
+}
+
+.cards h2 {
+  margin-bottom: var(--aari-space-2);
+  color: var(--aari-color-ink);
+  font-size: var(--aari-font-size-lg);
+}
+
+.cards span {
+  display: inline-flex;
+  margin-top: var(--aari-space-4);
+  padding: var(--aari-space-1) var(--aari-space-3);
+  color: var(--aari-color-muted);
+  background: var(--aari-color-neutral-soft);
+  border-radius: var(--aari-radius-full);
+  font-size: var(--aari-font-size-xs);
+  font-weight: var(--aari-font-weight-semibold);
+}
+
+@media (max-width: 48rem) {
+  .cards {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 32rem) {
+  .summary {
+    grid-template-columns: 1fr;
+    padding: var(--aari-space-5);
+  }
+}

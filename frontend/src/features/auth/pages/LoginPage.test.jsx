@@ -20,6 +20,8 @@ function renderLogin() {
       <AuthProvider>
         <Routes>
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/cambiar-contrasena" element={<h1>Cambio obligatorio</h1>} />
+          <Route path="/propietario" element={<h1>Portal propietario</h1>} />
           <Route path="/propietarios" element={<h1>Panel administrativo</h1>} />
         </Routes>
       </AuthProvider>
@@ -98,5 +100,35 @@ describe('LoginPage', () => {
         screen.getByText('El email o la contraseña son incorrectos.'),
       ).toBeInTheDocument()
     })
+  })
+
+  it('envía el primer ingreso al cambio obligatorio antes del portal', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (url) => {
+        if (url.endsWith('/auth/me')) {
+          return jsonResponse({ detail: 'Sin sesión' }, 401)
+        }
+        return jsonResponse({
+          user: {
+            email: 'ana@example.com',
+            id: '00000000-0000-0000-0000-000000000068',
+            perfil_id: '00000000-0000-0000-0000-000000000069',
+            primer_ingreso: true,
+            rol: 'propietario',
+          },
+        })
+      }),
+    )
+    const user = userEvent.setup()
+    renderLogin()
+
+    await user.type(screen.getByLabelText('Email*'), 'ana@example.com')
+    await user.type(screen.getByLabelText('Contraseña*'), '30123456')
+    await user.click(screen.getByRole('button', { name: 'Ingresar' }))
+
+    expect(
+      await screen.findByRole('heading', { name: 'Cambio obligatorio' }),
+    ).toBeInTheDocument()
   })
 })

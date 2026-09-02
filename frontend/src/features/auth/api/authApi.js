@@ -14,3 +14,10 @@ export function getCurrentUser() {
 export function logout() {
   return apiRequest('/auth/logout', { method: 'POST' })
 }
+
+export function changePassword(payload) {
+  return apiRequest('/auth/cambiar-contrasena', {
+    body: JSON.stringify(payload),
+    method: 'POST',
+  })
+}

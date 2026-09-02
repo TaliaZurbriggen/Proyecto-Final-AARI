@@ -82,6 +82,26 @@
   text-transform: uppercase;
 }
 
+.session {
+  display: grid;
+  gap: var(--aari-space-1);
+  padding: var(--aari-space-4);
+  color: var(--aari-color-text);
+  background: var(--aari-color-surface-soft);
+  border: 1px solid var(--aari-color-border);
+  border-radius: var(--aari-radius-md);
+  overflow-wrap: anywhere;
+}
+
+.session span {
+  color: var(--aari-color-muted);
+  font-size: var(--aari-font-size-sm);
+}
+
+.session strong {
+  color: var(--aari-color-ink);
+}
+
 .form {
   display: grid;
   gap: var(--aari-space-5);

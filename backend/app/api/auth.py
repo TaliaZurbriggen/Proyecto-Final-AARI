@@ -13,13 +13,20 @@ from app.core.security import (
     create_access_token,
     decode_access_token,
 )
+from app.db.access import SqlAlchemyAccessRepository
 from app.db.usuarios import SqlAlchemyUsuariosRepository
-from app.schemas.auth import AuthResponse, AuthenticatedUser, LoginRequest
+from app.schemas.auth import (
+    AuthResponse,
+    AuthenticatedUser,
+    ChangePasswordRequest,
+    LoginRequest,
+)
 from app.services.auth_service import (
     AccountLockedError,
     AuthService,
     InactiveAccountError,
     InvalidCredentialsError,
+    InvalidCurrentPasswordError,
 )
 
 
@@ -27,7 +34,7 @@ router = APIRouter(prefix="/auth", tags=["autenticación"])
 
 
 def get_auth_service() -> AuthService:
-    return AuthService(SqlAlchemyUsuariosRepository())
+    return AuthService(SqlAlchemyUsuariosRepository(), SqlAlchemyAccessRepository())
 
 
 def _unauthorized(message: str = "La sesión no es válida o venció.") -> HTTPException:
@@ -60,6 +67,14 @@ def require_roles(*roles: str) -> Callable[..., AuthenticatedUser]:
                 detail={
                     "code": "forbidden",
                     "message": "No tenés permiso para acceder a este recurso.",
+                },
+            )
+        if user.primer_ingreso:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail={
+                    "code": "first_login_required",
+                    "message": "Debés cambiar tu contraseña antes de continuar.",
                 },
             )
         return user
@@ -97,6 +112,11 @@ def login(
             },
         ) from error
 
+    _set_session_cookie(response, user)
+    return AuthResponse(user=user)
+
+
+def _set_session_cookie(response: Response, user: AuthenticatedUser) -> None:
     token = create_access_token(
         user_id=str(user.id),
         role=user.rol,
@@ -111,12 +131,33 @@ def login(
         max_age=access_token_minutes() * 60,
         path="/",
     )
-    return AuthResponse(user=user)
 
 
 @router.get("/me", response_model=AuthResponse)
 def me(user: AuthenticatedUser = Depends(get_current_user)) -> AuthResponse:
     return AuthResponse(user=user)
+
+
+@router.post("/cambiar-contrasena", response_model=AuthResponse)
+def change_password(
+    payload: ChangePasswordRequest,
+    response: Response,
+    user: AuthenticatedUser = Depends(get_current_user),
+    service: AuthService = Depends(get_auth_service),
+) -> AuthResponse:
+    try:
+        updated_user = service.change_password(user.id, payload)
+    except InvalidCurrentPasswordError as error:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={
+                "code": "invalid_current_password",
+                "field": "password_actual",
+                "message": "La contraseña actual es incorrecta.",
+            },
+        ) from error
+    _set_session_cookie(response, updated_user)
+    return AuthResponse(user=updated_user)
 
 
 @router.post("/logout", status_code=status.HTTP_204_NO_CONTENT)

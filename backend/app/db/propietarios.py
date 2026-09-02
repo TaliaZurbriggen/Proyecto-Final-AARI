@@ -5,6 +5,11 @@ from uuid import UUID, uuid4
 from sqlalchemy import text
 from sqlalchemy.exc import IntegrityError
 
+from app.db.access import (
+    access_from_row,
+    create_access_account,
+    sync_pending_access_account,
+)
 from app.db.database import SessionLocal
 from app.services.propietarios_service import (
     DuplicatePropietarioValueError,
@@ -33,28 +38,46 @@ class SqlAlchemyPropietariosRepository:
             or "propietarios.email" in message
         ):
             raise DuplicatePropietarioValueError("email") from error
+        if (
+            constraint in {"usuarios_email_key", "uq_usuarios_email_normalizado"}
+            or "usuarios.email" in message
+            or "uq_usuarios_email_normalizado" in message
+        ):
+            raise DuplicatePropietarioValueError("email") from error
         if constraint == "propiedades_propietario_id_fkey" or "foreign key" in message:
             raise PropietarioHasPropertiesError from error
         raise error
 
     def create(self, data: dict[str, object]) -> dict[str, object]:
+        propietario_id = str(uuid4())
         statement = text(
             """
-            INSERT INTO propietarios (id, nombre_completo, dni, email, telefono)
-            VALUES (:id, :nombre_completo, :dni, :email, :telefono)
-            RETURNING id, nombre_completo, dni, email, telefono,
-                      created_at, updated_at
+            INSERT INTO propietarios
+                (id, nombre_completo, dni, email, telefono, usuario_id)
+            VALUES
+                (:id, :nombre_completo, :dni, :email, :telefono, :usuario_id)
             """
         )
-        params = {"id": str(uuid4()), **data}
 
         try:
             with self.session_factory.begin() as session:
-                row = session.execute(statement, params).mappings().one()
+                user_id = create_access_account(
+                    session,
+                    email=str(data["email"]),
+                    temporary_password=str(data["dni"]),
+                    role="propietario",
+                )
+                session.execute(
+                    statement,
+                    {"id": propietario_id, "usuario_id": user_id, **data},
+                )
         except IntegrityError as error:
             self._translate_integrity_error(error)
 
-        return {**dict(row), "cantidad_inmuebles": 0}
+        record = self.get_detail(UUID(propietario_id))
+        if record is None:  # pragma: no cover - defensa ante una BD inconsistente
+            raise RuntimeError("El propietario creado no pudo recuperarse.")
+        return {**record, "usuario_id": user_id}
 
     def list(
         self, *, page: int, page_size: int, search: str | None
@@ -101,12 +124,20 @@ class SqlAlchemyPropietariosRepository:
             """
             SELECT pr.id, pr.nombre_completo, pr.dni, pr.email, pr.telefono,
                    pr.created_at, pr.updated_at,
-                   CAST(COUNT(p.id) AS INTEGER) AS cantidad_inmuebles
+                   CAST(COUNT(p.id) AS INTEGER) AS cantidad_inmuebles,
+                   CAST(ec.estado AS TEXT) AS acceso_estado,
+                   ec.intentos AS acceso_intentos,
+                   ec.ultimo_error AS acceso_ultimo_error,
+                   ec.enviado_en AS acceso_enviado_en,
+                   u.primer_ingreso AS acceso_primer_ingreso
             FROM propietarios pr
             LEFT JOIN propiedades p ON p.propietario_id = pr.id
+            LEFT JOIN usuarios u ON u.id = pr.usuario_id
+            LEFT JOIN entregas_credenciales ec ON ec.usuario_id = u.id
             WHERE pr.id = :propietario_id
             GROUP BY pr.id, pr.nombre_completo, pr.dni, pr.email, pr.telefono,
-                     pr.created_at, pr.updated_at
+                     pr.created_at, pr.updated_at, ec.estado, ec.intentos,
+                     ec.ultimo_error, ec.enviado_en, u.primer_ingreso
             """
         )
         properties_statement = text(
@@ -126,7 +157,12 @@ class SqlAlchemyPropietariosRepository:
                 return None
             properties = session.execute(properties_statement, params).mappings().all()
 
-        return {**dict(owner), "propiedades": [dict(row) for row in properties]}
+        record = dict(owner)
+        return {
+            **record,
+            "acceso": access_from_row(record),
+            "propiedades": [dict(row) for row in properties],
+        }
 
     def update(
         self, propietario_id: UUID, data: dict[str, object]
@@ -148,7 +184,25 @@ class SqlAlchemyPropietariosRepository:
 
         try:
             with self.session_factory.begin() as session:
+                current = session.execute(
+                    text(
+                        "SELECT email, dni, usuario_id FROM propietarios "
+                        "WHERE id = :propietario_id"
+                    ),
+                    {"propietario_id": str(propietario_id)},
+                ).mappings().one_or_none()
+                if current is None:
+                    return None
                 row = session.execute(statement, params).mappings().one_or_none()
+                if current["usuario_id"] is not None:
+                    sync_pending_access_account(
+                        session,
+                        user_id=current["usuario_id"],
+                        email=str(data["email"]),
+                        temporary_password=str(data["dni"]),
+                        email_changed=str(current["email"]).lower() != str(data["email"]).lower(),
+                        dni_changed=str(current["dni"]) != str(data["dni"]),
+                    )
         except IntegrityError as error:
             self._translate_integrity_error(error)
 
@@ -168,12 +222,34 @@ class SqlAlchemyPropietariosRepository:
 
         try:
             with self.session_factory.begin() as session:
+                user_id = session.execute(
+                    text(
+                        "SELECT usuario_id FROM propietarios "
+                        "WHERE id = :propietario_id"
+                    ),
+                    params,
+                ).scalar_one_or_none()
+                if user_id is None:
+                    exists = session.execute(
+                        text(
+                            "SELECT 1 FROM propietarios "
+                            "WHERE id = :propietario_id"
+                        ),
+                        params,
+                    ).scalar_one_or_none()
+                    if exists is None:
+                        return False
                 property_count = int(
                     session.execute(properties_statement, params).scalar_one()
                 )
                 if property_count:
                     raise PropietarioHasPropertiesError
                 result = session.execute(delete_statement, params)
+                if result.rowcount > 0 and user_id is not None:
+                    session.execute(
+                        text("DELETE FROM usuarios WHERE id = :user_id"),
+                        {"user_id": str(user_id)},
+                    )
                 return result.rowcount > 0
         except IntegrityError as error:
             self._translate_integrity_error(error)

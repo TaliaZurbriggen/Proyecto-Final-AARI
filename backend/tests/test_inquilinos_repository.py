@@ -28,6 +28,45 @@ def repository() -> SqlAlchemyInquilinosRepository:
         connection.execute(
             text(
                 """
+                CREATE TABLE usuarios (
+                    id TEXT PRIMARY KEY,
+                    email TEXT NOT NULL UNIQUE,
+                    password_hash TEXT NOT NULL,
+                    rol TEXT NOT NULL,
+                    primer_ingreso BOOLEAN NOT NULL DEFAULT 1,
+                    activo BOOLEAN NOT NULL DEFAULT 1,
+                    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+                )
+                """
+            )
+        )
+        connection.execute(
+            text(
+                "CREATE UNIQUE INDEX uq_usuarios_email_normalizado "
+                "ON usuarios (lower(email))"
+            )
+        )
+        connection.execute(
+            text(
+                """
+                CREATE TABLE entregas_credenciales (
+                    id TEXT PRIMARY KEY,
+                    usuario_id TEXT NOT NULL UNIQUE REFERENCES usuarios(id),
+                    destinatario_email TEXT NOT NULL,
+                    estado TEXT NOT NULL,
+                    intentos INTEGER NOT NULL DEFAULT 0,
+                    ultimo_error TEXT,
+                    enviado_en TEXT,
+                    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+                )
+                """
+            )
+        )
+        connection.execute(
+            text(
+                """
                 CREATE TABLE propiedades (
                     id TEXT PRIMARY KEY,
                     direccion TEXT NOT NULL,
@@ -52,6 +91,7 @@ def repository() -> SqlAlchemyInquilinosRepository:
                     telefono TEXT NOT NULL,
                     propiedad_id TEXT,
                     estado TEXT NOT NULL,
+                    usuario_id TEXT REFERENCES usuarios(id),
                     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
                     updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
                 )
@@ -136,6 +176,7 @@ def test_repository_runs_full_crud_and_property_lookup(
 
     assert len(items) == total == 1
     assert by_property is not None and by_property["id"] == created["id"]
+    assert created["acceso"]["estado"] == "pendiente"
     assert updated is not None
     assert str(updated["propiedad"]["id"]) == str(second_property)
     assert repository.get_active_by_property(first_property) is None
@@ -144,6 +185,8 @@ def test_repository_runs_full_crud_and_property_lookup(
     assert disassociated["propiedad"] is None
     assert repository.delete(tenant_id) is True
     assert repository.get_detail(tenant_id) is None
+    with repository.session_factory() as session:
+        assert session.execute(text("SELECT COUNT(*) FROM usuarios")).scalar_one() == 0
 
 
 def test_repository_rejects_missing_or_occupied_property(

@@ -8,6 +8,8 @@ from uuid import UUID
 
 from pydantic import BaseModel, EmailStr, Field, field_validator
 
+from app.schemas.access import AccesoResponse
+
 
 PERSON_NAME_PATTERN = re.compile(r"^[^\W\d_]+(?:[ '\-’][^\W\d_]+)*$", re.UNICODE)
 PERSON_NAME_ERROR = (
@@ -82,6 +84,7 @@ class InquilinoResponse(InquilinoContactInput):
     propiedad: PropiedadInquilinoResumen | None = None
     estado: EstadoInquilino
     cantidad_reclamos: int = Field(ge=0)
+    acceso: AccesoResponse | None = None
     created_at: datetime
     updated_at: datetime
 

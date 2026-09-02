@@ -40,3 +40,9 @@ export function disassociateInquilino(inquilinoId) {
 export function deleteInquilino(inquilinoId) {
   return apiRequest(`/inquilinos/${inquilinoId}`, { method: 'DELETE' })
 }
+
+export function retryInquilinoAccess(inquilinoId) {
+  return apiRequest(`/inquilinos/${inquilinoId}/acceso/reintentar`, {
+    method: 'POST',
+  })
+}

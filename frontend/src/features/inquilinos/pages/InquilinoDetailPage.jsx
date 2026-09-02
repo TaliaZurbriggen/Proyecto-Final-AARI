@@ -11,6 +11,7 @@ import {
 } from 'lucide-react'
 import { Link, useLocation, useNavigate, useParams } from 'react-router'
 import { PageContainer, PageHeading } from '../../../components/layout/index.js'
+import AccessDeliveryPanel from '../../access/components/AccessDeliveryPanel.jsx'
 import {
   AlertMessage,
   Button,
@@ -22,6 +23,7 @@ import {
   deleteInquilino,
   disassociateInquilino,
   getInquilino,
+  retryInquilinoAccess,
 } from '../api/inquilinosApi.js'
 import styles from './Inquilinos.module.css'
 
@@ -43,6 +45,7 @@ function InquilinoDetailPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [dialogAction, setDialogAction] = useState(null)
   const [isBusy, setIsBusy] = useState(false)
+  const [isRetryingAccess, setIsRetryingAccess] = useState(false)
 
   const loadTenant = useCallback(
     (signal) =>
@@ -94,6 +97,24 @@ function InquilinoDetailPage() {
     }
   }
 
+  const handleRetryAccess = async () => {
+    setIsRetryingAccess(true)
+    setError('')
+    try {
+      const updatedTenant = await retryInquilinoAccess(inquilinoId)
+      setTenant(updatedTenant)
+      setNotice(
+        updatedTenant.acceso?.estado === 'enviado'
+          ? 'Las credenciales se enviaron correctamente.'
+          : 'El correo sigue sin poder entregarse. Revisá la configuración e intentá nuevamente.',
+      )
+    } catch (requestError) {
+      setError(requestError.message)
+    } finally {
+      setIsRetryingAccess(false)
+    }
+  }
+
   if (isLoading) {
     return (
       <PageContainer>
@@ -132,7 +153,11 @@ function InquilinoDetailPage() {
       />
 
       <div className={styles.feedbackStack}>
-        {notice ? <AlertMessage tone="success">{notice}</AlertMessage> : null}
+        {notice ? (
+          <AlertMessage tone={tenant.acceso?.estado === 'fallido' ? 'warning' : 'success'}>
+            {notice}
+          </AlertMessage>
+        ) : null}
         {error ? <AlertMessage>{error}</AlertMessage> : null}
         {hasClaims ? (
           <AlertMessage tone="warning">
@@ -140,6 +165,12 @@ function InquilinoDetailPage() {
           </AlertMessage>
         ) : null}
       </div>
+
+      <AccessDeliveryPanel
+        access={tenant.acceso}
+        isRetrying={isRetryingAccess}
+        onRetry={handleRetryAccess}
+      />
 
       <div className={styles.detailGrid}>
         <section className={styles.detailPanel} aria-labelledby="tenant-data-title">

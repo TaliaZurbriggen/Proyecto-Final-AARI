@@ -4,6 +4,7 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 
+from app.db.access import SqlAlchemyAccessRepository
 from app.db.inquilinos import SqlAlchemyInquilinosRepository
 from app.schemas.inquilinos import (
     InquilinoCreate,
@@ -20,13 +21,25 @@ from app.services.inquilinos_service import (
     InquilinoPropertyOccupiedError,
     InquilinosService,
 )
+from app.services.access_service import (
+    AccessAlreadyActivatedError,
+    AccessInvitationService,
+    AccessNotFoundError,
+    SmtpWelcomeEmailSender,
+)
 
 router = APIRouter(prefix="/inquilinos", tags=["inquilinos"])
 property_router = APIRouter(prefix="/propiedades", tags=["inquilinos"])
 
 
 def get_inquilinos_service() -> InquilinosService:
-    return InquilinosService(SqlAlchemyInquilinosRepository())
+    return InquilinosService(
+        SqlAlchemyInquilinosRepository(),
+        AccessInvitationService(
+            SqlAlchemyAccessRepository(),
+            SmtpWelcomeEmailSender(),
+        ),
+    )
 
 
 def _duplicate_dni_error() -> HTTPException:
@@ -109,6 +122,28 @@ def get_inquilino(
         return service.get_detail(inquilino_id)
     except InquilinoNotFoundError as error:
         raise HTTPException(status_code=404, detail="Inquilino no encontrado.") from error
+
+
+@router.post("/{inquilino_id}/acceso/reintentar", response_model=InquilinoResponse)
+def retry_inquilino_access(
+    inquilino_id: UUID,
+    service: InquilinosService = Depends(get_inquilinos_service),
+) -> InquilinoResponse:
+    try:
+        return service.retry_access(inquilino_id)
+    except (InquilinoNotFoundError, AccessNotFoundError) as error:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="No encontramos una cuenta vinculada al inquilino.",
+        ) from error
+    except AccessAlreadyActivatedError as error:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail={
+                "code": "access_already_activated",
+                "message": "La cuenta ya fue activada y no usa la contraseña temporal.",
+            },
+        ) from error
 
 
 @router.put("/{inquilino_id}", response_model=InquilinoResponse)

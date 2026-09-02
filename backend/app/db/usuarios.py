@@ -15,11 +15,16 @@ class SqlAlchemyUsuariosRepository:
     def find_for_login(self, email: str, password: str) -> dict[str, object] | None:
         statement = text(
             """
-            SELECT id, email, CAST(rol AS TEXT) AS rol, primer_ingreso, activo,
+            SELECT u.id, u.email, CAST(u.rol AS TEXT) AS rol,
+                   u.primer_ingreso, u.activo,
                    intentos_fallidos, bloqueado_hasta,
-                   password_hash = crypt(:password, password_hash) AS password_valid
-            FROM usuarios
-            WHERE lower(email) = :email
+                   password_hash = crypt(:password, password_hash) AS password_valid,
+                   COALESCE(
+                       (SELECT p.id FROM propietarios p WHERE p.usuario_id = u.id),
+                       (SELECT i.id FROM inquilinos i WHERE i.usuario_id = u.id)
+                   ) AS perfil_id
+            FROM usuarios u
+            WHERE lower(u.email) = :email
             """
         )
         with self.session_factory() as session:
@@ -32,9 +37,14 @@ class SqlAlchemyUsuariosRepository:
     def get_by_id(self, user_id: UUID) -> dict[str, object] | None:
         statement = text(
             """
-            SELECT id, email, CAST(rol AS TEXT) AS rol, primer_ingreso, activo
-            FROM usuarios
-            WHERE id = :user_id
+            SELECT u.id, u.email, CAST(u.rol AS TEXT) AS rol,
+                   u.primer_ingreso, u.activo,
+                   COALESCE(
+                       (SELECT p.id FROM propietarios p WHERE p.usuario_id = u.id),
+                       (SELECT i.id FROM inquilinos i WHERE i.usuario_id = u.id)
+                   ) AS perfil_id
+            FROM usuarios u
+            WHERE u.id = :user_id
             """
         )
         with self.session_factory() as session:

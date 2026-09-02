@@ -27,6 +27,8 @@ function AppHeader({
   profileRole = 'Administración',
   searchPlaceholder = 'Buscar reclamo o propiedad',
   searchValue,
+  showNotifications = true,
+  showSearch = true,
 }) {
   const navigationRef = useRef(null)
 
@@ -78,17 +80,21 @@ function AppHeader({
           })}
         </nav>
 
-        <SearchInput
-          className={styles.search}
-          label="Buscar en AARI"
-          onChange={onSearchChange}
-          onClear={onSearchClear}
-          placeholder={searchPlaceholder}
-          value={searchValue}
-        />
+        {showSearch ? (
+          <SearchInput
+            className={styles.search}
+            label="Buscar en AARI"
+            onChange={onSearchChange}
+            onClear={onSearchClear}
+            placeholder={searchPlaceholder}
+            value={searchValue}
+          />
+        ) : null}
 
-        <div className={styles.account}>
-          <div className={styles.notification}>
+        <div
+          className={`${styles.account} ${!showSearch ? styles.accountAtEnd : ''}`}
+        >
+          {showNotifications ? <div className={styles.notification}>
             <IconButton
               label={
                 notificationCount > 0
@@ -104,7 +110,7 @@ function AppHeader({
                 {notificationCount > 9 ? '9+' : notificationCount}
               </span>
             ) : null}
-          </div>
+          </div> : null}
 
           <button
             aria-label={`Abrir perfil de ${profileName}`}

@@ -3,6 +3,7 @@
 from typing import Protocol
 from uuid import UUID
 
+from app.services.access_service import AccessInvitationService
 from app.schemas.propietarios import (
     PropietarioCreate,
     PropietarioDetailResponse,
@@ -47,12 +48,35 @@ class PropietariosRepository(Protocol):
 class PropietariosService:
     """Orquesta validaciones de existencia y contratos de respuesta."""
 
-    def __init__(self, repository: PropietariosRepository) -> None:
+    def __init__(
+        self,
+        repository: PropietariosRepository,
+        access_service: AccessInvitationService | None = None,
+    ) -> None:
         self.repository = repository
+        self.access_service = access_service
 
     def create(self, payload: PropietarioCreate) -> PropietarioResponse:
         record = self.repository.create(payload.model_dump(mode="json"))
+        if self.access_service is not None:
+            self.access_service.deliver(
+                user_id=UUID(str(record["usuario_id"])),
+                recipient=payload.email,
+                person_name=payload.nombre_completo,
+                temporary_password=payload.dni,
+            )
+            refreshed = self.repository.get_detail(UUID(str(record["id"])))
+            if refreshed is not None:
+                record = refreshed
         return PropietarioResponse.model_validate(record)
+
+    def retry_access(self, propietario_id: UUID) -> PropietarioDetailResponse:
+        if self.repository.get_detail(propietario_id) is None:
+            raise PropietarioNotFoundError
+        if self.access_service is None:  # pragma: no cover - error de composición
+            raise RuntimeError("El servicio de acceso no está configurado.")
+        self.access_service.retry(entity="propietario", entity_id=propietario_id)
+        return self.get_detail(propietario_id)
 
     def list(
         self, *, page: int, page_size: int, search: str | None

@@ -13,8 +13,11 @@ Ejecutar desde el SQL Editor, en este orden:
 5. `05_seed_admin.sql` — reemplazar los valores de ejemplo antes de ejecutarlo.
 6. `06_clasificacion_agente.sql`
 
-La instalación nueva debe aplicar además `13_autenticacion_usuarios.sql` para
-agregar las restricciones e índices de acceso seguro.
+La instalación nueva debe aplicar además, en orden:
+
+1. `13_autenticacion_usuarios.sql` — restricciones e índices de acceso seguro.
+2. `14_acceso_propietarios_inquilinos.sql` — cuentas vinculadas, backfill y
+   seguimiento del correo de bienvenida.
 
 El módulo de administración inicial ya incorpora el resultado de las
 migraciones incrementales 07, 08, 09, 10, 11, 12, 15 y 16. No deben repetirse
@@ -38,12 +41,17 @@ Aplicar únicamente las migraciones pendientes y respetar este orden:
    corregir nombres reales de forma automática.
 7. `13_autenticacion_usuarios.sql` — normaliza el email de acceso y agrega
    restricciones e índices para intentos fallidos y bloqueos temporales.
-8. `15_proveedores_cobertura_horario.sql` — agrega el horario habitual y las
+8. `14_acceso_propietarios_inquilinos.sql` — crea cuentas para propietarios e
+   inquilinos existentes, vincula cada persona con un único usuario y agrega el
+   estado persistente del envío de credenciales. La migración se detiene si
+   detecta emails repetidos entre identidades de acceso para evitar asignaciones
+   ambiguas.
+9. `15_proveedores_cobertura_horario.sql` — agrega el horario habitual y las
    tablas de cobertura estructurada. Conserva temporalmente `zona_cobertura`
    para revisar proveedores existentes sin perder información.
-9. Completar las coberturas estructuradas de los proveedores que devuelve la
+10. Completar las coberturas estructuradas de los proveedores que devuelve la
    consulta indicada abajo.
-10. `16_finalizar_cobertura_proveedores.sql` — verifica que todos los
+11. `16_finalizar_cobertura_proveedores.sql` — verifica que todos los
     proveedores tengan cobertura válida y recién entonces elimina
     `zona_cobertura`.
 

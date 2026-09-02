@@ -1,0 +1,72 @@
+.panel {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: var(--aari-space-4);
+  align-items: center;
+  margin-bottom: var(--aari-space-5);
+  padding: var(--aari-space-5);
+  background: var(--aari-color-surface);
+  border: 1px solid var(--aari-color-border);
+  border-radius: var(--aari-radius-lg);
+  box-shadow: var(--aari-shadow-sm);
+}
+
+.icon {
+  display: grid;
+  width: 2.75rem;
+  height: 2.75rem;
+  place-items: center;
+  color: var(--aari-color-primary-strong);
+  background: var(--aari-color-primary-soft);
+  border-radius: var(--aari-radius-md);
+}
+
+.icon svg {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.copy {
+  min-width: 0;
+}
+
+.heading {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--aari-space-3);
+  align-items: center;
+  margin-bottom: var(--aari-space-1);
+}
+
+.heading h2 {
+  color: var(--aari-color-ink);
+  font-size: var(--aari-font-size-lg);
+}
+
+.copy p,
+.copy small {
+  color: var(--aari-color-muted);
+}
+
+.copy small {
+  display: block;
+  margin-top: var(--aari-space-1);
+  font-size: var(--aari-font-size-xs);
+}
+
+@media (max-width: 48rem) {
+  .panel {
+    grid-template-columns: auto 1fr;
+  }
+
+  .panel > button {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+}
+
+@media (max-width: 32rem) {
+  .panel {
+    grid-template-columns: 1fr;
+  }
+}
