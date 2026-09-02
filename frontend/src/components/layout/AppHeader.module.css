@@ -63,6 +63,11 @@
   align-items: center;
   align-self: stretch;
   gap: var(--aari-space-1);
+  scrollbar-width: none;
+}
+
+.navigation::-webkit-scrollbar {
+  display: none;
 }
 
 .link,

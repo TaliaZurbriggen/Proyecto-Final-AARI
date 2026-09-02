@@ -9,6 +9,8 @@ from app.api.inquilinos import property_router as property_tenant_router
 from app.api.inquilinos import router as inquilinos_router
 from app.api.propiedades import router as propiedades_router
 from app.api.propietarios import router as propietarios_router
+from app.api.proveedores import router as proveedores_router
+from app.api.proveedores import specialties_router
 from app.api.reclamos import router as reclamos_router
 from app.db.database import engine
 
@@ -34,6 +36,8 @@ app.include_router(propiedades_router, dependencies=admin_dependencies)
 app.include_router(property_tenant_router, dependencies=admin_dependencies)
 app.include_router(propietarios_router, dependencies=admin_dependencies)
 app.include_router(inquilinos_router, dependencies=admin_dependencies)
+app.include_router(proveedores_router, dependencies=admin_dependencies)
+app.include_router(specialties_router, dependencies=admin_dependencies)
 app.include_router(reclamos_router)
 
 

@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react'
 import { Bell, Building2, LogOut } from 'lucide-react'
 import { IconButton, SearchInput } from '../ui/index.js'
 import styles from './AppHeader.module.css'
@@ -29,6 +30,14 @@ function AppHeader({
   showNotifications = true,
   showSearch = true,
 }) {
+  const navigationRef = useRef(null)
+
+  useEffect(() => {
+    navigationRef.current
+      ?.querySelector('[aria-current="page"]')
+      ?.scrollIntoView?.({ block: 'nearest', inline: 'center' })
+  }, [activeItem])
+
   const handleNavigation = (event, item) => {
     if (onNavigate) {
       event.preventDefault()
@@ -49,7 +58,11 @@ function AppHeader({
           </span>
         </a>
 
-        <nav className={styles.navigation} aria-label="Navegación principal">
+        <nav
+          className={styles.navigation}
+          aria-label="Navegación principal"
+          ref={navigationRef}
+        >
           {items.map((item) => {
             const isActive = item.label === activeItem
 

@@ -52,7 +52,8 @@ Proyecto-Final-AARI/
 │   ├── public/                  # Recursos estáticos
 │   ├── src/
 │   │   ├── components/          # UI y layouts reutilizables
-│   │   ├── pages/               # Pantallas de la aplicación
+│   │   ├── features/            # Módulos de auth, personas, inmuebles y proveedores
+│   │   ├── pages/               # Pantallas generales de la aplicación
 │   │   └── styles/              # Tokens y estilos globales
 │   ├── AGENTS.md                # Reglas específicas del frontend
 │   ├── Dockerfile
@@ -163,6 +164,46 @@ activa por propiedad. A continuación se aplica
 `backend/migrations/12_nombres_personas_validos.sql`, que incorpora el formato
 de nombres a propietarios e inquilinos y se detiene si encuentra datos que no
 puede corregir de manera segura.
+
+### Gestión de proveedores
+
+La API permite registrar, buscar, filtrar, consultar y editar proveedores, y
+cambiar su estado entre activo e inactivo sin eliminar su historial. El
+teléfono de WhatsApp se normaliza a formato internacional y es único. Cada
+proveedor debe tener al menos una especialidad; el catálogo incluye oficios
+predefinidos y admite especialidades personalizadas reutilizables.
+
+La cobertura se registra de forma estructurada mediante una o más combinaciones
+de provincia y localidad. En cada localidad se puede indicar cobertura completa
+o una lista concreta de barrios. Esta estructura permite que la selección
+automática de futuros reclamos filtre por ubicación sin interpretar texto
+libre. Una propiedad sin barrio solo será compatible con proveedores que cubran
+toda su localidad.
+
+El horario habitual de inicio y fin es opcional y solo funciona como referencia
+operativa. No representa turnos disponibles ni reemplaza la coordinación de
+visitas prevista para el módulo agéntico. Si se informa, ambos horarios son
+obligatorios y el fin debe ser posterior al inicio dentro del mismo día.
+
+El frontend incorpora `/proveedores`, `/proveedores/nuevo`,
+`/proveedores/:id` y `/proveedores/:id/editar`. Incluye filtros combinables por
+especialidad, provincia, localidad, barrio y estado, además de pantallas
+responsive para alta, edición, detalle y activación o desactivación. El filtro
+por barrio exige indicar también provincia y localidad para evitar coincidencias
+entre barrios homónimos o proveedores que cubren otra ciudad completa.
+
+Las cinco tablas del módulo de proveedores tienen RLS habilitado y no conceden
+permisos a los roles `anon` ni `authenticated` del Data API de Supabase. La
+aplicación accede a ellas exclusivamente mediante FastAPI y la conexión segura
+del backend; no se definen políticas públicas para acceso directo.
+
+En bases existentes, la actualización se realiza en dos etapas. La migración
+`backend/migrations/15_proveedores_cobertura_horario.sql` crea las coberturas
+estructuradas y conserva temporalmente `zona_cobertura` para revisar los datos
+anteriores. Después de completar la cobertura de cada proveedor se ejecuta
+`backend/migrations/16_finalizar_cobertura_proveedores.sql`, que verifica que
+no falten datos antes de eliminar la columna libre. El procedimiento y la
+consulta de control están documentados en `backend/migrations/README.md`.
 
 ### Autenticación del administrador
 
@@ -300,7 +341,7 @@ Una vez instalado todo esto, segui con las secciones de abajo.
      | `+`      | `%2B`     |
      | espacio  | `%20`     |
 
-6. Probá la conexión levantando el servidor y entrando a `http://127.0.0.1:8000/health/db`. Si ves `{"status":"ok",...}`, la conexión funciona.
+6. Probá la conexión levantando el servidor y entrando a `http://localhost:8000/health/db`. Si ves `{"status":"ok",...}`, la conexión funciona.
 
 7. Instalá las dependencias:
 ```bash
@@ -312,7 +353,7 @@ Una vez instalado todo esto, segui con las secciones de abajo.
    uvicorn app.main:app --reload
 ```
 
-9. Probá que funciona entrando a `http://127.0.0.1:8000/health` en el navegador.
+9. Probá que funciona entrando a `http://localhost:8000/health` en el navegador.
 
 ### Alternativa: levantar el backend con Docker
 
@@ -349,6 +390,12 @@ docker run -p 8000:8000 --env-file .env aari-backend
 ```
 
 5. Abrí `http://localhost:5173/` en el navegador para ver la aplicación.
+
+> En desarrollo local usá `localhost` tanto para el frontend como para el
+> backend. No mezcles `localhost` con `127.0.0.1`: el navegador los considera
+> sitios diferentes y puede impedir que la cookie de sesión se envíe después
+> del inicio de sesión. El valor recomendado es
+> `VITE_API_URL=http://localhost:8000`.
 
 ### Validaciones del frontend
 
