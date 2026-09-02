@@ -1,6 +1,8 @@
 -- AARI-68 / HU6: cuentas vinculadas y seguimiento del correo de bienvenida.
 -- Requiere 01_modulo_administracion.sql y 13_autenticacion_usuarios.sql.
 
+begin;
+
 create unique index if not exists uq_propietarios_usuario
     on propietarios (usuario_id)
     where usuario_id is not null;
@@ -166,3 +168,5 @@ select usuario_id, lower(btrim(email)), 'pendiente'
 from inquilinos
 where usuario_id is not null
 on conflict (usuario_id) do nothing;
+
+commit;

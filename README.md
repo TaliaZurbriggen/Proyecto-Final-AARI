@@ -245,7 +245,7 @@ SMTP_USERNAME=proyectofinalaari@gmail.com
 SMTP_PASSWORD=LA_CLAVE_DE_APLICACION
 SMTP_FROM=AARI <proyectofinalaari@gmail.com>
 SMTP_STARTTLS=true
-APP_LOGIN_URL=http://127.0.0.1:5173/login
+APP_LOGIN_URL=http://localhost:5173/login
 ```
 
 `SMTP_PASSWORD` debe contener una contraseña de aplicación de Google generada

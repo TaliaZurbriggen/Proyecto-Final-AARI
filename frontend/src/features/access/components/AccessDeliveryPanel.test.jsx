@@ -41,4 +41,25 @@ describe('AccessDeliveryPanel', () => {
     expect(screen.getByText('Cuenta activa')).toBeInTheDocument()
     expect(screen.queryByRole('button')).not.toBeInTheDocument()
   })
+
+  it('permite reenviar credenciales mientras la cuenta no fue activada', async () => {
+    const onRetry = vi.fn()
+    const user = userEvent.setup()
+    render(
+      <AccessDeliveryPanel
+        access={{
+          estado: 'enviado',
+          intentos: 1,
+          primer_ingreso: true,
+        }}
+        onRetry={onRetry}
+      />,
+    )
+
+    expect(screen.getByText('Credenciales enviadas')).toBeInTheDocument()
+    await user.click(
+      screen.getByRole('button', { name: 'Reenviar credenciales' }),
+    )
+    expect(onRetry).toHaveBeenCalledOnce()
+  })
 })

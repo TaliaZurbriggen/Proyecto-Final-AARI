@@ -36,7 +36,9 @@ function presentation(access) {
 function AccessDeliveryPanel({ access, isRetrying = false, onRetry }) {
   if (!access) return null
   const content = presentation(access)
-  const canRetry = access.primer_ingreso && access.estado !== 'enviado'
+  const canRetry = access.primer_ingreso
+  const retryLabel =
+    access.estado === 'enviado' ? 'Reenviar credenciales' : 'Reintentar envío'
 
   return (
     <section className={styles.panel} aria-labelledby="access-delivery-title">
@@ -62,7 +64,7 @@ function AccessDeliveryPanel({ access, isRetrying = false, onRetry }) {
           onClick={onRetry}
           variant="secondary"
         >
-          {isRetrying ? 'Reintentando…' : 'Reintentar envío'}
+          {isRetrying ? 'Enviando…' : retryLabel}
         </Button>
       ) : null}
     </section>
