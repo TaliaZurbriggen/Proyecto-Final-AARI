@@ -52,7 +52,7 @@ Proyecto-Final-AARI/
 │   ├── public/                  # Recursos estáticos
 │   ├── src/
 │   │   ├── components/          # UI y layouts reutilizables
-│   │   ├── features/            # Módulos de auth, personas, inmuebles y proveedores
+│   │   ├── features/            # Auth, personas, inmuebles, proveedores y operadores
 │   │   ├── pages/               # Pantallas generales de la aplicación
 │   │   └── styles/              # Tokens y estilos globales
 │   ├── AGENTS.md                # Reglas específicas del frontend
@@ -262,6 +262,55 @@ vincula cuentas faltantes usando el DNI vigente como clave temporal, registra
 los envíos previos como pendientes y se detiene ante emails de acceso
 duplicados para no inferir una identidad incorrecta.
 
+### Gestión de operadores (HU7)
+
+Administración dispone de `/operadores` y `/operadores/nuevo` para listar,
+buscar, registrar y desactivar operadores. El alta solicita nombre completo y
+email único entre todas las cuentas, incluidas las inactivas. Genera una
+contraseña aleatoria de ocho caracteres con letras y números: se guarda su
+hash con `pgcrypto`, se envía por correo y debe cambiarse en el primer ingreso.
+La contraseña no se devuelve a la interfaz ni se registra en logs.
+
+La API, disponible exclusivamente para el rol administrador, expone:
+
+- `GET /usuarios/operadores` — búsqueda y paginación.
+- `POST /usuarios/operadores` — alta y envío de credenciales.
+- `POST /usuarios/operadores/{id}/acceso/reintentar` — nueva clave temporal y
+  reenvío, solamente mientras la cuenta esté activa y pendiente de primer ingreso.
+- `PATCH /usuarios/operadores/{id}/desactivar` — baja lógica y cantidad de
+  reclamos liberados.
+
+Se reutilizan las variables SMTP y `APP_LOGIN_URL` de HU6: **no hay variables
+de entorno ni dependencias nuevas**. El alta se confirma antes de contactar a
+SMTP. Si el correo falla, la cuenta permanece y el listado permite reintentar.
+Cada reenvío invalida la clave temporal anterior, incluso si el nuevo correo
+falla; una confirmación advierte este comportamiento. Si un envío queda
+pendiente por una interrupción, se puede reintentar después de dos minutos.
+Nunca se conserva la clave temporal recuperable para reenviarla.
+
+Desactivar impide nuevos accesos e invalida la sesión en su siguiente consulta
+autenticada. En la misma transacción, los reclamos asignados al operador que
+estén en estado `Escalado` quedan sin asignación, disponibles para la futura
+cola general; no cambian de estado ni se eliminan. Los demás reclamos conservan
+su asignación histórica. La bandeja de reclamos, la edición y la reactivación
+de operadores quedan fuera de esta HU.
+
+La migración `backend/migrations/17_usuarios_operadores.sql` se aplicó con
+autorización al Supabase compartido de desarrollo de AARI el 02/09/2026.
+Talía no debe repetirla en ese mismo proyecto; cambiar de rama o hacer pull no
+ejecuta migraciones. Para otras bases, seguir `backend/migrations/README.md`.
+Las pruebas aisladas de HU7 están en
+`backend/tests/test_operadores.py` y
+`frontend/src/features/operadores/pages/Operadores.test.jsx`; no envían correo
+ni acceden a Supabase. Las seis pruebas optativas de PostgreSQL real están en
+`backend/tests/test_operadores_supabase_integration.py`: validan el flujo con
+rollback y la concurrencia en un esquema privado temporal. El procedimiento,
+resultado y advertencias previas están en `docs/hu7_validacion_supabase.md`.
+Se validó un alta real autorizada mediante el servicio de operadores y SMTP:
+cuenta persistida, hash bcrypt, primer ingreso obligatorio y correo registrado
+como enviado en un intento. Quedan la confirmación de recepción, el primer
+ingreso y la revisión manual de la interfaz por el responsable.
+
 ### Pruebas automáticas del clasificador
 
 Desde `backend/`, la suite completa se ejecuta con:
@@ -456,7 +505,10 @@ Con Docker Compose podés levantar el backend y el frontend juntos, ya conectado
 - **Completada y fusionada:** AARI-9 / HU1, gestión integral de propietarios.
 - **Completada y fusionada:** AARI-22 / HU2, gestión integral de propiedades.
 - **Completada y fusionada:** AARI-56 / HU5, autenticación administrativa.
-- **En curso:** AARI-68 / HU6, acceso de propietarios e inquilinos.
+- **Completada y fusionada:** AARI-68 / HU6, acceso de propietarios e inquilinos.
+- **En curso:** AARI-79 / HU7, gestión de operadores; migración 17 aplicada y
+  pruebas PostgreSQL aprobadas y alta real con SMTP validada desde el servicio;
+  pendientes la confirmación de recepción, el primer ingreso y la revisión manual.
 - **En curso:** AARI-34 / HU3, gestión integral de inquilinos; implementación
   terminada y pendiente de revisión antes del Pull Request.
 - **Siguiente secuencia del módulo de administración:** proveedores.

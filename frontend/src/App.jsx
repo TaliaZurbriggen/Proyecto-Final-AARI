@@ -14,6 +14,8 @@ import InquilinosListPage from './features/inquilinos/pages/InquilinosListPage.j
 import ProveedorDetailPage from './features/proveedores/pages/ProveedorDetailPage.jsx'
 import ProveedorFormPage from './features/proveedores/pages/ProveedorFormPage.jsx'
 import ProveedoresListPage from './features/proveedores/pages/ProveedoresListPage.jsx'
+import OperadoresListPage from './features/operadores/pages/OperadoresListPage.jsx'
+import OperadorFormPage from './features/operadores/pages/OperadorFormPage.jsx'
 import { AuthProvider } from './features/auth/AuthContext.jsx'
 import ProtectedRoute from './features/auth/ProtectedRoute.jsx'
 import LoginPage from './features/auth/pages/LoginPage.jsx'
@@ -41,6 +43,8 @@ function App() {
         </Route>
         <Route element={<ProtectedRoute allowedRoles={['administrador']} />}>
           <Route element={<AdminLayout />}>
+            <Route path="operadores" element={<OperadoresListPage />} />
+            <Route path="operadores/nuevo" element={<OperadorFormPage />} />
             <Route path="propietarios" element={<PropietariosListPage />} />
             <Route path="propietarios/nuevo" element={<PropietarioFormPage />} />
             <Route
