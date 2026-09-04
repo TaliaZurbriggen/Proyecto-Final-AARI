@@ -299,13 +299,25 @@ La migración `backend/migrations/17_usuarios_operadores.sql` se aplicó con
 autorización al Supabase compartido de desarrollo de AARI el 02/09/2026.
 Talía no debe repetirla en ese mismo proyecto; cambiar de rama o hacer pull no
 ejecuta migraciones. Para otras bases, seguir `backend/migrations/README.md`.
+La revisión del PR #21 agrega `backend/migrations/18_revalidar_operador_al_escalar.sql`,
+**aplicada con autorización el 03/09/2026** en la base compartida, registrada como
+`20260904001512_hu7_revalidar_operador_al_escalar`. No repetirla en ese proyecto.
+Revalida el operador al entrar a `Escalado` aunque solo cambie el estado:
+si está inactivo, la
+operación se rechaza; se permite reabrir con otro operador activo o sin asignación.
+No cambia asignaciones históricas ni reescribe la migración 17. Se detiene ante
+escalados existentes con operador inválido para que se revisen por separado.
 Las pruebas aisladas de HU7 están en
 `backend/tests/test_operadores.py` y
 `frontend/src/features/operadores/pages/Operadores.test.jsx`; no envían correo
-ni acceden a Supabase. Las seis pruebas optativas de PostgreSQL real están en
+ni acceden a Supabase. `backend/tests/test_operadores_migration.py` agrega
+controles estructurales locales de la migración 18, no una ejecución de su SQL.
+Las pruebas optativas de PostgreSQL real están en
 `backend/tests/test_operadores_supabase_integration.py`: validan el flujo con
-rollback y la concurrencia en un esquema privado temporal. El procedimiento,
-resultado y advertencias previas están en `docs/hu7_validacion_supabase.md`.
+rollback y la concurrencia en un esquema privado temporal; ahora incluyen
+reaperturas y su concurrencia con la baja, y requieren la migración 18 instalada.
+El procedimiento, los resultados y las advertencias previas están en
+`docs/hu7_validacion_supabase.md`.
 Se validó un alta real autorizada mediante el servicio de operadores y SMTP:
 cuenta persistida, hash bcrypt, primer ingreso obligatorio y correo registrado
 como enviado en un intento. Quedan la confirmación de recepción, el primer
@@ -506,8 +518,9 @@ Con Docker Compose podés levantar el backend y el frontend juntos, ya conectado
 - **Completada y fusionada:** AARI-22 / HU2, gestión integral de propiedades.
 - **Completada y fusionada:** AARI-56 / HU5, autenticación administrativa.
 - **Completada y fusionada:** AARI-68 / HU6, acceso de propietarios e inquilinos.
-- **En curso:** AARI-79 / HU7, gestión de operadores; migración 17 aplicada y
-  pruebas PostgreSQL aprobadas y alta real con SMTP validada desde el servicio;
+- **En curso:** AARI-79 / HU7, gestión de operadores; migraciones 17 y 18
+  aplicadas, 16 pruebas PostgreSQL aprobadas y corrección de reapertura del PR #21
+  pendiente de nueva revisión. Alta real con SMTP validada desde el servicio;
   pendientes la confirmación de recepción, el primer ingreso y la revisión manual.
 - **En curso:** AARI-34 / HU3, gestión integral de inquilinos; implementación
   terminada y pendiente de revisión antes del Pull Request.

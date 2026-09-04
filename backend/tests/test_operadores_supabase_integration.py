@@ -217,6 +217,56 @@ def test_real_name_constraint_and_private_api_permissions(real_transaction):
         FROM pg_proc WHERE oid='public.validar_operador_asignado()'::regprocedure""")).scalar_one()
 
 
+@pytest.mark.parametrize("previous_state", ["Resuelto", "Reabierto por disconformidad"])
+@pytest.mark.parametrize("assignment", ["inactive", "active", "replacement", "unassigned"])
+def test_real_reopening_revalidates_operator(real_transaction, previous_state, assignment):
+    connection, _, repository, _, marker = real_transaction
+    created = repository.create({"nombre_completo": "Operador Histórico",
+                                 "email": f"history-{marker}@example.com"},
+                                generate_temporary_password())
+    operator = UUID(created["id"])
+    dependencies = seed_claim_dependencies(connection, marker)
+    claim = insert_claim(connection, dependencies, operator, previous_state)
+    if assignment != "active":
+        assert repository.deactivate(operator) == 0
+    # Una edición histórica (incluso SET estado=estado) sigue siendo válida.
+    connection.execute(text("UPDATE reclamos SET estado=estado, urgencia='media' WHERE id=:id"),
+                       {"id": claim})
+    expected = operator
+    if assignment == "inactive":
+        with pytest.raises(IntegrityError) as failure:
+            with connection.begin_nested():
+                connection.execute(text("UPDATE reclamos SET estado='Escalado' WHERE id=:id"),
+                                   {"id": claim})
+        assert failure.value.orig.pgcode == "23514"
+        assert connection.execute(text("SELECT estado FROM reclamos WHERE id=:id"),
+                                  {"id": claim}).scalar_one() == previous_state
+        assert connection.execute(text("""SELECT count(*) FROM reclamo_historial_estados
+            WHERE reclamo_id=:id AND estado_nuevo='Escalado'"""), {"id": claim}).scalar_one() == 0
+    else:
+        if assignment == "replacement":
+            replacement = repository.create({"nombre_completo": "Operador Reemplazo",
+                                             "email": f"replacement-{marker}@example.com"},
+                                            generate_temporary_password())
+            expected = UUID(replacement["id"])
+        elif assignment == "unassigned":
+            expected = None
+        if assignment == "active":
+            # Solo cambia estado: la asignación no aparece en SET.
+            connection.execute(text("UPDATE reclamos SET estado='Escalado' WHERE id=:id"),
+                               {"id": claim})
+        else:
+            connection.execute(text("""UPDATE reclamos
+                SET estado='Escalado', operador_asignado_id=:operator WHERE id=:id"""),
+                {"id": claim, "operator": str(expected) if expected else None})
+        assert connection.execute(text("SELECT estado FROM reclamos WHERE id=:id"),
+                                  {"id": claim}).scalar_one() == "Escalado"
+        assert connection.execute(text("""SELECT count(*) FROM reclamo_historial_estados
+            WHERE reclamo_id=:id AND estado_nuevo='Escalado'"""), {"id": claim}).scalar_one() == 1
+    assert connection.execute(text("SELECT operador_asignado_id FROM reclamos WHERE id=:id"),
+                              {"id": claim}).scalar_one() == expected
+
+
 @pytest.fixture(scope="module")
 def isolated_concurrency_engine():
     schema = "aari_hu7_test_" + uuid4().hex
@@ -230,15 +280,17 @@ def isolated_concurrency_engine():
                 connection.exec_driver_sql(f'CREATE TABLE "{schema}".{table} (LIKE public.{table} INCLUDING ALL)')
                 connection.exec_driver_sql(f'ALTER TABLE "{schema}".{table} ENABLE ROW LEVEL SECURITY')
                 connection.exec_driver_sql(f'REVOKE ALL ON "{schema}".{table} FROM PUBLIC, anon, authenticated')
-            # Misma función instalada por 17; solo cambia el destino de las tablas.
+            # Copiar función y trigger instalados, incluidas las columnas de 18.
+            # No mantener una réplica manual que pueda ocultar regresiones del DDL.
             definition = connection.execute(text("SELECT pg_get_functiondef('public.validar_operador_asignado()'::regprocedure)")).scalar_one()
             connection.exec_driver_sql(definition.replace("public.", f'"{schema}".'))
             connection.exec_driver_sql(f'REVOKE ALL ON FUNCTION "{schema}".validar_operador_asignado() FROM PUBLIC, anon, authenticated')
             connection.exec_driver_sql(f'''ALTER TABLE "{schema}".reclamos
                 ADD FOREIGN KEY (operador_asignado_id) REFERENCES "{schema}".usuarios(id)''')
-            connection.exec_driver_sql(f'''CREATE TRIGGER trg_validar_operador_asignado
-                BEFORE INSERT OR UPDATE OF operador_asignado_id ON "{schema}".reclamos
-                FOR EACH ROW EXECUTE FUNCTION "{schema}".validar_operador_asignado()''')
+            trigger_definition = connection.execute(text("""SELECT pg_get_triggerdef(oid)
+                FROM pg_trigger WHERE tgrelid='public.reclamos'::regclass
+                  AND tgname='trg_validar_operador_asignado' AND NOT tgisinternal""")).scalar_one()
+            connection.exec_driver_sql(trigger_definition.replace("public.", f'"{schema}".'))
         created = True
         yield engine
     finally:
@@ -265,7 +317,10 @@ def wait_for_blocked_worker(engine, worker_pid):
     raise AssertionError("La operación concurrente no esperó el bloqueo de fila.")
 
 
-@pytest.mark.parametrize("scenario", ["retry_after_activation", "assign_after_deactivation", "deactivate_after_assignment"])
+@pytest.mark.parametrize("scenario", [
+    "retry_after_activation", "assign_after_deactivation", "deactivate_after_assignment",
+    "reopen_after_deactivation", "deactivate_after_reopening",
+])
 def test_real_concurrency_serializes_operator_actions(isolated_concurrency_engine, scenario):
     engine = isolated_concurrency_engine
     repository = SqlAlchemyOperadoresRepository(sessionmaker(bind=engine))
@@ -275,6 +330,10 @@ def test_real_concurrency_serializes_operator_actions(isolated_concurrency_engin
     operator = UUID(created["id"])
     dependencies = {key: str(uuid4()) for key in ("tenant", "property", "specialty")}
     pids = Queue()
+    claim = None
+    if scenario in {"reopen_after_deactivation", "deactivate_after_reopening"}:
+        with engine.begin() as connection:
+            claim = insert_claim(connection, dependencies, operator, "Resuelto")
 
     def worker():
         with engine.connect() as connection:
@@ -291,6 +350,12 @@ def test_real_concurrency_serializes_operator_actions(isolated_concurrency_engin
                     insert_claim(connection, dependencies, operator)
                 assert failure.value.orig.pgcode == "23514"
                 return "rejected"
+            if scenario == "reopen_after_deactivation":
+                with pytest.raises(IntegrityError) as failure:
+                    connection.execute(text("UPDATE reclamos SET estado='Escalado' WHERE id=:id"),
+                                       {"id": claim})
+                assert failure.value.orig.pgcode == "23514"
+                return "rejected"
             count = worker_repository.deactivate(operator)
             connection.commit()  # Solo confirma datos del esquema temporal.
             return count
@@ -299,8 +364,11 @@ def test_real_concurrency_serializes_operator_actions(isolated_concurrency_engin
         with engine.connect() as blocker:
             if scenario == "retry_after_activation":
                 blocker.execute(text("UPDATE usuarios SET primer_ingreso=false WHERE id=:id"), {"id": str(operator)})
-            elif scenario == "assign_after_deactivation":
+            elif scenario in {"assign_after_deactivation", "reopen_after_deactivation"}:
                 blocker.execute(text("UPDATE usuarios SET activo=false WHERE id=:id"), {"id": str(operator)})
+            elif scenario == "deactivate_after_reopening":
+                blocker.execute(text("UPDATE reclamos SET estado='Escalado' WHERE id=:id"),
+                                {"id": claim})
             else:
                 insert_claim(blocker, dependencies, operator)
             future = pool.submit(worker)
@@ -309,9 +377,14 @@ def test_real_concurrency_serializes_operator_actions(isolated_concurrency_engin
             finally:
                 blocker.commit()  # Libera el bloqueo para que el worker revalide.
         outcome = future.result(timeout=15)
-    assert outcome == (1 if scenario == "deactivate_after_assignment" else "rejected")
-    if scenario == "deactivate_after_assignment":
+    deactivating = scenario in {"deactivate_after_assignment", "deactivate_after_reopening"}
+    assert outcome == (1 if deactivating else "rejected")
+    if deactivating:
         assert not repository.get(operator)["activo"]
         with engine.connect() as connection:
             assert connection.execute(text("SELECT count(*) FROM reclamos WHERE operador_asignado_id=:id"),
                                       {"id": str(operator)}).scalar_one() == 0
+    if scenario == "reopen_after_deactivation":
+        with engine.connect() as connection:
+            assert connection.execute(text("SELECT estado FROM reclamos WHERE id=:id"),
+                                      {"id": claim}).scalar_one() == "Resuelto"

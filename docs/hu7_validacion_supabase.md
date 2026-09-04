@@ -182,8 +182,9 @@ separado, especialmente las funciones compartidas con otros módulos.
 
 ## Qué debe hacer Talía y qué falta
 
-- En el mismo Supabase de AARI **no repetir la migración**: ya está aplicada una
-  vez para el equipo. En otra base, seguir la guía de migraciones y sus controles.
+- En el mismo Supabase de AARI **no repetir la migración 17**: ya está aplicada
+  una vez para el equipo. La corrección 18 descrita abajo también se aplicó con
+  autorización el 03/09/2026: no repetirla. En otra base, seguir la guía y sus controles.
 - Obtener el código cuando se publique la rama/PR y, después de la revisión y
   merge, actualizar `main`. La migración no hace pull ni publica el código.
 - Mantener el `.env` local existente: se reutilizan SMTP y APP_LOGIN_URL de HU6.
@@ -210,7 +211,114 @@ La publicación no equivale a un merge ni al cierre de la historia. La confirmac
 específica de recepción y primer ingreso del responsable no se presupone por
 la autorización del PR; esos pendientes permanecen indicados en esta evidencia.
 
+## Corrección de reapertura del PR #21 (03/09/2026)
+
+El responsable aprobó implementar la corrección propuesta tras el
+[hallazgo de revisión](https://github.com/TaliaZurbriggen/Proyecto-Final-AARI/pull/21#issuecomment-5533304112).
+La migración 17 solo dispara el trigger al insertar o escribir el operador;
+un cambio únicamente de estado podía reabrir un reclamo con operador inactivo.
+
+Se preparó `18_revalidar_operador_al_escalar.sql` en la misma rama del PR,
+**sin modificar 17**. Su aplicación al Supabase compartido fue autorizada y
+se detalla en el apartado siguiente. Cambia tanto las columnas del trigger como
+la condición interna de su función. Se mantienen
+el bloqueo `FOR SHARE`, `SECURITY INVOKER`, `search_path` fijo y permisos privados.
+Se rechaza la reapertura inválida; se permite otro operador activo o asignación
+nula en esa operación. No se opta por desasignar silenciosamente ni reescribir
+historial. Un control transaccional aborta ante escalados inválidos existentes,
+sin intentar corregir datos reales automáticamente.
+
+Pruebas agregadas:
+
+- Cuatro controles estructurales locales de transacción, condiciones, permisos
+  y revisión de datos previos. **No ejecutan SQL ni demuestran bloqueos reales.**
+- Ocho casos PostgreSQL de reapertura desde `Resuelto` y `Reabierto por
+  disconformidad`: operador inactivo, activo, reemplazo activo y sin asignación.
+  Verifican la conservación de asignación histórica y el rollback del historial
+  cuando se rechaza la operación.
+- Dos casos concurrentes: reapertura que espera una baja y es rechazada;
+  baja que espera una reapertura válida y después libera ese escalado.
+- La réplica concurrente obtiene ahora la función **y el trigger** instalados
+  mediante `pg_get_functiondef` y `pg_get_triggerdef`, sin columnas codificadas
+  manualmente que pudieran ocultar una regresión.
+
+Las pruebas externas requieren autorización y la migración 18 instalada. Durante
+la preparación local se comprobó que la carpeta de PostgreSQL no tenía binarios
+ejecutables; no se instaló una
+dependencia ni se recurrió a Supabase sin permiso para suplirla. La CLI de
+Supabase tampoco está disponible; el archivo mantiene la convención incremental
+numerada del repositorio y se preparó con edición local.
+
+Validación de esta corrección:
+`python -m pytest tests -q --tb=short -p no:cacheprovider --basetemp <directorio_temporal_nuevo>`,
+con `DATABASE_URL=sqlite://` y las suites externas deshabilitadas:
+**210 aprobadas, 18 omitidas y 2 advertencias preexistentes**.
+Las 18 omisiones incluyen los 16 casos optativos de operadores
+y dos suites externas previas. No se volvió a ejecutar el frontend porque no
+se modificó. `git diff --check` sin errores y migración 17 sin diferencias.
+
+La aplicación y validación posteriores se registran a continuación. Queda obtener
+nueva revisión de Talía antes de fusionar.
+No se envían correos, no se cierra Jira y no se registra tiempo de esta corrección
+sin la confirmación del tiempo real del responsable.
+
+## Aplicación autorizada de la migración 18 (03/09/2026)
+
+El responsable autorizó aplicar 18, ejecutar las pruebas reales sin SMTP y
+publicar la corrección si las validaciones resultaban correctas. Se confirmó
+el proyecto AARI `kmisxmwrqthqkrbsqcfq`, activo y con la 17 instalada. El control
+previo no encontró reclamos escalados con operador inválido ni esquemas de
+prueba pendientes. No se modificaron asignaciones ni cuentas reales.
+
+- Historial: `20260904001512_hu7_revalidar_operador_al_escalar`. La versión está
+  en UTC; la aplicación ocurrió el 03/09/2026 a las 21:15 en Argentina.
+- SHA-256 del archivo aplicado (bytes locales):
+  `0005DF1392FC62E33877C72629665F7B984F102679CAC6EBAACE98E6A165BA0E`.
+- Función y trigger instalados verificados: incluye la columna `estado` y
+  revalida la entrada a `Escalado`; `SECURITY INVOKER`, `search_path` vacío y
+  ausencia de ejecución pública conservados.
+- La 17 conserva su hash original y no se volvió a ejecutar.
+
+### Pruebas, limpieza y seguridad posteriores
+
+Con `RUN_OPERADORES_POSTGRES_TESTS=1` y el proyecto explícitamente confirmado,
+se ejecutó desde `backend/`:
+
+```powershell
+.\.venv\Scripts\python.exe -m pytest tests/test_operadores_supabase_integration.py -q --tb=no -p no:cacheprovider --basetemp <directorio_temporal_nuevo>
+```
+
+Resultado: **16 aprobadas**. Incluye los ocho casos de reapertura y cinco
+escenarios concurrentes (dos nuevos), además de los tres casos funcionales
+originales. No hubo SMTP real: el emisor está simulado. Los casos sobre `public`
+se revirtieron, y el esquema privado exacto de concurrencia se eliminó al
+finalizar. No se copiaron datos reales a ese esquema.
+
+Comprobación independiente después de las pruebas: 7 usuarios, 0 reclamos,
+6 entregas y 1 operador, igual que antes. Cero usuarios sintéticos de la suite,
+cero esquemas `aari_hu7_test_*` y cero escalados inválidos. La cuenta de prueba
+persistente previamente autorizada se conserva; no se confundió con los datos
+transitorios ni se modificó.
+
+RLS habilitada y sin permisos de lectura/escritura para `anon` y `authenticated`
+en usuarios/reclamos. Los asesores no reportaron hallazgos nuevos: seguridad
+conserva 27 avisos (incluidas las 6 advertencias previas documentadas arriba);
+rendimiento pasó de 23 a 22 avisos informativos, sin incorporaciones.
+No se modificaron funciones o índices ajenos a la corrección.
+
+Regresión local final con SQLite y las suites externas deshabilitadas:
+**210 aprobadas, 18 omitidas y 2 advertencias previas**. Comando idéntico al de
+la preparación local, usando un directorio temporal nuevo. La revisión de
+formato y secretos del diff no detectó errores ni credenciales reales.
+
+La corrección se entrega para nueva revisión en el PR #21. La publicación no
+autoriza merge, cierre de Jira ni tiempo adicional; esos pasos siguen sujetos
+a la indicación del responsable.
+
 ## Fuentes técnicas consultadas
+
+- [Columnas y condiciones de triggers en PostgreSQL 17](https://www.postgresql.org/docs/17/sql-createtrigger.html).
+- [Triggers de PostgreSQL en Supabase](https://supabase.com/docs/guides/database/postgres/triggers).
 
 - [Permisos del Data API y RLS](https://supabase.com/docs/guides/api/securing-your-api).
 - [Cambio de exposición automática de tablas](https://supabase.com/changelog/45329-breaking-change-tables-not-exposed-to-data-and-graphql-api-automatically):

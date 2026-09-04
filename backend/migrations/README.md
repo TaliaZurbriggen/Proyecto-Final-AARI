@@ -20,6 +20,8 @@ La instalación nueva debe aplicar además, en orden:
    seguimiento del correo de bienvenida.
 3. `17_usuarios_operadores.sql` — nombres de operadores y asignación de
    reclamos. También es necesaria en instalaciones nuevas.
+4. `18_revalidar_operador_al_escalar.sql` — revalida asignaciones al pasar a
+   `Escalado`, aunque no cambie el operador.
 
 El módulo de administración inicial ya incorpora el resultado de las
 migraciones incrementales 07, 08, 09, 10, 11, 12, 15 y 16. No deben repetirse
@@ -59,6 +61,8 @@ Aplicar únicamente las migraciones pendientes y respetar este orden:
 12. `17_usuarios_operadores.sql` — agrega el nombre del operador, una referencia
     opcional desde reclamos, su índice y validación de asignaciones a operadores
     activos. Aplicar después de la revisión indicada abajo.
+13. `18_revalidar_operador_al_escalar.sql` — corrige el trigger y su función
+    para revalidar también al entrar al estado `Escalado`. No reemplaza la 17.
 
 La migración 09 se detiene si encuentra propiedades existentes porque provincia
 y localidad no pueden inferirse de manera segura. Esos registros deben
@@ -152,3 +156,50 @@ Después de aplicarlo, validar:
 
 Usar un remitente simulado en pruebas automatizadas. El envío SMTP real
 requiere autorización específica y un destinatario de prueba acordado.
+
+## HU7: corrección incremental 18 (PR #21)
+
+**Aplicada con autorización al Supabase compartido AARI de desarrollo el
+03/09/2026 (Argentina)**, historial
+`20260904001512_hu7_revalidar_operador_al_escalar` (versión UTC).
+No repetirla por integrante ni por pull. La 17 permanece intacta,
+con su historial y hash. En otras bases, aplicar esta corrección después de 17 tanto en
+bases existentes como en instalaciones nuevas. No hay cambios de `.env`,
+dependencias, cuentas o correos.
+
+El trigger ahora observa `operador_asignado_id` y `estado`; la función valida
+inserciones, cambios de operador y transiciones de otro estado a `Escalado`.
+La asignación debe ser nula o apuntar a una cuenta con rol `operador` activa.
+Reabrir con un operador inactivo se rechaza con SQLSTATE `23514`: el llamador
+debe indicar otro operador activo o quitar la asignación en la misma operación.
+No se libera automáticamente un reclamo histórico por cambiar otros campos ni
+por ejecutar `SET estado=estado` cuando aún no está escalado.
+
+Antes de aplicar, comprobar si el fallo ya dejó asignaciones inválidas. Esta
+consulta solo devuelve un conteo, sin datos personales:
+
+```sql
+select count(*) as escalados_con_operador_invalido
+from public.reclamos r
+where r.estado = 'Escalado' and r.operador_asignado_id is not null
+  and not exists (
+      select 1 from public.usuarios u
+      where u.id = r.operador_asignado_id and u.rol = 'operador' and u.activo
+  );
+```
+
+La migración repite esa comprobación bajo el bloqueo de tabla obtenido al
+recrear el trigger. Si hay resultados, aborta y revierte todos sus cambios:
+no modifica asignaciones existentes. Revisar su tratamiento con el responsable
+y ejecutar `ROLLBACK` si el cliente dejó abierta la transacción fallida.
+
+La operación es transaccional, con espera de bloqueo de 5 segundos y límite de
+30 segundos por sentencia. Conserva `SECURITY INVOKER`, `search_path` vacío y
+la revocación de ejecución a roles públicos. No cambia RLS ni los permisos de
+tablas. `FOR SHARE` sigue serializando la validación con la baja del operador.
+
+Tras aplicarla, comprobar la definición instalada de función y trigger,
+permisos y el conteo anterior; ejecutar las pruebas PostgreSQL autorizadas de
+reapertura válida/inválida, historial y ambos órdenes de concurrencia con la
+baja. No confundir los controles de texto locales con pruebas SQL reales.
+Detalles y resultados en `docs/hu7_validacion_supabase.md`.
