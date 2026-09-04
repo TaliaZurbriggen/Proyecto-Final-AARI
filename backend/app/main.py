@@ -7,6 +7,7 @@ from sqlalchemy import text
 from app.api.auth import require_admin, router as auth_router
 from app.api.inquilinos import property_router as property_tenant_router
 from app.api.inquilinos import router as inquilinos_router
+from app.api.operadores import router as operadores_router
 from app.api.propiedades import router as propiedades_router
 from app.api.propietarios import router as propietarios_router
 from app.api.proveedores import router as proveedores_router
@@ -31,6 +32,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 app.include_router(auth_router)
+app.include_router(operadores_router)
 admin_dependencies = [Depends(require_admin)]
 app.include_router(propiedades_router, dependencies=admin_dependencies)
 app.include_router(property_tenant_router, dependencies=admin_dependencies)

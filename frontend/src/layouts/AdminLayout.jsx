@@ -7,6 +7,7 @@ const navigationItems = [
   { href: '/propiedades', label: 'Propiedades' },
   { href: '/inquilinos', label: 'Inquilinos' },
   { href: '/proveedores', label: 'Proveedores' },
+  { href: '/operadores', label: 'Operadores' },
 ]
 
 function AdminLayout() {
@@ -16,7 +17,10 @@ function AdminLayout() {
   const isProperties = location.pathname.startsWith('/propiedades')
   const isTenants = location.pathname.startsWith('/inquilinos')
   const isProviders = location.pathname.startsWith('/proveedores')
-  const activeModule = isProviders
+  const isOperators = location.pathname.startsWith('/operadores')
+  const activeModule = isOperators
+    ? { href: '/operadores', label: 'Operadores', placeholder: 'Buscar operador por nombre o email' }
+    : isProviders
     ? {
         href: '/proveedores',
         label: 'Proveedores',
