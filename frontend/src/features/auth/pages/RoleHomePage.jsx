@@ -1,5 +1,5 @@
 import { Building2, ClipboardList, Wrench } from 'lucide-react'
-import { useLocation } from 'react-router'
+import { Link, useLocation } from 'react-router'
 import { PageContainer, PageHeading } from '../../../components/layout/index.js'
 import AlertMessage from '../../../components/ui/AlertMessage.jsx'
 import { useAuth } from '../authContext.js'
@@ -60,8 +60,18 @@ function RoleHomePage() {
         <article>
           <ClipboardList aria-hidden="true" />
           <h2>Reclamos</h2>
-          <p>Vas a poder consultar y seguir el estado de tus solicitudes.</p>
-          <span>Próximamente</span>
+          <p>
+            {user?.rol === 'inquilino'
+              ? 'Informá un problema de tu unidad y recibí el número de seguimiento.'
+              : 'Vas a poder consultar y seguir el estado de tus solicitudes.'}
+          </p>
+          {user?.rol === 'inquilino' ? (
+            <Link className={styles.cardAction} to="/inquilino/reclamos/nuevo">
+              Crear reclamo
+            </Link>
+          ) : (
+            <span>Próximamente</span>
+          )}
         </article>
         <article>
           <Wrench aria-hidden="true" />
