@@ -52,7 +52,7 @@ Proyecto-Final-AARI/
 │   ├── public/                  # Recursos estáticos
 │   ├── src/
 │   │   ├── components/          # UI y layouts reutilizables
-│   │   ├── features/            # Auth, personas, inmuebles, proveedores y operadores
+│   │   ├── features/            # Auth, personas, inmuebles, proveedores, operadores y reclamos
 │   │   ├── pages/               # Pantallas generales de la aplicación
 │   │   └── styles/              # Tokens y estilos globales
 │   ├── AGENTS.md                # Reglas específicas del frontend
@@ -320,8 +320,41 @@ El procedimiento, los resultados y las advertencias previas están en
 `docs/hu7_validacion_supabase.md`.
 Se validó un alta real autorizada mediante el servicio de operadores y SMTP:
 cuenta persistida, hash bcrypt, primer ingreso obligatorio y correo registrado
-como enviado en un intento. Quedan la confirmación de recepción, el primer
-ingreso y la revisión manual de la interfaz por el responsable.
+como enviado en un intento. La corrección revisada quedó fusionada en el PR #21.
+
+### Alta de reclamos (HU8)
+
+El portal del inquilino incorpora `/inquilino/reclamos/nuevo`. Antes de enviar,
+muestra la persona y la unidad vinculadas a la sesión; solicita una descripción
+de 20 a 1000 caracteres, urgencia baja/media/alta y permite hasta tres fotos
+opcionales JPG, JPEG o PNG de 5 MB cada una. La confirmación muestra un número
+visible y el estado inicial `Recibido` inmediatamente después de persistir.
+
+La API exige el rol `inquilino` y expone `GET /reclamos/contexto` y
+`POST /reclamos`. No admite un segundo reclamo activo para la misma persona y
+unidad: solo `Resuelto` y `Resuelto (sin confirmación)` se consideran cerrados.
+El rubro queda vacío hasta la clasificación posterior, por lo que el flujo no
+inventa una especialidad durante el alta.
+
+Las fotos se guardan en el bucket privado `reclamos-fotos` mediante el backend.
+Además de `DATABASE_URL`, el `.env` de `backend/` debe incluir:
+
+```env
+SUPABASE_URL=https://project-ref.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=tu_clave_service_role_de_supabase
+```
+
+La clave de servicio no se coloca en el frontend, en una variable `VITE_*`, en
+Git, Jira ni Notion. La migración
+`backend/migrations/19_alta_reclamos.sql` configura el contrato de base de datos
+y el bucket; debe aplicarse una sola vez al entorno autorizado siguiendo
+`backend/migrations/README.md`.
+
+Después de persistir, el backend intenta enviar la confirmación por SMTP en
+segundo plano. Si el correo falla, el reclamo permanece creado y la notificación
+queda registrada como `fallido`. El objetivo de 30 segundos mide desde la
+persistencia hasta la aceptación o rechazo de SMTP, no la llegada a la bandeja.
+Las pruebas automatizadas usan dobles y no contactan Storage ni SMTP reales.
 
 ### Pruebas automáticas del clasificador
 
@@ -518,10 +551,11 @@ Con Docker Compose podés levantar el backend y el frontend juntos, ya conectado
 - **Completada y fusionada:** AARI-22 / HU2, gestión integral de propiedades.
 - **Completada y fusionada:** AARI-56 / HU5, autenticación administrativa.
 - **Completada y fusionada:** AARI-68 / HU6, acceso de propietarios e inquilinos.
-- **En curso:** AARI-79 / HU7, gestión de operadores; migraciones 17 y 18
-  aplicadas, 16 pruebas PostgreSQL aprobadas y corrección de reapertura del PR #21
-  pendiente de nueva revisión. Alta real con SMTP validada desde el servicio;
-  pendientes la confirmación de recepción, el primer ingreso y la revisión manual.
+- **Completada y fusionada:** AARI-79 / HU7, gestión de operadores; migraciones
+  17 y 18 aplicadas y validaciones de reapertura incorporadas en el PR #21.
+- **En curso:** AARI-89 / HU8, alta de reclamos; migración 19 aplicada y flujo
+  real validado en el entorno compartido con persistencia, foto privada y
+  notificación SMTP enviada. Pendiente de revisión del Pull Request.
 - **En curso:** AARI-34 / HU3, gestión integral de inquilinos; implementación
   terminada y pendiente de revisión antes del Pull Request.
 - **Siguiente secuencia del módulo de administración:** proveedores.
