@@ -1,5 +1,6 @@
-"""Contratos HTTP y de aplicación para clasificar reclamos."""
+"""Contratos HTTP y de aplicación para crear y clasificar reclamos."""
 
+from datetime import datetime
 from typing import Literal
 from uuid import UUID
 
@@ -9,6 +10,38 @@ from app.agents.classification.state import MotivoEscalado, TipoGasto
 
 
 EstadoPersistido = Literal["Clasificado", "Escalado"]
+
+
+class ClaimPropertyContext(BaseModel):
+    """Unidad vinculada al inquilino que inicia el reclamo."""
+
+    id: UUID
+    direccion: str
+    provincia: str
+    localidad: str
+    barrio: str | None = None
+    tipo: str
+    piso: int | None = None
+    numero: str | None = None
+
+
+class ClaimContextResponse(BaseModel):
+    """Contexto visible antes de confirmar un alta."""
+
+    inquilino_nombre: str
+    inquilino_email: str
+    propiedad: ClaimPropertyContext
+
+
+class ClaimCreatedResponse(BaseModel):
+    """Confirmación inmediata de que el reclamo quedó persistido."""
+
+    id: UUID
+    numero: int
+    estado: Literal["Recibido"]
+    creado_en: datetime
+    notificacion_estado: Literal["pendiente"] = "pendiente"
+    fotos_adjuntas: int
 
 
 class AgentClassificationResult(BaseModel):

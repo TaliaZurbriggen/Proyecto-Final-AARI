@@ -21,4 +21,19 @@ describe('apiClient', () => {
       expect.objectContaining({ credentials: 'include' }),
     )
   })
+
+  it('deja que el navegador defina el límite multipart para FormData', async () => {
+    const response = new Response(JSON.stringify({ status: 'ok' }), {
+      headers: { 'Content-Type': 'application/json' },
+      status: 200,
+    })
+    const fetchMock = vi.fn().mockResolvedValue(response)
+    vi.stubGlobal('fetch', fetchMock)
+    const body = new FormData()
+    body.append('descripcion', 'Descripción suficientemente extensa.')
+
+    await apiRequest('/reclamos', { body, method: 'POST' })
+
+    expect(fetchMock.mock.calls[0][1].headers).not.toHaveProperty('Content-Type')
+  })
 })

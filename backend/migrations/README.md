@@ -22,6 +22,9 @@ La instalación nueva debe aplicar además, en orden:
    reclamos. También es necesaria en instalaciones nuevas.
 4. `18_revalidar_operador_al_escalar.sql` — revalida asignaciones al pasar a
    `Escalado`, aunque no cambie el operador.
+5. `19_alta_reclamos.sql` — habilita el alta inicial sin rubro, agrega número
+   visible, evita reclamos activos duplicados, protege fotos/notificaciones y
+   configura el bucket privado `reclamos-fotos`.
 
 El módulo de administración inicial ya incorpora el resultado de las
 migraciones incrementales 07, 08, 09, 10, 11, 12, 15 y 16. No deben repetirse
@@ -63,6 +66,42 @@ Aplicar únicamente las migraciones pendientes y respetar este orden:
     activos. Aplicar después de la revisión indicada abajo.
 13. `18_revalidar_operador_al_escalar.sql` — corrige el trigger y su función
     para revalidar también al entrar al estado `Escalado`. No reemplaza la 17.
+14. `19_alta_reclamos.sql` — agrega el contrato de persistencia de HU8 y el
+    bucket privado. Antes de aplicarla, revisar el control de duplicados activos.
+
+## HU8: preparación de la migración 19
+
+La migración es transaccional y no crea reclamos, no sube fotos y no envía
+correos. `tipo_id` queda opcional únicamente en el alta: el clasificador puede
+completarlo después. El número visible usa una secuencia independiente del UUID
+interno y los registros anteriores reciben un número antes de exigir `NOT NULL`.
+
+Se considera activo todo estado salvo `Resuelto` y
+`Resuelto (sin confirmación)`. Antes de crear el índice único parcial, la
+migración se detiene y revierte si ya existen dos reclamos activos para la misma
+combinación de inquilino y propiedad. No elimina ni fusiona datos históricos.
+
+El bucket `reclamos-fotos` queda privado, limitado a 5 MB y a MIME
+`image/jpeg`/`image/png`. Los metadatos, el historial inicial y las
+notificaciones mantienen RLS sin permisos para `anon` ni `authenticated`. No se
+crean políticas públicas: las operaciones pasan por FastAPI y una clave de
+servicio exclusiva del backend. Esa clave se guarda solo en `.env`, nunca en
+variables `VITE_*`, commits o documentación con valores reales.
+
+Después de aplicar, validar en el entorno autorizado:
+
+- nulabilidad de `reclamos.tipo_id`, secuencia e índice único de `numero`;
+- rechazo concurrente de un segundo reclamo activo para la misma unidad;
+- bucket privado, límites de tamaño/MIME y ausencia de políticas públicas;
+- alta con cero y tres fotos, rollback de metadatos y limpieza de objetos ante
+  un fallo de persistencia;
+- notificación en estado `pendiente` y transición posterior a `enviado` o
+  `fallido`, sin revertir el reclamo.
+
+La confirmación visual es inmediata al persistir. El objetivo de 30 segundos se
+mide desde esa persistencia hasta que SMTP acepta o rechaza el envío, no hasta
+que el mensaje aparece en la bandeja del destinatario. Las pruebas reales de
+Storage y SMTP requieren autorización específica; la suite local usa dobles.
 
 La migración 09 se detiene si encuentra propiedades existentes porque provincia
 y localidad no pueden inferirse de manera segura. Esos registros deben

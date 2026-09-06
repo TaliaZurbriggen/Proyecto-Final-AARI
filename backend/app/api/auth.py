@@ -83,6 +83,7 @@ def require_roles(*roles: str) -> Callable[..., AuthenticatedUser]:
 
 
 require_admin = require_roles("administrador")
+require_inquilino = require_roles("inquilino")
 
 
 @router.post("/login", response_model=AuthResponse)

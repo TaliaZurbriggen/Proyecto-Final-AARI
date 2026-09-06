@@ -87,6 +87,24 @@
   font-weight: var(--aari-font-weight-semibold);
 }
 
+.cards .cardAction {
+  display: inline-flex;
+  min-height: var(--aari-control-height-sm);
+  align-items: center;
+  margin-top: var(--aari-space-4);
+  padding-inline: var(--aari-space-3);
+  color: var(--aari-color-surface);
+  background: var(--aari-color-primary);
+  border-radius: var(--aari-radius-md);
+  font-size: var(--aari-font-size-sm);
+  font-weight: var(--aari-font-weight-semibold);
+  text-decoration: none;
+}
+
+.cards .cardAction:hover {
+  background: var(--aari-color-primary-hover);
+}
+
 @media (max-width: 48rem) {
   .cards {
     grid-template-columns: 1fr;

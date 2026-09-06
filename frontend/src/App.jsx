@@ -22,6 +22,8 @@ import LoginPage from './features/auth/pages/LoginPage.jsx'
 import ChangePasswordPage from './features/auth/pages/ChangePasswordPage.jsx'
 import RoleHomePage from './features/auth/pages/RoleHomePage.jsx'
 import RoleLayout from './layouts/RoleLayout.jsx'
+import ReclamoConfirmationPage from './features/reclamos/pages/ReclamoConfirmationPage.jsx'
+import ReclamoFormPage from './features/reclamos/pages/ReclamoFormPage.jsx'
 import { useAuth } from './features/auth/authContext.js'
 import { destinationForUser } from './features/auth/routing.js'
 
@@ -96,6 +98,14 @@ function App() {
         <Route element={<ProtectedRoute allowedRoles={['inquilino']} />}>
           <Route element={<RoleLayout />}>
             <Route path="inquilino" element={<RoleHomePage />} />
+            <Route
+              path="inquilino/reclamos/nuevo"
+              element={<ReclamoFormPage />}
+            />
+            <Route
+              path="inquilino/reclamos/confirmacion"
+              element={<ReclamoConfirmationPage />}
+            />
           </Route>
         </Route>
         <Route element={<ProtectedRoute allowedRoles={['operador']} />}>

@@ -13,13 +13,17 @@ export class ApiError extends Error {
 }
 
 export async function apiRequest(path, options = {}) {
+  const isFormData =
+    typeof FormData !== 'undefined' && options.body instanceof FormData
   let response
   try {
     response = await fetch(`${API_URL}${path}`, {
       credentials: 'include',
       ...options,
       headers: {
-        ...(options.body ? { 'Content-Type': 'application/json' } : {}),
+        ...(options.body && !isFormData
+          ? { 'Content-Type': 'application/json' }
+          : {}),
         ...options.headers,
       },
     })
