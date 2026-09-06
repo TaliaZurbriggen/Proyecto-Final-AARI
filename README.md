@@ -354,7 +354,11 @@ Después de persistir, el backend intenta enviar la confirmación por SMTP en
 segundo plano. Si el correo falla, el reclamo permanece creado y la notificación
 queda registrada como `fallido`. El objetivo de 30 segundos mide desde la
 persistencia hasta la aceptación o rechazo de SMTP, no la llegada a la bandeja.
-Las pruebas automatizadas usan dobles y no contactan Storage ni SMTP reales.
+El `timeout=10` se aplica a cada operación SMTP y no constituye un límite total:
+un servidor lento podría superar el objetivo sin bloquear la creación del
+reclamo. La medición del entorno compartido y sus límites se documentan en
+`docs/hu8_validacion_reclamos.md`. Las pruebas automatizadas usan dobles y no
+contactan Storage ni SMTP reales.
 
 ### Pruebas automáticas del clasificador
 

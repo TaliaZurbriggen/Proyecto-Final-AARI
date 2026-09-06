@@ -4,6 +4,7 @@ from datetime import UTC, datetime
 from uuid import uuid4
 
 from fastapi.testclient import TestClient
+from starlette.datastructures import UploadFile
 
 from app.api.auth import require_inquilino
 from app.api.reclamos import (
@@ -129,6 +130,41 @@ def test_creates_claim_with_photo_and_runs_mocked_background_notification():
     assert creation_service.payload["description"].startswith("La canilla")
     assert creation_service.payload["photos"][0].filename == "cocina.png"
     assert notification_service.delivered == [creation_service.notification_id]
+
+
+def test_rejects_four_photos_before_reading_them(monkeypatch):
+    service = FakeCreationService()
+
+    async def fail_if_read(*args, **kwargs):
+        raise AssertionError("Las fotos no deben leerse cuando se supera el límite.")
+
+    monkeypatch.setattr(UploadFile, "read", fail_if_read)
+    try:
+        with build_client(service, FakeNotificationService()) as client:
+            response = client.post(
+                "/reclamos",
+                data={
+                    "descripcion": "La canilla de la cocina pierde agua desde ayer.",
+                    "urgencia": "media",
+                },
+                files=[
+                    (
+                        "fotos",
+                        (f"cocina-{index}.png", b"contenido", "image/png"),
+                    )
+                    for index in range(4)
+                ],
+            )
+    finally:
+        app.dependency_overrides.clear()
+
+    assert response.status_code == 422
+    assert response.json()["detail"] == {
+        "code": "invalid_claim",
+        "message": "Podés adjuntar hasta 3 fotos.",
+        "field": "fotos",
+    }
+    assert service.payload is None
 
 
 def test_returns_conflict_for_a_second_active_claim():

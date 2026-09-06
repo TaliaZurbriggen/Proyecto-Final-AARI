@@ -38,7 +38,7 @@ class ClaimEmailSender(Protocol):
 
 
 class SmtpClaimEmailSender:
-    """Envía la confirmación con un límite de conexión menor a 30 segundos."""
+    """Envía la confirmación con 10 segundos de espera por operación SMTP."""
 
     def send(self, *, recipient: str, claim_number: int, message: str) -> None:
         host = os.getenv("SMTP_HOST", "").strip()

@@ -29,6 +29,7 @@ from app.services.claim_notifications import (
 from app.services.claim_storage import SupabaseClaimPhotoStorage
 from app.services.classification_service import ClaimNotFoundError, ClassificationService
 from app.services.claims_creation_service import (
+    MAX_PHOTOS,
     MAX_PHOTO_BYTES,
     ActiveClaimExistsError,
     ClaimCreationService,
@@ -109,6 +110,16 @@ async def create_claim(
     ),
 ) -> ClaimCreatedResponse:
     """Persiste el reclamo y agenda la confirmación por correo."""
+
+    if len(fotos) > MAX_PHOTOS:
+        for photo in fotos:
+            await photo.close()
+        raise _claim_error(
+            code="invalid_claim",
+            message="Podés adjuntar hasta 3 fotos.",
+            field="fotos",
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+        )
 
     uploads: list[ClaimPhotoUpload] = []
     for photo in fotos:
