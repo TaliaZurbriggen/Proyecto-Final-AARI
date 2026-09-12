@@ -547,20 +547,24 @@ Con Docker Compose podés levantar el backend y el frontend juntos, ya conectado
 
 ## Estado del proyecto
 
-**Sprint 2 — En curso (18/08/2026 al 15/09/2026)**
+**Sprint 3 — En curso (09/09/2026 al 07/10/2026)**
 
-- **Sprint 1 finalizado:** grafo LangGraph, integración con Gemini, clasificación estructurada, umbral de confianza, persistencia trazable, manejo seguro de respuestas inválidas y evaluación del prompt v5 sobre 80 casos (70/80; 87,50 %).
-- **Base compartida del Sprint 2 completada:** sistema visual, skill de frontend, tokens y componentes reutilizables.
-- **Completada y fusionada:** AARI-9 / HU1, gestión integral de propietarios.
-- **Completada y fusionada:** AARI-22 / HU2, gestión integral de propiedades.
-- **Completada y fusionada:** AARI-56 / HU5, autenticación administrativa.
-- **Completada y fusionada:** AARI-68 / HU6, acceso de propietarios e inquilinos.
-- **Completada y fusionada:** AARI-79 / HU7, gestión de operadores; migraciones
-  17 y 18 aplicadas y validaciones de reapertura incorporadas en el PR #21.
-- **En curso:** AARI-89 / HU8, alta de reclamos; migración 19 aplicada y flujo
-  real validado en el entorno compartido con persistencia, foto privada y
-  notificación SMTP enviada. Pendiente de revisión del Pull Request.
-- **En curso:** AARI-34 / HU3, gestión integral de inquilinos; implementación
-  terminada y pendiente de revisión antes del Pull Request.
-- **Siguiente secuencia del módulo de administración:** proveedores.
-- **Trabajo paralelo:** autenticación, acceso por roles, operadores y alta de reclamos.
+El Sprint compromete **39 HH** y consolida el flujo posterior al alta de un
+reclamo: contratos y cláusulas, actualizaciones de estado, notificaciones,
+resolución de escalados, derivación de expensas, Home administrativo y un
+entorno compartido en la nube.
+
+- **Sprint 2 finalizado:** ocho historias completadas y 22 h 20 min registradas.
+- **Talía:** AARI-318, AARI-319, AARI-147 y AARI-332, más su participación en
+  el despliegue.
+- **Tobías:** AARI-116, AARI-125, AARI-135 y AARI-157, más su participación en
+  el despliegue.
+- **Trabajo conjunto:** AARI-338, despliegue del entorno compartido.
+- **Inicio previsto de Tobías:** AARI-116, base reutilizable para las
+  notificaciones de AARI-135 y AARI-157.
+- **Seguimiento:** los story points conservan las estimaciones académicas
+  originales; Time Tracking contiene las 39 HH reestimadas y los worklogs
+  registrarán el tiempo real.
+
+El alcance, la secuencia, las dependencias y el criterio de estimación están
+documentados en [`docs/planificacion_sprint_3.md`](docs/planificacion_sprint_3.md).
