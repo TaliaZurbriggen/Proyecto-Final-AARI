@@ -21,6 +21,8 @@ from app.schemas.reclamos import (
     ClaimClassificationResponse,
     ClaimContextResponse,
     ClaimCreatedResponse,
+    TenantClaimDetail,
+    TenantClaimsResponse,
 )
 from app.services.claim_notifications import (
     ClaimNotificationService,
@@ -28,6 +30,10 @@ from app.services.claim_notifications import (
 )
 from app.services.claim_storage import SupabaseClaimPhotoStorage
 from app.services.classification_service import ClaimNotFoundError, ClassificationService
+from app.services.claims_query_service import (
+    TenantClaimNotFoundError,
+    TenantClaimsQueryService,
+)
 from app.services.claims_creation_service import (
     MAX_PHOTOS,
     MAX_PHOTO_BYTES,
@@ -53,6 +59,10 @@ def get_claim_creation_service() -> ClaimCreationService:
         SqlAlchemyClaimsRepository(),
         SupabaseClaimPhotoStorage(),
     )
+
+
+def get_claims_query_service() -> TenantClaimsQueryService:
+    return TenantClaimsQueryService(SqlAlchemyClaimsRepository())
 
 
 def get_claim_notification_service() -> ClaimNotificationService:
@@ -176,6 +186,40 @@ async def create_claim(
         created.notification_id,
     )
     return created.response
+
+
+@router.get("", response_model=TenantClaimsResponse)
+def list_tenant_claims(
+    user: AuthenticatedUser = Depends(require_inquilino),
+    service: TenantClaimsQueryService = Depends(get_claims_query_service),
+) -> TenantClaimsResponse:
+    """Lista únicamente los reclamos del inquilino autenticado."""
+
+    return TenantClaimsResponse(
+        items=service.list(user_id=user.id, profile_id=user.perfil_id)
+    )
+
+
+@router.get("/{reclamo_id}", response_model=TenantClaimDetail)
+def get_tenant_claim(
+    reclamo_id: UUID,
+    user: AuthenticatedUser = Depends(require_inquilino),
+    service: TenantClaimsQueryService = Depends(get_claims_query_service),
+) -> TenantClaimDetail:
+    """Devuelve estado e historial si el reclamo pertenece a la sesión."""
+
+    try:
+        return service.get(
+            claim_id=reclamo_id,
+            user_id=user.id,
+            profile_id=user.perfil_id,
+        )
+    except TenantClaimNotFoundError as error:
+        raise _claim_error(
+            code="claim_not_found",
+            message="No encontramos ese reclamo en tu cuenta.",
+            status_code=status.HTTP_404_NOT_FOUND,
+        ) from error
 
 
 @router.post(

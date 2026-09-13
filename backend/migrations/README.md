@@ -27,6 +27,9 @@ La instalación nueva debe aplicar además, en orden:
    configura el bucket privado `reclamos-fotos`.
 6. `20_contratos_alquiler.sql` — contratos, versiones, historial, protección de
    períodos firmados superpuestos y bucket privado `contratos-alquiler`.
+7. `21_actualizaciones_estado_reclamo.sql` — registra cada transición con su
+   origen, genera una notificación durable para el inquilino y agrega reintentos
+   seguros de entrega.
 
 El módulo de administración inicial ya incorpora el resultado de las
 migraciones incrementales 07, 08, 09, 10, 11, 12, 15 y 16. No deben repetirse
@@ -72,6 +75,9 @@ Aplicar únicamente las migraciones pendientes y respetar este orden:
     bucket privado. Antes de aplicarla, revisar el control de duplicados activos.
 15. `20_contratos_alquiler.sql` — contratos de alquiler, versiones, auditoría,
     permisos y bucket privado de PDF. Aplicar después de 19.
+16. `21_actualizaciones_estado_reclamo.sql` — amplía la bandeja de salida,
+    crea la notificación por cambio de estado y conserva email como canal
+    inicial. WhatsApp permanece desacoplado hasta su historia específica.
 
 ## HU29: migración 20
 
@@ -92,6 +98,62 @@ la instalación existente. No existe una migración de rollback destructivo.
 Prueba real aislada y verificación de RLS/privacidad aprobadas. La prueba de
 carga/descarga real del PDF todavía requiere configurar Storage en el `.env`
 local. Evidencia, comandos y pendientes: `docs/hu29_gestion_contratos.md`.
+
+## HU10: preparación de la migración 21
+
+El archivo vacío fue generado con `supabase migration new` y luego se adaptó a
+la numeración incremental que utiliza este repositorio. La migración es
+transaccional, limita la espera de bloqueos a 5 segundos y cada sentencia a 30
+segundos. No modifica estados de reclamos, no envía mensajes y no aplica el
+cambio al proyecto remoto por sí sola.
+
+**Aplicación confirmada:** en el proyecto compartido AARI de desarrollo se
+ejecutó el 10/09/2026 (Argentina) y quedó registrada como
+`20260911003055_hu10_actualizaciones_estado_reclamo` (versión UTC). Se verificó
+la estructura instalada, RLS, ausencia de lectura para `anon` y
+`authenticated`, funciones `SECURITY INVOKER` con `search_path` vacío y que el
+conteo de notificaciones no cambió durante la migración.
+
+La tabla `notificaciones` funciona como bandeja de salida: persiste asunto,
+mensaje, estado que originó el aviso, próxima fecha de intento y una reserva
+temporal configurable con `NOTIFICATION_LEASE_SECONDS` (120 segundos por
+defecto) para recuperar trabajos abandonados. Cada
+intento fallido se reprograma; después del tercero queda en `fallido`. Los
+workers reclaman filas con `FOR UPDATE SKIP LOCKED` y confirman la transacción
+antes de llamar a SMTP, por lo que no mantienen bloqueos durante una operación
+de red. El resultado solo actualiza la fila si todavía corresponde al mismo
+número de intento; un worker demorado no puede sobrescribir el resultado de un
+intento posterior. Si un proceso se interrumpe durante el tercer intento, la
+fila se marca como fallida cuando vence su reserva en lugar de quedar
+indefinidamente en `procesando`. La entrega es al menos una vez: si SMTP acepta
+el mensaje y la conexión se corta antes de confirmarlo, un reintento todavía
+puede producir un duplicado.
+
+El trigger de historial genera una notificación únicamente cuando existe un
+estado anterior. La confirmación inicial de HU8 se conserva separada y no se
+duplica. La preferencia de todos los inquilinos existentes comienza en `email`;
+el puerto de WhatsApp queda explícitamente desacoplado y las pruebas utilizan
+un doble hasta implementar su integración real.
+
+Antes de aplicar, verificar que no haya notificaciones con `intentos` fuera del
+rango 0..3. Si las hubiera, la transacción aborta sin corregir ni eliminar datos
+automáticamente. Después de aplicar en un entorno autorizado, validar:
+
+- columnas, constraints, índices parciales y FK hacia el historial;
+- que una transición cree exactamente una notificación y el alta inicial no;
+- origen `agente` cuando el backend define ese contexto y `sistema` como valor
+  seguro en los demás casos;
+- aislamiento de reclamos por inquilino en los endpoints de listado y detalle;
+- tres intentos, recuperación de una fila `procesando` vencida y ausencia de
+  reclamos duplicados de una misma fila con dos workers concurrentes;
+- RLS y ausencia de permisos públicos inesperados, además de los asesores de
+  seguridad y rendimiento de Supabase.
+
+Las pruebas reales de SMTP o WhatsApp y la aplicación al Supabase compartido
+requieren autorización específica. La suite automatizada local no consume
+servicios externos. La evidencia del recorrido transaccional de los 20 estados,
+realizado con `ROLLBACK` y sin SMTP, está en
+`docs/hu10_validacion_actualizaciones_estado.md`.
 
 ## HU8: preparación de la migración 19
 

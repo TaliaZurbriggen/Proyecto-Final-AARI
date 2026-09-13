@@ -273,6 +273,8 @@ SMTP_PASSWORD=LA_CLAVE_DE_APLICACION
 SMTP_FROM=AARI <proyectofinalaari@gmail.com>
 SMTP_STARTTLS=true
 APP_LOGIN_URL=http://localhost:5173/login
+NOTIFICATION_WORKER_ENABLED=true
+NOTIFICATION_LEASE_SECONDS=120
 ```
 
 `SMTP_PASSWORD` debe contener una contraseña de aplicación de Google generada
@@ -282,6 +284,28 @@ archivo `.env` solo deben existir asignaciones `CLAVE=VALOR` y comentarios que
 comiencen con `#`; no se deben pegar encabezados como `=== backend/.env ===`.
 Estas variables no pertenecen a `frontend/.env`. Para un entorno publicado,
 `APP_LOGIN_URL` debe reemplazarse por la URL real del login.
+
+Las actualizaciones de estado de los reclamos reutilizan la misma configuración
+SMTP. El backend procesa una bandeja de salida persistente y reintenta hasta tres
+veces, con un minuto entre intentos. `NOTIFICATION_WORKER_ENABLED=true` mantiene
+activo ese proceso; puede desactivarse temporalmente con `false` durante tareas
+de mantenimiento. Cada worker reserva el intento durante
+`NOTIFICATION_LEASE_SECONDS` (120 segundos por defecto, configurable entre 30 y
+3600) y solo puede guardar el resultado del mismo número de intento. Esto reduce
+duplicados y evita que un worker demorado sobrescriba otro intento, aunque SMTP
+mantiene una garantía de entrega al menos una vez. WhatsApp queda encapsulado
+como canal, pero su entrega real se incorporará en HU19.
+
+El portal del inquilino consulta nuevamente el listado y el detalle del reclamo
+cada 30 segundos mientras la pantalla permanece abierta. Las consultas no se
+superponen y, ante un error temporal, se conserva la última información visible
+para poder reintentar automáticamente en el siguiente ciclo.
+
+La migración de actualizaciones es
+`backend/migrations/21_actualizaciones_estado_reclamo.sql`; se ejecuta después
+de `20_contratos_alquiler.sql`. En el Supabase compartido ya fue aplicada bajo
+su identificador UTC original, por lo que renombrar el archivo del repositorio
+no requiere volver a ejecutarla.
 
 Las bases existentes deben aplicar una vez
 `backend/migrations/14_acceso_propietarios_inquilinos.sql`. La migración crea y

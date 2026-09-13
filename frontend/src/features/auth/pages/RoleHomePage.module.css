@@ -101,6 +101,30 @@
   text-decoration: none;
 }
 
+.cardActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--aari-space-2);
+}
+
+.cards .cardSecondaryAction {
+  display: inline-flex;
+  min-height: var(--aari-control-height-sm);
+  align-items: center;
+  margin-top: var(--aari-space-4);
+  padding-inline: var(--aari-space-3);
+  color: var(--aari-color-ink);
+  border: 1px solid var(--aari-color-border-strong);
+  border-radius: var(--aari-radius-md);
+  font-size: var(--aari-font-size-sm);
+  font-weight: var(--aari-font-weight-semibold);
+  text-decoration: none;
+}
+
+.cards .cardSecondaryAction:hover {
+  background: var(--aari-color-surface-soft);
+}
+
 .cards .cardAction:hover {
   background: var(--aari-color-primary-hover);
 }

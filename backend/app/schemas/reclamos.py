@@ -1,4 +1,4 @@
-"""Contratos HTTP y de aplicación para crear y clasificar reclamos."""
+"""Contratos HTTP y de aplicación para crear, consultar y clasificar reclamos."""
 
 from datetime import datetime
 from typing import Literal
@@ -10,6 +10,28 @@ from app.agents.classification.state import MotivoEscalado, TipoGasto
 
 
 EstadoPersistido = Literal["Clasificado", "Escalado"]
+EstadoReclamo = Literal[
+    "Recibido",
+    "Clasificado",
+    "Clasificación pendiente",
+    "Escalado",
+    "Pendiente de respuesta del responsable",
+    "Pendiente de respuesta - vencido",
+    "Autorizado",
+    "Rechazado por propietario",
+    "Pendiente de asignación",
+    "Sin presupuestos recibidos",
+    "Proveedor seleccionado",
+    "En proceso",
+    "Visita programada",
+    "Resuelto",
+    "Resuelto (sin confirmación)",
+    "Reabierto por disconformidad",
+    "Derivado a inmobiliaria (expensa)",
+    "Derivado a proveedor externo",
+    "Sesión expirada",
+    "Pendiente de autorización - vencido",
+]
 
 
 class ClaimPropertyContext(BaseModel):
@@ -42,6 +64,40 @@ class ClaimCreatedResponse(BaseModel):
     creado_en: datetime
     notificacion_estado: Literal["pendiente"] = "pendiente"
     fotos_adjuntas: int
+
+
+class ClaimHistoryItem(BaseModel):
+    """Transición visible para el inquilino propietario del reclamo."""
+
+    estado_anterior: str | None
+    estado_nuevo: EstadoReclamo
+    origen: str
+    timestamp: datetime
+
+
+class TenantClaimListItem(BaseModel):
+    """Resumen de un reclamo propio en el portal del inquilino."""
+
+    id: UUID
+    numero: int
+    descripcion: str
+    urgencia: Literal["baja", "media", "alta"]
+    estado: EstadoReclamo
+    creado_en: datetime
+    updated_at: datetime
+    propiedad: ClaimPropertyContext
+
+
+class TenantClaimsResponse(BaseModel):
+    """Colección ordenada de reclamos pertenecientes al inquilino autenticado."""
+
+    items: list[TenantClaimListItem]
+
+
+class TenantClaimDetail(TenantClaimListItem):
+    """Detalle de un reclamo propio con su trazabilidad cronológica."""
+
+    historial: list[ClaimHistoryItem]
 
 
 class AgentClassificationResult(BaseModel):

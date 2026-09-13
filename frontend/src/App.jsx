@@ -23,7 +23,9 @@ import ChangePasswordPage from './features/auth/pages/ChangePasswordPage.jsx'
 import RoleHomePage from './features/auth/pages/RoleHomePage.jsx'
 import RoleLayout from './layouts/RoleLayout.jsx'
 import ReclamoConfirmationPage from './features/reclamos/pages/ReclamoConfirmationPage.jsx'
+import ReclamoDetailPage from './features/reclamos/pages/ReclamoDetailPage.jsx'
 import ReclamoFormPage from './features/reclamos/pages/ReclamoFormPage.jsx'
+import ReclamosListPage from './features/reclamos/pages/ReclamosListPage.jsx'
 import { useAuth } from './features/auth/authContext.js'
 import { destinationForUser } from './features/auth/routing.js'
 import ContractsListPage from './features/contratos/pages/ContractsListPage.jsx'
@@ -110,12 +112,20 @@ function App() {
             <Route path="inquilino/contratos" element={<ContractsListPage />} />
             <Route path="inquilino/contratos/:contractId" element={<ContractDetailPage />} />
             <Route
+              path="inquilino/reclamos"
+              element={<ReclamosListPage />}
+            />
+            <Route
               path="inquilino/reclamos/nuevo"
               element={<ReclamoFormPage />}
             />
             <Route
               path="inquilino/reclamos/confirmacion"
               element={<ReclamoConfirmationPage />}
+            />
+            <Route
+              path="inquilino/reclamos/:reclamoId"
+              element={<ReclamoDetailPage />}
             />
           </Route>
         </Route>

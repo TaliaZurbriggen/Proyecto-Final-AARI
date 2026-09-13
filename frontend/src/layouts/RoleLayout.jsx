@@ -17,6 +17,7 @@ function RoleLayout() {
   const items = user?.rol === 'inquilino'
     ? [
         { href: homePath, label: 'Inicio' },
+        { href: '/inquilino/reclamos', label: 'Mis reclamos' },
         { href: '/inquilino/reclamos/nuevo', label: 'Nuevo reclamo' },
       ]
     : [{ href: homePath, label: 'Inicio' }]
@@ -25,9 +26,12 @@ function RoleLayout() {
   }
   const activeItem = location.pathname.includes('/contratos')
     ? 'Mis contratos'
-    : location.pathname.startsWith('/inquilino/reclamos')
-    ? 'Nuevo reclamo'
-    : 'Inicio'
+    : location.pathname === '/inquilino/reclamos/nuevo'
+      || location.pathname === '/inquilino/reclamos/confirmacion'
+      ? 'Nuevo reclamo'
+      : location.pathname.startsWith('/inquilino/reclamos')
+        ? 'Mis reclamos'
+        : 'Inicio'
 
   const handleLogout = async () => {
     await logout()

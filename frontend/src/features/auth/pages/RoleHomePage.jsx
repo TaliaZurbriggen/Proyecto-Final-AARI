@@ -66,9 +66,14 @@ function RoleHomePage() {
               : 'Vas a poder consultar y seguir el estado de tus solicitudes.'}
           </p>
           {user?.rol === 'inquilino' ? (
-            <Link className={styles.cardAction} to="/inquilino/reclamos/nuevo">
-              Crear reclamo
-            </Link>
+            <div className={styles.cardActions}>
+              <Link className={styles.cardAction} to="/inquilino/reclamos">
+                Ver mis reclamos
+              </Link>
+              <Link className={styles.cardSecondaryAction} to="/inquilino/reclamos/nuevo">
+                Crear reclamo
+              </Link>
+            </div>
           ) : (
             <span>Próximamente</span>
           )}
