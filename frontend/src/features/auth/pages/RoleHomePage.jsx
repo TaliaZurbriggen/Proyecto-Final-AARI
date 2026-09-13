@@ -1,4 +1,4 @@
-import { Building2, ClipboardList, Wrench } from 'lucide-react'
+import { Building2, ClipboardList, FileText, Wrench } from 'lucide-react'
 import { Link, useLocation } from 'react-router'
 import { PageContainer, PageHeading } from '../../../components/layout/index.js'
 import AlertMessage from '../../../components/ui/AlertMessage.jsx'
@@ -73,12 +73,17 @@ function RoleHomePage() {
             <span>Próximamente</span>
           )}
         </article>
-        <article>
+        {['inquilino', 'propietario'].includes(user?.rol) ? <article>
+          <FileText aria-hidden="true" />
+          <h2>Mis contratos</h2>
+          <p>Consultá tus contratos firmados, sus vigencias y documentos anteriores.</p>
+          <Link className={styles.cardAction} to={`/${user.rol}/contratos`}>Ver contratos</Link>
+        </article> : <article>
           <Wrench aria-hidden="true" />
           <h2>Gestión asociada</h2>
           <p>La información disponible se adaptará al rol de tu cuenta.</p>
           <span>Próximamente</span>
-        </article>
+        </article>}
       </div>
     </PageContainer>
   )

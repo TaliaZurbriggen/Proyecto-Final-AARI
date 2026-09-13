@@ -20,7 +20,12 @@ function RoleLayout() {
         { href: '/inquilino/reclamos/nuevo', label: 'Nuevo reclamo' },
       ]
     : [{ href: homePath, label: 'Inicio' }]
-  const activeItem = location.pathname.startsWith('/inquilino/reclamos')
+  if (['inquilino', 'propietario'].includes(user?.rol)) {
+    items.push({ href: `${homePath}/contratos`, label: 'Mis contratos' })
+  }
+  const activeItem = location.pathname.includes('/contratos')
+    ? 'Mis contratos'
+    : location.pathname.startsWith('/inquilino/reclamos')
     ? 'Nuevo reclamo'
     : 'Inicio'
 

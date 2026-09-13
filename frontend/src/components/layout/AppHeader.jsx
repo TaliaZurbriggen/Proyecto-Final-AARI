@@ -33,9 +33,27 @@ function AppHeader({
   const navigationRef = useRef(null)
 
   useEffect(() => {
-    navigationRef.current
-      ?.querySelector('[aria-current="page"]')
-      ?.scrollIntoView?.({ block: 'nearest', inline: 'center' })
+    const navigation = navigationRef.current
+    const activeLink = navigation?.querySelector('[aria-current="page"]')
+    if (!activeLink) return
+
+    // Desplazar solo el menú; scrollIntoView también movía la página completa.
+    const centerActiveLink = () => {
+      if (navigation.scrollWidth <= navigation.clientWidth) return
+      navigation.scrollTo?.({
+        left: navigation.scrollLeft + activeLink.getBoundingClientRect().left
+          - navigation.getBoundingClientRect().left
+          - (navigation.clientWidth - activeLink.offsetWidth) / 2,
+        behavior: 'instant',
+      })
+    }
+    centerActiveLink()
+    // Recalcular al cargar la tipografía o cambiar el ancho/orientación.
+    if (typeof ResizeObserver === 'undefined') return
+    const observer = new ResizeObserver(centerActiveLink)
+    observer.observe(navigation)
+    observer.observe(activeLink)
+    return () => observer.disconnect()
   }, [activeItem])
 
   const handleNavigation = (event, item) => {
@@ -122,7 +140,7 @@ function AppHeader({
               {getInitials(profileName)}
             </span>
             <span className={styles.profileCopy}>
-              <strong>{profileName}</strong>
+              <strong title={profileName}>{profileName}</strong>
               <small>{profileRole}</small>
             </span>
           </button>

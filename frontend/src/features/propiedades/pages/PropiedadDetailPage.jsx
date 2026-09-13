@@ -18,6 +18,7 @@ import {
   StatusBadge,
 } from '../../../components/ui/index.js'
 import { getPropertyTenant } from '../../inquilinos/api/inquilinosApi.js'
+import ContractPanel from '../../contratos/components/ContractPanel.jsx'
 import { deletePropiedad, getPropiedad } from '../api/propiedadesApi.js'
 import styles from './Propiedades.module.css'
 
@@ -52,6 +53,7 @@ function PropiedadDetailPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [isDeleteOpen, setIsDeleteOpen] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
+  const [contractCount, setContractCount] = useState(0)
 
   useEffect(() => {
     const controller = new AbortController()
@@ -112,7 +114,9 @@ function PropiedadDetailPage() {
     )
   }
 
-  const deletionReason = property.cantidad_reclamos > 0
+  const deletionReason = contractCount > 0
+    ? 'Tiene contratos asociados. El registro se conserva para mantener el historial.'
+    : property.cantidad_reclamos > 0
     ? 'Tiene reclamos históricos asociados y debe conservarse para mantener la trazabilidad.'
     : tenant
       ? 'Tiene un inquilino activo. Primero debe resolverse esa asociación.'
@@ -242,6 +246,8 @@ function PropiedadDetailPage() {
           </Link>
         </div>
       </section>
+
+      <ContractPanel key={property.id} propiedadId={property.id} canCreate={Boolean(tenant)} onCount={setContractCount} />
 
       <section className={styles.dangerZone} aria-labelledby="danger-title">
         <div>

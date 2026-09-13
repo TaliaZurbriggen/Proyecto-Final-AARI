@@ -5,6 +5,13 @@
 **Duración:** 4 semanas, del 09/09/2026 al 07/10/2026  
 **Estado:** Sprint configurado y activo en Jira; alcance y reestimación acordados.
 
+**Seguimiento HU29 (12–13/09/2026):** comenzó su implementación en una rama
+desde main. La inmobiliaria administra los PDF; inquilino y propietario solo
+consultan sus contratos firmados. No se incorpora firma electrónica ni fecha
+de firma manual; la firma queda en el documento. Se mantiene la estimación.
+Decisiones, ejecución y pendientes en
+[`hu29_gestion_contratos.md`](hu29_gestion_contratos.md).
+
 ## Punto de partida
 
 Durante el Sprint 2 se completaron ocho historias de usuario y se registraron **22 h 20 min** de trabajo. El alcance quedó terminado casi dos semanas antes del cierre previsto. La estimación original de 190 HH no representó la duración real de las implementaciones, por lo que el equipo acordó reestimar el Sprint 3 utilizando:

@@ -26,6 +26,9 @@ import ReclamoConfirmationPage from './features/reclamos/pages/ReclamoConfirmati
 import ReclamoFormPage from './features/reclamos/pages/ReclamoFormPage.jsx'
 import { useAuth } from './features/auth/authContext.js'
 import { destinationForUser } from './features/auth/routing.js'
+import ContractsListPage from './features/contratos/pages/ContractsListPage.jsx'
+import ContractFormPage from './features/contratos/pages/ContractFormPage.jsx'
+import ContractDetailPage from './features/contratos/pages/ContractDetailPage.jsx'
 
 function SessionHomeRedirect() {
   const { user } = useAuth()
@@ -45,6 +48,10 @@ function App() {
         </Route>
         <Route element={<ProtectedRoute allowedRoles={['administrador']} />}>
           <Route element={<AdminLayout />}>
+            <Route path="contratos" element={<ContractsListPage />} />
+            <Route path="contratos/nuevo" element={<ContractFormPage />} />
+            <Route path="contratos/:contractId" element={<ContractDetailPage />} />
+            <Route path="contratos/:contractId/editar" element={<ContractFormPage />} />
             <Route path="operadores" element={<OperadoresListPage />} />
             <Route path="operadores/nuevo" element={<OperadorFormPage />} />
             <Route path="propietarios" element={<PropietariosListPage />} />
@@ -93,11 +100,15 @@ function App() {
         <Route element={<ProtectedRoute allowedRoles={['propietario']} />}>
           <Route element={<RoleLayout />}>
             <Route path="propietario" element={<RoleHomePage />} />
+            <Route path="propietario/contratos" element={<ContractsListPage />} />
+            <Route path="propietario/contratos/:contractId" element={<ContractDetailPage />} />
           </Route>
         </Route>
         <Route element={<ProtectedRoute allowedRoles={['inquilino']} />}>
           <Route element={<RoleLayout />}>
             <Route path="inquilino" element={<RoleHomePage />} />
+            <Route path="inquilino/contratos" element={<ContractsListPage />} />
+            <Route path="inquilino/contratos/:contractId" element={<ContractDetailPage />} />
             <Route
               path="inquilino/reclamos/nuevo"
               element={<ReclamoFormPage />}

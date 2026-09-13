@@ -25,6 +25,8 @@ La instalación nueva debe aplicar además, en orden:
 5. `19_alta_reclamos.sql` — habilita el alta inicial sin rubro, agrega número
    visible, evita reclamos activos duplicados, protege fotos/notificaciones y
    configura el bucket privado `reclamos-fotos`.
+6. `20_contratos_alquiler.sql` — contratos, versiones, historial, protección de
+   períodos firmados superpuestos y bucket privado `contratos-alquiler`.
 
 El módulo de administración inicial ya incorpora el resultado de las
 migraciones incrementales 07, 08, 09, 10, 11, 12, 15 y 16. No deben repetirse
@@ -68,6 +70,28 @@ Aplicar únicamente las migraciones pendientes y respetar este orden:
     para revalidar también al entrar al estado `Escalado`. No reemplaza la 17.
 14. `19_alta_reclamos.sql` — agrega el contrato de persistencia de HU8 y el
     bucket privado. Antes de aplicarla, revisar el control de duplicados activos.
+15. `20_contratos_alquiler.sql` — contratos de alquiler, versiones, auditoría,
+    permisos y bucket privado de PDF. Aplicar después de 19.
+
+## HU29: migración 20
+
+Aplicada el **13/09/2026 al Supabase compartido de desarrollo** mediante
+`scripts/check_contracts_postgres.py --mode apply`. No repetir al hacer pull.
+Es aditiva y transaccional, con límites de bloqueo/sentencia. Instala
+`btree_gist` si falta, crea tres tablas con RLS y revoca permisos públicos.
+No carga cuentas, contratos ni PDFs, y no agrega una fecha de firma manual.
+
+La exclusión GiST rechaza períodos firmados superpuestos para una misma
+propiedad. Las FK restrictivas conservan personas e inmuebles con historial.
+El bucket `contratos-alquiler` queda privado, limitado a PDF de 10 MiB.
+
+Antes de aplicarla en otra base, revisar `to_regclass('public.contratos')`.
+Si ya existe, no volver a ejecutar ni borrar tablas para continuar: verificar
+la instalación existente. No existe una migración de rollback destructivo.
+
+Prueba real aislada y verificación de RLS/privacidad aprobadas. La prueba de
+carga/descarga real del PDF todavía requiere configurar Storage en el `.env`
+local. Evidencia, comandos y pendientes: `docs/hu29_gestion_contratos.md`.
 
 ## HU8: preparación de la migración 19
 

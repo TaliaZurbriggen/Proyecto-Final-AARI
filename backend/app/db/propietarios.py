@@ -4,6 +4,7 @@ from uuid import UUID, uuid4
 
 from sqlalchemy import text
 from sqlalchemy.exc import IntegrityError
+from app.services.contract_errors import preserve_contract_history
 
 from app.db.access import (
     access_from_row,
@@ -211,6 +212,7 @@ class SqlAlchemyPropietariosRepository:
         detail = self.get_detail(propietario_id)
         return detail
 
+    @preserve_contract_history
     def delete(self, propietario_id: UUID) -> bool:
         properties_statement = text(
             "SELECT COUNT(*) FROM propiedades WHERE propietario_id = :propietario_id"
