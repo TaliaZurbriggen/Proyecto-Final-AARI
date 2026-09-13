@@ -1,10 +1,13 @@
 import os
 
 from fastapi import Depends, FastAPI
+from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
 
 from app.api.auth import require_admin, router as auth_router
+from app.api.contratos import router as contratos_router
+from app.services.contract_errors import ContractError
 from app.api.inquilinos import property_router as property_tenant_router
 from app.api.inquilinos import router as inquilinos_router
 from app.api.operadores import router as operadores_router
@@ -41,6 +44,15 @@ app.include_router(inquilinos_router, dependencies=admin_dependencies)
 app.include_router(proveedores_router, dependencies=admin_dependencies)
 app.include_router(specialties_router, dependencies=admin_dependencies)
 app.include_router(reclamos_router)
+app.include_router(contratos_router)
+
+
+@app.exception_handler(ContractError)
+async def contract_error_handler(request, error):
+    detail = {"code": error.code, "message": str(error)}
+    if error.field:
+        detail["field"] = error.field
+    return JSONResponse(status_code=error.status, content={"detail": detail})
 
 
 @app.get("/health")

@@ -8,6 +8,7 @@ const navigationItems = [
   { href: '/inquilinos', label: 'Inquilinos' },
   { href: '/proveedores', label: 'Proveedores' },
   { href: '/operadores', label: 'Operadores' },
+  { href: '/contratos', label: 'Contratos' },
 ]
 
 function AdminLayout() {
@@ -18,7 +19,10 @@ function AdminLayout() {
   const isTenants = location.pathname.startsWith('/inquilinos')
   const isProviders = location.pathname.startsWith('/proveedores')
   const isOperators = location.pathname.startsWith('/operadores')
-  const activeModule = isOperators
+  const isContracts = location.pathname.startsWith('/contratos')
+  const activeModule = isContracts
+    ? { href: '/contratos', label: 'Contratos', placeholder: 'Buscar inmueble o participante' }
+    : isOperators
     ? { href: '/operadores', label: 'Operadores', placeholder: 'Buscar operador por nombre o email' }
     : isProviders
     ? {

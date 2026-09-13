@@ -4,6 +4,7 @@ from uuid import UUID, uuid4
 
 from sqlalchemy import text
 from sqlalchemy.exc import IntegrityError
+from app.services.contract_errors import preserve_contract_history
 
 from app.db.access import (
     access_from_row,
@@ -323,6 +324,7 @@ class SqlAlchemyInquilinosRepository:
                 return None
         return self.get_detail(inquilino_id)
 
+    @preserve_contract_history
     def delete(self, inquilino_id: UUID) -> bool:
         params = {"inquilino_id": str(inquilino_id)}
         with self.session_factory.begin() as session:

@@ -52,7 +52,7 @@ Proyecto-Final-AARI/
 │   ├── public/                  # Recursos estáticos
 │   ├── src/
 │   │   ├── components/          # UI y layouts reutilizables
-│   │   ├── features/            # Auth, personas, inmuebles, proveedores, operadores y reclamos
+│   │   ├── features/            # Auth, personas, inmuebles, proveedores, operadores, reclamos y contratos
 │   │   ├── pages/               # Pantallas generales de la aplicación
 │   │   └── styles/              # Tokens y estilos globales
 │   ├── AGENTS.md                # Reglas específicas del frontend
@@ -93,6 +93,33 @@ POST /reclamos/{reclamo_id}/clasificar
 ```
 
 El endpoint obtiene el reclamo, invoca el grafo y guarda el resultado. Devuelve `Clasificado` o `Escalado`, junto con el tipo de gasto cuando corresponda, la confianza, el fundamento y el motivo de escalado. La migración `backend/migrations/06_clasificacion_agente.sql` debe haberse aplicado una vez antes de utilizarlo. Cada cambio de estado queda registrado con origen `agente`.
+
+### Gestión de contratos de alquiler (HU29)
+
+La inmobiliaria administra los contratos desde `/contratos` o desde la ficha
+del inquilino/propiedad. Puede guardar un borrador sin PDF, completar sus fechas
+y cargar después el documento firmado. No se pide otra firma ni fecha de firma.
+Las versiones anteriores y las renovaciones conservan el historial.
+
+Inquilinos y propietarios consultan únicamente sus contratos firmados desde
+`/inquilino/contratos` y `/propietario/contratos`; no pueden cargarlos ni editarlos.
+El PDF se guarda en el bucket privado `contratos-alquiler` (10 MiB) y se descarga
+mediante un enlace temporal autorizado de 5 minutos.
+
+Requiere la migración `backend/migrations/20_contratos_alquiler.sql`, posterior
+a la 19, y `SUPABASE_URL` / `SUPABASE_SERVICE_ROLE_KEY` en el **backend/.env** del
+worktree, además de la conexión y autenticación existentes. Nunca usar variables
+`VITE_*` para estas credenciales. La migración se aplicó al Supabase compartido el
+13/09/2026; no repetirla al actualizar la rama. La prueba real de Storage del
+13/09 pasó: PDF sintético, descarga privada con bytes idénticos, rechazo de acceso
+público y limpieza verificada. Pendientes: revisión funcional y PR.
+
+`SUPABASE_URL` es la URL HTTPS del proyecto (`https://project-ref.supabase.co`),
+**no** la cadena PostgreSQL que se usa en `DATABASE_URL`. Mantener ambas variables
+separadas y reiniciar el backend después de modificar `.env`.
+
+Alcance, decisiones, pruebas y pendientes:
+[`docs/hu29_gestion_contratos.md`](docs/hu29_gestion_contratos.md).
 
 ### Gestión de propietarios
 
@@ -560,6 +587,9 @@ entorno compartido en la nube.
 - **Tobías:** AARI-116, AARI-125, AARI-135 y AARI-157, más su participación en
   el despliegue.
 - **Trabajo conjunto:** AARI-338, despliegue del entorno compartido.
+- **HU29 / AARI-318 en implementación:** módulo contractual y pruebas locales
+  incorporados en su rama; migración instalada y Storage real validado.
+  Pendientes: revisión funcional y merge. La extracción de cláusulas pertenece a HU30.
 - **Inicio previsto de Tobías:** AARI-116, base reutilizable para las
   notificaciones de AARI-135 y AARI-157.
 - **Seguimiento:** los story points conservan las estimaciones académicas

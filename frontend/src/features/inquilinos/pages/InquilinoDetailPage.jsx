@@ -12,6 +12,7 @@ import {
 import { Link, useLocation, useNavigate, useParams } from 'react-router'
 import { PageContainer, PageHeading } from '../../../components/layout/index.js'
 import AccessDeliveryPanel from '../../access/components/AccessDeliveryPanel.jsx'
+import ContractPanel from '../../contratos/components/ContractPanel.jsx'
 import {
   AlertMessage,
   Button,
@@ -46,6 +47,7 @@ function InquilinoDetailPage() {
   const [dialogAction, setDialogAction] = useState(null)
   const [isBusy, setIsBusy] = useState(false)
   const [isRetryingAccess, setIsRetryingAccess] = useState(false)
+  const [contractCount, setContractCount] = useState(0)
 
   const loadTenant = useCallback(
     (signal) =>
@@ -237,11 +239,15 @@ function InquilinoDetailPage() {
         </section>
       </div>
 
+      <ContractPanel key={tenant.id} inquilinoId={tenant.id} canCreate={Boolean(tenant.propiedad)} onCount={setContractCount} />
+
       <section className={styles.managementZone} aria-labelledby="association-title">
         <div>
           <h2 id="association-title">Administrar registro</h2>
           <p>
-            {hasClaims
+            {contractCount > 0
+              ? 'Tiene contratos asociados: puede desasociarse, pero no eliminarse. Su historial se conserva.'
+              : hasClaims
               ? 'La desasociación conserva al inquilino y sus reclamos históricos.'
               : 'Podés liberar la propiedad o eliminar el registro si ya no es necesario.'}
           </p>
@@ -256,7 +262,7 @@ function InquilinoDetailPage() {
             Desasociar propiedad
           </Button>
           <Button
-            disabled={hasClaims}
+            disabled={hasClaims || contractCount > 0}
             leadingIcon={<Trash2 />}
             onClick={() => setDialogAction('delete')}
             variant="danger"
