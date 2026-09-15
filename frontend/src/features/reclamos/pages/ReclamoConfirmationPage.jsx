@@ -52,7 +52,14 @@ function ReclamoConfirmationPage() {
           </p>
         </div>
 
-        <Link className={styles.primaryLink} to="/inquilino">Volver al inicio</Link>
+        <div className={styles.confirmationActions}>
+          <Link className={styles.primaryLink} to={`/inquilino/reclamos/${claim.id}`}>
+            Ver seguimiento
+          </Link>
+          <Link className={styles.secondaryLink} to="/inquilino/reclamos">
+            Mis reclamos
+          </Link>
+        </div>
       </section>
     </PageContainer>
   )

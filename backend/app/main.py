@@ -1,4 +1,6 @@
+import asyncio
 import os
+from contextlib import asynccontextmanager
 
 from fastapi import Depends, FastAPI
 from fastapi.responses import JSONResponse
@@ -15,10 +17,40 @@ from app.api.propiedades import router as propiedades_router
 from app.api.propietarios import router as propietarios_router
 from app.api.proveedores import router as proveedores_router
 from app.api.proveedores import specialties_router
+from app.api.reclamos import get_claim_notification_service
 from app.api.reclamos import router as reclamos_router
 from app.db.database import engine
+from app.services.claim_notifications import run_notification_worker
 
-app = FastAPI(title="AARI - Automatización y Asistencia en Reclamos Inmobiliarios")
+
+def _notification_worker_enabled() -> bool:
+    configured = os.getenv("NOTIFICATION_WORKER_ENABLED", "true").lower()
+    return configured not in {"0", "false", "no"} and "PYTEST_CURRENT_TEST" not in os.environ
+
+
+@asynccontextmanager
+async def lifespan(_: FastAPI):
+    """Mantiene activa la bandeja de salida sin bloquear las peticiones."""
+
+    if not _notification_worker_enabled():
+        yield
+        return
+
+    stop_event = asyncio.Event()
+    worker = asyncio.create_task(
+        run_notification_worker(get_claim_notification_service(), stop_event)
+    )
+    try:
+        yield
+    finally:
+        stop_event.set()
+        await worker
+
+
+app = FastAPI(
+    title="AARI - Automatización y Asistencia en Reclamos Inmobiliarios",
+    lifespan=lifespan,
+)
 cors_origins = [
     origin.strip()
     for origin in os.getenv(

@@ -1,5 +1,7 @@
 """Acceso a datos para el alta, notificación y clasificación de reclamos."""
 
+from collections.abc import Mapping
+from typing import Any
 from uuid import UUID, uuid4
 
 from sqlalchemy import text
@@ -8,11 +10,18 @@ from sqlalchemy.exc import IntegrityError
 from app.db.database import SessionLocal
 from app.schemas.reclamos import (
     AgentClassificationResult,
+    ClaimHistoryItem,
     ClaimClassificationResponse,
     ClaimCreatedResponse,
     ClaimPropertyContext,
+    TenantClaimDetail,
+    TenantClaimListItem,
 )
-from app.services.claim_notifications import ClaimNotificationContext
+from app.services.claim_notifications import (
+    RETRY_INTERVAL_SECONDS,
+    ClaimNotificationContext,
+    notification_lease_seconds,
+)
 from app.services.classification_service import ClaimForClassification
 from app.services.claims_creation_service import (
     ActiveClaimExistsError,
@@ -63,6 +72,101 @@ class SqlAlchemyClaimsRepository:
                 tipo=row["tipo"],
                 piso=row["piso"],
                 numero=row["numero"],
+            ),
+        )
+
+    def list_for_tenant(
+        self, *, user_id: UUID, profile_id: UUID
+    ) -> list[TenantClaimListItem]:
+        statement = text(
+            """
+            SELECT r.id, r.numero AS reclamo_numero, r.descripcion,
+                   r.urgencia::text AS urgencia,
+                   r.estado, r.creado_en, r.updated_at,
+                   p.id AS propiedad_id, p.direccion, p.provincia, p.localidad,
+                   p.barrio, p.tipo::text AS propiedad_tipo, p.piso,
+                   p.numero AS propiedad_numero
+            FROM reclamos r
+            JOIN inquilinos i ON i.id = r.inquilino_id
+            JOIN propiedades p ON p.id = r.propiedad_id
+            WHERE i.id = :profile_id
+              AND i.usuario_id = :user_id
+            ORDER BY r.creado_en DESC, r.numero DESC
+            """
+        )
+        with self.session_factory() as session:
+            rows = session.execute(
+                statement,
+                {"profile_id": str(profile_id), "user_id": str(user_id)},
+            ).mappings().all()
+        return [self._tenant_claim_from_row(row) for row in rows]
+
+    def get_for_tenant(
+        self, *, claim_id: UUID, user_id: UUID, profile_id: UUID
+    ) -> TenantClaimDetail | None:
+        statement = text(
+            """
+            SELECT r.id, r.numero AS reclamo_numero, r.descripcion,
+                   r.urgencia::text AS urgencia,
+                   r.estado, r.creado_en, r.updated_at,
+                   p.id AS propiedad_id, p.direccion, p.provincia, p.localidad,
+                   p.barrio, p.tipo::text AS propiedad_tipo, p.piso,
+                   p.numero AS propiedad_numero
+            FROM reclamos r
+            JOIN inquilinos i ON i.id = r.inquilino_id
+            JOIN propiedades p ON p.id = r.propiedad_id
+            WHERE r.id = :claim_id
+              AND i.id = :profile_id
+              AND i.usuario_id = :user_id
+            """
+        )
+        history_statement = text(
+            """
+            SELECT estado_anterior, estado_nuevo, origen, timestamp
+            FROM reclamo_historial_estados
+            WHERE reclamo_id = :claim_id
+            ORDER BY timestamp ASC, id ASC
+            """
+        )
+        params = {
+            "claim_id": str(claim_id),
+            "profile_id": str(profile_id),
+            "user_id": str(user_id),
+        }
+        with self.session_factory() as session:
+            row = session.execute(statement, params).mappings().one_or_none()
+            if row is None:
+                return None
+            history_rows = session.execute(
+                history_statement,
+                {"claim_id": str(claim_id)},
+            ).mappings().all()
+
+        summary = self._tenant_claim_from_row(row)
+        return TenantClaimDetail(
+            **summary.model_dump(),
+            historial=[ClaimHistoryItem.model_validate(item) for item in history_rows],
+        )
+
+    @staticmethod
+    def _tenant_claim_from_row(row: Mapping[str, Any]) -> TenantClaimListItem:
+        return TenantClaimListItem(
+            id=row["id"],
+            numero=int(row["reclamo_numero"]),
+            descripcion=row["descripcion"],
+            urgencia=row["urgencia"],
+            estado=row["estado"],
+            creado_en=row["creado_en"],
+            updated_at=row["updated_at"],
+            propiedad=ClaimPropertyContext(
+                id=row["propiedad_id"],
+                direccion=row["direccion"],
+                provincia=row["provincia"],
+                localidad=row["localidad"],
+                barrio=row["barrio"],
+                tipo=row["propiedad_tipo"],
+                piso=row["piso"],
+                numero=row["propiedad_numero"],
             ),
         )
 
@@ -171,16 +275,21 @@ class SqlAlchemyClaimsRepository:
                         """
                         INSERT INTO notificaciones
                             (id, reclamo_id, destinatario_tipo,
-                             destinatario_contacto, canal, mensaje, estado_envio)
+                             destinatario_contacto, canal, asunto, mensaje,
+                             estado_reclamo, estado_envio, proximo_intento_en)
                         VALUES
                             (:id, :reclamo_id, 'inquilino', :recipient,
-                             'email', :message, 'pendiente')
+                             'email', :subject, :message, 'Recibido',
+                             'pendiente', CURRENT_TIMESTAMP)
                         """
                     ),
                     {
                         "id": str(notification_id),
                         "reclamo_id": str(claim_id),
                         "recipient": context.tenant_email,
+                        "subject": (
+                            f"AARI - Reclamo #{claim_number:06d} recibido"
+                        ),
                         "message": message,
                     },
                 )
@@ -244,62 +353,145 @@ class SqlAlchemyClaimsRepository:
         details.extend([property_context.localidad, property_context.provincia])
         return " · ".join(details)
 
-    def get_notification_context(
+    def claim_notification(
         self, notification_id: UUID
     ) -> ClaimNotificationContext | None:
-        statement = text(
-            """
-            SELECT n.destinatario_contacto, n.mensaje, r.numero
-            FROM notificaciones n
-            JOIN reclamos r ON r.id = n.reclamo_id
-            WHERE n.id = :notification_id
-              AND n.canal = 'email'
-              AND n.estado_envio IN ('pendiente', 'fallido')
-            """
+        contexts = self._claim_notifications(
+            limit=1,
+            notification_id=notification_id,
         )
-        with self.session_factory() as session:
-            row = session.execute(
-                statement,
-                {"notification_id": str(notification_id)},
-            ).mappings().one_or_none()
-        if row is None:
-            return None
-        return ClaimNotificationContext(
-            recipient=str(row["destinatario_contacto"]),
-            claim_number=int(row["numero"]),
-            message=str(row["mensaje"]),
-        )
+        return contexts[0] if contexts else None
 
-    def mark_notification_result(
+    def claim_due_notifications(
+        self, *, limit: int
+    ) -> list[ClaimNotificationContext]:
+        return self._claim_notifications(limit=limit)
+
+    def _claim_notifications(
         self,
-        notification_id: UUID,
         *,
-        sent: bool,
-        safe_error: str | None = None,
-    ) -> None:
+        limit: int,
+        notification_id: UUID | None = None,
+    ) -> list[ClaimNotificationContext]:
+        id_filter = "AND n.id = :notification_id" if notification_id else ""
+        statement = text(
+            f"""
+            WITH candidates AS (
+                SELECT n.id
+                FROM notificaciones n
+                WHERE n.intentos < 3
+                  AND (
+                      (
+                          n.estado_envio = 'pendiente'
+                          AND n.proximo_intento_en <= CURRENT_TIMESTAMP
+                      )
+                      OR (
+                          n.estado_envio = 'procesando'
+                          AND n.bloqueado_hasta <= CURRENT_TIMESTAMP
+                      )
+                  )
+                  {id_filter}
+                ORDER BY n.proximo_intento_en ASC, n.created_at ASC
+                FOR UPDATE SKIP LOCKED
+                LIMIT :limit
+            )
+            UPDATE notificaciones n
+            SET estado_envio = 'procesando',
+                intentos = n.intentos + 1,
+                bloqueado_hasta = CURRENT_TIMESTAMP
+                    + make_interval(secs => :lease_seconds),
+                updated_at = CURRENT_TIMESTAMP
+            FROM candidates c, reclamos r
+            WHERE n.id = c.id
+              AND r.id = n.reclamo_id
+            RETURNING n.id, n.destinatario_contacto, n.canal, n.asunto,
+                      n.mensaje, n.intentos, r.numero
+            """
+        )
+        params: dict[str, object] = {
+            "lease_seconds": notification_lease_seconds(),
+            "limit": max(1, min(limit, 50)),
+        }
+        if notification_id:
+            params["notification_id"] = str(notification_id)
         with self.session_factory.begin() as session:
             session.execute(
                 text(
                     """
                     UPDATE notificaciones
-                    SET estado_envio = :status,
-                        intentos = intentos + 1,
+                    SET estado_envio = 'fallido',
+                        ultimo_error = COALESCE(
+                            ultimo_error,
+                            'La entrega se interrumpió durante el último intento.'
+                        ),
+                        bloqueado_hasta = NULL,
+                        proximo_intento_en = NULL,
+                        updated_at = CURRENT_TIMESTAMP
+                    WHERE estado_envio = 'procesando'
+                      AND intentos >= 3
+                      AND bloqueado_hasta <= CURRENT_TIMESTAMP
+                    """
+                )
+            )
+            rows = session.execute(statement, params).mappings().all()
+        return [
+            ClaimNotificationContext(
+                id=UUID(str(row["id"])),
+                recipient=str(row["destinatario_contacto"]),
+                claim_number=int(row["numero"]),
+                channel=str(row["canal"]),
+                subject=str(row["asunto"]),
+                message=str(row["mensaje"]),
+                attempt_number=int(row["intentos"]),
+            )
+            for row in rows
+        ]
+
+    def mark_notification_result(
+        self,
+        notification_id: UUID,
+        *,
+        attempt_number: int,
+        sent: bool,
+        safe_error: str | None = None,
+    ) -> bool:
+        with self.session_factory.begin() as session:
+            result = session.execute(
+                text(
+                    """
+                    UPDATE notificaciones
+                    SET estado_envio = CASE
+                            WHEN :sent THEN 'enviado'
+                            WHEN intentos >= 3 THEN 'fallido'
+                            ELSE 'pendiente'
+                        END,
                         ultimo_error = :safe_error,
                         enviado_en = CASE
                             WHEN :sent THEN CURRENT_TIMESTAMP
                             ELSE enviado_en
                         END,
+                        proximo_intento_en = CASE
+                            WHEN NOT :sent AND intentos < 3
+                                THEN CURRENT_TIMESTAMP
+                                     + make_interval(secs => :retry_seconds)
+                            ELSE NULL
+                        END,
+                        bloqueado_hasta = NULL,
                         updated_at = CURRENT_TIMESTAMP
                     WHERE id = :notification_id
+                      AND estado_envio = 'procesando'
+                      AND intentos = :attempt_number
                     """
                 ),
                 {
+                    "attempt_number": attempt_number,
                     "notification_id": str(notification_id),
-                    "status": "enviado" if sent else "fallido",
                     "safe_error": safe_error,
                     "sent": sent,
+                    "retry_seconds": RETRY_INTERVAL_SECONDS,
                 },
             )
+        return result.rowcount == 1
 
     def get_for_classification(self, reclamo_id: UUID) -> ClaimForClassification | None:
         statement = text(
