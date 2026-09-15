@@ -30,6 +30,8 @@ La instalación nueva debe aplicar además, en orden:
 7. `21_actualizaciones_estado_reclamo.sql` — registra cada transición con su
    origen, genera una notificación durable para el inquilino y agrega reintentos
    seguros de entrega.
+8. `22_corregir_alerta_cancelaciones.sql` — adapta la alerta histórica de tres
+   cancelaciones al contrato obligatorio de la bandeja de salida de la 21.
 
 El módulo de administración inicial ya incorpora el resultado de las
 migraciones incrementales 07, 08, 09, 10, 11, 12, 15 y 16. No deben repetirse
@@ -78,6 +80,8 @@ Aplicar únicamente las migraciones pendientes y respetar este orden:
 16. `21_actualizaciones_estado_reclamo.sql` — amplía la bandeja de salida,
     crea la notificación por cambio de estado y conserva email como canal
     inicial. WhatsApp permanece desacoplado hasta su historia específica.
+17. `22_corregir_alerta_cancelaciones.sql` — redefine la función de alerta de
+    cancelaciones para completar asunto, estado y próxima fecha de intento.
 
 ## HU29: migración 20
 
@@ -154,6 +158,25 @@ requieren autorización específica. La suite automatizada local no consume
 servicios externos. La evidencia del recorrido transaccional de los 20 estados,
 realizado con `ROLLBACK` y sin SMTP, está en
 `docs/hu10_validacion_actualizaciones_estado.md`.
+
+### HU10: corrección incremental 22 (PR #25)
+
+La migración 21 ya está aplicada en el Supabase compartido y no se modifica.
+La corrección 22 redefine `chk_alerta_cancelaciones()` para que, desde la
+tercera cancelación, la alerta complete `asunto`, el estado actual del reclamo
+y `proximo_intento_en`. Sin esos datos obligatorios, el `INSERT` del trigger
+fallaba y revertía también la cancelación que originaba la alerta.
+
+La migración conserva el trigger y el umbral históricos, utiliza
+`SECURITY INVOKER` con `search_path` vacío y revoca la ejecución pública. No
+crea cancelaciones ni envía correos.
+
+**Aplicación confirmada:** se ejecutó con autorización en el Supabase
+compartido AARI de desarrollo el **14/09/2026 (Argentina)** y quedó registrada
+como `20260915005037_hu10_corregir_alerta_cancelaciones` (versión UTC). No
+repetirla al hacer pull. El QA PostgreSQL insertó tres cancelaciones dentro de
+una transacción, verificó la notificación completa y finalizó con `ROLLBACK`,
+sin persistir datos ni invocar SMTP.
 
 ## HU8: preparación de la migración 19
 

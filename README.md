@@ -307,6 +307,12 @@ de `20_contratos_alquiler.sql`. En el Supabase compartido ya fue aplicada bajo
 su identificador UTC original, por lo que renombrar el archivo del repositorio
 no requiere volver a ejecutarla.
 
+Las bases que ya aplicaron la 21 deben ejecutar luego
+`backend/migrations/22_corregir_alerta_cancelaciones.sql`. Esta corrección
+adapta la alerta de tres cancelaciones al contrato obligatorio de la bandeja de
+salida sin modificar el historial de la migración 21. En el Supabase compartido
+de desarrollo ya fue aplicada; no debe repetirse al hacer pull.
+
 Las bases existentes deben aplicar una vez
 `backend/migrations/14_acceso_propietarios_inquilinos.sql`. La migración crea y
 vincula cuentas faltantes usando el DNI vigente como clave temporal, registra
