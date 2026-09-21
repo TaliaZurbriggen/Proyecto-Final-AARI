@@ -1,6 +1,6 @@
 # HU12 — Notificación al actor responsable
 
-Fecha de validación: **17/09/2026**
+Fecha de validación inicial: **17/09/2026**. Revisión del PR #26: **21/09/2026**.
 
 Historia: **AARI-135**
 
@@ -58,6 +58,65 @@ no incluye datos personales, credenciales ni valores de `.env`.
 
 ## Validaciones
 
+### Correcciones de revisión del PR #26
+
+La clasificación automática es una operación inicial: solo admite reclamos en
+`Recibido` o `Clasificación pendiente`, sin clasificación ni solicitud de
+responsable previas. Una repetición o un estado avanzado devuelve HTTP `409`
+antes de invocar el modelo. La condición se vuelve a comprobar con el reclamo
+bloqueado al persistir, por si cambió durante la ejecución del grafo.
+
+Se eligió rechazar la reclasificación automática en lugar de reemplazar al
+responsable porque ese reemplazo necesitaría un flujo explícito para cancelar
+avisos anteriores, resolver respuestas en curso y recalcular plazos. Así se
+conservan juntos el tipo de gasto, el actor, el contacto, los plazos, el
+historial y las notificaciones originales. Se eliminó el `ON CONFLICT DO
+NOTHING` que ocultaba la conservación de un responsable incompatible.
+
+Los recordatorios y vencimientos ahora bloquean tanto `reclamos` como
+`reclamo_responsables` con `FOR UPDATE OF r, rr SKIP LOCKED`. Una autorización
+en curso impide que el worker tome ese reclamo. Si el worker obtiene primero
+el bloqueo, la autorización espera a que termine su transacción. Además,
+`UPDATE ... RETURNING id` debe confirmar el cambio a vencido antes de crear
+su alerta o marcar `escalado_en`; cero filas modificadas no genera efectos.
+
+Estas correcciones no requieren migraciones, dependencias nuevas ni cambios
+de configuración de la aplicación. La migración 23 ya aplicada no se modificó.
+
+Se agregaron 12 pruebas con PostgreSQL 17 local y datos sintéticos: repetición,
+cambio ordinario/extraordinario en ambas direcciones, expensa a ordinario,
+clasificaciones simultáneas, estado modificado durante la clasificación,
+clasificación inicial pendiente, autorización concurrente con recordatorio o
+vencimiento, bloqueo entre selección y actualización y transición de cero filas.
+También se agregaron siete casos HTTP para verificar el `409` sin envíos ni
+persistencia y evitar llamadas innecesarias al modelo.
+
+Para reproducirlas, usar una instancia PostgreSQL **local y dedicada a pruebas**,
+con los roles `anon` y `authenticated` existentes y un usuario con permisos de
+creación de bases y de las extensiones de las migraciones. Desde `backend/`:
+
+```powershell
+$env:AARI_TEST_POSTGRES_URL = 'postgresql://aari_test@127.0.0.1:55426/postgres'
+$env:DATABASE_URL = $env:AARI_TEST_POSTGRES_URL
+python -m pytest tests/test_responsible_actor_postgres.py -q
+python -m pytest -q
+```
+
+La URL es un ejemplo de una instancia aislada; no copiar credenciales reales
+en este documento ni usar Supabase. Cada caso crea una base con nombre
+`aari_pr26_<uuid>`, aplica las migraciones necesarias y elimina exclusivamente
+esa base al terminar. Sin `AARI_TEST_POSTGRES_URL`, estos casos se omiten.
+
+Resultado de la suite completa el 21/09: **334 aprobadas, 26 omitidas**, con
+una advertencia de deprecación del adaptador `datetime` de SQLite. Incluye los
+12 casos PostgreSQL y no presenta fallos. Las omisiones corresponden a pruebas
+optativas de servicios/configuración externos. Como control de regresión,
+siete de los casos nuevos se ejecutaron contra el repositorio anterior
+(`5123ace`) y fallaron, reproduciendo los problemas reportados. Esta revisión
+no consumió Gemini, no envió correo real y no modificó Supabase compartido.
+
+### Evidencia de la validación inicial
+
 Pruebas focalizadas:
 
 ```powershell
@@ -109,8 +168,13 @@ infraestructura compartida sin una decisión específica.
   **17/09/2026 (Argentina)** y quedó registrada como
   `20260917200108_hu12_notificaciones_actor_responsable`. No repetirla al hacer
   pull.
-- No se hizo commit, push ni pull request.
-- No se registró tiempo ni se cerraron actividades de Jira.
+- Implementación y correcciones disponibles para revisión en el
+  [PR #26](https://github.com/TaliaZurbriggen/Proyecto-Final-AARI/pull/26), rama
+  `codex/AARI-135-notificacion-actor-responsable`. Pendiente aprobación y merge.
+- El tiempo autorizado de la implementación se registró por separado en Jira;
+  esta revisión no añade tiempo ni cierra actividades.
 - El registro equivalente en Notion no pudo crearse porque el espacio alcanzó
   el límite de bloques del plan actual. Esta página conserva la decisión en el
-  repositorio hasta que Notion vuelva a admitir escrituras.
+  repositorio hasta que Notion vuelva a admitir escrituras. El intento del
+  21/09 de registrar esta corrección volvió a recibir `403 restricted_resource`
+  por ese mismo límite.

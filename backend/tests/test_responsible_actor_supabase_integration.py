@@ -67,6 +67,11 @@ def _claim_id(connection):
             JOIN inquilinos i ON i.id = r.inquilino_id
             JOIN propiedades p ON p.id = r.propiedad_id
             JOIN propietarios pr ON pr.id = p.propietario_id
+            WHERE r.estado IN ('Recibido', 'Clasificación pendiente')
+              AND r.clasificado_en IS NULL
+              AND NOT EXISTS (
+                  SELECT 1 FROM reclamo_responsables rr WHERE rr.reclamo_id = r.id
+              )
             ORDER BY r.creado_en, r.id
             FOR UPDATE OF r SKIP LOCKED
             LIMIT 1

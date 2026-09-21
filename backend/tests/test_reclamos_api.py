@@ -4,11 +4,13 @@ from dataclasses import dataclass
 from uuid import UUID, uuid4
 
 from fastapi.testclient import TestClient
+import pytest
 
 from app.api.reclamos import get_claim_notification_service, get_classification_service
 from app.main import app
 from app.schemas.reclamos import AgentClassificationResult, ClaimClassificationResponse
 from app.services.classification_service import (
+    ClaimClassificationConflictError,
     ClaimForClassification,
     ClassificationService,
     PersistedClassification,
@@ -239,3 +241,69 @@ def test_endpoint_attempts_the_responsible_notification_after_persisting():
 
     assert response.status_code == 200
     assert notification_service.delivered == [notification_id]
+
+
+@pytest.mark.parametrize(
+    ("estado", "clasificado"),
+    [
+        ("Pendiente de respuesta del responsable", True),
+        ("Pendiente de respuesta - vencido", True),
+        ("Autorizado", False),
+        ("Resuelto", False),
+        ("Escalado", True),
+        ("Recibido", True),
+    ],
+)
+def test_reclassification_returns_409_before_calling_the_model(estado, clasificado):
+    claim = ClaimForClassification(
+        reclamo_id=uuid4(),
+        descripcion="Descripción sintética de un reclamo de prueba.",
+        urgencia="media",
+        rubro_declarado=None,
+        clausulas_contrato=[],
+        estado=estado,
+        clasificado=clasificado,
+    )
+    repository = FakeRepository(claim)
+    graph = FakeGraph({})
+    notifications = FakeNotificationService()
+    try:
+        with build_client(repository, graph, notifications) as client:
+            response = client.post(f"/reclamos/{claim.reclamo_id}/clasificar")
+    finally:
+        app.dependency_overrides.clear()
+
+    assert response.status_code == 409
+    assert "No se puede volver a clasificar" in response.json()["detail"]
+    assert graph.state is None
+    assert repository.persisted is None
+    assert notifications.delivered == []
+
+
+def test_classification_race_returns_409_without_delivering_notifications():
+    class ConcurrentRepository(FakeRepository):
+        def persist_classification(self, reclamo_id, result):
+            raise ClaimClassificationConflictError("El reclamo avanzó de etapa.")
+
+    claim = ClaimForClassification(
+        reclamo_id=uuid4(),
+        descripcion="Descripción sintética de un reclamo de prueba.",
+        urgencia="media",
+        rubro_declarado=None,
+        clausulas_contrato=[],
+    )
+    graph = FakeGraph({
+        "tipo_gasto": "ordinario", "confianza": 0.95,
+        "fundamento": "Mantenimiento habitual.", "debe_escalar": False,
+        "motivo_escalado": None, "estado_clasificacion": "clasificado",
+        "actor_responsable": "inquilino", "notificacion_responsable_requerida": True,
+    })
+    notifications = FakeNotificationService()
+    try:
+        with build_client(ConcurrentRepository(claim), graph, notifications) as client:
+            response = client.post(f"/reclamos/{claim.reclamo_id}/clasificar")
+    finally:
+        app.dependency_overrides.clear()
+    assert response.status_code == 409
+    assert graph.state is not None
+    assert notifications.delivered == []

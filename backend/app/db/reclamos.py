@@ -22,8 +22,11 @@ from app.services.claim_notifications import (
     ClaimNotificationContext,
     notification_lease_seconds,
 )
-from app.services.classification_service import ClaimForClassification
-from app.services.classification_service import PersistedClassification
+from app.services.classification_service import (
+    ClaimForClassification,
+    PersistedClassification,
+    ensure_classification_allowed,
+)
 from app.services.claims_creation_service import (
     ActiveClaimExistsError,
     PersistedClaim,
@@ -534,8 +537,8 @@ class SqlAlchemyClaimsRepository:
                            p.localidad, p.barrio,
                            p.tipo::text AS propiedad_tipo, p.piso,
                            p.numero AS propiedad_numero
-                    FROM reclamo_responsables rr
-                    JOIN reclamos r ON r.id = rr.reclamo_id
+                    FROM reclamos r
+                    JOIN reclamo_responsables rr ON rr.reclamo_id = r.id
                     JOIN inquilinos i ON i.id = r.inquilino_id
                     JOIN propiedades p ON p.id = r.propiedad_id
                     JOIN propietarios pr ON pr.id = p.propietario_id
@@ -543,7 +546,7 @@ class SqlAlchemyClaimsRepository:
                       AND rr.escalado_en IS NULL
                       AND rr.respuesta_vence_en <= CURRENT_TIMESTAMP
                     ORDER BY rr.respuesta_vence_en, rr.reclamo_id
-                    FOR UPDATE OF rr SKIP LOCKED
+                    FOR UPDATE OF r, rr SKIP LOCKED
                     LIMIT :limit
                     """
                 ),
@@ -551,17 +554,20 @@ class SqlAlchemyClaimsRepository:
             ).mappings().all()
 
             for row in overdue_rows:
-                session.execute(
+                transitioned = session.execute(
                     text(
                         """
                         UPDATE reclamos
                         SET estado = 'Pendiente de respuesta - vencido'
                         WHERE id = :reclamo_id
                           AND estado = 'Pendiente de respuesta del responsable'
+                        RETURNING id
                         """
                     ),
                     {"reclamo_id": str(row["reclamo_id"])},
-                )
+                ).scalar_one_or_none()
+                if transitioned is None:
+                    continue
                 history_id = session.execute(
                     text(
                         """
@@ -645,8 +651,8 @@ class SqlAlchemyClaimsRepository:
                            p.localidad, p.barrio,
                            p.tipo::text AS propiedad_tipo, p.piso,
                            p.numero AS propiedad_numero
-                    FROM reclamo_responsables rr
-                    JOIN reclamos r ON r.id = rr.reclamo_id
+                    FROM reclamos r
+                    JOIN reclamo_responsables rr ON rr.reclamo_id = r.id
                     JOIN inquilinos i ON i.id = r.inquilino_id
                     JOIN propiedades p ON p.id = r.propiedad_id
                     JOIN propietarios pr ON pr.id = p.propietario_id
@@ -655,7 +661,7 @@ class SqlAlchemyClaimsRepository:
                       AND rr.recordatorio_programado_en <= CURRENT_TIMESTAMP
                       AND rr.respuesta_vence_en > CURRENT_TIMESTAMP
                     ORDER BY rr.recordatorio_programado_en, rr.reclamo_id
-                    FOR UPDATE OF rr SKIP LOCKED
+                    FOR UPDATE OF r, rr SKIP LOCKED
                     LIMIT :limit
                     """
                 ),
@@ -758,7 +764,11 @@ class SqlAlchemyClaimsRepository:
     def get_for_classification(self, reclamo_id: UUID) -> ClaimForClassification | None:
         statement = text(
             """
-            SELECT r.id, r.descripcion, r.urgencia::text AS urgencia,
+            SELECT r.id, r.descripcion, r.urgencia::text AS urgencia, r.estado,
+                   (r.clasificado_en IS NOT NULL OR EXISTS (
+                       SELECT 1 FROM reclamo_responsables rr
+                       WHERE rr.reclamo_id = r.id
+                   )) AS clasificado,
                    e.nombre AS rubro_declarado
             FROM reclamos r
             LEFT JOIN especialidades e ON e.id = r.tipo_id
@@ -778,6 +788,8 @@ class SqlAlchemyClaimsRepository:
             urgencia=row["urgencia"],
             rubro_declarado=row["rubro_declarado"],
             clausulas_contrato=[],
+            estado=row["estado"],
+            clasificado=row["clasificado"],
         )
 
     def persist_classification(
@@ -803,7 +815,8 @@ class SqlAlchemyClaimsRepository:
             context = session.execute(
                 text(
                     """
-                    SELECT r.id, r.numero, r.descripcion,
+                    SELECT r.id, r.numero, r.descripcion, r.estado,
+                           r.clasificado_en,
                            i.nombre_completo AS inquilino_nombre,
                            i.email AS inquilino_email,
                            i.telefono AS inquilino_telefono,
@@ -842,6 +855,20 @@ class SqlAlchemyClaimsRepository:
                 raise RuntimeError(
                     "El reclamo desapareció antes de persistir su clasificación."
                 )
+
+            # Revalidar bajo el bloqueo del reclamo: el estado pudo cambiar
+            # mientras el grafo se ejecutaba o al competir con otra solicitud.
+            has_responsible = session.execute(
+                text(
+                    "SELECT EXISTS (SELECT 1 FROM reclamo_responsables "
+                    "WHERE reclamo_id = :reclamo_id)"
+                ),
+                {"reclamo_id": str(reclamo_id)},
+            ).scalar_one()
+            ensure_classification_allowed(
+                estado=context["estado"],
+                clasificado=context["clasificado_en"] is not None or has_responsible,
+            )
 
             session.execute(
                 text("SELECT set_config('app.origen_reclamo', 'agente', true)")
@@ -925,7 +952,6 @@ class SqlAlchemyClaimsRepository:
                                     hours => :reminder_hours + :escalation_hours
                                 )
                         )
-                        ON CONFLICT (reclamo_id) DO NOTHING
                         """
                     ),
                     {

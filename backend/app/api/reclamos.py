@@ -29,7 +29,11 @@ from app.services.claim_notifications import (
     SmtpClaimEmailSender,
 )
 from app.services.claim_storage import SupabaseClaimPhotoStorage
-from app.services.classification_service import ClaimNotFoundError, ClassificationService
+from app.services.classification_service import (
+    ClaimClassificationConflictError,
+    ClaimNotFoundError,
+    ClassificationService,
+)
 from app.services.claims_query_service import (
     TenantClaimNotFoundError,
     TenantClaimsQueryService,
@@ -241,6 +245,8 @@ def classify_claim(
         classified = service.classify(reclamo_id)
     except ClaimNotFoundError as error:
         raise HTTPException(status_code=404, detail="Reclamo no encontrado.") from error
+    except ClaimClassificationConflictError as error:
+        raise HTTPException(status_code=409, detail=str(error)) from error
 
     if classified.notification_id is not None:
         background_tasks.add_task(

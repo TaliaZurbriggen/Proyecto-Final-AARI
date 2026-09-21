@@ -43,7 +43,7 @@ def test_notification_lease_is_configurable_and_bounded(monkeypatch) -> None:
 
 
 def test_followups_are_claimed_without_blocking_and_are_idempotent() -> None:
-    assert FOLLOWUP_SOURCE.count("for update of rr skip locked") == 2
+    assert FOLLOWUP_SOURCE.count("for update of r, rr skip locked") == 2
     assert "on conflict (clave_idempotencia)" in FOLLOWUP_SOURCE
     assert "responsable_recordatorio" in FOLLOWUP_SOURCE
     assert "responsable_vencido" in FOLLOWUP_SOURCE

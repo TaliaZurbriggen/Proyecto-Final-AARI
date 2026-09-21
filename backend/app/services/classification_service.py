@@ -11,6 +11,18 @@ class ClaimNotFoundError(Exception):
     """Señala que no existe el reclamo solicitado."""
 
 
+class ClaimClassificationConflictError(Exception):
+    """La clasificación automática no puede reemplazar una gestión iniciada."""
+
+
+def ensure_classification_allowed(*, estado: str, clasificado: bool) -> None:
+    if clasificado or estado not in {"Recibido", "Clasificación pendiente"}:
+        raise ClaimClassificationConflictError(
+            "El reclamo ya fue clasificado o avanzó de etapa. "
+            "No se puede volver a clasificar automáticamente."
+        )
+
+
 @dataclass(frozen=True)
 class ClaimForClassification:
     """Datos existentes que necesita el grafo para clasificar."""
@@ -20,6 +32,8 @@ class ClaimForClassification:
     urgencia: str
     rubro_declarado: str | None
     clausulas_contrato: list[dict[str, object]]
+    estado: str = "Recibido"
+    clasificado: bool = False
 
 
 @dataclass(frozen=True)
@@ -63,6 +77,9 @@ class ClassificationService:
         if claim is None:
             raise ClaimNotFoundError
 
+        ensure_classification_allowed(
+            estado=claim.estado, clasificado=claim.clasificado
+        )
         graph_result = self.graph.invoke(
             {
                 "reclamo_id": str(claim.reclamo_id),
