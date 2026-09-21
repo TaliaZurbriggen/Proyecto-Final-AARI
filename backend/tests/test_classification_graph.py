@@ -48,6 +48,8 @@ def assert_invalid_response_is_escalated(result: dict[str, object]) -> None:
     assert result["debe_escalar"] is True
     assert result["motivo_escalado"] == "respuesta_modelo_invalida"
     assert result["estado_clasificacion"] == "escalado"
+    assert result["actor_responsable"] is None
+    assert result["notificacion_responsable_requerida"] is False
 
 
 def invoke_graph(classifier: object, confidence_threshold: float = 0.75) -> dict[str, object]:
@@ -70,6 +72,8 @@ def test_graph_classifies_a_high_confidence_claim():
     assert result["debe_escalar"] is False
     assert result["motivo_escalado"] is None
     assert result["estado_clasificacion"] == "clasificado"
+    assert result["actor_responsable"] == "inquilino"
+    assert result["notificacion_responsable_requerida"] is True
     assert classifier.prompt is not None
     assert "La canilla de la cocina pierde agua al abrirla." in classifier.prompt
     assert '"plomeria-01"' in classifier.prompt
@@ -112,6 +116,35 @@ def test_graph_classifies_at_the_confidence_threshold():
 
     assert result["tipo_gasto"] == "expensa"
     assert result["estado_clasificacion"] == "clasificado"
+    assert result["actor_responsable"] == "inmobiliaria"
+
+
+@pytest.mark.parametrize(
+    ("expense_type", "expected_actor"),
+    [
+        ("ordinario", "inquilino"),
+        ("extraordinario", "propietario"),
+        ("expensa", "inmobiliaria"),
+    ],
+)
+def test_graph_maps_each_expense_type_to_its_responsible_actor(
+    expense_type: str,
+    expected_actor: str,
+) -> None:
+    result = invoke_graph(
+        FakeClassifier(
+            {
+                "tipo_gasto": expense_type,
+                "confianza": 0.9,
+                "fundamento": "Clasificación controlada para la prueba.",
+                "debe_escalar": False,
+                "motivo_escalado": None,
+            }
+        )
+    )
+
+    assert result["actor_responsable"] == expected_actor
+    assert result["notificacion_responsable_requerida"] is True
 
 
 def test_graph_preserves_a_valid_escalation_from_the_model():
@@ -130,6 +163,7 @@ def test_graph_preserves_a_valid_escalation_from_the_model():
     assert result["tipo_gasto"] is None
     assert result["motivo_escalado"] == "riesgo_seguridad"
     assert result["estado_clasificacion"] == "escalado"
+    assert result["actor_responsable"] is None
 
 
 def test_prompt_uses_fallbacks_for_domain_data_not_available():

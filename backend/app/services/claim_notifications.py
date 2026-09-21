@@ -52,6 +52,8 @@ class ClaimNotificationContext:
 
 
 class ClaimNotificationRepository(Protocol):
+    def enqueue_due_responsible_followups(self, *, limit: int) -> int: ...
+
     def claim_notification(
         self, notification_id: UUID
     ) -> ClaimNotificationContext | None: ...
@@ -162,8 +164,9 @@ class ClaimNotificationService:
         return self._deliver_claimed(context)
 
     def deliver_due(self, *, limit: int = 10) -> int:
-        """Procesa un lote vencido; los bloqueos evitan envíos duplicados."""
+        """Materializa vencimientos y procesa un lote sin envíos duplicados."""
 
+        self.repository.enqueue_due_responsible_followups(limit=limit)
         contexts = self.repository.claim_due_notifications(limit=limit)
         for context in contexts:
             self._deliver_claimed(context)

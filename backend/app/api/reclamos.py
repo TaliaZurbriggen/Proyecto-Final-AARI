@@ -229,11 +229,22 @@ def get_tenant_claim(
 )
 def classify_claim(
     reclamo_id: UUID,
+    background_tasks: BackgroundTasks,
     service: ClassificationService = Depends(get_classification_service),
+    notification_service: ClaimNotificationService = Depends(
+        get_claim_notification_service
+    ),
 ) -> ClaimClassificationResponse:
     """Clasifica un reclamo existente y persiste clasificación o escalado."""
 
     try:
-        return service.classify(reclamo_id)
+        classified = service.classify(reclamo_id)
     except ClaimNotFoundError as error:
         raise HTTPException(status_code=404, detail="Reclamo no encontrado.") from error
+
+    if classified.notification_id is not None:
+        background_tasks.add_task(
+            notification_service.deliver,
+            classified.notification_id,
+        )
+    return classified.response

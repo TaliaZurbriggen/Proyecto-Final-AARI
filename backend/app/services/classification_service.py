@@ -22,6 +22,14 @@ class ClaimForClassification:
     clausulas_contrato: list[dict[str, object]]
 
 
+@dataclass(frozen=True)
+class PersistedClassification:
+    """Resultado público y notificación que puede intentarse inmediatamente."""
+
+    response: ClaimClassificationResponse
+    notification_id: UUID | None
+
+
 class ClaimsRepository(Protocol):
     """Puerto de persistencia para que el servicio pueda probarse sin Supabase."""
 
@@ -32,7 +40,7 @@ class ClaimsRepository(Protocol):
         self,
         reclamo_id: UUID,
         result: AgentClassificationResult,
-    ) -> ClaimClassificationResponse:
+    ) -> PersistedClassification:
         """Guarda el resultado y registra el origen agente en una transacción."""
 
 
@@ -50,7 +58,7 @@ class ClassificationService:
         self.repository = repository
         self.graph = graph
 
-    def classify(self, reclamo_id: UUID) -> ClaimClassificationResponse:
+    def classify(self, reclamo_id: UUID) -> PersistedClassification:
         claim = self.repository.get_for_classification(reclamo_id)
         if claim is None:
             raise ClaimNotFoundError

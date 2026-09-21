@@ -15,6 +15,11 @@ class FakeRepository:
     context: ClaimNotificationContext | None
     accept_results: bool = True
     results: list[tuple[int, bool, str | None]] = field(default_factory=list)
+    followup_batches: list[int] = field(default_factory=list)
+
+    def enqueue_due_responsible_followups(self, *, limit: int) -> int:
+        self.followup_batches.append(limit)
+        return 0
 
     def claim_notification(
         self, notification_id: UUID
@@ -98,6 +103,7 @@ def test_processes_a_due_batch_and_marks_each_result():
     sender = FakeSender()
 
     assert ClaimNotificationService(repository, sender).deliver_due(limit=5) == 1
+    assert repository.followup_batches == [5]
     assert repository.results == [(1, True, None)]
 
 

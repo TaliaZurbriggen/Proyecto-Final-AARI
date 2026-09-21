@@ -10,6 +10,9 @@ SOURCE = inspect.getsource(SqlAlchemyClaimsRepository._claim_notifications).lowe
 RESULT_SOURCE = inspect.getsource(
     SqlAlchemyClaimsRepository.mark_notification_result
 ).lower()
+FOLLOWUP_SOURCE = inspect.getsource(
+    SqlAlchemyClaimsRepository.enqueue_due_responsible_followups
+).lower()
 
 
 def test_claims_due_notifications_without_blocking_other_workers() -> None:
@@ -37,3 +40,16 @@ def test_notification_lease_is_configurable_and_bounded(monkeypatch) -> None:
 
     monkeypatch.setenv("NOTIFICATION_LEASE_SECONDS", "5")
     assert notification_lease_seconds() == 30
+
+
+def test_followups_are_claimed_without_blocking_and_are_idempotent() -> None:
+    assert FOLLOWUP_SOURCE.count("for update of rr skip locked") == 2
+    assert "on conflict (clave_idempotencia)" in FOLLOWUP_SOURCE
+    assert "responsable_recordatorio" in FOLLOWUP_SOURCE
+    assert "responsable_vencido" in FOLLOWUP_SOURCE
+
+
+def test_overdue_flow_changes_state_before_notifying_an_operator() -> None:
+    assert "pendiente de respuesta - vencido" in FOLLOWUP_SOURCE
+    assert "_operator_recipient" in FOLLOWUP_SOURCE
+    assert "set_config('app.origen_reclamo', 'sistema', true)" in FOLLOWUP_SOURCE
