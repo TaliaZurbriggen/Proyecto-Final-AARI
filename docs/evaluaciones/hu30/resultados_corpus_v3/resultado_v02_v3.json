@@ -1,0 +1,210 @@
+{
+  "document": "V02",
+  "source": "output\\pdf\\hu30_corpus\\validation\\V02_modelo_inmueble_mendoza_2024_paginas_4_6.pdf",
+  "source_sha256": "ea31e4c14934389984c4f7eaf9ff8de02924e12068e7197604f1280832cd7479",
+  "prompt_version": "v3",
+  "model": "gemini-3.5-flash",
+  "frozen_files": [
+    {
+      "path": "backend/prompts/prompt_extraccion_clausulas_v3.md",
+      "sha256": "c478cdd2d9207120a957ec27a8471f03c54d1f8287b401d9843df5ee920ed916"
+    },
+    {
+      "path": "backend/app/services/contract_clause_llm.py",
+      "sha256": "122219ccccc838eb639a91c570024f50f26fd8a0d15f28f4aac3fd933465d5dc"
+    },
+    {
+      "path": "backend/app/services/contract_clause_evidence.py",
+      "sha256": "e179ee2669212c0c8a1b35ead32a0cac4d3c0972437648ac7af144ecb7cbef2d"
+    }
+  ],
+  "expectations_state": "validated",
+  "expected_controls": 5,
+  "external_calls": 1,
+  "executed_at": "2026-09-24T22:44:22.627575+00:00",
+  "extractor_version": "hu30-v3",
+  "pages": 3,
+  "local_extraction_complete": true,
+  "model_proposals": 8,
+  "valid_clauses": [
+    {
+      "numero": "QUINTO",
+      "titulo": "ARTÍCULO QUINTO - ENTREGA DEL INMUEBLE",
+      "evidencias": [
+        {
+          "pagina": 1,
+          "texto": "ARTÍCULO QUINTO - ENTREGA DEL INMUEBLE: EL LOCADOR debe entregar el inmueble en estado apropiado para su destino, de acuerdo\na las condiciones exigidas en las bases licitatorias y las indicadas en la oferta presentada en dicho proceso. Al momento de la entrega se labrará el"
+        },
+        {
+          "pagina": 2,
+          "texto": "Acta de Recepción indicada en el Anexo 1 del presente Contrato, en la cual se describirá el estado de conservación del bien dado en locación, como\nasimismo de sus instalaciones, artefactos y demás mobiliario con los que cuenta el inmueble"
+        }
+      ],
+      "paginas": [
+        1,
+        2
+      ],
+      "texto_original": "ARTÍCULO QUINTO - ENTREGA DEL INMUEBLE: EL LOCADOR debe entregar el inmueble en estado apropiado para su destino, de acuerdo\na las condiciones exigidas en las bases licitatorias y las indicadas en la oferta presentada en dicho proceso. Al momento de la entrega se labrará el\n\nActa de Recepción indicada en el Anexo 1 del presente Contrato, en la cual se describirá el estado de conservación del bien dado en locación, como\nasimismo de sus instalaciones, artefactos y demás mobiliario con los que cuenta el inmueble",
+      "resumen": "El locador debe entregar el inmueble en un estado apropiado para su destino, conforme a las bases licitatorias y la oferta. Al momento de la entrega, se labrará un Acta de Recepción (Anexo 1) detallando el estado de conservación del inmueble, sus instalaciones, artefactos y mobiliario.",
+      "categoria": "otro",
+      "responsable": "propietario",
+      "uso_clasificador": "contexto",
+      "condiciones": "Establece la obligación de entrega en estado apropiado y la confección de un acta de recepción inicial. No define penalidades directas en este artículo.",
+      "referencias": [
+        "Anexo 1"
+      ],
+      "confianza": 1.0
+    },
+    {
+      "numero": "XTO",
+      "titulo": "ARTÍCULO XTO - OBLIGACIONES DEL LOCADOR",
+      "evidencias": [
+        {
+          "pagina": 2,
+          "texto": "ARTÍCULO XTO - OBLIGACIONES DEL LOCADOR. EL LOCADOR tendrá a su cargo todos los actos de reparación de naturaleza\nestructural del inmueble locado, originado por cualquier causa no imputable a EL LOCATARIO, que aseguren al LOCATARIO el uso del bien\nconforme el destino de uso previsto en el presente contrato. Serán por cuenta y cargo de EL LOCADOR los trabajos de reparación que, por causa de\nfuerza mayor, siniestros, por acción del tiempo o uso natural, se ocasionaren en el edificio, durante el término de la contratación, efectuando para ello\ncualquier trabajo que fuere necesario. En caso de que EL LOCADOR no responda o guarde silencio ante un reclamo de EL LOCATARIO,\ndebidamente notificado para realizar alguna reparación urgente, EL LOCATARIO podrá llevar a cabo dicha reparación por su cuenta y a expensas de\nEL LOCADOR, una vez transcurridas al menos veinticuatro (24) horas corridas desde la recepción de la notificación. Si las reparaciones no fuerar\nurgentes, EL LOCATARIO deberá intimar a EL LOCADOR para que las realice dentro de un plazo que no podrá ser inferior a.\nCo ....) días corridos desde la recepción de la intimación. Si EL LOCADOR no realiza las reparaciones dentro de dicho plazo, EL LOCATARIO\npodrá llevarlas a cabo por sí mismo, conforme a lo anteriormente mencionado, pudiendo descontar o compensar su valor, con la obligación a su cargo\nestablecida en el Art. 4? del presente contrato"
+        }
+      ],
+      "paginas": [
+        2
+      ],
+      "texto_original": "ARTÍCULO XTO - OBLIGACIONES DEL LOCADOR. EL LOCADOR tendrá a su cargo todos los actos de reparación de naturaleza\nestructural del inmueble locado, originado por cualquier causa no imputable a EL LOCATARIO, que aseguren al LOCATARIO el uso del bien\nconforme el destino de uso previsto en el presente contrato. Serán por cuenta y cargo de EL LOCADOR los trabajos de reparación que, por causa de\nfuerza mayor, siniestros, por acción del tiempo o uso natural, se ocasionaren en el edificio, durante el término de la contratación, efectuando para ello\ncualquier trabajo que fuere necesario. En caso de que EL LOCADOR no responda o guarde silencio ante un reclamo de EL LOCATARIO,\ndebidamente notificado para realizar alguna reparación urgente, EL LOCATARIO podrá llevar a cabo dicha reparación por su cuenta y a expensas de\nEL LOCADOR, una vez transcurridas al menos veinticuatro (24) horas corridas desde la recepción de la notificación. Si las reparaciones no fuerar\nurgentes, EL LOCATARIO deberá intimar a EL LOCADOR para que las realice dentro de un plazo que no podrá ser inferior a.\nCo ....) días corridos desde la recepción de la intimación. Si EL LOCADOR no realiza las reparaciones dentro de dicho plazo, EL LOCATARIO\npodrá llevarlas a cabo por sí mismo, conforme a lo anteriormente mencionado, pudiendo descontar o compensar su valor, con la obligación a su cargo\nestablecida en el Art. 4? del presente contrato",
+      "resumen": "El locador asume las reparaciones estructurales no imputables al locatario, así como las derivadas de fuerza mayor, siniestros, paso del tiempo o uso natural. Ante la inacción del locador debidamente notificado, el locatario queda facultado para realizar las reparaciones urgentes (luego de 24 horas corridas) o no urgentes (vencido el plazo de intimación) por su cuenta y a costa del locador, pudiendo compensar el costo con el canon de alquiler.",
+      "categoria": "reparacion",
+      "responsable": "condicional",
+      "uso_clasificador": "operativa",
+      "condiciones": "El locador responde por reparaciones estructurales, fuerza mayor, siniestros, acción del tiempo o uso natural. Si el locador no responde ante un reclamo por reparaciones urgentes en 24 horas corridas, el locatario puede realizarlas a costa del locador. Para reparaciones no urgentes, el locatario debe intimar por un plazo no menor al indicado en el contrato; si el locador no cumple, el locatario puede ejecutarlas y compensar su costo con el canon mensual.",
+      "referencias": [
+        "Art. 4?"
+      ],
+      "confianza": 1.0
+    },
+    {
+      "numero": "SÉPTIMO",
+      "titulo": "ARTÍCULO SÉPTIMO- USO Y GOCE DEL INMUEBLE- PROHIBICIÓN DE VARIAR EL DESTINO",
+      "evidencias": [
+        {
+          "pagina": 2,
+          "texto": "ARTÍCULO SÉPTIMO- USO Y GOCE DEL INMUEBLE- PROHIBICIÓN DE VARIAR EL DESTINO. Si por causas no imputables a EL\nLOCATARIO, éste se ve impedido de usar o gozar del Inmueble, o éste no puede servir para el objeto de la locación, puede pedir la cesación del pago\ndel precio por el tiempo que no pueda usar o gozar del inmueble. EL LOCATARIO puede usar y gozar del Inmueble conforme a derecho y\nexclusivamente para el destino correspondiente. No puede variarlo, aunque ello no cause perjuicio a EL LOCADOR"
+        }
+      ],
+      "paginas": [
+        2
+      ],
+      "texto_original": "ARTÍCULO SÉPTIMO- USO Y GOCE DEL INMUEBLE- PROHIBICIÓN DE VARIAR EL DESTINO. Si por causas no imputables a EL\nLOCATARIO, éste se ve impedido de usar o gozar del Inmueble, o éste no puede servir para el objeto de la locación, puede pedir la cesación del pago\ndel precio por el tiempo que no pueda usar o gozar del inmueble. EL LOCATARIO puede usar y gozar del Inmueble conforme a derecho y\nexclusivamente para el destino correspondiente. No puede variarlo, aunque ello no cause perjuicio a EL LOCADOR",
+      "resumen": "Si por causas no imputables al locatario este se ve impedido de usar o gozar del inmueble, o si este no sirve para el objeto de la locación, el locatario puede exigir la suspensión del pago del canon por el tiempo que dure el impedimento. Se prohíbe variar el destino pactado.",
+      "categoria": "reparacion",
+      "responsable": "condicional",
+      "uso_clasificador": "operativa",
+      "condiciones": "La suspensión del pago del canon es condicional a que el impedimento de uso o goce del inmueble no sea imputable al locatario.",
+      "referencias": [],
+      "confianza": 1.0
+    },
+    {
+      "numero": "OCTAVO",
+      "titulo": "ARTÍCULO OCTAVO - CARGAS Y CONTRIBUCIONES POR LA ACTIVIDAD",
+      "evidencias": [
+        {
+          "pagina": 2,
+          "texto": "ARTÍCULO OCTAVO - CARGAS Y CONTRIBUCIONES POR LA ACTIVIDAD. EL LOCATARIO tiene a su cargo el pago de las cargas y\ncontribuciones que se originen en el destino que dé al Inmueble locado. No tiene a su cargo el pago de las que graven al Inmueble ni las expensas\ncomunes extraordinarias. Solo puede establecerse que estén a cargo de EL LOCATARIO aquellas expensas que deriven de gastos habituales,\nentendiéndose por tales aquellos que se vinculan a los servicios normales y permanentes a disposición de EL LOCATARIO, independientemente de\nque sean considerados como expensas comunes ordinarias o extraordinarias. Este tendrá/no tendrá a su cargo el pago de los servicios de luz, agua y\ngas, tasas municipales"
+        }
+      ],
+      "paginas": [
+        2
+      ],
+      "texto_original": "ARTÍCULO OCTAVO - CARGAS Y CONTRIBUCIONES POR LA ACTIVIDAD. EL LOCATARIO tiene a su cargo el pago de las cargas y\ncontribuciones que se originen en el destino que dé al Inmueble locado. No tiene a su cargo el pago de las que graven al Inmueble ni las expensas\ncomunes extraordinarias. Solo puede establecerse que estén a cargo de EL LOCATARIO aquellas expensas que deriven de gastos habituales,\nentendiéndose por tales aquellos que se vinculan a los servicios normales y permanentes a disposición de EL LOCATARIO, independientemente de\nque sean considerados como expensas comunes ordinarias o extraordinarias. Este tendrá/no tendrá a su cargo el pago de los servicios de luz, agua y\ngas, tasas municipales",
+      "resumen": "El locatario asume las cargas y contribuciones de su actividad, pero no las que graven el inmueble ni las expensas extraordinarias. Solo se pueden pactar a cargo del locatario las expensas vinculadas a servicios normales y permanentes (gastos habituales). Existe una contradicción no resuelta en el texto ('tendrá/no tendrá') sobre el pago de servicios de luz, agua, gas y tasas municipales.",
+      "categoria": "expensa",
+      "responsable": "no_especificado",
+      "uso_clasificador": "contexto",
+      "condiciones": "La redacción contiene la opción contradictoria 'tendrá/no tendrá' sin definir cuál de las dos alternativas aplica, lo que genera ambigüedad absoluta sobre si el locatario debe o no pagar los servicios de luz, agua, gas y tasas municipales. Requiere revisión humana.",
+      "referencias": [],
+      "confianza": 1.0
+    },
+    {
+      "numero": "NOVENO",
+      "titulo": "ARTÍCULO NOVENO- CONSERVAR EL INMUEBLE EN BUEN ESTADO- LLAVE",
+      "evidencias": [
+        {
+          "pagina": 2,
+          "texto": "ARTÍCULO NOVENO- CONSERVAR EL INMUEBLE EN BUEN ESTADO- LLAVE El LOCATARIO debe mantener el Inmueble y\nconservarlo en el estado en que lo recibió. Tiene a su cargo los gastos de conservación no estructurales y las mejoras de mero mantenimiento.\nResponde por cualquier deterioro causado al Inmueble, incluso por visitantes ocasionales, pero no por acción de EL LOCADOR o sus dependientes;\nasimismo responde por su destrucción por incendio no originado en caso fortuito; las mejoras e instalaciones de carácter definitivo que efectuare el\nocupante para su mayor comodidad, quedarán a beneficio del propietario. Finalizada la Locación, EL LOCADOR no podrá negarse a recibir la llave y\nla restitución del inmueble, invocando falta de pago de cánones, servicios y/o ínfimas reparaciones menores"
+        }
+      ],
+      "paginas": [
+        2
+      ],
+      "texto_original": "ARTÍCULO NOVENO- CONSERVAR EL INMUEBLE EN BUEN ESTADO- LLAVE El LOCATARIO debe mantener el Inmueble y\nconservarlo en el estado en que lo recibió. Tiene a su cargo los gastos de conservación no estructurales y las mejoras de mero mantenimiento.\nResponde por cualquier deterioro causado al Inmueble, incluso por visitantes ocasionales, pero no por acción de EL LOCADOR o sus dependientes;\nasimismo responde por su destrucción por incendio no originado en caso fortuito; las mejoras e instalaciones de carácter definitivo que efectuare el\nocupante para su mayor comodidad, quedarán a beneficio del propietario. Finalizada la Locación, EL LOCADOR no podrá negarse a recibir la llave y\nla restitución del inmueble, invocando falta de pago de cánones, servicios y/o ínfimas reparaciones menores",
+      "resumen": "El locatario debe conservar el inmueble en el estado recibido, pagando el mantenimiento y conservación no estructural. Responde por deterioros (propios o de visitas), excepto si son causados por el locador o sus dependientes. Responde por incendio salvo caso fortuito. Las mejoras definitivas quedan para el propietario.",
+      "categoria": "mantenimiento",
+      "responsable": "condicional",
+      "uso_clasificador": "operativa",
+      "condiciones": "El locatario asume los gastos de conservación no estructurales y mero mantenimiento. Responde por deterioros (incluso de visitantes), salvo los causados por el locador o sus dependientes. Responde por incendio excepto si se originó por caso fortuito. Las mejoras definitivas quedan a beneficio del propietario.",
+      "referencias": [],
+      "confianza": 1.0
+    },
+    {
+      "numero": "NOVENO",
+      "titulo": "ARTÍCULO NOVENO- CONSERVAR EL INMUEBLE EN BUEN ESTADO- LLAVE (Restitución)",
+      "evidencias": [
+        {
+          "pagina": 2,
+          "texto": "ARTÍCULO NOVENO- CONSERVAR EL INMUEBLE EN BUEN ESTADO- LLAVE El LOCATARIO debe mantener el Inmueble y\nconservarlo en el estado en que lo recibió. Tiene a su cargo los gastos de conservación no estructurales y las mejoras de mero mantenimiento.\nResponde por cualquier deterioro causado al Inmueble, incluso por visitantes ocasionales, pero no por acción de EL LOCADOR o sus dependientes;\nasimismo responde por su destrucción por incendio no originado en caso fortuito; las mejoras e instalaciones de carácter definitivo que efectuare el\nocupante para su mayor comodidad, quedarán a beneficio del propietario. Finalizada la Locación, EL LOCADOR no podrá negarse a recibir la llave y\nla restitución del inmueble, invocando falta de pago de cánones, servicios y/o ínfimas reparaciones menores"
+        }
+      ],
+      "paginas": [
+        2
+      ],
+      "texto_original": "ARTÍCULO NOVENO- CONSERVAR EL INMUEBLE EN BUEN ESTADO- LLAVE El LOCATARIO debe mantener el Inmueble y\nconservarlo en el estado en que lo recibió. Tiene a su cargo los gastos de conservación no estructurales y las mejoras de mero mantenimiento.\nResponde por cualquier deterioro causado al Inmueble, incluso por visitantes ocasionales, pero no por acción de EL LOCADOR o sus dependientes;\nasimismo responde por su destrucción por incendio no originado en caso fortuito; las mejoras e instalaciones de carácter definitivo que efectuare el\nocupante para su mayor comodidad, quedarán a beneficio del propietario. Finalizada la Locación, EL LOCADOR no podrá negarse a recibir la llave y\nla restitución del inmueble, invocando falta de pago de cánones, servicios y/o ínfimas reparaciones menores",
+      "resumen": "Al finalizar el contrato, el locador tiene la obligación de recibir las llaves y la restitución del inmueble, sin poder negarse alegando falta de pago de alquileres, servicios o la existencia de reparaciones menores pendientes.",
+      "categoria": "devolucion",
+      "responsable": "propietario",
+      "uso_clasificador": "operativa",
+      "condiciones": "Establece una prohibición expresa al locador de rechazar la restitución del inmueble por deudas o reparaciones menores pendientes.",
+      "referencias": [],
+      "confianza": 1.0
+    },
+    {
+      "numero": "DÉCIMO SE 'ÓN",
+      "titulo": "ARTÍCULO DÉCIMO SEGUNDO - RESCISIÓN (daños por fuerza mayor)",
+      "evidencias": [
+        {
+          "pagina": 2,
+          "texto": "ARTÍCULO DÉCIMO SE 'ÓN. EL LOCATARIO podrá rescindir el contrato notificando fehacientemente a EL LOCADOR con\nuna antelación mínima de (...) días. EL LOCADOR renuncia expresamente a percibir cualquier indemnización y a la posibilidad\nde accionar por tal concepto. La locación quedará rescindida de pleno derecho si, debido a un caso fortuito o fuerza mayor, su continuación se vuelve\nimposible. En tal caso, ninguna de las partes será responsable por los daños y perjuicios que pudieran derivarse, salvo cuando alguna de las partes\ntenga culpa en la producción del evento"
+        }
+      ],
+      "paginas": [
+        2
+      ],
+      "texto_original": "ARTÍCULO DÉCIMO SE 'ÓN. EL LOCATARIO podrá rescindir el contrato notificando fehacientemente a EL LOCADOR con\nuna antelación mínima de (...) días. EL LOCADOR renuncia expresamente a percibir cualquier indemnización y a la posibilidad\nde accionar por tal concepto. La locación quedará rescindida de pleno derecho si, debido a un caso fortuito o fuerza mayor, su continuación se vuelve\nimposible. En tal caso, ninguna de las partes será responsable por los daños y perjuicios que pudieran derivarse, salvo cuando alguna de las partes\ntenga culpa en la producción del evento",
+      "resumen": "Si por caso fortuito o fuerza mayor la continuación del contrato se vuelve imposible, este se rescinde de pleno derecho. Ninguna de las partes será responsable por los daños y perjuicios derivados de dicha rescisión, salvo que medie culpa de alguna de ellas en la producción del evento.",
+      "categoria": "danio",
+      "responsable": "condicional",
+      "uso_clasificador": "operativa",
+      "condiciones": "La exención de responsabilidad por daños y perjuicios ante rescisión por caso fortuito o fuerza mayor no aplica si alguna de las partes tuvo la culpa en la producción del evento.",
+      "referencias": [],
+      "confianza": 1.0
+    },
+    {
+      "numero": "5",
+      "titulo": "REFERENCIAS PARA COMPLETAR - (5) Acta de Recepción",
+      "evidencias": [
+        {
+          "pagina": 3,
+          "texto": "5) En el Acta de Recepción que se labrará al momento de entregarse la tenencia material del bien inmueble, la autoridad del organismo que realice la\ninspección respectiva, deberá dejar constancia de las siguientes cuestiones mínimas: a) Descripción general del inmueble en sus aspectos de\nlocalización y constructivos (ubicación o domicilio, superficie cubierta y descubierta aprox en metros cuadrados, cantidad de ambientes, tipo de\nconstrucción, etc.), b) descripción del estado de conservación que presenta el inmueble y del funcionamiento de sus instalaciones (eléctricas, sanitarias,\nservicios de gas), c) cualquier otra información relevante, puntualmente exigida por los pliegos de condiciones particulares, técnicas o especiales\naplicables, que deba dejarse constancia al momento de la recepción"
+        }
+      ],
+      "paginas": [
+        3
+      ],
+      "texto_original": "5) En el Acta de Recepción que se labrará al momento de entregarse la tenencia material del bien inmueble, la autoridad del organismo que realice la\ninspección respectiva, deberá dejar constancia de las siguientes cuestiones mínimas: a) Descripción general del inmueble en sus aspectos de\nlocalización y constructivos (ubicación o domicilio, superficie cubierta y descubierta aprox en metros cuadrados, cantidad de ambientes, tipo de\nconstrucción, etc.), b) descripción del estado de conservación que presenta el inmueble y del funcionamiento de sus instalaciones (eléctricas, sanitarias,\nservicios de gas), c) cualquier otra información relevante, puntualmente exigida por los pliegos de condiciones particulares, técnicas o especiales\naplicables, que deba dejarse constancia al momento de la recepción",
+      "resumen": "La autoridad del organismo locatario que realice la inspección al recibir el inmueble debe dejar constancia en el Acta de Recepción de la descripción general y constructiva del bien, su estado de conservación, el funcionamiento de las instalaciones (gas, electricidad, sanitarias) y cualquier otro dato exigido por los pliegos.",
+      "categoria": "otro",
+      "responsable": "inquilino",
+      "uso_clasificador": "contexto",
+      "condiciones": "Establece las pautas mínimas obligatorias que debe registrar la autoridad del organismo locatario al realizar la inspección inicial.",
+      "referencias": [],
+      "confianza": 1.0
+    }
+  ],
+  "rejected_proposals": [],
+  "evidence_incidents": []
+}

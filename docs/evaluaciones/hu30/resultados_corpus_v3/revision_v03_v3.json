@@ -1,0 +1,14 @@
+{
+  "document": "V03",
+  "result": "docs/evaluaciones/hu30/resultados_corpus_v3/resultado_v03_v3.json",
+  "controls": [
+    {"id": "V03-E01", "state": "completo", "matched_proposals": ["V01", "V02", "V03"], "notes": "Vinculó la restitución con la cláusula séptima y conservó la excepción por tiempo y uso normal."},
+    {"id": "V03-E02", "state": "completo", "matched_proposals": ["V03"], "notes": "Diferenció mantenimiento y restitución del locatario de las reformas de puesta en uso a cargo del locador."},
+    {"id": "V03-E03", "state": "completo", "matched_proposals": ["V04"], "notes": "Separó servicios y expensas ordinarias de expensas extraordinarias e impuestos sobre la titularidad."},
+    {"id": "V03-E04", "state": "completo", "matched_proposals": ["V05"], "notes": "Conservó inspección y acceso para trabajos sin inventar un plazo de aviso."},
+    {"id": "V03-E05", "state": "completo", "matched_proposals": ["V06"], "notes": "Unió la cláusula entre páginas y mantuvo autorización previa y excepción funcional no estructural."}
+  ],
+  "accepted_hallucinations": 0,
+  "reviewed_by": "Codex - comparación documental local",
+  "reviewed_at": "2026-09-24"
+}

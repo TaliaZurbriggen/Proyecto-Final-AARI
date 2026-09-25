@@ -23,7 +23,8 @@ class FakeRepository:
         return self.claim if self.claim and self.claim.reclamo_id == reclamo_id else None
 
     def persist_classification(
-        self, reclamo_id: UUID, result: AgentClassificationResult
+        self, reclamo_id: UUID, result: AgentClassificationResult,
+        contract_context: list[dict[str, object]],
     ) -> ClaimClassificationResponse:
         self.persisted = result
         return ClaimClassificationResponse(

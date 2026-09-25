@@ -32,6 +32,8 @@ La instalación nueva debe aplicar además, en orden:
    seguros de entrega.
 8. `22_corregir_alerta_cancelaciones.sql` — adapta la alerta histórica de tres
    cancelaciones al contrato obligatorio de la bandeja de salida de la 21.
+9. `23_clausulas_contractuales.sql` — análisis durable de documentos,
+   cláusulas revisables, auditoría y contexto contractual de clasificación.
 
 El módulo de administración inicial ya incorpora el resultado de las
 migraciones incrementales 07, 08, 09, 10, 11, 12, 15 y 16. No deben repetirse
@@ -82,6 +84,44 @@ Aplicar únicamente las migraciones pendientes y respetar este orden:
     inicial. WhatsApp permanece desacoplado hasta su historia específica.
 17. `22_corregir_alerta_cancelaciones.sql` — redefine la función de alerta de
     cancelaciones para completar asunto, estado y próxima fecha de intento.
+18. `23_clausulas_contractuales.sql` — agrega análisis y revisión de cláusulas
+    contractuales. Aplicar después de 22 y de la migración 20 de contratos.
+19. `24_evidencia_clausulas_contractuales.sql` — conserva evidencia por página,
+    propuestas rechazadas y el uso operativo/contextual de cada cláusula. Aplicar
+    después de 23.
+
+## HU30: migración 24
+
+Aplicada el **21/09/2026 al Supabase compartido de desarrollo** mediante
+`scripts/check_contract_clauses_postgres.py --mode apply`. La ejecución no creó
+análisis ni llamó a Gemini. Se volvió a comprobar que las tablas mantienen RLS
+activo y no conceden lectura pública. No repetirla al actualizar la rama.
+
+La migración aditiva agrega JSONB de propuestas
+rechazadas al análisis y, en cada cláusula, evidencia separada por página y una
+clasificación `operativa`, `contexto` o `excluir`. Los registros anteriores
+conservan sus campos originales, reciben evidencia vacía y uso `operativa`; no se
+inventan fragmentos por página durante la migración.
+
+No crea tablas expuestas ni cambia las políticas existentes: las columnas quedan
+protegidas por el RLS y las revocaciones de las tablas de la migración 23. Antes
+de aplicarla en otra base, comprobar que 23 esté instalada y que no existan
+columnas homónimas agregadas manualmente.
+
+## HU30: migración 23
+
+Aplicada el **21/09/2026 al Supabase compartido de desarrollo** mediante
+`scripts/check_contract_clauses_postgres.py --mode apply`. No repetirla al hacer
+pull. La ejecución no creó análisis ni llamó a Gemini: únicamente agregó la cola
+durable, las cláusulas revisables, su auditoría y el snapshot contractual de cada
+clasificación. Las tres tablas nuevas tienen RLS activo y no conceden lectura a
+`public`, `anon` ni `authenticated`.
+
+Antes de aplicarla en otra base, ejecutar el mismo script en modo `check`. La
+prueba PostgreSQL crea un esquema aislado, recorre solicitud idempotente,
+procesamiento, confirmación, consulta del contexto y permisos, y termina con
+`ROLLBACK`. El análisis externo continúa deshabilitado por defecto y no forma
+parte de esta migración.
 
 ## HU29: migración 20
 

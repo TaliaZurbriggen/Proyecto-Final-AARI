@@ -1,0 +1,424 @@
+{
+  "document": "V01",
+  "source": "output\\pdf\\hu30_corpus\\validation\\V01_modelo_vivienda_cels.pdf",
+  "source_sha256": "f20f157a6686a80ad1aff69c45d6b5335b3a7092032b26b77e48b8802a81da2c",
+  "prompt_version": "v3",
+  "model": "gemini-3.5-flash",
+  "frozen_files": [
+    {
+      "path": "backend/prompts/prompt_extraccion_clausulas_v3.md",
+      "sha256": "c478cdd2d9207120a957ec27a8471f03c54d1f8287b401d9843df5ee920ed916"
+    },
+    {
+      "path": "backend/app/services/contract_clause_llm.py",
+      "sha256": "122219ccccc838eb639a91c570024f50f26fd8a0d15f28f4aac3fd933465d5dc"
+    },
+    {
+      "path": "backend/app/services/contract_clause_evidence.py",
+      "sha256": "e179ee2669212c0c8a1b35ead32a0cac4d3c0972437648ac7af144ecb7cbef2d"
+    }
+  ],
+  "expectations_state": "validated",
+  "expected_controls": 8,
+  "external_calls": 1,
+  "executed_at": "2026-09-24T22:42:21.559183+00:00",
+  "extractor_version": "hu30-v3",
+  "pages": 9,
+  "local_extraction_complete": true,
+  "model_proposals": 16,
+  "valid_clauses": [
+    {
+      "numero": "SEGUNDA",
+      "titulo": "Plazo y notificación de no renovación",
+      "evidencias": [
+        {
+          "pagina": 4,
+          "texto": "Si el LOCADOR no quisiera continuar la relación \nlocativa al vencimiento del plazo, deberá notificar al locatario con una antelación mínima de sesenta \n(60) días. Caso contrario, el contrato se considerará automáticamente reconducido"
+        }
+      ],
+      "paginas": [
+        4
+      ],
+      "texto_original": "Si el LOCADOR no quisiera continuar la relación \nlocativa al vencimiento del plazo, deberá notificar al locatario con una antelación mínima de sesenta \n(60) días. Caso contrario, el contrato se considerará automáticamente reconducido",
+      "resumen": "Si el locador decide no continuar con la relación locativa al vencimiento del plazo, debe notificar al locatario con una antelación mínima de 60 días. De lo contrario, el contrato se considerará automáticamente reconducido.",
+      "categoria": "aviso",
+      "responsable": "propietario",
+      "uso_clasificador": "operativa",
+      "condiciones": "Requiere notificación por escrito con antelación mínima de 60 días para evitar la reconducción automática.",
+      "referencias": [],
+      "confianza": 0.98
+    },
+    {
+      "numero": "CUARTA (Parte 1)",
+      "titulo": "Estado de conservación, inventario y obligación de preservación",
+      "evidencias": [
+        {
+          "pagina": 4,
+          "texto": "El LOCA TARIO declara que ha visitado el inmueble y comprobado que el mismo se \nencuentra desocupado, y en el siguiente estado de conservación"
+        },
+        {
+          "pagina": 5,
+          "texto": "El LOCATARIO se obliga a preservar el inmueble, y a restituirlo en iguales condiciones a las de \nrecepción, salvo por el normal desgaste propio de un uso adecuado de la cosa"
+        }
+      ],
+      "paginas": [
+        4,
+        5
+      ],
+      "texto_original": "El LOCA TARIO declara que ha visitado el inmueble y comprobado que el mismo se \nencuentra desocupado, y en el siguiente estado de conservación\n\nEl LOCATARIO se obliga a preservar el inmueble, y a restituirlo en iguales condiciones a las de \nrecepción, salvo por el normal desgaste propio de un uso adecuado de la cosa",
+      "resumen": "El locatario declara recibir el inmueble desocupado y en el estado de conservación detallado en el inventario, obligándose a preservarlo y restituirlo en las mismas condiciones, salvo por el desgaste natural derivado de un uso adecuado.",
+      "categoria": "devolucion",
+      "responsable": "inquilino",
+      "uso_clasificador": "operativa",
+      "condiciones": "Se exceptúa el desgaste natural por el uso adecuado de la cosa.",
+      "referencias": [],
+      "confianza": 0.95
+    },
+    {
+      "numero": "CUARTA (Parte 2)",
+      "titulo": "Reparaciones a cargo del locatario",
+      "evidencias": [
+        {
+          "pagina": 5,
+          "texto": "Serán a exclusivo cargo del LOCATARIO todas las reparaciones, reconstrucciones y/o refacciones que \nfueran menester realizar para el debido cumplimiento de esta obligación, cualquiera fuera la causa, \nnaturaleza o cuantía del deterioro, y sin derecho a reembolso a lguno a su favor. En caso de no \nhacerlo, el LOCADOR tendrá derecho a realizarlo a cuenta del LOCATARIO"
+        }
+      ],
+      "paginas": [
+        5
+      ],
+      "texto_original": "Serán a exclusivo cargo del LOCATARIO todas las reparaciones, reconstrucciones y/o refacciones que \nfueran menester realizar para el debido cumplimiento de esta obligación, cualquiera fuera la causa, \nnaturaleza o cuantía del deterioro, y sin derecho a reembolso a lguno a su favor. En caso de no \nhacerlo, el LOCADOR tendrá derecho a realizarlo a cuenta del LOCATARIO",
+      "resumen": "Son a cargo exclusivo del locatario todas las reparaciones, reconstrucciones o refacciones necesarias para mantener el inmueble en las condiciones de recepción, sin derecho a reembolso. Si el locatario no las realiza, el locador podrá ejecutarlas a cuenta de aquel.",
+      "categoria": "reparacion",
+      "responsable": "inquilino",
+      "uso_clasificador": "operativa",
+      "condiciones": "Aplica a cualquier causa, naturaleza o cuantía del deterioro, sin derecho a reembolso. Faculta al locador a realizar las obras a costa del locatario si este no cumple.",
+      "referencias": [
+        "CUARTA (Parte 1)"
+      ],
+      "confianza": 0.98
+    },
+    {
+      "numero": "CUARTA (Parte 3)",
+      "titulo": "Reparaciones a cargo del locador por fuerza mayor, terceros o uso normal",
+      "evidencias": [
+        {
+          "pagina": 5,
+          "texto": "Serán a exclusivo cargo del LOCADOR las reparaciones, reconstrucciones y/o refacciones que fueran \nmenester realizar en el inmueble por daños causados po r fuerza mayor, hechos de terceros, vicios \nredhibitorios, o por el normal uso de la cosa, y sin derecho a reembolso alguno a su favor. En caso de \nno hacerlo, el LOCATARIO tendrá derecho a realizarlo a cuenta del LOCADOR, pudiendo descontarlo \ndel importe del alquiler"
+        }
+      ],
+      "paginas": [
+        5
+      ],
+      "texto_original": "Serán a exclusivo cargo del LOCADOR las reparaciones, reconstrucciones y/o refacciones que fueran \nmenester realizar en el inmueble por daños causados po r fuerza mayor, hechos de terceros, vicios \nredhibitorios, o por el normal uso de la cosa, y sin derecho a reembolso alguno a su favor. En caso de \nno hacerlo, el LOCATARIO tendrá derecho a realizarlo a cuenta del LOCADOR, pudiendo descontarlo \ndel importe del alquiler",
+      "resumen": "Son a cargo exclusivo del locador las reparaciones, reconstrucciones o refacciones por daños derivados de fuerza mayor, hechos de terceros, vicios redhibitorios o el uso normal de la cosa, sin derecho a reembolso. Si el locador no las realiza, el locatario puede ejecutarlas a su costa y descontar el costo del alquiler.",
+      "categoria": "reparacion",
+      "responsable": "propietario",
+      "uso_clasificador": "operativa",
+      "condiciones": "Aplica a daños por fuerza mayor, hechos de terceros, vicios redhibitorios o uso normal. Faculta al locatario a realizar las obras a costa del locador y descontarlas del alquiler si este no cumple.",
+      "referencias": [],
+      "confianza": 0.98
+    },
+    {
+      "numero": "CUARTA (Parte 4)",
+      "titulo": "Comparación de presupuestos para arreglos",
+      "evidencias": [
+        {
+          "pagina": 5,
+          "texto": "En todos los casos, ambas partes podrán presentar presupuestos para su comparación y estipular de \neste modo el costo final de los arreglos"
+        }
+      ],
+      "paginas": [
+        5
+      ],
+      "texto_original": "En todos los casos, ambas partes podrán presentar presupuestos para su comparación y estipular de \neste modo el costo final de los arreglos",
+      "resumen": "Ambas partes tienen la facultad de presentar presupuestos para comparar y acordar el costo final de las reparaciones.",
+      "categoria": "reparacion",
+      "responsable": "no_especificado",
+      "uso_clasificador": "operativa",
+      "condiciones": "Facultad de ambas partes para presentar presupuestos comparativos.",
+      "referencias": [],
+      "confianza": 0.98
+    },
+    {
+      "numero": "QUINTA (Inciso a)",
+      "titulo": "Transferencia y pago de servicios públicos",
+      "evidencias": [
+        {
+          "pagina": 5,
+          "texto": "Son obligaciones del LOCATARIO: a) Transferir la titularidad de los servicios de energía \neléctrica, agua, teléfono, gas, TV x cable e internet, a su nombre y cargo en un plazo no superior a los \nsesenta (60) días corridos, a partir de la suscripción del presente, y abonar su suministro hasta la \nfecha de corte de los servicios al momento de entrega del inmueble al LOCADOR, en el que deberá \npresentar la correspondiente baja"
+        }
+      ],
+      "paginas": [
+        5
+      ],
+      "texto_original": "Son obligaciones del LOCATARIO: a) Transferir la titularidad de los servicios de energía \neléctrica, agua, teléfono, gas, TV x cable e internet, a su nombre y cargo en un plazo no superior a los \nsesenta (60) días corridos, a partir de la suscripción del presente, y abonar su suministro hasta la \nfecha de corte de los servicios al momento de entrega del inmueble al LOCADOR, en el que deberá \npresentar la correspondiente baja",
+      "resumen": "El locatario debe transferir a su nombre y cargo los servicios de electricidad, agua, teléfono, gas, televisión por cable e internet en un plazo máximo de 60 días corridos desde la firma. Debe pagar los consumos hasta la fecha de corte al entregar el inmueble, presentando la baja correspondiente.",
+      "categoria": "servicio",
+      "responsable": "inquilino",
+      "uso_clasificador": "operativa",
+      "condiciones": "Plazo máximo de 60 días corridos desde la firma para la transferencia de titularidad. Obligación de presentar la baja al entregar el inmueble.",
+      "referencias": [],
+      "confianza": 0.98
+    },
+    {
+      "numero": "SEXTA (Inciso a)",
+      "titulo": "Obligación general de reparación del locador",
+      "evidencias": [
+        {
+          "pagina": 5,
+          "texto": "Son obligaciones del LOCADOR: a) Realizar todas las reparaciones que requiera el inmueble, \nasí como las necesarias para el normal funcionamiento de los servicios públicos, con excepción de \naquellos arreglos cuya necesidad surja n por la responsabilidad del LOCATARIO (excluyendo en este \ncaso la que se produzca por el normal uso de la cosa"
+        }
+      ],
+      "paginas": [
+        5
+      ],
+      "texto_original": "Son obligaciones del LOCADOR: a) Realizar todas las reparaciones que requiera el inmueble, \nasí como las necesarias para el normal funcionamiento de los servicios públicos, con excepción de \naquellos arreglos cuya necesidad surja n por la responsabilidad del LOCATARIO (excluyendo en este \ncaso la que se produzca por el normal uso de la cosa",
+      "resumen": "El locador debe realizar todas las reparaciones del inmueble y las necesarias para el funcionamiento normal de los servicios públicos, salvo aquellas que sean responsabilidad del locatario (excluyendo de esta responsabilidad el desgaste por uso normal).",
+      "categoria": "reparacion",
+      "responsable": "propietario",
+      "uso_clasificador": "operativa",
+      "condiciones": "Se exceptúan los arreglos que surjan por responsabilidad del locatario, pero se excluye de dicha excepción el desgaste por uso normal.",
+      "referencias": [],
+      "confianza": 0.98
+    },
+    {
+      "numero": "SÉPTIMA (Inciso a)",
+      "titulo": "Prohibición de realizar mejoras y modificaciones sin autorización",
+      "evidencias": [
+        {
+          "pagina": 5,
+          "texto": "Le está prohibido al LOCATARIO: a) Efectuar alteraciones, modificaciones, mejor as e \ninnovaciones en el bien locado o sus partes, sin consentimiento previo, expreso y por escrito \notorgado por EL LOCADOR, quedando las que se introduzcan, consten o no con autorización, a \nbeneficio de la propiedad, sin derecho a exigir al LOCATARIO indem nización, reintegro o devolución \nalguna (salvo acuerdo en contrario), y sin perjuicio de la facultad del LOCADOR de exigir su remoción \npara que recupere su estado anterior, a cargo del LOCATARIO"
+        }
+      ],
+      "paginas": [
+        5
+      ],
+      "texto_original": "Le está prohibido al LOCATARIO: a) Efectuar alteraciones, modificaciones, mejor as e \ninnovaciones en el bien locado o sus partes, sin consentimiento previo, expreso y por escrito \notorgado por EL LOCADOR, quedando las que se introduzcan, consten o no con autorización, a \nbeneficio de la propiedad, sin derecho a exigir al LOCATARIO indem nización, reintegro o devolución \nalguna (salvo acuerdo en contrario), y sin perjuicio de la facultad del LOCADOR de exigir su remoción \npara que recupere su estado anterior, a cargo del LOCATARIO",
+      "resumen": "Se prohíbe al locatario realizar modificaciones, mejoras o alteraciones sin consentimiento previo por escrito del locador. Las mejoras introducidas quedarán a beneficio de la propiedad sin derecho a indemnización o reintegro (salvo pacto en contrario), pudiendo el locador exigir su remoción a costa del locatario para volver al estado anterior.",
+      "categoria": "mantenimiento",
+      "responsable": "inquilino",
+      "uso_clasificador": "operativa",
+      "condiciones": "Requiere consentimiento previo, expreso y por escrito del locador. Las mejoras quedan a beneficio de la propiedad sin derecho a indemnización (salvo acuerdo en contrario), y el locador puede exigir la remoción a costa del locatario.",
+      "referencias": [],
+      "confianza": 0.98
+    },
+    {
+      "numero": "DÉCIMO PRIMERA",
+      "titulo": "Devolución de llaves y comprobante de recepción del inmueble",
+      "evidencias": [
+        {
+          "pagina": 6,
+          "texto": "Al vencimiento del contrato, el LOCATARIO deberá devolver las llaves al \nLOCADOR. La recepción po r parte del LOCADOR del inmueble arrendado, aún sin reserva alguna de \nsu parte, no importará conformidad con el estado del inmueble, por lo que el LOCATARIO deberá \nrequerir comprobante de recepción en el que conste expresamente dicha circunstancia para su \nliberación"
+        }
+      ],
+      "paginas": [
+        6
+      ],
+      "texto_original": "Al vencimiento del contrato, el LOCATARIO deberá devolver las llaves al \nLOCADOR. La recepción po r parte del LOCADOR del inmueble arrendado, aún sin reserva alguna de \nsu parte, no importará conformidad con el estado del inmueble, por lo que el LOCATARIO deberá \nrequerir comprobante de recepción en el que conste expresamente dicha circunstancia para su \nliberación",
+      "resumen": "Al finalizar el contrato, el locatario debe devolver las llaves. La recepción del inmueble por el locador sin reservas no implica conformidad con su estado, por lo que el locatario debe exigir un comprobante de recepción que deje constancia expresa de dicha circunstancia para quedar liberado.",
+      "categoria": "devolucion",
+      "responsable": "inquilino",
+      "uso_clasificador": "operativa",
+      "condiciones": "La recepción sin reservas no implica conformidad con el estado del inmueble; el locatario debe exigir un comprobante de recepción que lo libere expresamente.",
+      "referencias": [],
+      "confianza": 0.98
+    },
+    {
+      "numero": "DÉCIMO SEGUNDA (Párrafos 2 y 3)",
+      "titulo": "Retención y devolución del depósito de garantía por daños",
+      "evidencias": [
+        {
+          "pagina": 7,
+          "texto": "El depósito de garantía podrá ser retenido por el LOCADOR para responder en parte o totalmente a \nlos desperfectos, daños o rotu ras originadas en la propiedad, sus artefactos o accesorios, cuya \nresponsabilidad sea atribuible al LOCATARIO, y que LOCADOR o sus representantes observen al \nfinalizar la locación. \nConsecuentemente, el LOCADOR restituirá total o parcialmente este depósito , con la actualización \npertinente, al momento de la entrega de las llaves por parte del LOCATARIO a la finalización del \ncontrato"
+        }
+      ],
+      "paginas": [
+        7
+      ],
+      "texto_original": "El depósito de garantía podrá ser retenido por el LOCADOR para responder en parte o totalmente a \nlos desperfectos, daños o rotu ras originadas en la propiedad, sus artefactos o accesorios, cuya \nresponsabilidad sea atribuible al LOCATARIO, y que LOCADOR o sus representantes observen al \nfinalizar la locación. \nConsecuentemente, el LOCADOR restituirá total o parcialmente este depósito , con la actualización \npertinente, al momento de la entrega de las llaves por parte del LOCATARIO a la finalización del \ncontrato",
+      "resumen": "El locador puede retener total o parcialmente el depósito de garantía para cubrir daños, desperfectos o roturas en la propiedad o sus accesorios imputables al locatario y detectados al finalizar el contrato. El saldo restante actualizado debe ser devuelto al momento de la entrega de las llaves.",
+      "categoria": "devolucion",
+      "responsable": "condicional",
+      "uso_clasificador": "operativa",
+      "condiciones": "La retención del depósito está condicionada a la existencia de desperfectos, daños o roturas imputables al locatario observados al finalizar la locación. La devolución debe ser con la actualización pertinente al momento de la entrega de llaves.",
+      "referencias": [],
+      "confianza": 0.98
+    },
+    {
+      "numero": "DÉCIMO TERCERA",
+      "titulo": "Cláusulas penales por demora en la restitución del inmueble o del depósito",
+      "evidencias": [
+        {
+          "pagina": 7,
+          "texto": "Se estipula como cláusula penal, que ante el supuesto de que el LOCATARIO no \nrestituya el inmueble en tiempo y las formas convenidas una vez intimado a ello, otorga derecho al \nLOCADOR a exigir un valor mensual, por la ocupación indebida, equivalente a la duplicación del \nalquiler último vigente hasta la recuperación por EL LOCADOR de la disponibilidad material y ju rídica \ndel inmueble, no implicando ello tácita reconducción ni prórroga alguna, sin perjuicio del ejercicio de \nlas facultades del artículo siguiente. \nSe estipula como cláusula penal, que ante el supuesto de que el LOCADOR no restituya al LOCATARIO \nel depósito de acuerdo a lo previsto en la cláusula décimo segunda, otorga derecho al LOCATARIO a \nexigir la duplicación de la tasa de actualización sobre el monto del depósito, hasta que la restitución \níntegra al LOCATARIO se haga efectiva"
+        }
+      ],
+      "paginas": [
+        7
+      ],
+      "texto_original": "Se estipula como cláusula penal, que ante el supuesto de que el LOCATARIO no \nrestituya el inmueble en tiempo y las formas convenidas una vez intimado a ello, otorga derecho al \nLOCADOR a exigir un valor mensual, por la ocupación indebida, equivalente a la duplicación del \nalquiler último vigente hasta la recuperación por EL LOCADOR de la disponibilidad material y ju rídica \ndel inmueble, no implicando ello tácita reconducción ni prórroga alguna, sin perjuicio del ejercicio de \nlas facultades del artículo siguiente. \nSe estipula como cláusula penal, que ante el supuesto de que el LOCADOR no restituya al LOCATARIO \nel depósito de acuerdo a lo previsto en la cláusula décimo segunda, otorga derecho al LOCATARIO a \nexigir la duplicación de la tasa de actualización sobre el monto del depósito, hasta que la restitución \níntegra al LOCATARIO se haga efectiva",
+      "resumen": "Establece dos cláusulas penales: 1) Si el locatario no devuelve el inmueble a tiempo tras ser intimado, el locador puede exigir un valor mensual equivalente al doble del último alquiler por ocupación indebida. 2) Si el locador no restituye el depósito de garantía a tiempo, el locatario tiene derecho a exigir el doble de la tasa de actualización sobre el monto del depósito hasta su devolución efectiva.",
+      "categoria": "devolucion",
+      "responsable": "condicional",
+      "uso_clasificador": "operativa",
+      "condiciones": "La penalidad al locatario se activa si no restituye el inmueble en tiempo y forma tras ser intimado. La penalidad al locador se activa si no restituye el depósito de garantía según lo convenido.",
+      "referencias": [
+        "DÉCIMO SEGUNDA"
+      ],
+      "confianza": 0.98
+    },
+    {
+      "numero": "DÉCIMO CUARTA (Párrafo 1)",
+      "titulo": "Rescisión por incumplimiento de la obligación de conservación",
+      "evidencias": [
+        {
+          "pagina": 7,
+          "texto": "De acuerdo a lo establecido en el art. 1220 del Código Civil y Comercial, el \nLOCATARIO puede resolver el contrato en cualquier momento, sin costo alguno de su parte, si el \nLOCADOR incumple la obligación de conservar el inmueble con aptitud para el uso y g oce convenido; \no por la garantía de evicción o la de vicios redhibitorios"
+        }
+      ],
+      "paginas": [
+        7
+      ],
+      "texto_original": "De acuerdo a lo establecido en el art. 1220 del Código Civil y Comercial, el \nLOCATARIO puede resolver el contrato en cualquier momento, sin costo alguno de su parte, si el \nLOCADOR incumple la obligación de conservar el inmueble con aptitud para el uso y g oce convenido; \no por la garantía de evicción o la de vicios redhibitorios",
+      "resumen": "El locatario puede rescindir el contrato sin costo alguno si el locador incumple con su obligación de conservar el inmueble apto para el uso y goce acordado, o por garantías de evicción o vicios redhibitorios.",
+      "categoria": "mantenimiento",
+      "responsable": "propietario",
+      "uso_clasificador": "operativa",
+      "condiciones": "Aplica si el locador incumple la obligación de conservar el inmueble con aptitud para el uso y goce convenido, o por evicción o vicios redhibitorios.",
+      "referencias": [],
+      "confianza": 0.98
+    }
+  ],
+  "rejected_proposals": [
+    {
+      "ordinal": 7,
+      "propuesta": {
+        "numero": "QUINTA (Inciso c)",
+        "titulo": "Pago de expensas ordinarias y ABL",
+        "evidencias": [
+          {
+            "pagina": 5,
+            "texto": "Son obligaciones del LOCATARIO: ... c) Abonar las expensas ordinarias y el impuesto de alumbrado, barrido y limpieza durante la relación locativa, el que se considera accesorio al precio."
+          }
+        ],
+        "paginas": [
+          5
+        ],
+        "texto_original": "Son obligaciones del LOCATARIO: ... c) Abonar las expensas ordinarias y el impuesto de alumbrado, barrido y limpieza durante la relación locativa, el que se considera accesorio al precio.",
+        "resumen": "El locatario está obligado a pagar las expensas ordinarias y el impuesto de Alumbrado, Barrido y Limpieza (ABL) durante el transcurso del contrato.",
+        "categoria": "expensa",
+        "responsable": "inquilino",
+        "uso_clasificador": "operativa",
+        "condiciones": "El impuesto de ABL se considera accesorio al precio del alquiler.",
+        "referencias": [],
+        "confianza": 0.98
+      },
+      "motivo": "el fragmento de la página 5 cambia caracteres del texto de origen.",
+      "evidencias_invalidas": [
+        {
+          "pagina": 5,
+          "texto": "Son obligaciones del LOCATARIO: ... c) Abonar las expensas ordinarias y el impuesto de alumbrado, barrido y limpieza durante la relación locativa, el que se considera accesorio al precio."
+        }
+      ]
+    },
+    {
+      "ordinal": 9,
+      "propuesta": {
+        "numero": "SEXTA (Inciso b)",
+        "titulo": "Notificación previa para visitas al inmueble",
+        "evidencias": [
+          {
+            "pagina": 5,
+            "texto": "Son obligaciones del LOCADOR: ... b) Notificar al LOCATARIO, con al menos 72 hs de antelación, cualquier visita que quiera realizar sobre el inmueble."
+          }
+        ],
+        "paginas": [
+          5
+        ],
+        "texto_original": "Son obligaciones del LOCADOR: ... b) Notificar al LOCATARIO, con al menos 72 hs de antelación, cualquier visita que quiera realizar sobre el inmueble.",
+        "resumen": "El locador debe dar aviso al locatario con una anticipación mínima de 72 horas antes de realizar cualquier visita al inmueble.",
+        "categoria": "acceso",
+        "responsable": "propietario",
+        "uso_clasificador": "operativa",
+        "condiciones": "Requiere una notificación previa mínima de 72 horas.",
+        "referencias": [],
+        "confianza": 0.98
+      },
+      "motivo": "el fragmento de la página 5 cambia caracteres del texto de origen.",
+      "evidencias_invalidas": [
+        {
+          "pagina": 5,
+          "texto": "Son obligaciones del LOCADOR: ... b) Notificar al LOCATARIO, con al menos 72 hs de antelación, cualquier visita que quiera realizar sobre el inmueble."
+        }
+      ]
+    },
+    {
+      "ordinal": 10,
+      "propuesta": {
+        "numero": "SEXTA (Inciso c)",
+        "titulo": "Reembolso y compensación de reparaciones urgentes",
+        "evidencias": [
+          {
+            "pagina": 5,
+            "texto": "Son obligaciones del LOCADOR: ... c) Restituir los gastos en que incurriere el LOCATARIO por reparaciones urgentes en el inmueble, siempre que el LOCATARIO haya previamente notificado al LOCADOR -por cualquier medio- y éste no lo resolviera en el plazo que la urgencia requiera. Estos gastos deberán estar debidamente acreditados, pudiendo el LOCATARIO en estos casos descontarlos del importe del alquiler."
+          }
+        ],
+        "paginas": [
+          5
+        ],
+        "texto_original": "Son obligaciones del LOCADOR: ... c) Restituir los gastos en que incurriere el LOCATARIO por reparaciones urgentes en el inmueble, siempre que el LOCATARIO haya previamente notificado al LOCADOR -por cualquier medio- y éste no lo resolviera en el plazo que la urgencia requiera. Estos gastos deberán estar debidamente acreditados, pudiendo el LOCATARIO en estos casos descontarlos del importe del alquiler.",
+        "resumen": "El locador debe reembolsar al locatario los gastos por reparaciones urgentes, siempre que el locatario haya notificado previamente por cualquier medio y el locador no las haya resuelto en el plazo requerido por la urgencia. Los gastos deben estar acreditados y el locatario podrá descontarlos del alquiler.",
+        "categoria": "reparacion",
+        "responsable": "condicional",
+        "uso_clasificador": "operativa",
+        "condiciones": "Requiere notificación previa del locatario por cualquier medio y falta de resolución por el locador en el plazo que la urgencia demande. Los gastos deben estar debidamente acreditados.",
+        "referencias": [],
+        "confianza": 0.98
+      },
+      "motivo": "el fragmento de la página 5 cambia caracteres del texto de origen.",
+      "evidencias_invalidas": [
+        {
+          "pagina": 5,
+          "texto": "Son obligaciones del LOCADOR: ... c) Restituir los gastos en que incurriere el LOCATARIO por reparaciones urgentes en el inmueble, siempre que el LOCATARIO haya previamente notificado al LOCADOR -por cualquier medio- y éste no lo resolviera en el plazo que la urgencia requiera. Estos gastos deberán estar debidamente acreditados, pudiendo el LOCATARIO en estos casos descontarlos del importe del alquiler."
+        }
+      ]
+    },
+    {
+      "ordinal": 11,
+      "propuesta": {
+        "numero": "SEXTA (Incisos e y f)",
+        "titulo": "Pago de expensas extraordinarias e impuesto inmobiliario",
+        "evidencias": [
+          {
+            "pagina": 5,
+            "texto": "Son obligaciones del LOCADOR: ... e) Abonar las expensas extraordinarias durante la relación locativa. f) Abonar el impuesto inmobiliario, y cualquier otro que grave a la propiedad."
+          }
+        ],
+        "paginas": [
+          5
+        ],
+        "texto_original": "Son obligaciones del LOCADOR: ... e) Abonar las expensas extraordinarias durante la relación locativa. f) Abonar el impuesto inmobiliario, y cualquier otro que grave a la propiedad.",
+        "resumen": "El locador debe pagar las expensas extraordinarias durante el contrato, así como el impuesto inmobiliario y cualquier otro tributo que grave la propiedad.",
+        "categoria": "expensa",
+        "responsable": "propietario",
+        "uso_clasificador": "operativa",
+        "condiciones": "Aplica durante toda la relación locativa.",
+        "referencias": [],
+        "confianza": 0.98
+      },
+      "motivo": "el fragmento de la página 5 cambia caracteres del texto de origen.",
+      "evidencias_invalidas": [
+        {
+          "pagina": 5,
+          "texto": "Son obligaciones del LOCADOR: ... e) Abonar las expensas extraordinarias durante la relación locativa. f) Abonar el impuesto inmobiliario, y cualquier otro que grave a la propiedad."
+        }
+      ]
+    }
+  ],
+  "evidence_incidents": [
+    "La propuesta 7 requiere revisión de evidencia: el fragmento de la página 5 cambia caracteres del texto de origen.",
+    "La propuesta 9 requiere revisión de evidencia: el fragmento de la página 5 cambia caracteres del texto de origen.",
+    "La propuesta 10 requiere revisión de evidencia: el fragmento de la página 5 cambia caracteres del texto de origen.",
+    "La propuesta 11 requiere revisión de evidencia: el fragmento de la página 5 cambia caracteres del texto de origen."
+  ]
+}

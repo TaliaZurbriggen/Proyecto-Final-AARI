@@ -19,3 +19,6 @@ export function uploadContract(id, { file, signed, revision }) {
 }
 export const downloadContract = (id, documentId) => apiRequest(`/contratos/${id}/documentos/${documentId}/descarga`, { method: 'POST' })
 export const endContract = (id, data) => apiRequest(`/contratos/${id}/finalizar`, { method: 'POST', body: JSON.stringify(data) })
+export const getContractAnalysis = (id, documentId, options = {}) => apiRequest(`/contratos/${id}/documentos/${documentId}/analisis`, options)
+export const startContractAnalysis = (id, documentId) => apiRequest(`/contratos/${id}/documentos/${documentId}/analisis`, { method: 'POST' })
+export const reviewContractClause = (id, clauseId, data) => apiRequest(`/contratos/${id}/clausulas/${clauseId}`, { method: 'PATCH', body: JSON.stringify(data) })

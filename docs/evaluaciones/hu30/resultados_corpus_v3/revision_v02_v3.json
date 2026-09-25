@@ -1,0 +1,14 @@
+{
+  "document": "V02",
+  "result": "docs/evaluaciones/hu30/resultados_corpus_v3/resultado_v02_v3.json",
+  "controls": [
+    {"id": "V02-E01", "state": "completo", "matched_proposals": ["V01", "V08"], "notes": "Conservó entrega apropiada, acta inicial, estado de conservación, instalaciones e inventario."},
+    {"id": "V02-E02", "state": "completo", "matched_proposals": ["V02"], "notes": "Separó correctamente reparaciones estructurales, fuerza mayor, siniestros y desgaste natural a cargo del locador."},
+    {"id": "V02-E03", "state": "completo", "matched_proposals": ["V02"], "notes": "Conservó notificación, plazo mínimo de 24 horas para urgencias, intimación para no urgentes y compensación con el alquiler."},
+    {"id": "V02-E04", "state": "completo", "matched_proposals": ["V04"], "notes": "Separó actividad, gravámenes, expensas habituales y servicios, y preservó explícitamente la alternativa contradictoria tendrá/no tendrá para revisión."},
+    {"id": "V02-E05", "state": "completo", "matched_proposals": ["V05", "V06", "V08"], "notes": "Conservó mantenimiento no estructural, daños y excepciones, restitución de llaves e inventario inicial."}
+  ],
+  "accepted_hallucinations": 0,
+  "reviewed_by": "Codex - comparación documental local",
+  "reviewed_at": "2026-09-24"
+}

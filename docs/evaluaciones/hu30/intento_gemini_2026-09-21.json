@@ -1,0 +1,41 @@
+{
+  "fuente": "hu30_contrato_anonimizado.pdf",
+  "fuente_sha256": "3e27aa10c53c72abdeee176175420067d109456465010e5fc61a46437896b16b",
+  "fecha": "2026-09-21",
+  "modelo": "gemini-3.5-flash",
+  "prompt_version": "v1",
+  "extractor_version": "hu30-v1",
+  "invocaciones_aplicacion": 3,
+  "documento_transmitido": true,
+  "intentos": [
+    {
+      "modo": "json_schema_pydantic",
+      "codigo": 400,
+      "estado": "INVALID_ARGUMENT",
+      "contenido_devuelto": false
+    },
+    {
+      "modo": "json_schema_sanitizado",
+      "codigo": 400,
+      "estado": "INVALID_ARGUMENT",
+      "contenido_devuelto": false
+    },
+    {
+      "modo": "function_calling",
+      "estado": "EXITOSO",
+      "contenido_devuelto": true,
+      "propuestas_modelo": 18,
+      "clausulas_validas": 14,
+      "incidencias_evidencia": 4
+    }
+  ],
+  "resultado": "function_calling_exitoso",
+  "causa_acotada": "El endpoint generateContent rechazo el modo response_json_schema aun despues de retirar las restricciones no admitidas.",
+  "contenido_devuelto": true,
+  "reintento_automatico": false,
+  "correccion_local": "El adaptador usa function_calling para la salida estructurada y conserva la validacion final con Pydantic.",
+  "validacion_local_correccion": "Aprobada dentro de la suite y confirmada con una ejecucion real autorizada.",
+  "resultado_detallado": "resultado_gemini_ejemplo_01.json",
+  "evaluacion": "evaluacion_gemini_ejemplo_01.md",
+  "reintento_pendiente": false
+}

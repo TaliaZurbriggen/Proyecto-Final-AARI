@@ -4,6 +4,12 @@ FROM python:3.12-slim
 # Carpeta de trabajo dentro del contenedor
 WORKDIR /app
 
+# OCR local para páginas escaneadas. El paquete de idioma español evita enviar
+# el documento a un servicio externo solo para obtener su texto.
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends tesseract-ocr tesseract-ocr-spa \
+    && rm -rf /var/lib/apt/lists/*
+
 # Copiamos primero el archivo de dependencias
 COPY requirements.txt .
 

@@ -121,6 +121,48 @@ separadas y reiniciar el backend después de modificar `.env`.
 Alcance, decisiones, pruebas y pendientes:
 [`docs/hu29_gestion_contratos.md`](docs/hu29_gestion_contratos.md).
 
+### Extracción y revisión de cláusulas contractuales (HU30)
+
+Desde el detalle de un contrato, administración puede solicitar el análisis de
+la última versión firmada. La lectura del PDF se realiza primero de forma local:
+usa texto digital por página y reserva Tesseract para páginas escaneadas. Gemini
+propone cláusulas con evidencia separada por página, resumen, tema, responsable,
+condiciones y uso sugerido (`operativa`, `contexto` o `excluir`). El backend
+ancla cada cita a una coincidencia única de la página y almacena el texto exacto
+del PDF; una paráfrasis o palabra cambiada se conserva como rechazo auditable.
+Ninguna propuesta se usa hasta que una persona la confirma o la edita y confirma.
+También se puede descartar.
+
+El trabajo se persiste en una cola durable con recuperación de intentos. El
+clasificador recibe únicamente cláusulas confirmadas del contrato aplicable al
+inquilino, propiedad y fecha de creación del reclamo, y guarda el contexto exacto
+utilizado. Las migraciones `backend/migrations/23_clausulas_contractuales.sql` y
+`backend/migrations/24_evidencia_clausulas_contractuales.sql` fueron aplicadas al
+Supabase compartido el **21/09/2026**; no repetirlas al actualizar la rama.
+
+Para OCR local se requieren `pypdfium2`, `pytesseract` y el motor Tesseract con
+idioma español. Docker lo instala automáticamente. En Windows, instalar
+Tesseract por separado, comprobar que `spa` aparezca en `tesseract --list-langs`
+y configurar, si el ejecutable o los datos de idioma no están en las rutas por
+defecto:
+
+```env
+TESSERACT_CMD=C:\Program Files\Tesseract-OCR\tesseract.exe
+TESSERACT_LANGUAGE=spa
+TESSDATA_PREFIX=C:\ruta\a\tessdata
+```
+
+`TESSDATA_PREFIX` debe apuntar a la carpeta que contiene `spa.traineddata`; no
+se versiona ese archivo binario dentro del repositorio.
+
+Por privacidad, `CONTRACT_ANALYSIS_EXTERNAL_ENABLED=false` es el valor seguro y
+predeterminado. Mientras permanezca así, ningún contrato se envía a Gemini. Las
+pruebas automatizadas usan modelos simulados; una evaluación externa con material
+anonimizado requiere autorización específica y habilitación temporal.
+
+Alcance, decisiones, validaciones y pendientes:
+[`docs/hu30_extraccion_clausulas.md`](docs/hu30_extraccion_clausulas.md).
+
 ### Gestión de propietarios
 
 El Sprint 2 incorpora el primer módulo funcional de administración. La API
@@ -617,9 +659,19 @@ entorno compartido en la nube.
 - **Tobías:** AARI-116, AARI-125, AARI-135 y AARI-157, más su participación en
   el despliegue.
 - **Trabajo conjunto:** AARI-338, despliegue del entorno compartido.
-- **HU29 / AARI-318 en implementación:** módulo contractual y pruebas locales
-  incorporados en su rama; migración instalada y Storage real validado.
-  Pendientes: revisión funcional y merge. La extracción de cláusulas pertenece a HU30.
+- **HU29 / AARI-318 finalizada:** módulo contractual integrado, migración y
+  Storage privado validados.
+- **HU30 / AARI-319 en validación:** extracción local/OCR, análisis
+  estructurado, revisión humana e integración del contexto contractual ya
+  implementados en su rama. Las migraciones 23 y 24 están aplicadas; las suites
+  locales, PostgreSQL y OCR están aprobados. V3 fue evaluada en cuatro modelos
+  públicos con una llamada por documento y sin reintentos: obtuvo 19/23 controles
+  completos, 12/15 críticos y cero alucinaciones aceptadas. Mejoró frente a v2,
+  pero aún no habilita los holdouts ni el cierre de la historia. V4 está en
+  preparación local para dividir reglas, acortar evidencia y conservar
+  coordinaciones ambiguas. Su primer intento externo fue bloqueado por el límite
+  gratuito diario. El segundo intento, el 25/09, recibió `503 UNAVAILABLE` en
+  V01 y V02; todavía no hay resultados evaluables de v4.
 - **Inicio previsto de Tobías:** AARI-116, base reutilizable para las
   notificaciones de AARI-135 y AARI-157.
 - **Seguimiento:** los story points conservan las estimaciones académicas

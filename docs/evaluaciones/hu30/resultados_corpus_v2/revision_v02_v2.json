@@ -1,0 +1,14 @@
+{
+  "document": "V02",
+  "result": "docs/evaluaciones/hu30/resultados_corpus_v2/resultado_v02_v2.json",
+  "controls": [
+    {"id": "V02-E01", "state": "completo", "matched_proposals": ["V02", "V09"], "notes": "Conservó entrega, estado inicial, instalaciones e inventario del acta de recepción."},
+    {"id": "V02-E02", "state": "parcial", "matched_proposals": ["R01"], "notes": "Encontró las reparaciones estructurales y causas no imputables, pero la propuesta fue rechazada por evidencia no literal."},
+    {"id": "V02-E03", "state": "parcial", "matched_proposals": ["R01"], "notes": "Encontró aviso, 24 horas, intimación y compensación, pero la propuesta completa no superó la comprobación literal."},
+    {"id": "V02-E04", "state": "completo", "matched_proposals": ["V04"], "notes": "Separó cargas de actividad, impuestos, expensas habituales y servicios sujetos a opción."},
+    {"id": "V02-E05", "state": "completo", "matched_proposals": ["V05", "V06", "V07", "V09"], "notes": "Conservó mantenimiento, daños y excepciones, recepción de llaves y contexto de inventario."}
+  ],
+  "accepted_hallucinations": 0,
+  "reviewed_by": "Codex - comparación documental local",
+  "reviewed_at": "2026-09-24"
+}

@@ -1,0 +1,129 @@
+{
+  "version": "2026-09-24",
+  "purpose": "Validar generalización de la extracción HU30 sin modificar el prompt a partir de estos resultados.",
+  "results_directory": "docs/evaluaciones/hu30/resultados_corpus_v2",
+  "prompt_freeze": {
+    "prompt_version": "v2",
+    "extractor_version": "hu30-v2",
+    "model": "gemini-3.5-flash",
+    "frozen_at": "2026-09-24",
+    "files": [
+      {
+        "path": "backend/prompts/prompt_extraccion_clausulas_v2.md",
+        "sha256": "1de25b61d81b28e67b6ee03559565349367ca840b3cd8801bda42eb1f906e1e8"
+      },
+      {
+        "path": "backend/app/services/contract_clause_llm.py",
+        "sha256": "f9596c37f4fbef1279701f0a7c8793f9c421ee387a6c1c1f3954bfc8977926e6"
+      }
+    ]
+  },
+  "thresholds": {
+    "minimum_general_coverage": 0.85,
+    "minimum_critical_recall": 1.0,
+    "maximum_accepted_hallucinations": 0
+  },
+  "split_policy": {
+    "known_regression": "El ejemplo 01 se conserva como regresión y no mide generalización.",
+    "validation": "V01-V04 se evalúan con el prompt v2 congelado. Sus fallos no habilitan a retocar v2 dentro de esta medición.",
+    "holdout": "H01-H02 serán elegidos y custodiados por Tobías/Oikos; no se incorporan ni se inspeccionan hasta la evaluación final."
+  },
+  "documents": [
+    {
+      "id": "V01",
+      "role": "validation",
+      "path": "output/pdf/hu30_corpus/validation/V01_modelo_vivienda_cels.pdf",
+      "sha256": "f20f157a6686a80ad1aff69c45d6b5335b3a7092032b26b77e48b8802a81da2c",
+      "pages": 9,
+      "contract_pages": [4, 5, 6, 7],
+      "reading_mode": "digital",
+      "verified_local_extraction": {
+        "complete": true,
+        "characters": 33048,
+        "methods": ["digital", "digital", "digital", "digital", "digital", "digital", "digital", "digital", "digital"]
+      },
+      "source_url": "https://www.cels.org.ar/web/wp-content/uploads/2017/06/PROYECTODELEY-MAYO17.pdf",
+      "source_kind": "Proyecto público con modelo de vivienda y contenido ajeno al contrato alrededor del anexo.",
+      "privacy_review": "Modelo público sin partes completadas; contiene únicamente información institucional pública.",
+      "expectations_state": "validated",
+      "external_run": "requires_explicit_per_run_authorization"
+    },
+    {
+      "id": "V02",
+      "role": "validation",
+      "path": "output/pdf/hu30_corpus/validation/V02_modelo_inmueble_mendoza_2024_paginas_4_6.pdf",
+      "sha256": "ea31e4c14934389984c4f7eaf9ff8de02924e12068e7197604f1280832cd7479",
+      "pages": 3,
+      "contract_pages": [1, 2, 3],
+      "source_pages": [4, 5, 6],
+      "reading_mode": "ocr",
+      "verified_local_extraction": {
+        "complete": true,
+        "characters": 11750,
+        "methods": ["ocr", "ocr", "ocr"]
+      },
+      "source_url": "https://www.mendoza.gov.ar/wp-content/uploads/sites/63/2024/06/DI-2024-04245942-GDEMZA-DISPOSICION-APROBACION-MODELO-DE-CONTRATO-DE-LOCACION-DE-BIENES-INMUEBLES.pdf",
+      "source_kind": "Modelo público oficial de locación de inmueble; copia limitada al anexo contractual.",
+      "privacy_review": "Campos de partes sin completar; el encabezado conserva información institucional pública.",
+      "expectations_state": "validated",
+      "external_run": "requires_explicit_per_run_authorization"
+    },
+    {
+      "id": "V03",
+      "role": "validation",
+      "path": "output/pdf/hu30_corpus/validation/V03_modelo_inmueble_unipe.pdf",
+      "sha256": "aaaa338ceb76f6f61993a75e4b49bc1547de35cb22b9a1b26b18207f9efe6073",
+      "pages": 3,
+      "contract_pages": [1, 2, 3],
+      "reading_mode": "digital",
+      "verified_local_extraction": {
+        "complete": true,
+        "characters": 6451,
+        "methods": ["digital", "digital", "digital"]
+      },
+      "source_url": "https://portalcompras.unipe.edu.ar/diaguita/temp/346_MODELO_DE_CONTRATO_DE_LOCACIONBIBLIOTECA.pdf",
+      "source_kind": "Modelo público institucional para inmueble destinado a biblioteca.",
+      "privacy_review": "Modelo sin contraparte privada completada; conserva autoridades y domicilio institucionales públicos.",
+      "expectations_state": "validated",
+      "external_run": "requires_explicit_per_run_authorization"
+    },
+    {
+      "id": "V04",
+      "role": "validation",
+      "path": "output/pdf/hu30_corpus/validation/V04_modelo_inmueble_dgn_paginas_8_9.pdf",
+      "sha256": "a921c2a9db516211b82398c52ad937e7a881d0ec6d248334fdf6d483bd303d1c",
+      "pages": 2,
+      "contract_pages": [1, 2],
+      "source_pages": [8, 9],
+      "reading_mode": "digital_text_layer_over_scan",
+      "verified_local_extraction": {
+        "complete": true,
+        "characters": 4709,
+        "methods": ["digital", "digital"]
+      },
+      "source_url": "https://oaip.mpd.gov.ar/pdf/res%20DGN%200564_2007.PDF",
+      "source_kind": "Modelo público oficial; copia limitada al anexo contractual.",
+      "privacy_review": "Campos de partes sin completar; conserva sellos, firma y domicilio institucionales públicos.",
+      "expectations_state": "validated",
+      "external_run": "requires_explicit_per_run_authorization"
+    },
+    {
+      "id": "H01",
+      "role": "holdout",
+      "path": null,
+      "sha256": null,
+      "custodian": "Tobías/Oikos",
+      "expectations_state": "withheld",
+      "external_run": "blocked_until_final_evaluation"
+    },
+    {
+      "id": "H02",
+      "role": "holdout",
+      "path": null,
+      "sha256": null,
+      "custodian": "Tobías/Oikos",
+      "expectations_state": "withheld",
+      "external_run": "blocked_until_final_evaluation"
+    }
+  ]
+}

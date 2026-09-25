@@ -32,6 +32,7 @@ class ClaimsRepository(Protocol):
         self,
         reclamo_id: UUID,
         result: AgentClassificationResult,
+        contract_context: list[dict[str, object]],
     ) -> ClaimClassificationResponse:
         """Guarda el resultado y registra el origen agente en una transacción."""
 
@@ -65,4 +66,6 @@ class ClassificationService:
             }
         )
         result = AgentClassificationResult.model_validate(graph_result)
-        return self.repository.persist_classification(reclamo_id, result)
+        return self.repository.persist_classification(
+            reclamo_id, result, claim.clausulas_contrato
+        )

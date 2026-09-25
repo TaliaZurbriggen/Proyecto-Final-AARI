@@ -1,5 +1,7 @@
 """Acceso a datos para el alta, notificación y clasificación de reclamos."""
 
+import json
+
 from collections.abc import Mapping
 from typing import Any
 from uuid import UUID, uuid4
@@ -7,6 +9,7 @@ from uuid import UUID, uuid4
 from sqlalchemy import text
 from sqlalchemy.exc import IntegrityError
 
+from app.db.clausulas_contrato import SqlAlchemyContractClausesRepository
 from app.db.database import SessionLocal
 from app.schemas.reclamos import (
     AgentClassificationResult,
@@ -515,13 +518,16 @@ class SqlAlchemyClaimsRepository:
             descripcion=row["descripcion"],
             urgencia=row["urgencia"],
             rubro_declarado=row["rubro_declarado"],
-            clausulas_contrato=[],
+            clausulas_contrato=SqlAlchemyContractClausesRepository(
+                self.session_factory
+            ).confirmed_for_claim(reclamo_id),
         )
 
     def persist_classification(
         self,
         reclamo_id: UUID,
         result: AgentClassificationResult,
+        contract_context: list[dict[str, object]],
     ) -> ClaimClassificationResponse:
         estado = "Escalado" if result.debe_escalar else "Clasificado"
         statement = text(
@@ -533,6 +539,7 @@ class SqlAlchemyClaimsRepository:
                 fundamento_clasificacion = :fundamento,
                 motivo_escalado = :motivo_escalado,
                 origen_clasificacion = 'agente',
+                contexto_contractual_clasificacion = CAST(:contract_context AS jsonb),
                 clasificado_en = now()
             WHERE id = :reclamo_id
             RETURNING id, estado, tipo_gasto::text AS tipo_gasto,
@@ -547,6 +554,7 @@ class SqlAlchemyClaimsRepository:
             "fundamento": result.fundamento,
             "motivo_escalado": result.motivo_escalado,
             "reclamo_id": str(reclamo_id),
+            "contract_context": json.dumps(contract_context, ensure_ascii=False),
         }
         with self.session_factory.begin() as session:
             session.execute(

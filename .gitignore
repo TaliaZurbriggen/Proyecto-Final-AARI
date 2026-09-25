@@ -36,3 +36,7 @@ Thumbs.db
 .idea/
 # Evidencia detallada de ejecuciones locales del clasificador
 backend/artifacts/
+
+# Artefactos temporales de renderizado y fuentes públicas descargadas
+tmp/
+output/pdf/hu30_corpus/sources/

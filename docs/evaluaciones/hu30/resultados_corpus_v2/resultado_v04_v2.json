@@ -1,0 +1,162 @@
+{
+  "document": "V04",
+  "source": "output\\pdf\\hu30_corpus\\validation\\V04_modelo_inmueble_dgn_paginas_8_9.pdf",
+  "source_sha256": "a921c2a9db516211b82398c52ad937e7a881d0ec6d248334fdf6d483bd303d1c",
+  "prompt_version": "v2",
+  "model": "gemini-3.5-flash",
+  "frozen_files": [
+    {
+      "path": "backend/prompts/prompt_extraccion_clausulas_v2.md",
+      "sha256": "1de25b61d81b28e67b6ee03559565349367ca840b3cd8801bda42eb1f906e1e8"
+    },
+    {
+      "path": "backend/app/services/contract_clause_llm.py",
+      "sha256": "f9596c37f4fbef1279701f0a7c8793f9c421ee387a6c1c1f3954bfc8977926e6"
+    }
+  ],
+  "expectations_state": "validated",
+  "expected_controls": 5,
+  "external_calls": 1,
+  "executed_at": "2026-09-24T22:13:15.042187+00:00",
+  "extractor_version": "hu30-v2",
+  "pages": 2,
+  "local_extraction_complete": true,
+  "model_proposals": 6,
+  "valid_clauses": [
+    {
+      "numero": "PRIMERA",
+      "titulo": "Destino del inmueble",
+      "evidencias": [
+        {
+          "pagina": 1,
+          "texto": "Se conviene que la propiedad locada será destinada al funcionamiento de dependencias del Ministerio Público de la Defensa, no pudiendo el LOCATARIO darle otro destino sin conformidad por escrito del LOCADOR"
+        }
+      ],
+      "paginas": [
+        1
+      ],
+      "texto_original": "Se conviene que la propiedad locada será destinada al funcionamiento de dependencias del Ministerio Público de la Defensa, no pudiendo el LOCATARIO darle otro destino sin conformidad por escrito del LOCADOR",
+      "resumen": "El inmueble se destinará exclusivamente al funcionamiento de dependencias del Ministerio Público de la Defensa, prohibiéndose al LOCATARIO cambiar su destino sin la conformidad por escrito del LOCADOR.",
+      "categoria": "otro",
+      "responsable": "inquilino",
+      "uso_clasificador": "contexto",
+      "condiciones": "Requiere conformidad por escrito del LOCADOR para cambiar el destino.",
+      "referencias": [],
+      "confianza": 1.0
+    },
+    {
+      "numero": "QUINTA",
+      "titulo": "Gastos de reparación y conservación",
+      "evidencias": [
+        {
+          "pagina": 1,
+          "texto": "Queda también convenido que quedarán a cargo del LOCADOR los gastos que demanden las reparaciones que fuera necesario efectuar durante la vigencia del presente contrato para mantener el edificio en buen estado de"
+        },
+        {
+          "pagina": 2,
+          "texto": "conservación, de manera que pueda servir satisfactoriamente al uso que se le destine, con arreglo a las prescripciones del Código Civil (arts. 1515 y ss.)"
+        }
+      ],
+      "paginas": [
+        1,
+        2
+      ],
+      "texto_original": "Queda también convenido que quedarán a cargo del LOCADOR los gastos que demanden las reparaciones que fuera necesario efectuar durante la vigencia del presente contrato para mantener el edificio en buen estado de\n\nconservación, de manera que pueda servir satisfactoriamente al uso que se le destine, con arreglo a las prescripciones del Código Civil (arts. 1515 y ss.)",
+      "resumen": "Quedan a cargo del LOCADOR los gastos de las reparaciones necesarias durante la vigencia del contrato para mantener el edificio en buen estado de conservación, de modo que sirva satisfactoriamente al uso destinado, de conformidad con los arts. 1515 y ss. del Código Civil.",
+      "categoria": "reparacion",
+      "responsable": "propietario",
+      "uso_clasificador": "operativa",
+      "condiciones": "Reparaciones necesarias para mantener el edificio en buen estado de conservación para el uso destinado.",
+      "referencias": [
+        "Código Civil (arts. 1515 y ss.)"
+      ],
+      "confianza": 1.0
+    },
+    {
+      "numero": "SEXTA",
+      "titulo": "Impuestos, tasas y gastos comunes",
+      "evidencias": [
+        {
+          "pagina": 2,
+          "texto": "Serán por cuenta del LOCADOR el pago de los impuestos, tasas, contribuciones y gravámenes de cualquier naturaleza, existentes o a crearse, salvo aquellos que obedecieran al uso que al inmueble le diera el LOCATARIO y se facturen en virtud de los consumos, y la parte proporcional de los gastos comunes al edificio."
+        }
+      ],
+      "paginas": [
+        2
+      ],
+      "texto_original": "Serán por cuenta del LOCADOR el pago de los impuestos, tasas, contribuciones y gravámenes de cualquier naturaleza, existentes o a crearse, salvo aquellos que obedecieran al uso que al inmueble le diera el LOCATARIO y se facturen en virtud de los consumos, y la parte proporcional de los gastos comunes al edificio.",
+      "resumen": "Corresponde al LOCADOR el pago de impuestos, tasas, contribuciones y gravámenes (existentes o futuros) y la parte proporcional de los gastos comunes (expensas), con excepción de aquellos conceptos facturados en virtud de los consumos derivados del uso que el LOCATARIO haga del inmueble.",
+      "categoria": "expensa",
+      "responsable": "condicional",
+      "uso_clasificador": "operativa",
+      "condiciones": "El LOCADOR asume impuestos, tasas, contribuciones y expensas comunes, excepto los consumos derivados del uso del LOCATARIO.",
+      "referencias": [],
+      "confianza": 1.0
+    },
+    {
+      "numero": "SÉPTIMA",
+      "titulo": "Estado de recepción, conservación, devolución e inventario",
+      "evidencias": [
+        {
+          "pagina": 2,
+          "texto": "El LOCATARIO recibirá el inmueble desocupado, en perfecto estado de conservación , obligándose a mantener y a devolver el inmueble en las mismas condiciones y a pagar el importe de los deterioros ocasionados, salvo los que resulten del buen uso y de la acción del tiempo. Al momento de tomar posesión del inmueble se labrará el acta respectiva en la que se consigne • la fecha de inicio de la posesión, el estado de recepción, y el inventario completo de las instalaciones."
+        }
+      ],
+      "paginas": [
+        2
+      ],
+      "texto_original": "El LOCATARIO recibirá el inmueble desocupado, en perfecto estado de conservación , obligándose a mantener y a devolver el inmueble en las mismas condiciones y a pagar el importe de los deterioros ocasionados, salvo los que resulten del buen uso y de la acción del tiempo. Al momento de tomar posesión del inmueble se labrará el acta respectiva en la que se consigne • la fecha de inicio de la posesión, el estado de recepción, y el inventario completo de las instalaciones.",
+      "resumen": "El LOCATARIO recibe el inmueble desocupado y en perfecto estado de conservación, obligándose a mantenerlo y devolverlo en las mismas condiciones. Debe pagar los deterioros ocasionados, exceptuando aquellos que resulten del buen uso y del transcurso del tiempo. Al tomar posesión, se labrará un acta que deje constancia de la fecha de inicio, el estado de recepción y el inventario completo de las instalaciones.",
+      "categoria": "devolucion",
+      "responsable": "condicional",
+      "uso_clasificador": "operativa",
+      "condiciones": "El LOCATARIO debe mantener y devolver en las mismas condiciones de recepción, pagando deterioros salvo los del buen uso y paso del tiempo. Se labrará acta de entrega e inventario.",
+      "referencias": [],
+      "confianza": 1.0
+    },
+    {
+      "numero": "OCTAVA",
+      "titulo": "Seguridad y normas municipales",
+      "evidencias": [
+        {
+          "pagina": 2,
+          "texto": "El LOCATARIO no podrá tener en la propiedad cosas que pudieran afectar la seguridad de las personas, objetos e instalaciones, ni realizar actos que contraríen las normas municipales."
+        }
+      ],
+      "paginas": [
+        2
+      ],
+      "texto_original": "El LOCATARIO no podrá tener en la propiedad cosas que pudieran afectar la seguridad de las personas, objetos e instalaciones, ni realizar actos que contraríen las normas municipales.",
+      "resumen": "Se prohíbe al LOCATARIO mantener en el inmueble elementos que afecten la seguridad de personas, objetos o instalaciones, así como realizar actos que infrinjan las normativas municipales.",
+      "categoria": "danio",
+      "responsable": "inquilino",
+      "uso_clasificador": "operativa",
+      "condiciones": "Prohibición de tener elementos peligrosos o realizar actos contrarios a normas municipales.",
+      "referencias": [],
+      "confianza": 1.0
+    },
+    {
+      "numero": "NOVENA",
+      "titulo": "Modificaciones y exención de restitución al estado anterior",
+      "evidencias": [
+        {
+          "pagina": 2,
+          "texto": "El LOCATARIO, previa conformidad del LOCADOR, podrá efectuar en el inmueble que se contrata las modificaciones que sean indispensables para adaptarlo a sus servicios, sin que ello importe la obligación de su parte de devolverlo a su anterior estado en ocasión de desocuparlo, el que será devuelto en el estado en que se encuentre sin ulteriores responsabilidades por parte del LOCATARIO."
+        }
+      ],
+      "paginas": [
+        2
+      ],
+      "texto_original": "El LOCATARIO, previa conformidad del LOCADOR, podrá efectuar en el inmueble que se contrata las modificaciones que sean indispensables para adaptarlo a sus servicios, sin que ello importe la obligación de su parte de devolverlo a su anterior estado en ocasión de desocuparlo, el que será devuelto en el estado en que se encuentre sin ulteriores responsabilidades por parte del LOCATARIO.",
+      "resumen": "El LOCATARIO puede realizar las modificaciones indispensables para adaptar el inmueble a sus servicios, siempre que cuente con la conformidad previa del LOCADOR. Al desocupar el inmueble, no tendrá la obligación de restituirlo a su estado anterior, devolviéndose en el estado en que se halle sin responsabilidades adicionales para el LOCATARIO.",
+      "categoria": "devolucion",
+      "responsable": "condicional",
+      "uso_clasificador": "operativa",
+      "condiciones": "Requiere conformidad previa del LOCADOR para realizar modificaciones. No hay obligación de restituir al estado anterior.",
+      "referencias": [],
+      "confianza": 1.0
+    }
+  ],
+  "rejected_proposals": [],
+  "evidence_incidents": []
+}

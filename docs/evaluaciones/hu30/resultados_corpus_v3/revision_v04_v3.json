@@ -1,0 +1,14 @@
+{
+  "document": "V04",
+  "result": "docs/evaluaciones/hu30/resultados_corpus_v3/resultado_v04_v3.json",
+  "controls": [
+    {"id": "V04-E01", "state": "completo", "matched_proposals": ["V01"], "notes": "Unió correctamente la cláusula entre páginas y atribuyó al locador las reparaciones necesarias para mantener el inmueble apto."},
+    {"id": "V04-E02", "state": "incorrecto", "matched_proposals": ["V02"], "notes": "Aunque la evidencia es literal, resolvió que los gastos comunes corresponden al locador. La sintaxis de la fuente admite más de una lectura y debía conservarse como no_especificado y contexto."},
+    {"id": "V04-E03", "state": "completo", "matched_proposals": ["V03"], "notes": "Conservó mantenimiento, devolución, deterioros, excepción por buen uso y tiempo, acta e inventario inicial."},
+    {"id": "V04-E04", "state": "completo", "matched_proposals": ["V04"], "notes": "Detectó la prohibición de elementos peligrosos y actos contrarios a normas municipales."},
+    {"id": "V04-E05", "state": "completo", "matched_proposals": ["V05"], "notes": "Conservó conformidad previa y la exención expresa de restaurar, sin inventar una obligación contraria."}
+  ],
+  "accepted_hallucinations": 0,
+  "reviewed_by": "Codex - comparación documental local",
+  "reviewed_at": "2026-09-24"
+}
