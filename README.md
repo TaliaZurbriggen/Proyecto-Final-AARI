@@ -79,7 +79,7 @@ La referencia aprobada se conserva dentro de la skill. Si una historia necesita 
 El primer flujo del agente está implementado con LangGraph:
 
 ```text
-Inicio → clasificar_reclamo → Fin
+Inicio → clasificar_reclamo → determinar_actor_responsable → Fin
 ```
 
 El grafo usa Gemini con salida estructurada, la base de conocimiento v1.1 y un umbral de confianza configurable (`0.75` inicial). Las respuestas inválidas o de confianza insuficiente se escalan de manera segura.
@@ -92,7 +92,25 @@ Con el backend levantado y un reclamo existente en Supabase, se puede ejecutar:
 POST /reclamos/{reclamo_id}/clasificar
 ```
 
-El endpoint obtiene el reclamo, invoca el grafo y guarda el resultado. Devuelve `Clasificado` o `Escalado`, junto con el tipo de gasto cuando corresponda, la confianza, el fundamento y el motivo de escalado. La migración `backend/migrations/06_clasificacion_agente.sql` debe haberse aplicado una vez antes de utilizarlo. Cada cambio de estado queda registrado con origen `agente`.
+El endpoint obtiene el reclamo, invoca el grafo y guarda el resultado. Con HU12,
+una clasificación confiable determina al responsable y deja el reclamo en
+`Pendiente de respuesta del responsable`; si requiere revisión, devuelve
+`Escalado`. Incluye el tipo de gasto cuando corresponda, la confianza, el
+fundamento y el motivo de escalado. Cada cambio queda registrado con origen
+`agente`.
+
+Solo se admite la clasificación automática inicial de un reclamo `Recibido` o
+en `Clasificación pendiente`, sin clasificación ni solicitud de responsable
+previas. Repetirla o intentarla después de avanzar de etapa devuelve HTTP `409`
+sin reemplazar el actor ni sus notificaciones. También se revalida esta regla
+bajo bloqueo al guardar el resultado.
+
+Requiere las migraciones de clasificación y notificaciones hasta
+`backend/migrations/23_notificaciones_actor_responsable.sql`, siguiendo
+`backend/migrations/README.md`. La 23 ya fue aplicada al Supabase compartido el
+17/09/2026: no repetirla al actualizar la rama. La revisión del PR #26 no añade
+migraciones. Decisiones y pruebas:
+[`docs/hu12_notificacion_actor_responsable.md`](docs/hu12_notificacion_actor_responsable.md).
 
 ### Gestión de contratos de alquiler (HU29)
 

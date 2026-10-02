@@ -22,12 +22,25 @@ from app.services.claim_notifications import (
     ClaimNotificationContext,
     notification_lease_seconds,
 )
-from app.services.classification_service import ClaimForClassification
+from app.services.classification_service import (
+    ClaimForClassification,
+    PersistedClassification,
+    ensure_classification_allowed,
+)
 from app.services.claims_creation_service import (
     ActiveClaimExistsError,
     PersistedClaim,
     StoredClaimPhoto,
     TenantClaimContext,
+)
+from app.services.responsible_actor_notifications import (
+    ResponsibleNotificationData,
+    initial_message,
+    initial_subject,
+    overdue_operator_message,
+    overdue_operator_subject,
+    reminder_message,
+    reminder_subject,
 )
 
 
@@ -276,11 +289,12 @@ class SqlAlchemyClaimsRepository:
                         INSERT INTO notificaciones
                             (id, reclamo_id, destinatario_tipo,
                              destinatario_contacto, canal, asunto, mensaje,
-                             estado_reclamo, estado_envio, proximo_intento_en)
+                             estado_reclamo, tipo_evento, estado_envio,
+                             proximo_intento_en)
                         VALUES
                             (:id, :reclamo_id, 'inquilino', :recipient,
                              'email', :subject, :message, 'Recibido',
-                             'pendiente', CURRENT_TIMESTAMP)
+                             'alta_reclamo', 'pendiente', CURRENT_TIMESTAMP)
                         """
                     ),
                     {
@@ -493,10 +507,268 @@ class SqlAlchemyClaimsRepository:
             )
         return result.rowcount == 1
 
+    def enqueue_due_responsible_followups(self, *, limit: int) -> int:
+        """Materializa recordatorios y vencimientos sin mantener locks al enviar."""
+
+        batch_limit = max(1, min(limit, 50))
+        enqueued = 0
+        with self.session_factory.begin() as session:
+            session.execute(
+                text("SELECT set_config('app.origen_reclamo', 'sistema', true)")
+            )
+            session.execute(
+                text(
+                    "SELECT set_config("
+                    "'app.omitir_notificacion_inquilino', 'false', true)"
+                )
+            )
+
+            overdue_rows = session.execute(
+                text(
+                    """
+                    SELECT rr.reclamo_id, rr.actor_tipo,
+                           rr.destinatario_contacto, rr.canal,
+                           r.numero, r.descripcion,
+                           r.tipo_gasto::text AS tipo_gasto,
+                           r.operador_asignado_id,
+                           i.nombre_completo AS inquilino_nombre,
+                           pr.nombre_completo AS propietario_nombre,
+                           p.id AS propiedad_id, p.direccion, p.provincia,
+                           p.localidad, p.barrio,
+                           p.tipo::text AS propiedad_tipo, p.piso,
+                           p.numero AS propiedad_numero
+                    FROM reclamos r
+                    JOIN reclamo_responsables rr ON rr.reclamo_id = r.id
+                    JOIN inquilinos i ON i.id = r.inquilino_id
+                    JOIN propiedades p ON p.id = r.propiedad_id
+                    JOIN propietarios pr ON pr.id = p.propietario_id
+                    WHERE r.estado = 'Pendiente de respuesta del responsable'
+                      AND rr.escalado_en IS NULL
+                      AND rr.respuesta_vence_en <= CURRENT_TIMESTAMP
+                    ORDER BY rr.respuesta_vence_en, rr.reclamo_id
+                    FOR UPDATE OF r, rr SKIP LOCKED
+                    LIMIT :limit
+                    """
+                ),
+                {"limit": batch_limit},
+            ).mappings().all()
+
+            for row in overdue_rows:
+                transitioned = session.execute(
+                    text(
+                        """
+                        UPDATE reclamos
+                        SET estado = 'Pendiente de respuesta - vencido'
+                        WHERE id = :reclamo_id
+                          AND estado = 'Pendiente de respuesta del responsable'
+                        RETURNING id
+                        """
+                    ),
+                    {"reclamo_id": str(row["reclamo_id"])},
+                ).scalar_one_or_none()
+                if transitioned is None:
+                    continue
+                history_id = session.execute(
+                    text(
+                        """
+                        SELECT id
+                        FROM reclamo_historial_estados
+                        WHERE reclamo_id = :reclamo_id
+                          AND estado_nuevo = 'Pendiente de respuesta - vencido'
+                        ORDER BY timestamp DESC, id DESC
+                        LIMIT 1
+                        """
+                    ),
+                    {"reclamo_id": str(row["reclamo_id"])},
+                ).scalar_one_or_none()
+                operator = self._operator_recipient(
+                    session,
+                    assigned_operator_id=row["operador_asignado_id"],
+                )
+                if operator is not None:
+                    result = session.execute(
+                        text(
+                            """
+                            INSERT INTO notificaciones (
+                                reclamo_id, destinatario_tipo,
+                                destinatario_contacto, canal, asunto, mensaje,
+                                estado_reclamo, historial_estado_id,
+                                tipo_evento, clave_idempotencia,
+                                estado_envio, proximo_intento_en
+                            ) VALUES (
+                                :reclamo_id, :recipient_type, :recipient,
+                                'email', :subject, :message,
+                                'Pendiente de respuesta - vencido', :history_id,
+                                'responsable_vencido', :idempotency_key,
+                                'pendiente', CURRENT_TIMESTAMP
+                            )
+                            ON CONFLICT (clave_idempotencia)
+                            WHERE clave_idempotencia IS NOT NULL
+                            DO NOTHING
+                            """
+                        ),
+                        {
+                            "reclamo_id": str(row["reclamo_id"]),
+                            "recipient_type": operator["rol"],
+                            "recipient": operator["email"],
+                            "subject": overdue_operator_subject(int(row["numero"])),
+                            "message": overdue_operator_message(
+                                claim_number=int(row["numero"]),
+                                actor=row["actor_tipo"],
+                                property_label=self._property_label_from_row(row),
+                            ),
+                            "history_id": str(history_id) if history_id else None,
+                            "idempotency_key": (
+                                f"{row['reclamo_id']}:responsable_vencido:"
+                                f"{operator['id']}"
+                            ),
+                        },
+                    )
+                    enqueued += max(result.rowcount, 0)
+
+                session.execute(
+                    text(
+                        """
+                        UPDATE reclamo_responsables
+                        SET escalado_en = CURRENT_TIMESTAMP,
+                            updated_at = CURRENT_TIMESTAMP
+                        WHERE reclamo_id = :reclamo_id
+                        """
+                    ),
+                    {"reclamo_id": str(row["reclamo_id"])},
+                )
+
+            reminder_rows = session.execute(
+                text(
+                    """
+                    SELECT rr.reclamo_id, rr.actor_tipo,
+                           rr.destinatario_contacto, rr.canal,
+                           r.numero, r.descripcion,
+                           r.tipo_gasto::text AS tipo_gasto,
+                           i.nombre_completo AS inquilino_nombre,
+                           pr.nombre_completo AS propietario_nombre,
+                           p.id AS propiedad_id, p.direccion, p.provincia,
+                           p.localidad, p.barrio,
+                           p.tipo::text AS propiedad_tipo, p.piso,
+                           p.numero AS propiedad_numero
+                    FROM reclamos r
+                    JOIN reclamo_responsables rr ON rr.reclamo_id = r.id
+                    JOIN inquilinos i ON i.id = r.inquilino_id
+                    JOIN propiedades p ON p.id = r.propiedad_id
+                    JOIN propietarios pr ON pr.id = p.propietario_id
+                    WHERE r.estado = 'Pendiente de respuesta del responsable'
+                      AND rr.recordatorio_generado_en IS NULL
+                      AND rr.recordatorio_programado_en <= CURRENT_TIMESTAMP
+                      AND rr.respuesta_vence_en > CURRENT_TIMESTAMP
+                    ORDER BY rr.recordatorio_programado_en, rr.reclamo_id
+                    FOR UPDATE OF r, rr SKIP LOCKED
+                    LIMIT :limit
+                    """
+                ),
+                {"limit": batch_limit},
+            ).mappings().all()
+
+            for row in reminder_rows:
+                if row["destinatario_contacto"] and row["canal"]:
+                    data = self._responsible_notification_data(row)
+                    result = session.execute(
+                        text(
+                            """
+                            INSERT INTO notificaciones (
+                                reclamo_id, destinatario_tipo,
+                                destinatario_contacto, canal, asunto, mensaje,
+                                estado_reclamo, tipo_evento,
+                                clave_idempotencia, estado_envio,
+                                proximo_intento_en
+                            ) VALUES (
+                                :reclamo_id, :recipient_type, :recipient,
+                                :channel, :subject, :message,
+                                'Pendiente de respuesta del responsable',
+                                'responsable_recordatorio', :idempotency_key,
+                                'pendiente', CURRENT_TIMESTAMP
+                            )
+                            ON CONFLICT (clave_idempotencia)
+                            WHERE clave_idempotencia IS NOT NULL
+                            DO NOTHING
+                            """
+                        ),
+                        {
+                            "reclamo_id": str(row["reclamo_id"]),
+                            "recipient_type": row["actor_tipo"],
+                            "recipient": row["destinatario_contacto"],
+                            "channel": row["canal"],
+                            "subject": reminder_subject(data),
+                            "message": reminder_message(data),
+                            "idempotency_key": (
+                                f"{row['reclamo_id']}:responsable_recordatorio"
+                            ),
+                        },
+                    )
+                    enqueued += max(result.rowcount, 0)
+
+                session.execute(
+                    text(
+                        """
+                        UPDATE reclamo_responsables
+                        SET recordatorio_generado_en = CURRENT_TIMESTAMP,
+                            updated_at = CURRENT_TIMESTAMP
+                        WHERE reclamo_id = :reclamo_id
+                        """
+                    ),
+                    {"reclamo_id": str(row["reclamo_id"])},
+                )
+
+        return enqueued
+
+    @staticmethod
+    def _operator_recipient(session, *, assigned_operator_id):
+        if assigned_operator_id is not None:
+            assigned = session.execute(
+                text(
+                    """
+                    SELECT id, email, rol::text AS rol
+                    FROM usuarios
+                    WHERE id = :operator_id AND rol = 'operador' AND activo
+                    """
+                ),
+                {"operator_id": str(assigned_operator_id)},
+            ).mappings().one_or_none()
+            if assigned is not None:
+                return assigned
+
+        operator = session.execute(
+            text(
+                """
+                SELECT id, email, rol::text AS rol
+                FROM usuarios
+                WHERE activo AND rol = 'operador'
+                ORDER BY created_at, id
+                LIMIT 1
+                """
+            )
+        ).mappings().one_or_none()
+        if operator is not None:
+            return operator
+        return session.execute(
+            text(
+                """
+                SELECT id, email, rol::text AS rol
+                FROM usuarios
+                WHERE activo AND rol = 'administrador'
+                ORDER BY created_at, id
+                LIMIT 1
+                """
+            )
+        ).mappings().one_or_none()
+
     def get_for_classification(self, reclamo_id: UUID) -> ClaimForClassification | None:
         statement = text(
             """
-            SELECT r.id, r.descripcion, r.urgencia::text AS urgencia,
+            SELECT r.id, r.descripcion, r.urgencia::text AS urgencia, r.estado,
+                   (r.clasificado_en IS NOT NULL OR EXISTS (
+                       SELECT 1 FROM reclamo_responsables rr
+                       WHERE rr.reclamo_id = r.id
+                   )) AS clasificado,
                    e.nombre AS rubro_declarado
             FROM reclamos r
             LEFT JOIN especialidades e ON e.id = r.tipo_id
@@ -516,30 +788,21 @@ class SqlAlchemyClaimsRepository:
             urgencia=row["urgencia"],
             rubro_declarado=row["rubro_declarado"],
             clausulas_contrato=[],
+            estado=row["estado"],
+            clasificado=row["clasificado"],
         )
 
     def persist_classification(
         self,
         reclamo_id: UUID,
         result: AgentClassificationResult,
-    ) -> ClaimClassificationResponse:
-        estado = "Escalado" if result.debe_escalar else "Clasificado"
-        statement = text(
-            """
-            UPDATE reclamos
-            SET estado = :estado,
-                tipo_gasto = CAST(:tipo_gasto AS tipo_gasto_reclamo),
-                confianza_clasificacion = :confianza,
-                fundamento_clasificacion = :fundamento,
-                motivo_escalado = :motivo_escalado,
-                origen_clasificacion = 'agente',
-                clasificado_en = now()
-            WHERE id = :reclamo_id
-            RETURNING id, estado, tipo_gasto::text AS tipo_gasto,
-                      confianza_clasificacion, fundamento_clasificacion,
-                      motivo_escalado
-            """
+    ) -> PersistedClassification:
+        estado = (
+            "Escalado"
+            if result.debe_escalar
+            else "Pendiente de respuesta del responsable"
         )
+        notification_id: UUID | None = None
         params = {
             "estado": estado,
             "tipo_gasto": result.tipo_gasto,
@@ -549,21 +812,294 @@ class SqlAlchemyClaimsRepository:
             "reclamo_id": str(reclamo_id),
         }
         with self.session_factory.begin() as session:
+            context = session.execute(
+                text(
+                    """
+                    SELECT r.id, r.numero, r.descripcion, r.estado,
+                           r.clasificado_en,
+                           i.nombre_completo AS inquilino_nombre,
+                           i.email AS inquilino_email,
+                           i.telefono AS inquilino_telefono,
+                           i.canal_notificacion AS inquilino_canal,
+                           pr.nombre_completo AS propietario_nombre,
+                           pr.email AS propietario_email,
+                           pr.telefono AS propietario_telefono,
+                           pr.canal_notificacion AS propietario_canal,
+                           p.id AS propiedad_id, p.direccion, p.provincia,
+                           p.localidad, p.barrio,
+                           p.tipo::text AS propiedad_tipo, p.piso,
+                           p.numero AS propiedad_numero,
+                           (
+                               SELECT valor FROM configuracion_sistema
+                               WHERE clave = 'correo_contacto_inmobiliaria'
+                           ) AS inmobiliaria_email,
+                           (
+                               SELECT valor FROM configuracion_sistema
+                               WHERE clave = 'plazo_recordatorio_horas'
+                           ) AS plazo_recordatorio_horas,
+                           (
+                               SELECT valor FROM configuracion_sistema
+                               WHERE clave = 'plazo_escalado_horas'
+                           ) AS plazo_escalado_horas
+                    FROM reclamos r
+                    JOIN inquilinos i ON i.id = r.inquilino_id
+                    JOIN propiedades p ON p.id = r.propiedad_id
+                    JOIN propietarios pr ON pr.id = p.propietario_id
+                    WHERE r.id = :reclamo_id
+                    FOR UPDATE OF r
+                    """
+                ),
+                {"reclamo_id": str(reclamo_id)},
+            ).mappings().one_or_none()
+            if context is None:
+                raise RuntimeError(
+                    "El reclamo desapareció antes de persistir su clasificación."
+                )
+
+            # Revalidar bajo el bloqueo del reclamo: el estado pudo cambiar
+            # mientras el grafo se ejecutaba o al competir con otra solicitud.
+            has_responsible = session.execute(
+                text(
+                    "SELECT EXISTS (SELECT 1 FROM reclamo_responsables "
+                    "WHERE reclamo_id = :reclamo_id)"
+                ),
+                {"reclamo_id": str(reclamo_id)},
+            ).scalar_one()
+            ensure_classification_allowed(
+                estado=context["estado"],
+                clasificado=context["clasificado_en"] is not None or has_responsible,
+            )
+
             session.execute(
                 text("SELECT set_config('app.origen_reclamo', 'agente', true)")
             )
-            row = session.execute(statement, params).mappings().one_or_none()
+            omit_tenant_update = (
+                not result.debe_escalar
+                and result.actor_responsable == "inquilino"
+            )
+            session.execute(
+                text(
+                    "SELECT set_config("
+                    "'app.omitir_notificacion_inquilino', :omit, true)"
+                ),
+                {"omit": "true" if omit_tenant_update else "false"},
+            )
+            row = session.execute(
+                text(
+                    """
+                    UPDATE reclamos
+                    SET estado = :estado,
+                        tipo_gasto = CAST(:tipo_gasto AS tipo_gasto_reclamo),
+                        confianza_clasificacion = :confianza,
+                        fundamento_clasificacion = :fundamento,
+                        motivo_escalado = :motivo_escalado,
+                        origen_clasificacion = 'agente',
+                        clasificado_en = CURRENT_TIMESTAMP
+                    WHERE id = :reclamo_id
+                    RETURNING id, estado, tipo_gasto::text AS tipo_gasto,
+                              confianza_clasificacion,
+                              fundamento_clasificacion, motivo_escalado
+                    """
+                ),
+                params,
+            ).mappings().one_or_none()
 
-        if row is None:
-            raise RuntimeError("El reclamo desapareció antes de persistir su clasificación.")
-        return ClaimClassificationResponse(
-            reclamo_id=row["id"],
-            estado=row["estado"],
-            tipo_gasto=row["tipo_gasto"],
-            confianza=float(row["confianza_clasificacion"])
-            if row["confianza_clasificacion"] is not None
-            else None,
-            fundamento=row["fundamento_clasificacion"],
-            debe_escalar=result.debe_escalar,
-            motivo_escalado=row["motivo_escalado"],
+            if row is None:
+                raise RuntimeError(
+                    "El reclamo desapareció antes de persistir su clasificación."
+                )
+
+            if not result.debe_escalar:
+                history_id = session.execute(
+                    text(
+                        """
+                        SELECT id
+                        FROM reclamo_historial_estados
+                        WHERE reclamo_id = :reclamo_id
+                          AND estado_nuevo = :estado
+                        ORDER BY timestamp DESC, id DESC
+                        LIMIT 1
+                        """
+                    ),
+                    {"reclamo_id": str(reclamo_id), "estado": estado},
+                ).scalar_one_or_none()
+                actor_name, recipient, channel = self._responsible_contact(
+                    context,
+                    actor=result.actor_responsable,
+                )
+                reminder_hours = self._positive_hours(
+                    context["plazo_recordatorio_horas"],
+                    default=48,
+                )
+                escalation_hours = self._positive_hours(
+                    context["plazo_escalado_horas"],
+                    default=24,
+                )
+                session.execute(
+                    text(
+                        """
+                        INSERT INTO reclamo_responsables (
+                            reclamo_id, actor_tipo, destinatario_contacto,
+                            canal, contacto_error, solicitado_en,
+                            recordatorio_programado_en, respuesta_vence_en
+                        ) VALUES (
+                            :reclamo_id, :actor, :recipient, :channel,
+                            :contact_error, CURRENT_TIMESTAMP,
+                            CURRENT_TIMESTAMP
+                                + make_interval(hours => :reminder_hours),
+                            CURRENT_TIMESTAMP
+                                + make_interval(
+                                    hours => :reminder_hours + :escalation_hours
+                                )
+                        )
+                        """
+                    ),
+                    {
+                        "reclamo_id": str(reclamo_id),
+                        "actor": result.actor_responsable,
+                        "recipient": recipient,
+                        "channel": channel,
+                        "contact_error": (
+                            None
+                            if recipient
+                            else "El responsable no tiene un canal de contacto utilizable."
+                        ),
+                        "reminder_hours": reminder_hours,
+                        "escalation_hours": escalation_hours,
+                    },
+                )
+
+                if recipient and channel:
+                    data = ResponsibleNotificationData(
+                        claim_number=int(context["numero"]),
+                        actor=result.actor_responsable,
+                        actor_name=actor_name,
+                        expense_type=result.tipo_gasto,
+                        description=str(context["descripcion"]),
+                        property_label=self._property_label_from_row(context),
+                    )
+                    notification_row = session.execute(
+                        text(
+                            """
+                            INSERT INTO notificaciones (
+                                reclamo_id, destinatario_tipo,
+                                destinatario_contacto, canal, asunto, mensaje,
+                                estado_reclamo, historial_estado_id,
+                                tipo_evento, clave_idempotencia,
+                                estado_envio, proximo_intento_en
+                            ) VALUES (
+                                :reclamo_id, :actor, :recipient, :channel,
+                                :subject, :message, :estado, :history_id,
+                                'responsable_inicial', :idempotency_key,
+                                'pendiente', CURRENT_TIMESTAMP
+                            )
+                            ON CONFLICT (clave_idempotencia)
+                            WHERE clave_idempotencia IS NOT NULL
+                            DO UPDATE SET
+                                clave_idempotencia = EXCLUDED.clave_idempotencia
+                            RETURNING id
+                            """
+                        ),
+                        {
+                            "reclamo_id": str(reclamo_id),
+                            "actor": result.actor_responsable,
+                            "recipient": recipient,
+                            "channel": channel,
+                            "subject": initial_subject(data),
+                            "message": initial_message(data),
+                            "estado": estado,
+                            "history_id": str(history_id) if history_id else None,
+                            "idempotency_key": (
+                                f"{reclamo_id}:responsable_inicial:"
+                                f"{result.actor_responsable}"
+                            ),
+                        },
+                    ).mappings().one()
+                    notification_id = UUID(str(notification_row["id"]))
+
+        return PersistedClassification(
+            response=ClaimClassificationResponse(
+                reclamo_id=row["id"],
+                estado=row["estado"],
+                tipo_gasto=row["tipo_gasto"],
+                confianza=float(row["confianza_clasificacion"])
+                if row["confianza_clasificacion"] is not None
+                else None,
+                fundamento=row["fundamento_clasificacion"],
+                debe_escalar=result.debe_escalar,
+                motivo_escalado=row["motivo_escalado"],
+            ),
+            notification_id=notification_id,
+        )
+
+    @staticmethod
+    def _positive_hours(value: object, *, default: int) -> int:
+        try:
+            parsed = int(str(value))
+        except (TypeError, ValueError):
+            return default
+        return parsed if parsed > 0 else default
+
+    @staticmethod
+    def _responsible_contact(row: Mapping[str, Any], *, actor: str | None):
+        if actor == "inquilino":
+            name = str(row["inquilino_nombre"])
+            channel = str(row["inquilino_canal"])
+            raw_contact = (
+                row["inquilino_telefono"]
+                if channel == "whatsapp"
+                else row["inquilino_email"]
+            )
+        elif actor == "propietario":
+            name = str(row["propietario_nombre"])
+            channel = str(row["propietario_canal"])
+            raw_contact = (
+                row["propietario_telefono"]
+                if channel == "whatsapp"
+                else row["propietario_email"]
+            )
+        else:
+            name = "equipo de la inmobiliaria"
+            channel = "email"
+            raw_contact = row["inmobiliaria_email"]
+
+        recipient = str(raw_contact).strip() if raw_contact else None
+        if channel not in {"email", "whatsapp"}:
+            return name, None, None
+        return name, recipient or None, channel if recipient else None
+
+    @classmethod
+    def _responsible_notification_data(
+        cls,
+        row: Mapping[str, Any],
+    ) -> ResponsibleNotificationData:
+        actor = str(row["actor_tipo"])
+        if actor == "inquilino":
+            actor_name = str(row["inquilino_nombre"])
+        elif actor == "propietario":
+            actor_name = str(row["propietario_nombre"])
+        else:
+            actor_name = "equipo de la inmobiliaria"
+        return ResponsibleNotificationData(
+            claim_number=int(row["numero"]),
+            actor=actor,
+            actor_name=actor_name,
+            expense_type=str(row["tipo_gasto"]),
+            description=str(row["descripcion"]),
+            property_label=cls._property_label_from_row(row),
+        )
+
+    @classmethod
+    def _property_label_from_row(cls, row: Mapping[str, Any]) -> str:
+        return cls._property_label(
+            ClaimPropertyContext(
+                id=row.get("propiedad_id", row.get("id")),
+                direccion=row["direccion"],
+                provincia=row["provincia"],
+                localidad=row["localidad"],
+                barrio=row["barrio"],
+                tipo=row["propiedad_tipo"],
+                piso=row["piso"],
+                numero=row["propiedad_numero"],
+            )
         )
