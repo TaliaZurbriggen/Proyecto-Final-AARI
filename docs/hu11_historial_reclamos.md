@@ -1,11 +1,13 @@
 # HU11 — Historial de reclamos de una propiedad
 
 Jira: [AARI-125](https://taliazurbriggen.atlassian.net/browse/AARI-125).
-Implementación local del 02/10/2026, rama
+Implementación del 02/10/2026, validada y publicada el 04/10/2026, rama
 `codex/AARI-125-historial-reclamos-propiedad`, desde `main` actualizado
 (`053a712`, merge del PR #26). HU y subtareas AARI-126 a AARI-134 en curso;
-pendientes revisión funcional, autorización de commit y PR. No se registró
-tiempo de HU11: se requiere confirmación del tiempo real por parte de Tobías.
+pendiente revisión de Talía en el [PR #27](https://github.com/TaliaZurbriggen/Proyecto-Final-AARI/pull/27).
+Commit inicial `17e67ae`. PostgreSQL real y flujo funcional aprobados.
+Tiempo real confirmado y registrado en Jira: **40 minutos**; no se agregó
+tiempo por la validación ni se cerraron la HU o sus subtareas.
 
 ## Alcance y acceso
 
@@ -122,9 +124,11 @@ python -m pytest -q --tb=short
   Cubren roles, identidad, reclamos propios/ajenos, historial tras mudanza,
   filtros combinados, rango completo con límites exactos, orden estable,
   paginación, totales y cabecera CORS.
-- Suite completa: **342 aprobadas, 39 omitidas**, sin fallos. Las omisiones
-  corresponden a PostgreSQL local y servicios externos optativos. Se conservan
-  18 advertencias de deprecación del adaptador datetime de SQLite.
+- Suite completa inicial: **342 aprobadas, 39 omitidas**, sin fallos.
+- Suite completa con PostgreSQL 17.11 local habilitado: **355 aprobadas,
+  26 omitidas**, sin fallos, en 50,11 segundos. Las omisiones restantes
+  corresponden a integraciones optativas, no a la prueba PostgreSQL de HU11.
+  Se conservan 18 advertencias de deprecación del adaptador datetime de SQLite.
 
 Desde `frontend/`:
 
@@ -138,11 +142,11 @@ npm run build
 - Suite completa: **110 pruebas aprobadas en 25 archivos**; 10 casos nuevos
   cubren tabla, filtros, paginación, detalle, retorno con filtros, vacío,
   rango inválido, permisos, páginas fuera de rango y respuestas tardías.
-- Navegador: componentes reales con respuestas HTTP simuladas, escritorio y
+- Revisión visual inicial: componentes reales con respuestas HTTP simuladas, escritorio y
   móvil de 390 px; navegación con Tab/Enter y sin desborde horizontal de página.
   Esta revisión visual no equivale a probar una cuenta real contra Supabase.
 
-## Validaciones pendientes y entrega
+## PostgreSQL real y prueba funcional — 04/10/2026
 
 La prueba optativa `tests/test_property_claims_postgres.py` está preparada
 para ejecutar SQL sobre PostgreSQL local con migraciones existentes y datos
@@ -152,19 +156,66 @@ loopback y crea/elimina una base `aari_pr26_<uuid>` por caso. Se activa mediante
 URL del Supabase compartido. Ejecutar:
 
 ```powershell
-python -m pytest tests/test_property_claims_postgres.py -q
+# Ejemplo para la instancia local dedicada utilizada en esta validación.
+$env:AARI_TEST_POSTGRES_URL = 'postgresql://aari_test@127.0.0.1:55426/postgres'
+$env:DATABASE_URL = $env:AARI_TEST_POSTGRES_URL
+python -m pytest tests/test_property_claims_postgres.py -q --tb=short
+python -m pytest -q --tb=short
 ```
 
-No pudo validarse: la instalación temporal de PostgreSQL disponible está
-incompleta y no inicia. El intento devolvió conexión rechazada; en la suite
-completa este caso quedó omitido. No se ejecutaron consultas en Supabase,
-llamadas a Gemini ni envíos SMTP. Pendiente prueba funcional con las cuentas
-del entorno y validación PostgreSQL real antes del cierre definitivo.
+Resultado focalizado: **1 aprobada** en 3,51 segundos. El caso comprueba
+paginación 20/5, tipos enum de PostgreSQL, fechas `timestamptz` con ambos límites
+exactos del día argentino, alcance propio, detalle ajeno rechazado, historial
+registrado por el trigger y acceso histórico después de quitar la asignación.
+
+La instalación temporal anterior estaba incompleta (`libintl-9.dll` faltante).
+Se usó el paquete completo portable de PostgreSQL **17.11**, sin instalar
+servicios de Windows, cambiar PATH ni modificar la instalación del proyecto.
+Solo escucha en loopback, en el puerto dedicado **55426**. Las migraciones
+existentes se aplicaron exclusivamente a bases descartables locales; HU11
+no introduce una migración nueva.
+
+Se probó además la aplicación real, sin simular respuestas de API, con
+frontend en `localhost:5181` y backend en `localhost:8001`, sobre otra base
+descartable. Se cargaron dos propiedades y 25 reclamos ficticios, 22 de un
+inquilino y 3 de otro, con cuentas de prueba y credenciales aleatorias locales.
+Las migraciones existentes 13, 14 y 20 completaron autenticación y contratos
+en esa base de QA, sin ejecutar seeds de contactos reales.
+
+Comprobaciones funcionales realizadas:
+
+- Login real con `crypt`, cookie HttpOnly, `/auth/me` y logout.
+- Administración: Propiedades → ficha → Ver historial de reclamos; total 25,
+  páginas de 20 y 5. Filtros Resuelto + Ordinario + 01/10/2026: total 22,
+  páginas de 20 y 2 (excluye el reclamo En proceso y ambos límites externos).
+- Detalle, descripción, cronología y vuelta conservando los cuatro filtros
+  y la página 2. Rango invertido bloqueado en interfaz; API responde `422`.
+- Limpieza de filtros, combinación sin coincidencias y propiedad sin reclamos.
+- Inquilino: Mis reclamos → Historial de propiedad anterior; total 22, páginas
+  de 20 y 2, sin los tres reclamos de la otra cuenta. Detalle propio con
+  cronología En proceso → Resuelto, del cambio más reciente al inicial.
+- API con segunda cuenta: total 3, no 25. Reclamo ajeno `404`, propiedad sin
+  vínculo `403`, operador/propietario `403`, falta de sesión `401`. La interfaz
+  presenta errores y no muestra datos ajenos.
+- Escritorio y móvil de 390 × 844: tabla adaptada con etiquetas, filtros en
+  una columna y detalle sin desborde horizontal de página. Se restauró el
+  tamaño normal del navegador al terminar.
+
+No se ejecutaron consultas en Supabase, llamadas a Gemini ni envíos SMTP.
+El worker de notificaciones estuvo desactivado durante QA. Las configuraciones
+de prueba se pasaron al proceso, sin editar los `.env` del proyecto. La base
+de QA y sus cuentas se eliminaron al terminar; no son cuentas disponibles para
+el entorno compartido.
+
+## Entrega y pendientes
 
 El 02/10 se intentó registrar la decisión en la página ADR de Notion. Notion
 rechazó la escritura con `entitlement_required` porque el espacio agotó sus
 bloques gratuitos, sin cambios parciales. Esta documentación conserva la
 decisión y su evidencia hasta que el espacio permita escrituras.
 
-No hay commit ni PR de HU11 todavía. La revisión y el tiempo real se confirman
-con Tobías antes de publicar o cerrar la HU y sus subtareas.
+El PR #27 se publicó inicialmente en borrador y se actualiza con la evidencia
+de PostgreSQL real y recorrido funcional antes de solicitar revisión. No se
+fusiona automáticamente: resta revisión/aprobación de Talía e indicación de
+cierre de Jira. La réplica de la decisión en Notion sigue pendiente por el
+límite de bloques, no por falta de documentación en el repositorio.

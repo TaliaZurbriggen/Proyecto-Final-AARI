@@ -645,7 +645,10 @@ entorno compartido en la nube.
   páginas de 20 y detalle con transiciones. Administración consulta todos los
   reclamos; el inquilino únicamente los propios. Acceso desde la ficha de
   propiedad y desde Mis reclamos. No requiere migración ni cambios de `.env`.
-  Pruebas locales aprobadas; pendientes revisión funcional y PostgreSQL real.
+  PostgreSQL 17.11 local y recorrido funcional real de administración/inquilino
+  aprobados: backend 355 pruebas aprobadas/26 omitidas; frontend 110 pruebas,
+  lint y build correctos. [PR #27](https://github.com/TaliaZurbriggen/Proyecto-Final-AARI/pull/27)
+  publicado para revisión; HU y subtareas en curso, 40 minutos registrados.
   Flujo, decisiones y comandos en
   [`docs/hu11_historial_reclamos.md`](docs/hu11_historial_reclamos.md).
 - **Seguimiento:** los story points conservan las estimaciones académicas
