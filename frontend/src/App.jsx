@@ -26,6 +26,8 @@ import ReclamoConfirmationPage from './features/reclamos/pages/ReclamoConfirmati
 import ReclamoDetailPage from './features/reclamos/pages/ReclamoDetailPage.jsx'
 import ReclamoFormPage from './features/reclamos/pages/ReclamoFormPage.jsx'
 import ReclamosListPage from './features/reclamos/pages/ReclamosListPage.jsx'
+import PropertyClaimsHistoryPage from './features/reclamos/pages/PropertyClaimsHistoryPage.jsx'
+import PropertyClaimDetailPage from './features/reclamos/pages/PropertyClaimDetailPage.jsx'
 import { useAuth } from './features/auth/authContext.js'
 import { destinationForUser } from './features/auth/routing.js'
 import ContractsListPage from './features/contratos/pages/ContractsListPage.jsx'
@@ -68,6 +70,8 @@ function App() {
             />
             <Route path="propiedades" element={<PropiedadesListPage />} />
             <Route path="propiedades/nueva" element={<PropiedadFormPage />} />
+            <Route path="propiedades/:propiedadId/reclamos" element={<PropertyClaimsHistoryPage />} />
+            <Route path="propiedades/:propiedadId/reclamos/:reclamoId" element={<PropertyClaimDetailPage />} />
             <Route
               path="propiedades/:propiedadId"
               element={<PropiedadDetailPage />}
@@ -109,6 +113,8 @@ function App() {
         <Route element={<ProtectedRoute allowedRoles={['inquilino']} />}>
           <Route element={<RoleLayout />}>
             <Route path="inquilino" element={<RoleHomePage />} />
+            <Route path="inquilino/propiedades/:propiedadId/reclamos" element={<PropertyClaimsHistoryPage tenantView />} />
+            <Route path="inquilino/propiedades/:propiedadId/reclamos/:reclamoId" element={<PropertyClaimDetailPage tenantView />} />
             <Route path="inquilino/contratos" element={<ContractsListPage />} />
             <Route path="inquilino/contratos/:contractId" element={<ContractDetailPage />} />
             <Route

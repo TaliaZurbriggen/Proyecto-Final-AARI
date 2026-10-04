@@ -207,6 +207,9 @@ function PropiedadDetailPage() {
                 : `${property.cantidad_reclamos} reclamos históricos`}
             </span>
           </div>
+          <Link className={styles.backLink} to={`/propiedades/${property.id}/reclamos`}>
+            Ver historial de reclamos
+          </Link>
         </section>
       </div>
 

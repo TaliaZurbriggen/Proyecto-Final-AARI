@@ -638,8 +638,16 @@ entorno compartido en la nube.
 - **HU29 / AARI-318 en implementación:** módulo contractual y pruebas locales
   incorporados en su rama; migración instalada y Storage real validado.
   Pendientes: revisión funcional y merge. La extracción de cláusulas pertenece a HU30.
-- **Inicio previsto de Tobías:** AARI-116, base reutilizable para las
-  notificaciones de AARI-135 y AARI-157.
+- **HU12 / AARI-135 finalizada:** PR #26 mergeado en `main`; HU y subtareas
+  listas en Jira, con **50 minutos reales** registrados. Evidencia en
+  [`docs/hu12_notificacion_actor_responsable.md`](docs/hu12_notificacion_actor_responsable.md).
+- **HU11 / AARI-125 en implementación:** historial por propiedad con filtros,
+  páginas de 20 y detalle con transiciones. Administración consulta todos los
+  reclamos; el inquilino únicamente los propios. Acceso desde la ficha de
+  propiedad y desde Mis reclamos. No requiere migración ni cambios de `.env`.
+  Pruebas locales aprobadas; pendientes revisión funcional y PostgreSQL real.
+  Flujo, decisiones y comandos en
+  [`docs/hu11_historial_reclamos.md`](docs/hu11_historial_reclamos.md).
 - **Seguimiento:** los story points conservan las estimaciones académicas
   originales; Time Tracking contiene las 39 HH reestimadas y los worklogs
   registrarán el tiempo real.

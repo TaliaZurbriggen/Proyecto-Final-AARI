@@ -58,6 +58,16 @@ function ReclamosListPage() {
       ) : null}
 
       {!isLoading && claims.length ? (
+        <nav className={styles.propertyHistoryLinks} aria-label="Historial por propiedad">
+          {[...new Map(claims.map((claim) => [claim.propiedad.id, claim.propiedad])).values()].map((property) => (
+            <Link className={styles.secondaryLink} to={`/inquilino/propiedades/${property.id}/reclamos`} key={property.id}>
+              Historial de {claimPropertyLabel(property)}
+            </Link>
+          ))}
+        </nav>
+      ) : null}
+
+      {!isLoading && claims.length ? (
         <section className={styles.claimsList} aria-label="Reclamos registrados">
           {claims.map((claim) => (
             <article className={styles.claimCard} key={claim.id}>

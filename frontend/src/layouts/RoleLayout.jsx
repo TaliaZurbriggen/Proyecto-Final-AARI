@@ -30,6 +30,7 @@ function RoleLayout() {
       || location.pathname === '/inquilino/reclamos/confirmacion'
       ? 'Nuevo reclamo'
       : location.pathname.startsWith('/inquilino/reclamos')
+        || location.pathname.startsWith('/inquilino/propiedades/')
         ? 'Mis reclamos'
         : 'Inicio'
 
