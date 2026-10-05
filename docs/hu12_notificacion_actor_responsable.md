@@ -168,11 +168,13 @@ infraestructura compartida sin una decisión específica.
   **17/09/2026 (Argentina)** y quedó registrada como
   `20260917200108_hu12_notificaciones_actor_responsable`. No repetirla al hacer
   pull.
-- Implementación y correcciones disponibles para revisión en el
+- Implementación y correcciones aprobadas y mergeadas el **02/10/2026** en el
   [PR #26](https://github.com/TaliaZurbriggen/Proyecto-Final-AARI/pull/26), rama
-  `codex/AARI-135-notificacion-actor-responsable`. Pendiente aprobación y merge.
-- El tiempo autorizado de la implementación se registró por separado en Jira;
-  esta revisión no añade tiempo ni cierra actividades.
+  `codex/AARI-135-notificacion-actor-responsable`, commit final `83d8a48` y
+  merge `053a712`. `main` local sincronizado antes de iniciar HU11.
+- AARI-135 y sus 11 subtareas quedaron **Listo**. Tiempo real confirmado y
+  registrado: **50 minutos** (40m previos + 10m de cierre). Esta actualización
+  documental no agrega tiempo adicional.
 - El registro equivalente en Notion no pudo crearse porque el espacio alcanzó
   el límite de bloques del plan actual. Esta página conserva la decisión en el
   repositorio hasta que Notion vuelva a admitir escrituras. El intento del

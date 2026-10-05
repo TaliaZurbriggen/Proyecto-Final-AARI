@@ -428,6 +428,15 @@
   gap: var(--aari-space-4);
 }
 
+.propertyHistoryLinks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--aari-space-3);
+  margin-bottom: var(--aari-space-5);
+}
+
+.propertyHistoryLinks a { overflow-wrap: anywhere; min-width: 0; }
+
 .claimCard,
 .currentStatus,
 .claimSummaryPanel,
