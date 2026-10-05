@@ -73,3 +73,14 @@ class SupabaseClaimPhotoStorage:
             raise ClaimPhotoStorageError(
                 "No se pudo eliminar una foto temporal."
             ) from error
+
+    def download(self, path: str) -> bytes:
+        """El servidor resuelve el path autorizado; no se expone la clave ni una URL pública."""
+        url, key = self._configuration()
+        endpoint = f"{url}/storage/v1/object/authenticated/{self.bucket}/{quote(path, safe='/')}"
+        try:
+            response = httpx.get(endpoint, headers={"Authorization": f"Bearer {key}", "apikey": key}, timeout=10)
+            response.raise_for_status()
+        except (httpx.HTTPError, OSError) as error:
+            raise ClaimPhotoStorageError("No se pudo recuperar la foto. Intentá nuevamente.") from error
+        return response.content

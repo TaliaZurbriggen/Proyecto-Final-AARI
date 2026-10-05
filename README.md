@@ -112,6 +112,34 @@ Requiere las migraciones de clasificación y notificaciones hasta
 migraciones. Decisiones y pruebas:
 [`docs/hu12_notificacion_actor_responsable.md`](docs/hu12_notificacion_actor_responsable.md).
 
+### Resolución humana de casos escalados (HU13)
+
+Administradores y operadores activos revisan la cola de clasificación desde
+`/escalados` y `/operador/escalados`, respectivamente. Incluye búsqueda,
+paginación, propiedad, fechas y motivo de revisión, con los casos más antiguos
+primero. El detalle conserva descripción, fotos privadas e historial.
+
+La persona selecciona ordinario, extraordinario o expensa y escribe un
+fundamento obligatorio, sin clasificación preseleccionada. La entrada manual
+de LangGraph reutiliza el nodo `determinar_actor_responsable`, **sin consultar
+Gemini**, y continúa con las notificaciones y plazos de HU12. Resolver el
+escalado no significa cerrar la reparación.
+
+`POST /reclamos/{id}/resolver-escalado` guarda decisión, auditoría, transición
+y solicitud del responsable en una transacción. Una versión desactualizada,
+una decisión duplicada o un caso que avanzó devuelve `409`; no reemplaza la
+gestión existente. La confianza humana queda nula y el resultado anterior del
+modelo se conserva por separado.
+
+Requiere `backend/migrations/26_resolucion_escalados.sql`, **aplicada con
+autorización en Supabase el 05/10/2026**, con registro
+`20261005191504_hu13_resolucion_escalados`. No repetirla: el verificador de HU13
+comprueba tabla, índices, trigger, RLS y permisos. La numeración 24/25 pertenece
+a HU30; no renombrar scripts históricos. No hay nuevas variables ni dependencias.
+
+Alcance, decisiones y pruebas:
+[`docs/hu13_resolucion_escalados.md`](docs/hu13_resolucion_escalados.md).
+
 ### Gestión de contratos de alquiler (HU29)
 
 La inmobiliaria administra los contratos desde `/contratos` o desde la ficha
@@ -744,6 +772,16 @@ entorno compartido en la nube.
 - **HU12 / AARI-135 finalizada:** PR #26 mergeado en `main`; HU y subtareas
   listas en Jira, con **50 minutos reales** registrados. Evidencia en
   [`docs/hu12_notificacion_actor_responsable.md`](docs/hu12_notificacion_actor_responsable.md).
+- **HU13 / AARI-147 en curso:** implementación en
+  `codex/AARI-147-resolucion-escalados`, actualizada con `main` `439ee3c`. La HU y las
+  nueve subtareas están En curso. Cola de revisión, decisión manual sin LLM,
+  auditoría y continuidad de HU12 probadas localmente. Migración 26 aplicada
+  con autorización en Supabase el 05/10/2026; **9 pruebas reales aprobadas**,
+  con datos sintéticos y rollback, sin Gemini ni correos. Pendientes: revisión
+  funcional del equipo y creación/revisión del PR; publicación de la rama
+  autorizada el 05/10/2026, con **1 h 10 min** registrados en subtareas. La documentación está en
+  [`docs/hu13_resolucion_escalados.md`](docs/hu13_resolucion_escalados.md);
+  Notion no permitió agregarla por el límite de bloques gratuitos.
 - **HU11 / AARI-125 finalizada:** historial por propiedad con filtros,
   páginas de 20 y detalle con transiciones. Administración consulta todos los
   reclamos; el inquilino únicamente los propios. Acceso desde la ficha de

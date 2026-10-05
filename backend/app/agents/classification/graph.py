@@ -23,3 +23,13 @@ def build_classification_graph(
     builder.add_edge("clasificar_reclamo", "determinar_actor_responsable")
     builder.add_edge("determinar_actor_responsable", END)
     return builder.compile()
+
+
+def build_manual_classification_graph():
+    """Retoma el mismo nodo posterior a la clasificación, sin ejecutar el LLM."""
+
+    builder = StateGraph(ClassificationState)
+    builder.add_node("determinar_actor_responsable", determine_responsible_actor)
+    builder.add_edge(START, "determinar_actor_responsable")
+    builder.add_edge("determinar_actor_responsable", END)
+    return builder.compile()

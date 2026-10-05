@@ -28,6 +28,8 @@ import ReclamoFormPage from './features/reclamos/pages/ReclamoFormPage.jsx'
 import ReclamosListPage from './features/reclamos/pages/ReclamosListPage.jsx'
 import PropertyClaimsHistoryPage from './features/reclamos/pages/PropertyClaimsHistoryPage.jsx'
 import PropertyClaimDetailPage from './features/reclamos/pages/PropertyClaimDetailPage.jsx'
+import EscalatedClaimsPage from './features/reclamos/pages/EscalatedClaimsPage.jsx'
+import EscalatedClaimDetailPage from './features/reclamos/pages/EscalatedClaimDetailPage.jsx'
 import { useAuth } from './features/auth/authContext.js'
 import { destinationForUser } from './features/auth/routing.js'
 import ContractsListPage from './features/contratos/pages/ContractsListPage.jsx'
@@ -61,6 +63,8 @@ function App() {
         </Route>
         <Route element={<ProtectedRoute allowedRoles={['administrador']} />}>
           <Route element={<AdminLayout />}>
+            <Route path="escalados" element={<EscalatedClaimsPage />} />
+            <Route path="escalados/:reclamoId" element={<EscalatedClaimDetailPage />} />
             <Route path="contratos" element={<ContractsListPage />} />
             <Route path="contratos/nuevo" element={<ContractFormPage />} />
             <Route path="contratos/:contractId" element={<ContractDetailPage />} />
@@ -147,6 +151,8 @@ function App() {
         <Route element={<ProtectedRoute allowedRoles={['operador']} />}>
           <Route element={<RoleLayout />}>
             <Route path="operador" element={<RoleHomePage />} />
+            <Route path="operador/escalados" element={<EscalatedClaimsPage operatorView />} />
+            <Route path="operador/escalados/:reclamoId" element={<EscalatedClaimDetailPage operatorView />} />
           </Route>
         </Route>
         <Route path="design-system" element={<DesignSystemPreview />} />

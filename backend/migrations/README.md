@@ -181,6 +181,44 @@ prueba PostgreSQL crea un esquema aislado, recorre solicitud idempotente,
 procesamiento, confirmación, consulta del contexto y permisos, y termina con
 `ROLLBACK`. El análisis externo continúa deshabilitado por defecto y no forma
 parte de esta migración.
+
+## HU13: migración 26 — aplicada en el entorno compartido
+
+`26_resolucion_escalados.sql` se aplica después de las migraciones 21, 22 y
+`23_notificaciones_actor_responsable.sql`. Tanto una instalación nueva como una
+existente necesitan esta migración para utilizar la resolución manual.
+
+Los números 24 y 25 están reservados por HU30. Su rama también incorpora
+`23_clausulas_contractuales.sql`: existe otro script con prefijo 23. No ordenar
+solo por el prefijo ni renombrar scripts ya aplicados. Antes de la próxima
+instalación, coordinar el inventario y orden con HU30, identificando cada archivo
+por su nombre completo y el historial del entorno. HU13 no depende de las tablas
+de cláusulas y su migración no las modifica.
+
+La 26 es aditiva y transaccional, con `lock_timeout = 5s` y
+`statement_timeout = 30s`. Crea `reclamo_decisiones_clasificacion` con RLS y
+revocación de permisos a `anon` y `authenticated`, más índices para auditoría
+y cola. Un trigger encola un único aviso por entrada a clasificación pendiente
+o escalado sin responsable; pasar entre ambos estados no repite el aviso. Usa
+operador asignado activo, otro operador activo o administrador activo, sin
+difusión a todas las cuentas. No crea notificaciones retroactivas ni envía SMTP.
+
+**Aplicación confirmada:** ejecutada con autorización en Supabase AARI de
+desarrollo el **05/10/2026 (Argentina)**, registrada como
+`20261005191504_hu13_resolucion_escalados`. No modificó reclamos existentes.
+Se verificaron tabla, índices, función, trigger, RLS y permisos después del
+commit; **9 pruebas reales HU13 aprobadas** con datos ficticios y rollback,
+sin Gemini, SMTP ni Storage. No quedaron registros de prueba ni se consumió la
+secuencia normal de reclamos. La aplicación y el registro comparten una transacción: un fallo revierte
+ambos; una segunda ejecución verifica lo instalado y no repite la migración.
+
+Desde `backend`, `scripts/check_escalados_postgres.py --mode check` realiza
+solo lectura. `--mode apply` aplica si falta; `--mode test` ejecuta exclusivamente
+las pruebas sintéticas HU13 con rollback. Los dos últimos requieren autorización
+expresa; no habilitan Gemini, SMTP ni Storage reales. Se puede indicar
+`--env-file` sin imprimir su contenido. Comandos, resultados y pendientes en
+`docs/hu13_resolucion_escalados.md`.
+
 ## HU12: preparación de la migración 23
 
 La migración es aditiva, transaccional y limita la espera de bloqueos a cinco
