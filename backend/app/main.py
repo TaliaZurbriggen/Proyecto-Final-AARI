@@ -8,12 +8,15 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
 
 from app.api.auth import require_admin, router as auth_router
+from app.api.configuracion import router as agency_configuration_router
+from app.api.expensas import router as expenses_router
 from app.api.contratos import get_contract_clause_service, router as contratos_router
 from app.services.contract_errors import ContractError
 from app.api.inquilinos import property_router as property_tenant_router
 from app.api.inquilinos import router as inquilinos_router
 from app.api.operadores import router as operadores_router
 from app.api.propiedades import router as propiedades_router
+from app.api.property_claims import router as property_claims_router
 from app.api.propietarios import router as propietarios_router
 from app.api.proveedores import router as proveedores_router
 from app.api.proveedores import specialties_router
@@ -76,11 +79,15 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["X-Total-Count"],
 )
 app.include_router(auth_router)
+app.include_router(agency_configuration_router)
+app.include_router(expenses_router)
 app.include_router(operadores_router)
 admin_dependencies = [Depends(require_admin)]
 app.include_router(propiedades_router, dependencies=admin_dependencies)
+app.include_router(property_claims_router)
 app.include_router(property_tenant_router, dependencies=admin_dependencies)
 app.include_router(propietarios_router, dependencies=admin_dependencies)
 app.include_router(inquilinos_router, dependencies=admin_dependencies)

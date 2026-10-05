@@ -96,3 +96,100 @@ la página sintética); se corrigieron antes de obtener los resultados finales.
 Pendiente: revisión de Tobías y merge del PR. Se mantienen la revisión humana
 obligatoria y las limitaciones semánticas publicadas; estas regresiones no
 revalúan ni mejoran artificialmente la precisión de Gemini.
+
+## Segunda revisión — HU11, checkout Windows y recursos OCR
+
+Talía aprobó implementar esta ronda sobre la misma rama. Tras validar los
+resultados, autorizó el commit/push y comentarios de respuesta en GitHub y Jira.
+No autorizó merge del PR, horas adicionales de Jira ni llamadas externas.
+
+### Actualización de main
+
+Se preparó la integración de `origin/main` en `80afb67`, que incorpora el PR #27
+de HU11/AARI-125. El único conflicto fue `README.md`: se conservaron el historial
+por propiedad de HU11, HU12/AARI-135 finalizada y el alcance asistido de HU30.
+`backend/app/main.py` se combinó automáticamente. Se mantienen la protección
+contra reclasificación, la bandeja de notificaciones y el contexto contractual.
+El merge se incorpora en el commit de entrega autorizado, sin reescribir historial.
+
+### Hashes sin depender de CRLF/LF
+
+Se eligió `.gitattributes`, no normalizar silenciosamente `file_sha256()`:
+
+- Las entradas textuales congeladas se materializan con `text eol=lf`, incluso
+  si `core.autocrlf=true`. La cobertura incluye los ejecutores de diagnóstico
+  que registran su propio hash fuera de `prompt_freeze`.
+- La evidencia de `docs/evaluaciones/hu30/` conserva los bytes del blob con
+  `-text`, incluyendo archivos históricos que ya usan CRLF. Sólo el archivo
+  de controles congelados tiene una excepción explícita `text eol=lf`.
+- Los PDF conservan bytes originales con `-text`; su SHA sigue siendo binario.
+- No se recalcularon manifiestos, no se normalizaron resultados históricos y
+  no se modificó `contract_text_extraction.py` ni la función de hashing.
+
+Las regresiones crean repositorios Git locales con `autocrlf=true/false`,
+parten de textos CRLF y comprueban el checkout LF, el hash histórico del
+prompt/OCR/diagnóstico, la evidencia mixta sin conversión y el PDF intacto.
+También confirman que un cambio real de contenido sigue siendo rechazado.
+
+La primera ejecución Windows encontró otro hash de diagnóstico, no listado
+en los manifiestos. Se amplió la política antes de repetir la suite completa;
+no se modificó el script ni el registro para disimular esa diferencia.
+
+### OCR del flujo actual
+
+`contract_ocr.py` agrega `ManagedTesseractOcrEngine`. El worker y la evaluación
+asistida actual lo usan explícitamente; los ejecutores históricos conservan el
+adaptador congelado para no alterar las evaluaciones previas.
+
+El motor copia la imagen PIL antes de cerrar la imagen prestada, el bitmap,
+la página y el documento PDFium. Tesseract recibe la copia independiente, que
+también se cierra al finalizar. `ExitStack` garantiza los cierres en orden
+inverso incluso si falla una etapa o algún cierre, sin depender del GC.
+Se mantienen resolución, idioma y mensajes seguros; no cambia el prompt.
+
+Las pruebas cubren éxito, errores al abrir documento/página, renderizar,
+obtener/copiar PIL y ejecutar Tesseract, además de un fallo de cierre. Otra
+prueba renderiza un PDF sintético con PDFium real y verifica que la copia
+permanece legible tras cerrar los recursos nativos, con Tesseract simulado.
+El ejecutor asistido aislado implementa la renovación de su reserva en memoria;
+una prueba con modelo simulado verifica que no se detiene antes del análisis.
+
+### Validación de esta ronda
+
+Se materializó desde cero un checkout independiente del árbol preparado de Git,
+con `core.autocrlf=true`, sin crear un commit ni copiar `.env`. El árbol de código
+validado es `c918ff0fb394ffc826016a36522afa22cba74964`; las actualizaciones de esta
+documentación son posteriores. `git diff --quiet` contra su índice pasó.
+Se reutilizaron el entorno Python y las dependencias frontend ya instaladas;
+no se afirma haber instalado dependencias desde cero. `pypdfium2` está declarado
+en `backend/requirements.txt` y disponible en el entorno utilizado.
+
+| Validación en checkout Windows | Resultado |
+|---|---|
+| Backend completo, sin servicios externos | `python -m pytest -q`: **588 aprobadas, 50 omitidas, 19 advertencias** |
+| Regresiones nuevas de OCR/EOL | **15 aprobadas**, incluidas en las 588 |
+| Frontend completo, un worker | `npm test -- --run --maxWorkers=1`: **122 aprobadas** |
+| Prueba preexistente de operadores aislada | **14 aprobadas**, incluidas en las 122 |
+| Frontend lint/build | `npm run lint` y `npm run build`: **aprobados** |
+| Formato y revisión de secretos | `git diff --check` / `git diff --cached --check`: sin errores; ningún patrón de clave real detectado en líneas agregadas |
+
+En una ejecución paralela frontend hubo un fallo intermitente de foco en
+`Operadores.test.jsx`: el mensaje de error ya estaba renderizado pero el efecto
+de foco todavía no se había comprobado. Pasó aislada y la suite completa pasó
+con un worker. No se modificó ni omitió esa prueba; conviene estabilizar su
+espera asíncrona en una tarea separada. Otra ejecución completa previa en la
+rama también aprobó las 122. No se presenta el reintento como una corrección
+de ese módulo.
+
+Las advertencias son de compatibilidad de Starlette/httpx y del adaptador de
+fecha de SQLite/Python, incluida su repetición en los tests nuevos de HU11.
+Las 50 omisiones corresponden a integraciones optativas/externas: en esta ronda
+no se ejecutó PostgreSQL ni el OCR real con el idioma español. La prueba de
+liberación usa PDFium real y Tesseract simulado; no es una nueva medición de la
+calidad de lectura o de la precisión semántica. No se accedió a Gemini, Supabase
+ni SMTP, no se transmitieron contratos y no se ejecutó ninguna migración.
+
+La guía de migraciones conserva los dos archivos `23_*` aplicados y detalla
+el orden por nombre completo; para la siguiente se debe acordar un prefijo
+único, actualmente `26_`. Entrega autorizada en la misma rama del PR #28;
+pendiente nueva revisión de Tobías antes del merge. La HU permanece en curso.

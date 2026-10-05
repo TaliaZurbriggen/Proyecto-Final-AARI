@@ -50,6 +50,10 @@ describe('seguimiento de reclamos del inquilino', () => {
 
     expect(await screen.findByText('Reclamo #000012')).toBeInTheDocument()
     expect(screen.getByText('Clasificado')).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: /^Historial de / })).toHaveAttribute(
+      'href',
+      `/inquilino/propiedades/${claim.propiedad.id}/reclamos`,
+    )
     expect(screen.getByRole('link', { name: /Ver seguimiento/ })).toHaveAttribute(
       'href',
       `/inquilino/reclamos/${claim.id}`,

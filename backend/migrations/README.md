@@ -2,6 +2,44 @@
 
 Scripts SQL para crear y actualizar el esquema de Supabase.
 
+## HU14 — Migración aplicada al entorno compartido de desarrollo
+
+`20261007133447_hu14_derivacion_expensas.sql` es una migración aditiva generada
+con versión única por Supabase CLI 2.120.0. Requiere
+`23_notificaciones_actor_responsable.sql`; las versiones 24/25 de HU30 y 26 de
+HU13 se reservan sin renombrar archivos históricos. Antes de aplicar, contrastar
+el orden de archivos completos con el historial de la base, especialmente los
+dos archivos `23_*` de las ramas en integración.
+
+Agrega el snapshot privado del reporte, FK de notificación/reclamo, evento de
+correo de expensa e índices; protege notas y configuración con RLS/revocaciones.
+No clasifica casos, no cambia estados ni encola correos retroactivos. La
+restricción de notas conserva filas históricas y valida las escrituras nuevas.
+
+**07/10/2026: aplicada con autorización al Supabase compartido AARI de
+desarrollo**, historial `20261007143153_hu14_derivacion_expensas`. La versión
+local generada por CLI sigue siendo `20261007133447`; conservar ambos registros
+sin renombrar ni volver a ejecutar por integrante o pull. Tabla, restricciones,
+índices, RLS, permisos y lecturas reales de FastAPI verificados. Sin datos de
+prueba, cambios de estado ni correos. Los conteos previos se conservaron.
+El aviso de índice compuesto en la FK de reportes quedó corregido mediante
+la incremental autorizada siguiente, sin editar esta migración ya aplicada.
+Detalles, comandos y evidencia en `docs/hu14_derivacion_expensas.md` desde la raíz.
+
+### HU14 — Índice compuesto incremental
+
+`20261007150410_hu14_indice_fk_derivacion_expensas.sql`, generado por Supabase
+CLI 2.120.0, se aplica **después** de
+`20261007133447_hu14_derivacion_expensas.sql`. Agrega únicamente un índice B-tree
+no único sobre `(notificacion_id, reclamo_id)` en la tabla de reportes. Conserva
+FK, unicidad previa, RLS, permisos y datos; límites de bloqueo/ejecución 5s/30s.
+
+**Aplicada con autorización el 07/10/2026** al Supabase AARI de desarrollo,
+historial `20261007150923_hu14_indice_fk_derivacion_expensas`. No repetir por
+integrante o pull ni modificar la migración principal para incluir este cambio.
+Índice válido/listo verificado, aviso de esa FK eliminado de los asesores,
+conteos y seguridad sin cambios. Backend final: 385 aprobadas/26 omitidas.
+
 ## Instalación nueva
 
 Ejecutar desde el SQL Editor, en este orden:
@@ -43,6 +81,13 @@ La instalación nueva debe aplicar además, en orden:
 Las dos migraciones con prefijo `23_` corresponden a historias independientes
 y ambas ya fueron aplicadas en desarrollo. Se identifican por el nombre completo
 del archivo, no sólo por el número; no reemplazar una por la otra ni repetirlas.
+El orden publicado es explícito: `23_notificaciones_actor_responsable.sql`,
+`23_clausulas_contractuales.sql`, `24_evidencia_clausulas_contractuales.sql` y
+`25_extraccion_asistida_literal.sql`. HU14 utiliza las versiones únicas con
+timestamp documentadas arriba, después de sus dependencias. Para futuras
+migraciones, acordar una versión única y verificar el historial completo;
+`26_` está reservado para HU13. No renombrar las ya aplicadas para corregir
+la colisión histórica de prefijos.
 
 El módulo de administración inicial ya incorpora el resultado de las
 migraciones incrementales 07, 08, 09, 10, 11, 12, 15 y 16. No deben repetirse
@@ -100,7 +145,9 @@ Aplicar únicamente las migraciones pendientes y respetar este orden:
     contractuales. Aplicar después de 22 y de la migración 20 de contratos.
 20. `24_evidencia_clausulas_contractuales.sql` — conserva evidencia por página,
     propuestas rechazadas y el uso operativo/contextual de cada cláusula. Aplicar
-    después de 23.
+    después de `23_clausulas_contractuales.sql`.
+21. `25_extraccion_asistida_literal.sql` — origen e historial del análisis
+    asistido/literal. Aplicar después de `24_evidencia_clausulas_contractuales.sql`.
 
 ## HU30: migración 24
 

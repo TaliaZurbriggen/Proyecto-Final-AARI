@@ -518,3 +518,22 @@ Las [correcciones del PR #28](evaluaciones/hu30/correcciones_pr28_2026-10-05.md)
 integran `main` preservando AARI-135, corrigen la vigencia en horario argentino
 y protegen la reserva de cada trabajo de extracción. Se verificaron con
 PostgreSQL local descartable y Gemini simulado, sin modificar Supabase.
+
+La segunda revisión del PR #28 incorpora localmente `main` con HU11/AARI-125
+(`80afb67`), resuelve el README conservando ambos módulos y agrega una política
+Git de fin de línea para reproducir los hashes en Windows. Los manifiestos y
+resultados congelados no se recalculan; los PDF conservan hash de bytes originales.
+El nuevo motor `contract_ocr.py` libera explícitamente los recursos de PDFium
+y usa una copia PIL independiente. El worker actual lo inyecta sin editar el
+adaptador histórico congelado. La evaluación asistida actual usa el mismo motor.
+
+El checkout Windows independiente con `core.autocrlf=true` aprobó **588 pruebas
+de backend, con 50 omitidas**, y **122 de frontend** con un worker; lint y build
+aprobados. Se documenta
+un fallo intermitente preexistente de foco en operadores que pasó aislado; no se
+modificó ese módulo. En esta ronda no se usaron servicios externos ni se
+ejecutaron migraciones. Detalle y límites en la segunda revisión de
+[correcciones del PR #28](evaluaciones/hu30/correcciones_pr28_2026-10-05.md).
+Talía autorizó entregar esta actualización mediante commit/push y respuestas
+en GitHub/Jira. Sigue pendiente la nueva revisión de Tobías; no se cierra la HU
+ni se fusiona el PR por esta entrega.

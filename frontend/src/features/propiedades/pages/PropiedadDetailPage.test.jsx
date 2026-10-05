@@ -61,6 +61,10 @@ describe('detalle de propiedad con inquilino', () => {
     )
 
     expect(await screen.findByText('Lucía Pérez')).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Ver historial de reclamos' })).toHaveAttribute(
+      'href',
+      `/propiedades/${property.id}/reclamos`,
+    )
     expect(screen.getByRole('link', { name: 'Ver inquilino' })).toHaveAttribute(
       'href',
       `/inquilinos/${tenant.id}`,

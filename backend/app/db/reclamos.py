@@ -11,6 +11,8 @@ from sqlalchemy.exc import IntegrityError
 
 from app.db.clausulas_contrato import SqlAlchemyContractClausesRepository
 from app.db.database import SessionLocal
+from app.db.expensas import enqueue_expense_report
+from app.services.expense_notifications import agency_email, expense_report
 from app.schemas.reclamos import (
     AgentClassificationResult,
     ClaimHistoryItem,
@@ -473,6 +475,14 @@ class SqlAlchemyClaimsRepository:
         safe_error: str | None = None,
     ) -> bool:
         with self.session_factory.begin() as session:
+            context = session.execute(text("""
+                SELECT reclamo_id, tipo_evento FROM notificaciones WHERE id=:id
+            """), {"id": str(notification_id)}).mappings().one_or_none()
+            is_expense = context is not None and context["tipo_evento"] == "expensa_reporte"
+            if is_expense:
+                # Orden reclamo -> notificación, igual que la clasificación.
+                session.execute(text("SELECT id FROM reclamos WHERE id=:id FOR UPDATE"),
+                                {"id": str(context["reclamo_id"])})
             result = session.execute(
                 text(
                     """
@@ -498,6 +508,8 @@ class SqlAlchemyClaimsRepository:
                     WHERE id = :notification_id
                       AND estado_envio = 'procesando'
                       AND intentos = :attempt_number
+                      AND (tipo_evento <> 'expensa_reporte'
+                           OR bloqueado_hasta > clock_timestamp())
                     """
                 ),
                 {
@@ -508,7 +520,17 @@ class SqlAlchemyClaimsRepository:
                     "retry_seconds": RETRY_INTERVAL_SECONDS,
                 },
             )
-        return result.rowcount == 1
+            recorded = result.rowcount == 1
+            if recorded and sent and is_expense:
+                session.execute(text("SELECT set_config('app.origen_reclamo', 'sistema', true)"))
+                session.execute(text("SELECT set_config('app.omitir_notificacion_inquilino', 'false', true)"))
+                session.execute(text("""
+                    UPDATE reclamos SET estado='Derivado a inmobiliaria (expensa)'
+                    WHERE id=:id AND tipo_gasto='expensa'
+                      AND estado='Pendiente de respuesta del responsable'
+                """), {"id": str(context["reclamo_id"])})
+                # El trigger existente crea historial y un único aviso al inquilino.
+        return recorded
 
     def enqueue_due_responsible_followups(self, *, limit: int) -> int:
         """Materializa recordatorios y vencimientos sin mantener locks al enviar."""
@@ -546,6 +568,7 @@ class SqlAlchemyClaimsRepository:
                     JOIN propiedades p ON p.id = r.propiedad_id
                     JOIN propietarios pr ON pr.id = p.propietario_id
                     WHERE r.estado = 'Pendiente de respuesta del responsable'
+                      AND rr.actor_tipo <> 'inmobiliaria'
                       AND rr.escalado_en IS NULL
                       AND rr.respuesta_vence_en <= CURRENT_TIMESTAMP
                     ORDER BY rr.respuesta_vence_en, rr.reclamo_id
@@ -660,6 +683,7 @@ class SqlAlchemyClaimsRepository:
                     JOIN propiedades p ON p.id = r.propiedad_id
                     JOIN propietarios pr ON pr.id = p.propietario_id
                     WHERE r.estado = 'Pendiente de respuesta del responsable'
+                      AND rr.actor_tipo <> 'inmobiliaria'
                       AND rr.recordatorio_generado_en IS NULL
                       AND rr.recordatorio_programado_en <= CURRENT_TIMESTAMP
                       AND rr.respuesta_vence_en > CURRENT_TIMESTAMP
@@ -823,7 +847,7 @@ class SqlAlchemyClaimsRepository:
                 text(
                     """
                     SELECT r.id, r.numero, r.descripcion, r.estado,
-                           r.clasificado_en,
+                           r.clasificado_en, r.creado_en, r.urgencia::text AS urgencia,
                            i.nombre_completo AS inquilino_nombre,
                            i.email AS inquilino_email,
                            i.telefono AS inquilino_telefono,
@@ -882,7 +906,7 @@ class SqlAlchemyClaimsRepository:
             )
             omit_tenant_update = (
                 not result.debe_escalar
-                and result.actor_responsable == "inquilino"
+                and result.actor_responsable in {"inquilino", "inmobiliaria"}
             )
             session.execute(
                 text(
@@ -906,7 +930,7 @@ class SqlAlchemyClaimsRepository:
                     WHERE id = :reclamo_id
                     RETURNING id, estado, tipo_gasto::text AS tipo_gasto,
                               confianza_clasificacion,
-                              fundamento_clasificacion, motivo_escalado
+                              fundamento_clasificacion, motivo_escalado, clasificado_en
                     """
                 ),
                 params,
@@ -935,6 +959,9 @@ class SqlAlchemyClaimsRepository:
                     context,
                     actor=result.actor_responsable,
                 )
+                if result.actor_responsable == "inmobiliaria":
+                    recipient = agency_email(recipient)
+                    channel = "email" if recipient else None
                 reminder_hours = self._positive_hours(
                     context["plazo_recordatorio_horas"],
                     default=48,
@@ -977,7 +1004,18 @@ class SqlAlchemyClaimsRepository:
                     },
                 )
 
-                if recipient and channel:
+                if result.tipo_gasto == "expensa" and result.actor_responsable == "inmobiliaria":
+                    report_context = {**context, "clasificado_en": row["clasificado_en"]}
+                    report_property = ClaimPropertyContext(
+                        id=context["propiedad_id"], direccion=context["direccion"],
+                        provincia=context["provincia"], localidad=context["localidad"],
+                        barrio=context["barrio"], tipo=context["propiedad_tipo"],
+                        piso=context["piso"], numero=context["propiedad_numero"],
+                    )
+                    notification_id = enqueue_expense_report(
+                        session, expense_report(report_context, result, report_property), recipient,
+                    )
+                elif recipient and channel:
                     data = ResponsibleNotificationData(
                         claim_number=int(context["numero"]),
                         actor=result.actor_responsable,

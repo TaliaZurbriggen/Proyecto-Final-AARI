@@ -1,0 +1,34 @@
+# Entradas textuales congeladas de HU30: mismos bytes en Windows y Linux.
+# No normalizar globalmente la evidencia histórica ni recalcular manifiestos.
+docs/evaluaciones/hu30/** -text
+backend/app/schemas/clausulas_contrato.py text eol=lf
+backend/app/services/contract_clause_evidence.py text eol=lf
+backend/app/services/contract_clause_llm.py text eol=lf
+backend/app/services/contract_clause_reference_trial.py text eol=lf
+backend/app/services/contract_clause_segments.py text eol=lf
+backend/app/services/contract_clause_v5.py text eol=lf
+backend/app/services/contract_clause_v7_trial.py text eol=lf
+backend/app/services/contract_clause_v7.py text eol=lf
+backend/app/services/contract_clause_v8.py text eol=lf
+backend/app/services/contract_clause_v9.py text eol=lf
+backend/app/services/contract_text_extraction.py text eol=lf
+backend/prompts/prompt_extraccion_clausulas_v2.md text eol=lf
+backend/prompts/prompt_extraccion_clausulas_v3.md text eol=lf
+backend/prompts/prompt_extraccion_clausulas_v4.md text eol=lf
+backend/prompts/prompt_extraccion_clausulas_v7.md text eol=lf
+backend/prompts/prompt_extraccion_clausulas_v8.md text eol=lf
+backend/prompts/prompt_extraccion_clausulas_v9.md text eol=lf
+backend/scripts/evaluate_contract_clause_reference.py text eol=lf
+backend/scripts/evaluate_contract_clause_v7.py text eol=lf
+backend/scripts/evaluate_contract_clause_v9_comparison.py text eol=lf
+backend/scripts/evaluate_contract_clause_v9_flash38.py text eol=lf
+backend/scripts/evaluate_contract_clause_v9.py text eol=lf
+# Los diagnósticos también registran el SHA de su ejecutor, fuera del manifiesto.
+backend/scripts/diagnose_contract_clause_plain.py text eol=lf
+backend/scripts/diagnose_contract_model_flash38.py text eol=lf
+backend/scripts/diagnose_contract_recovery.py text eol=lf
+backend/scripts/diagnose_contract_schema_flash38.py text eol=lf
+backend/scripts/diagnose_contract_short_prompt_flash38.py text eol=lf
+docs/evaluaciones/hu30/controles_corpus_v2.json text eol=lf
+# PDF: hash de bytes originales, sin conversiones de fin de línea.
+*.pdf -text

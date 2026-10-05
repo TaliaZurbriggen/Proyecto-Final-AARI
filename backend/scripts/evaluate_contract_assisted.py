@@ -20,6 +20,7 @@ from app.services import contract_clause_assisted as assisted  # noqa: E402
 from app.services.contract_clause_corpus import get_document, load_json, verify_document  # noqa: E402
 from app.services.contract_clause_service import ContractClauseService  # noqa: E402
 from app.services.contract_clause_windows import write_json_atomically  # noqa: E402
+from app.services.contract_ocr import ManagedTesseractOcrEngine  # noqa: E402
 from app.services.contract_text_extraction import extract_contract_text  # noqa: E402
 
 RESULT = PROJECT / "docs/evaluaciones/hu30/asistida_2026-10-05.json"
@@ -31,7 +32,7 @@ def local_corpus():
     for name in ("V01", "V02", "V03", "V04"):
         document = get_document(manifest, name)
         path = verify_document(document, PROJECT)
-        extracted = extract_contract_text(path.read_bytes())
+        extracted = extract_contract_text(path.read_bytes(), ManagedTesseractOcrEngine())
         clauses = assisted.literal_clauses(extracted)
         # Comparar por página sin espacios: el esquema separa y normaliza extremos,
         # pero no debe perder palabras ni recuperar texto desde otra página.
@@ -66,6 +67,9 @@ def run_public_v04(output=RESULT):
     model = assisted.JsonClauseModel(os.environ["GEMINI_API_KEY"], assisted.DEFAULT_MODEL)
 
     class Repository:
+        def renew_lease(self, _id, *, execution_id):
+            # Ensayo aislado de un único trabajo, sin DB ni workers competidores.
+            return True
         def claim_due(self, **_):
             return [SimpleNamespace(id=uuid4(), contract_id=uuid4(), document_id=uuid4(),
                 storage_path="public/V04.pdf", attempt_number=1, mode="ia", execution_id=uuid4(),

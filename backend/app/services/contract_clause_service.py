@@ -22,6 +22,7 @@ from app.services.contract_clause_assisted import (
     literal_clauses,
 )
 from app.services.contract_errors import ContractError
+from app.services.contract_ocr import ManagedTesseractOcrEngine
 from app.services.contract_text_extraction import (
     ContractTextError,
     extract_contract_text,
@@ -78,7 +79,7 @@ class ContractClauseService:
         self.repository = repository
         self.storage = storage
         self.model_factory = model_factory
-        self.ocr = ocr
+        self.ocr = ocr if ocr is not None else ManagedTesseractOcrEngine()
         if not 0 < lease_interval_seconds < ANALYSIS_LEASE_SECONDS:
             raise ValueError("La renovación debe ocurrir antes de que venza la reserva.")
         self.lease_interval_seconds = lease_interval_seconds

@@ -709,29 +709,81 @@ entorno compartido en la nube.
 - **Tobías:** AARI-116, AARI-125, AARI-135 y AARI-157, más su participación en
   el despliegue.
 - **Trabajo conjunto:** AARI-338, despliegue del entorno compartido.
-- **HU29 / AARI-318 finalizada:** módulo contractual integrado, migración y
-  Storage privado validados.
-- **HU30 / AARI-319 en validación:** extracción local/OCR, análisis
+- **HU30 / AARI-319 aprobada para integración:** extracción local/OCR, análisis
   asistido, respaldo literal sin IA, revisión humana e integración del contexto
   contractual implementados en su rama. Las migraciones 23, 24 y 25 están
   aplicadas; las suites locales, PostgreSQL y OCR están aprobados. V3 fue evaluada en cuatro modelos
   públicos con una llamada por documento y sin reintentos: obtuvo 19/23 controles
   completos, 12/15 críticos y cero alucinaciones aceptadas. Mejoró frente a v2,
-  pero aún no habilita los holdouts ni el cierre de la historia. Las iteraciones
+  pero no habilita interpretación autónoma ni los holdouts. Las iteraciones
   posteriores siguen fuera de producción: V04 no superó los controles
   semánticos y varios ensayos recibieron `503 UNAVAILABLE`. El diagnóstico
   directo del 02/10 también recibió 503 sin LangChain, herramientas ni esquema
-  obligatorio: una solicitud HTTP verificada, cero reintentos. Suite integrada
-  actual con PostgreSQL local: 574 aprobadas y 28 omitidas; frontend: 112 aprobadas, lint y build
-  correctos. El flujo `v10-asistida` respondió HTTP 200 con V04 público, pero su
+  obligatorio: una solicitud HTTP verificada, cero reintentos. La validación
+  previa con PostgreSQL local aprobó 574 pruebas y omitió 28. Tras integrar HU11,
+  el checkout Windows con CRLF activado aprobó 588 de backend y omitió 50;
+  frontend: 122 aprobadas, lint y build correctos. El flujo
+  `v10-asistida` respondió HTTP 200 con V04 público, pero su
   revisión semántica obtuvo 60% general y 33,3% crítico: no acredita los umbrales
   automáticos. Confirmar como contexto no activa una cláusula; sólo una edición
   que habilite expresamente su uso permite aportar a reclamos. El PR #28 integra
   AARI-135, calcula la vigencia en horario argentino y renueva la reserva del
-  trabajo activo. Pendiente revisión y merge. Ver [alcance y resultados actuales de HU30](docs/evaluaciones/hu30/flujo_asistido_2026-10-05.md)
+  trabajo activo. Conserva hashes reproducibles en Windows y cierre explícito
+  de recursos OCR. Tobías aprobó el PR #28 el 07/10/2026; se actualiza sobre
+  `main` con HU14 preservando evidencia congelada y revisión humana obligatoria.
+  El cierre queda condicionado al merge y las pruebas de integración finales.
+  Ver [alcance y resultados actuales de HU30](docs/evaluaciones/hu30/flujo_asistido_2026-10-05.md)
   y [regresiones del PR #28](docs/evaluaciones/hu30/correcciones_pr28_2026-10-05.md).
-- **Inicio previsto de Tobías:** AARI-116, base reutilizable para las
-  notificaciones de AARI-135 y AARI-157.
+- **HU29 / AARI-318 finalizada:** PR #24 mergeado; HU y subtareas listas en Jira.
+  La extracción de cláusulas pertenece a HU30.
+- **HU10 / AARI-116 finalizada:** PR #25 mergeado; HU y subtareas listas en Jira.
+  Infraestructura reutilizable para las notificaciones posteriores del Sprint.
+- **HU12 / AARI-135 finalizada:** PR #26 mergeado en `main`; HU y subtareas
+  listas en Jira, con **50 minutos reales** registrados. Evidencia en
+  [`docs/hu12_notificacion_actor_responsable.md`](docs/hu12_notificacion_actor_responsable.md).
+- **HU11 / AARI-125 finalizada:** historial por propiedad con filtros,
+  páginas de 20 y detalle con transiciones. Administración consulta todos los
+  reclamos; el inquilino únicamente los propios. Acceso desde la ficha de
+  propiedad y desde Mis reclamos. No requiere migración ni cambios de `.env`.
+  PostgreSQL 17.11 local y recorrido funcional real de administración/inquilino
+  aprobados: backend 355 pruebas aprobadas/26 omitidas; frontend 110 pruebas,
+  lint y build correctos. [PR #27](https://github.com/TaliaZurbriggen/Proyecto-Final-AARI/pull/27)
+  aprobado por Talía y mergeado el 05/10/2026 (`80afb67`). HU y sus nueve
+  subtareas verificadas listas el 07/10/2026, con **1 h 15 min** registrados.
+  Flujo, decisiones y comandos en
+  [`docs/hu11_historial_reclamos.md`](docs/hu11_historial_reclamos.md).
+- **Pendientes verificados el 07/10/2026:** HU13/AARI-147 y HU30/AARI-319
+  continúan en curso con PR #29 y #28 abiertos. HU31/AARI-332 está en curso,
+  con rama subida y PR pendiente; su acceso a escalados espera integrar HU13.
+  El despliegue conjunto AARI-338 sigue por hacer.
+  El Sprint permanece activo; no se considera cerrado por su fecha prevista.
+- **HU14 / AARI-157 entregada para revisión:** desarrollo de
+  reportes, entrega con tres intentos, panel privado, configuración y notas.
+  Deriva solo después de aceptación SMTP registrada; fallos visibles sin
+  informar éxito falso. Backend 385 pruebas aprobadas/26 omitidas, frontend
+  122, lint/build y recorrido local de administración/operador/inquilino
+  aprobados. Migración **aplicada con autorización al Supabase AARI de desarrollo
+  el 07/10/2026**, con permisos y lecturas reales de FastAPI verificados, sin
+  cambiar datos ni enviar correos. Índice compuesto incremental aplicado con
+  autorización y aviso de esa FK corregido. Publicación de commit/PR autorizada;
+  validación final de la rama real: **387 backend aprobadas/26 omitidas**, 122
+  frontend, lint/build correctos. Tiempo real
+  confirmado y registrado hasta ahora: **1 h 20 min** en AARI-157.
+  Recorrido posterior al índice aprobado en escritorio/móvil y por los tres
+  roles; SMTP simulado, permisos por API y retiro del entorno QA verificados.
+  Un único reporte SMTP real de prueba fue aceptado y el usuario confirmó
+  recepción. Combinación temporal HU13/HU14/HU31: 527 pruebas backend
+  aprobadas/35 omitidas, 214 frontend, lint/build, flujo manual y 16 controles
+  API/SQL aprobados. Ajustes y pruebas únicamente en la copia aislada:
+  todavía falta trasladar/revalidar la integración definitiva, sin modificar
+  las ramas de Talía. El botón interno de revisión del Home sigue pendiente
+  de habilitación en HU31; la navegación combinada sí fue probada.
+  [PR #30](https://github.com/TaliaZurbriggen/Proyecto-Final-AARI/pull/30)
+  publicado desde main, sin historias ajenas, con revisión solicitada a Talía.
+  Las doce subtareas están listas; la HU principal sigue En curso hasta revisión
+  e integración. Commit de implementación `734386b`. Detalles en
+  [`docs/hu14_derivacion_expensas.md`](docs/hu14_derivacion_expensas.md) y
+  [guía de integración](docs/hu14_integracion_hu13_hu31.md).
 - **Seguimiento:** los story points conservan las estimaciones académicas
   originales; Time Tracking contiene las 39 HH reestimadas y los worklogs
   registrarán el tiempo real.

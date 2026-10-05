@@ -24,12 +24,16 @@ function RoleLayout() {
   if (['inquilino', 'propietario'].includes(user?.rol)) {
     items.push({ href: `${homePath}/contratos`, label: 'Mis contratos' })
   }
-  const activeItem = location.pathname.includes('/contratos')
+  if (user?.rol === 'operador') items.push({ href: '/expensas', label: 'Expensas' })
+  const activeItem = location.pathname.startsWith('/expensas')
+    ? 'Expensas'
+    : location.pathname.includes('/contratos')
     ? 'Mis contratos'
     : location.pathname === '/inquilino/reclamos/nuevo'
       || location.pathname === '/inquilino/reclamos/confirmacion'
       ? 'Nuevo reclamo'
       : location.pathname.startsWith('/inquilino/reclamos')
+        || location.pathname.startsWith('/inquilino/propiedades/')
         ? 'Mis reclamos'
         : 'Inicio'
 

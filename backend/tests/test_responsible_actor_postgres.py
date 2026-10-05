@@ -68,6 +68,9 @@ def local_engine():
                     "25_extraccion_asistida_literal.sql",
                 ):
                     cursor.execute((MIGRATIONS / filename).read_text(encoding="utf-8"))
+                # HU14 especializa expensas; archivo explícito, no glob por número.
+                cursor.execute((MIGRATIONS / "20261007133447_hu14_derivacion_expensas.sql").read_text(encoding="utf-8"))
+                cursor.execute((MIGRATIONS / "20261007150410_hu14_indice_fk_derivacion_expensas.sql").read_text(encoding="utf-8"))
                 cursor.execute("""
                     INSERT INTO configuracion_sistema (clave, valor) VALUES
                         ('correo_contacto_inmobiliaria', 'agency@example.com'),
