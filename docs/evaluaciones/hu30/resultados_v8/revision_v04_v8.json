@@ -1,0 +1,33 @@
+{
+  "document": "V04",
+  "result": "docs/evaluaciones/hu30/resultados_v8/resultado_v04_v8.json",
+  "model": "gemini-3.5-flash-lite",
+  "prompt_version": "v8-experimental",
+  "controls": [
+    {
+      "id": "V04-E01", "state": "completo", "matched_proposals": ["propuesta 1"],
+      "notes": "QUINTA conserva las reparaciones necesarias a cargo del locador durante la vigencia, conservación y aptitud para el uso. La evidencia local incluye la continuación íntegra en páginas 1 y 2."
+    },
+    {
+      "id": "V04-E02", "state": "parcial", "matched_proposals": ["propuesta 2"],
+      "notes": "Mejora respecto de v7: reconoce ambigüedad, mantiene responsable no_especificado, uso contexto y confianza 0.6; no inventa una obligación de pago del locatario. Sin embargo, el resumen presenta consumos y gastos comunes como excepciones, y condiciones dice 'así como la parte proporcional de los gastos comunes del edificio' dentro de la excepción. Esa coordinación es precisamente la que la fuente no resuelve inequívocamente. La incertidumbre no se conserva en todos los campos interpretativos; no se considera completo."
+    },
+    {
+      "id": "V04-E03", "state": "completo", "matched_proposals": ["propuestas 3 y 4"],
+      "notes": "Conserva mantenimiento, devolución, deterioros a cargo del locatario y la excepción por buen uso y tiempo. Separa el acta e inventario inicial como contexto sin asignarlos a un pagador. Ambas propuestas remiten al tramo íntegro de SÉPTIMA."
+    },
+    {
+      "id": "V04-E04", "state": "completo", "matched_proposals": ["propuesta 5"],
+      "notes": "Conserva la prohibición de elementos que afecten la seguridad y actos contrarios a normas municipales, respaldada por OCTAVA."
+    },
+    {
+      "id": "V04-E05", "state": "completo", "matched_proposals": ["propuesta 6"],
+      "notes": "Conserva conformidad previa del locador, modificaciones indispensables y ausencia de obligación de restaurar al estado anterior, con evidencia íntegra de NOVENA."
+    }
+  ],
+  "accepted_hallucinations": 1,
+  "out_of_scope_operational_proposals": [],
+  "additional_notes": "La única interpretación no respaldada contabilizada es la propuesta 2: elegir el alcance de una coordinación ambigua, no inventar un texto fuente ni atribuir el pago a una persona. Sus dos campos problemáticos se cuentan como una propuesta, no como dos alucinaciones. La aceptación técnica verifica procedencia de evidencia; no valida semántica. No se alteran controles ni resultados originales.",
+  "reviewed_by": "Codex - comparación documental con fuente pública y controles validados; sin validación jurídica ni de Oikos",
+  "reviewed_at": "2026-10-02"
+}

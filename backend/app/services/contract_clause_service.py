@@ -9,22 +9,20 @@ from pydantic import ValidationError
 
 from app.schemas.clausulas_contrato import (
     ClauseReviewRequest,
-    ContractAnalysisResponse,
 )
-from app.services.contract_clause_llm import (
+from app.schemas.analisis_asistido import AssistedAnalysisResponse as ContractAnalysisResponse
+from app.services.contract_clause_assisted import (
     DEFAULT_MODEL,
-    EXTRACTOR_VERSION,
     PROMPT_VERSION,
-    build_clause_prompt,
-    get_clause_model,
-    parse_batch,
+    EXTRACTOR_VERSION,
+    get_assisted_model,
+    interpret,
+    literal_clauses,
 )
-from app.services.contract_clause_evidence import validate_and_anchor_evidence
 from app.services.contract_errors import ContractError
 from app.services.contract_text_extraction import (
     ContractTextError,
     extract_contract_text,
-    minimize_personal_data,
 )
 
 
@@ -32,7 +30,7 @@ LOGGER = logging.getLogger(__name__)
 
 
 class ContractClauseService:
-    def __init__(self, repository, storage, *, model_factory: Callable = get_clause_model, ocr=None):
+    def __init__(self, repository, storage, *, model_factory: Callable = get_assisted_model, ocr=None):
         self.repository = repository
         self.storage = storage
         self.model_factory = model_factory
@@ -47,14 +45,17 @@ class ContractClauseService:
     def _response(record):
         return ContractAnalysisResponse.model_validate(record) if record else None
 
-    def request(self, contract_id, document_id, user):
+    def request(self, contract_id, document_id, user, *, mode="ia"):
         self._admin(user)
+        if mode not in {"ia", "literal"}:
+            raise ContractError("Modo de extracción inválido.", status=422)
         self.repository.document_for_analysis(contract_id, document_id)
         analysis_id = self.repository.request_analysis(
             contract_id, document_id, user.id,
             extractor=EXTRACTOR_VERSION,
-            prompt=PROMPT_VERSION,
-            model=os.getenv("CONTRACT_CLAUSE_MODEL", DEFAULT_MODEL),
+            prompt=PROMPT_VERSION if mode == "ia" else "sin-interpretacion",
+            model=os.getenv("CONTRACT_CLAUSE_MODEL", DEFAULT_MODEL) if mode == "ia" else "local",
+            mode=mode,
         )
         return self._response(self.repository.get(contract_id, analysis_id))
 
@@ -74,12 +75,25 @@ class ContractClauseService:
 
     def _process(self, job):
         try:
+            if (job.mode == "ia" and job.prompt_version is not None
+                    and job.prompt_version != PROMPT_VERSION):
+                self._fail(job, "El intento pertenece a una versión anterior. Solicitá un nuevo análisis.")
+                return
             pdf = self.storage.download(job.storage_path)
             extracted = extract_contract_text(pdf, self.ocr)
-            minimized = minimize_personal_data(extracted.model_text)
-            result = parse_batch(self.model_factory().invoke(build_clause_prompt(minimized)))
-            pages = {page.page: page.text for page in extracted.pages}
-            clauses, rejected, incidents = validate_and_anchor_evidence(result, pages)
+            clauses, source_rejected, incidents = [], [], []
+            origins = []
+            if job.mode == "ia":
+                model = (self.model_factory(job.model_name) if self.model_factory is get_assisted_model
+                         else self.model_factory())
+                clauses, source_rejected, incidents = interpret(extracted, model)
+                origins = ["ia"] * len(clauses)
+            literals = literal_clauses(extracted)
+            covered = {(clause.texto_original, tuple(clause.paginas)) for clause in clauses}
+            for clause in literals:
+                if (clause.texto_original, tuple(clause.paginas)) not in covered:
+                    clauses.append(clause)
+                    origins.append("literal")
             unreadable = [str(page.page) for page in extracted.pages if not page.readable]
             if unreadable:
                 incidents.append("Páginas sin lectura confiable: " + ", ".join(unreadable) + ".")
@@ -88,24 +102,30 @@ class ContractClauseService:
                 for page in extracted.pages
             ]
             self.repository.complete(
-                job.id, pages=page_summary, clauses=clauses, rejected=rejected,
+                job.id, pages=page_summary, clauses=clauses, rejected=[],
                 complete=extracted.complete, incidents=incidents,
+                extractor_version=EXTRACTOR_VERSION, source_rejected=source_rejected,
+                origins=origins, execution_id=job.execution_id,
             )
         except ContractTextError as error:
-            self.repository.fail(job.id, job.attempt_number, str(error))
+            self._fail(job, str(error))
         except (ValidationError, ValueError, TypeError):
-            self.repository.fail(
-                job.id, job.attempt_number,
+            self._fail(
+                job,
                 "El modelo devolvió una respuesta que no pudo validarse.",
             )
         except RuntimeError as error:
-            self.repository.fail(job.id, job.attempt_number, str(error))
+            self._fail(job, "El análisis no está disponible. Revisá la configuración o usá la extracción sin IA.")
         except Exception:
-            LOGGER.exception("Falló el análisis contractual %s sin registrar contenido privado.", job.id)
-            self.repository.fail(
-                job.id, job.attempt_number,
-                "No se pudo completar el análisis. Intentaremos nuevamente.",
+            # No registrar excepciones del proveedor: pueden contener prompt o credenciales.
+            LOGGER.warning("Falló el análisis contractual %s; contenido omitido.", job.id)
+            self._fail(
+                job,
+                "No se pudo completar el análisis. Podés reintentarlo o extraer sin IA.",
             )
+
+    def _fail(self, job, message):
+        self.repository.fail(job.id, job.attempt_number, message, execution_id=job.execution_id)
 
 
 async def run_contract_analysis_worker(

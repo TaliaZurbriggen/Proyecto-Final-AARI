@@ -94,11 +94,12 @@ class ExtractedClauseBatch(BaseModel):
 
 class ContractClauseResponse(ExtractedClause):
     evidencias: list[ClauseEvidence] = Field(default_factory=list)
-    uso_clasificador: ClauseUsage = "operativa"
+    uso_clasificador: ClauseUsage = "contexto"
     id: UUID
     ordinal: int
     estado_revision: ReviewState
     revision: int
+    habilitada_para_reclamos: bool = False
     revisado_por: UUID | None = None
     revisado_en: datetime | None = None
 

@@ -245,9 +245,11 @@ esas tres evidencias.
 
 La etiqueta de uso también requiere revisión humana: E01 y dos disposiciones
 ajenas al tratamiento ordinario de reclamos fueron sugeridas como `operativa`.
-Solo las cláusulas confirmadas con uso `operativa` alimentan el clasificador, por
-lo que el administrador puede corregir esa etiqueta antes de confirmar. Los
-detalles están en las evaluaciones v1 y v2 de `docs/evaluaciones/hu30/`.
+En la implementación de ese momento, una confirmación conservaba la etiqueta
+`operativa` sugerida por el modelo; el administrador podía corregirla antes.
+La decisión del 01/10 reemplaza esa política: ahora sólo una edición con
+habilitación explícita puede alimentar al clasificador. Los detalles de esas
+evaluaciones históricas están en `docs/evaluaciones/hu30/`.
 
 La suite automática usa mocks del proveedor. OCR local se prueba también con
 fixtures sintéticas reales; el mock del motor no demuestra que esté instalado.
@@ -356,3 +358,158 @@ de cuota y con una nueva autorización.
 El 25/09 se intentó continuar con V01 y V02. Ambos recibieron `503 UNAVAILABLE`
 por alta demanda y no produjeron resultados; V03-V04 no fueron enviados. La
 regresión v4 sigue pendiente de disponibilidad del modelo.
+
+## Decisión posterior del 01/10/2026: activación explícita
+
+Tras el ensayo experimental v5 de V04, se aprobó que las propuestas de IA se
+guarden inicialmente como contexto. Confirmar sólo conserva ese contexto;
+para que una cláusula aporte al clasificador, administración debe editarla y
+elegir expresamente uso `operativa`. Se conserva la propuesta original y la
+activación queda auditada. La consulta de reclamos excluye cualquier fila sin
+ese evento, incluidas las revisiones históricas que no lo registraron. Ver
+[decisión y alcance](evaluaciones/hu30/activacion_explicita_2026-10-01.md).
+
+Esta política de seguridad no mejora retroactivamente las métricas del modelo
+ni autoriza utilizar contratos privados con Gemini. H01-H02 siguen reservados.
+
+## Refinamientos experimentales del 02/10/2026
+
+V7 trasladó la materialización de citas y páginas al backend: el modelo propone
+el identificador de un tramo y el backend adjunta sus fragmentos completos.
+Esto mejora la procedencia, no garantiza que la interpretación sea correcta.
+V8 dejó la cláusula ambigua como contexto sin pagador definido, pero en sus
+condiciones todavía eligió un alcance de la excepción. Su ensayo V04 dio 4/5
+controles completos y 2/3 críticos, sin alcanzar los umbrales.
+
+Se aprobó preparar v9 para mantener la incertidumbre coherente entre todos los
+campos, especialmente resumen y condiciones. Conserva el esquema y la evidencia
+local, sin reemplazar respuestas del modelo por controles esperados. La suite
+local aprobó 385 pruebas, con 23 omitidas, y los cuatro preflights aprobaron sin
+llamadas externas. Ver [alcance, pruebas y limitaciones de v9](evaluaciones/hu30/preparacion_v9.md).
+
+Tras la autorización, V04 se ejecutó con v9. La revisión dio 3/5 completos y
+1/3 críticos, con dos propuestas no respaldadas: interpretación del alcance
+ambiguo y una condición copiada del prompt. No se enviaron V01-V03 porque V04
+no cumplió. Ver [ensayo v9](evaluaciones/hu30/evaluacion_v9_v04_2026-10-02.md).
+
+Las versiones experimentales siguen fuera de producción. La regresión completa
+y los holdouts continúan pendientes; no se da la HU por terminada por haber
+aprobado pruebas con dobles. Preparar un diagnóstico controlado antes de otra
+iteración; no se cambian los controles ni los umbrales.
+
+La comparación autorizada v9/V04 con Gemini 3.5 Flash conservó exactamente la
+entrada Lite y los controles. Se agregó un ejecutor/manifiesto independiente
+y la suite aprobó 402 pruebas, con 23 omitidas. La única invocación terminó
+en HTTP 503, sin cláusulas para evaluar y sin reintento manual. El resultado
+Lite quedó intacto. Ver [registro de comparación](evaluaciones/hu30/comparacion_v9_flash_2026-10-02.md).
+La disponibilidad del servicio sigue siendo una dependencia distinta de los
+errores semánticos observados en Lite; este intento no demuestra mejora ni
+empeoramiento del modelo Flash.
+
+Después se autorizó un ensayo equivalente con Flash 3.8, también aislado.
+La suite completa aprobó 420 pruebas, con 23 omitidas. La única invocación
+recibió HTTP 503 sin cláusulas; no se reintentó. Ver [registro 3.8](evaluaciones/hu30/comparacion_v9_flash38_2026-10-02.md).
+La entrada y referencia Lite siguen intactas.
+
+Después se autorizó y ejecutó un diagnóstico mínimo sin contratos. Flash 3.8
+respondió `OK` tanto con texto simple como con un esquema estructurado de un
+campo: dos invocaciones, sin reintentos manuales. Se agregó un ejecutor aislado
+con checkpoints y nueve pruebas; suite completa: 429 aprobadas y 23 omitidas.
+La inspección local del esquema completo conserva los nueve campos de las
+cláusulas, pero no equivale a aceptación real por Gemini. Ver
+[diagnóstico, límites y evidencia](evaluaciones/hu30/diagnostico_flash38_minimo_2026-10-02.md).
+El 503 de la extracción completa sigue sin causa demostrada.
+
+Se autorizó después una única solicitud con el esquema completo, el mismo
+prompt v9 y dos reglas sintéticas (140 caracteres de fuente). También terminó
+en HTTP 503, sin propuestas ni reintento manual. El ejecutor aislado valida los
+archivos congelados y protege su checkpoint; se agregaron nueve pruebas, con
+suite completa de 438 aprobadas y 23 omitidas. Ver
+[registro del esquema completo](evaluaciones/hu30/diagnostico_flash38_esquema_completo_2026-10-02.md).
+Reducir la fuente no produjo una respuesta; no permite atribuir el error al
+esquema ni descartar indisponibilidad.
+
+Después se aprobó la comprobación con instrucciones breves, sin cambiar
+fuente, esquema, modelo o método. La petición pasó a 504 caracteres y su
+única invocación también recibió HTTP 503. El bloqueo previo de permisos
+no ejecutó la API; tras retomar se hizo una sola invocación, sin reintento.
+Se agregaron doce pruebas y la suite quedó en 450 aprobadas y 23 omitidas.
+Ver [resultado y alternativa estudiada](evaluaciones/hu30/diagnostico_flash38_prompt_breve_2026-10-02.md).
+Se propone revisar JSON nativo en un ensayo separado; está soportado por la
+biblioteca instalada, pero no validado para este esquema. Se conserva el
+antecedente HTTP 400 de Interactions/v4 y se requiere nueva aprobación antes
+de implementar o invocar. No se repiten los ensayos actuales, no cambian
+producción, controles ni métricas y no se da la HU por terminada.
+
+Ante el pedido de probar otro modelo y la proximidad del cierre del Sprint
+el 07/10, se realizó una comparación V04 con Gemini 3.6 Flash. Se usó el
+pipeline existente sin editar código; preparación y hashes idénticos al ensayo
+v9/Lite, cambiando sólo modelo. También recibió HTTP 503, sin cláusulas y sin
+reintento manual. Ver [comparación 3.6](evaluaciones/hu30/comparacion_v9_flash36_2026-10-02.md).
+Después se autorizó un único ensayo del contrato público V04 con 3.1
+Flash-Lite. Conservó entrada, prompt y esquema y también recibió HTTP 503,
+sin propuestas. No hubo reintento manual ni quedan llamadas adicionales
+autorizadas. Ver [registro 3.1 y propuesta de continuidad](evaluaciones/hu30/comparacion_v9_flash31lite_2026-10-02.md).
+
+La inspección local posterior, sin Gemini, reconoce las 12 cláusulas de V04,
+conserva QUINTA entre las páginas 1 y 2 y reconstruye los 4.709 caracteres
+originales. Se propone habilitar ese resultado literal en la pantalla de
+revisión, con origen explícito y revisión humana de sus interpretaciones.
+El cambio sigue pendiente de aprobación; no sustituye la validación semántica,
+no permite activar cláusulas operativas automáticamente y no autoriza cerrar
+HU30 ni bajar sus umbrales por la proximidad del cierre del Sprint.
+
+Se aprobó después un diagnóstico directo con el SDK oficial, sin LangChain ni
+herramientas, enviando solamente el texto público V04. Se prepararon tres modos
+(texto, JSON, esquema nativo), condicionados a respuestas utilizables y con
+detención ante errores. La primera solicitud, sin formato impuesto por la API,
+recibió HTTP 503 en 14,555 segundos. El transporte verificó una solicitud y cero
+reintentos; los modos JSON no se ejecutaron. Esto reproduce el fallo sin el
+adaptador anterior, pero no identifica su causa ni valida una sustitución de
+producción. Se agregaron 19 pruebas simuladas; la suite completa aprobó 469,
+con 23 omitidas y dos advertencias conocidas. Ver
+[diagnóstico directo y límites](evaluaciones/hu30/diagnostico_directo_flash38_2026-10-02.md).
+Los prompts congelados, evidencia anterior y umbrales permanecen intactos.
+
+## Decisión vigente e implementación — 05/10/2026
+
+Talía aprobó continuar como **extracción asistida con revisión humana obligatoria**
+y aplicar la migración aditiva 25 con pruebas aisladas en Supabase. No se rebajaron
+los umbrales congelados ni se declaró validada una interpretación autónoma.
+
+El módulo actual `contract_clause_assisted.py` integra lectura local completa,
+materialización de tramos existentes y propuestas JSON de Gemini 3.5 Flash-Lite.
+Reutiliza los helpers de segmentación/materialización conocidos sin editar
+los archivos congelados de v5/v7/v9; el esquema HTTP nuevo vive en
+`schemas/analisis_asistido.py` para preservar sus hashes históricos.
+
+La pantalla ofrece **Extraer sin IA**, conserva texto no interpretado y muestra
+origen e historial. Ese modo no invoca Gemini ni asigna responsable. Los resultados
+se agregan sin borrar cláusulas revisadas; los intentos se auditan con un UUID
+que impide aplicar una respuesta tardía sobre una ejecución nueva.
+Confirmar mantiene `contexto`; sólo editar y habilitar expresamente permite
+aportar a un reclamo. Una interpretación literal pendiente no puede activarse
+con su mensaje de relleno y los resúmenes de sólo espacios se rechazan.
+
+La migración 25 fue aplicada sin borrar datos. La prueba PostgreSQL aislada con
+rollback pasó. La suite local completa aprobó **520 pruebas, con 23 omitidas**;
+frontend aprobó **112**, lint y build. Se revisó la interfaz con datos sintéticos
+a 320, 390, 768 y 1440 px, sin desbordamiento horizontal y con teclado.
+La lectura local de V01–V04 conservó el texto por página (comparación sin
+espacios), incluyendo las tres páginas OCR de V02.
+
+Una única petición real autorizada de V04 respondió HTTP 200: **7 propuestas
+de IA y 7 bloques literales**. La revisión documental dio 3/5 controles completos
+(60%), 1/3 críticos completos (33,3%) y una propuesta con atribución no respaldada.
+La procedencia de las citas no prueba la corrección de resumen o condiciones.
+No se enviaron contratos privados, no se probaron los holdouts ni se escribió
+ese resultado externo en Supabase.
+
+La [decisión completa y resultados](evaluaciones/hu30/flujo_asistido_2026-10-05.md)
+detallan el alcance y la revisión pendiente. Notion rechazó el ADR por límite
+de bloques gratuitos; la documentación quedó en el proyecto. Talía autorizó
+entregar los cambios de `feat/AARI-319-extraccion-clausulas` mediante commit/push
+y registrar dos horas adicionales el 05/10. Creará el PR para revisión de Tobías;
+la HU sigue en curso, sin autorización de cierre o merge. Antes del cierre, corresponde revisar el
+flujo asistido y aceptar explícitamente ese alcance, sin confundirlo con haber
+cumplido los indicadores del modelo automático.

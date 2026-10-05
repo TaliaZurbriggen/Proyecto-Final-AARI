@@ -1,0 +1,365 @@
+{
+  "document": "V04",
+  "source_url": "https://oaip.mpd.gov.ar/pdf/res%20DGN%200564_2007.PDF",
+  "source_sha256": "a921c2a9db516211b82398c52ad937e7a881d0ec6d248334fdf6d483bd303d1c",
+  "model": "gemini-3.5-flash-lite",
+  "prompt_version": "v10-asistida",
+  "prompt_sha256": "62e248275c3f0dc3a9ef421aaa1ff2286d982c521bcf3c10aa90d7f49d6f3889",
+  "state": "completed",
+  "maximum_http_requests": 1,
+  "started_at": "2026-10-05T12:29:02.689878+00:00",
+  "semantic_review": "pending",
+  "private_contracts_sent": 0,
+  "supabase_writes": 0,
+  "clauses": [
+    {
+      "numero": "1",
+      "titulo": "Destino del inmueble",
+      "evidencias": [
+        {
+          "pagina": 1,
+          "texto": "PRIMERA: El LOCADOR da en locación al LOCATARIO y éste acepta, un \n \ninmueble de su propiedad, sito en Se \nconviene que la propiedad locada será destinada al funcionamiento de \ndependencias del Ministerio Público de la Defensa, no pudiendo el \nLOCATARIO darle otro destino sin conformidad por escrito del LOCADOR"
+        }
+      ],
+      "paginas": [
+        1
+      ],
+      "texto_original": "PRIMERA: El LOCADOR da en locación al LOCATARIO y éste acepta, un \n \ninmueble de su propiedad, sito en Se \nconviene que la propiedad locada será destinada al funcionamiento de \ndependencias del Ministerio Público de la Defensa, no pudiendo el \nLOCATARIO darle otro destino sin conformidad por escrito del LOCADOR",
+      "resumen": "El inmueble se destinará exclusivamente al funcionamiento de dependencias del Ministerio Público de la Defensa.",
+      "categoria": "otro",
+      "responsable": "inquilino",
+      "uso_clasificador": "operativa",
+      "condiciones": "Prohibido darle otro destino sin conformidad por escrito del LOCADOR.",
+      "referencias": [
+        "CLÁUSULA 1"
+      ],
+      "confianza": 1.0
+    },
+    {
+      "numero": "5",
+      "titulo": "Reparaciones y conservación",
+      "evidencias": [
+        {
+          "pagina": 1,
+          "texto": "QUINTA: Queda también convenido que quedarán a cargo del LOCADOR los \ngastos que demanden las reparaciones que fuera necesario efectuar durante \nla vigencia del presente contrato para mantener el edificio en buen estado de"
+        },
+        {
+          "pagina": 2,
+          "texto": "conservación, de manera que pueda servir satisfactoriamente al uso que se le \ndestine, con arreglo a las prescripciones del Código Civil (arts. 1515 y ss.)"
+        }
+      ],
+      "paginas": [
+        1,
+        2
+      ],
+      "texto_original": "QUINTA: Queda también convenido que quedarán a cargo del LOCADOR los \ngastos que demanden las reparaciones que fuera necesario efectuar durante \nla vigencia del presente contrato para mantener el edificio en buen estado de\n\nconservación, de manera que pueda servir satisfactoriamente al uso que se le \ndestine, con arreglo a las prescripciones del Código Civil (arts. 1515 y ss.)",
+      "resumen": "Quedan a cargo del LOCADOR los gastos de reparaciones necesarias durante la vigencia del contrato para mantener el edificio en buen estado.",
+      "categoria": "reparacion",
+      "responsable": "propietario",
+      "uso_clasificador": "operativa",
+      "condiciones": "Con arreglo a las prescripciones del Código Civil (arts. 1515 y ss.).",
+      "referencias": [
+        "CLÁUSULA 5"
+      ],
+      "confianza": 1.0
+    },
+    {
+      "numero": "6",
+      "titulo": "Impuestos, tasas y gastos comunes",
+      "evidencias": [
+        {
+          "pagina": 2,
+          "texto": "SEXTA: Serán por cuenta del LOCADOR el pago de los impuestos, tasas, \ncontribuciones y gravámenes de cualquier naturaleza, existentes o a crearse, \nsalvo aquellos que obedecieran al uso que al inmueble le diera el LOCATARIO \ny se facturen en virtud de los consumos, y la parte proporcional de los gastos \ncomunes al edificio."
+        }
+      ],
+      "paginas": [
+        2
+      ],
+      "texto_original": "SEXTA: Serán por cuenta del LOCADOR el pago de los impuestos, tasas, \ncontribuciones y gravámenes de cualquier naturaleza, existentes o a crearse, \nsalvo aquellos que obedecieran al uso que al inmueble le diera el LOCATARIO \ny se facturen en virtud de los consumos, y la parte proporcional de los gastos \ncomunes al edificio.",
+      "resumen": "El LOCADOR asume el pago de impuestos, tasas, contribuciones y gravámenes, salvo los originados por consumos del LOCATARIO y su parte proporcional de gastos comunes.",
+      "categoria": "expensa",
+      "responsable": "condicional",
+      "uso_clasificador": "operativa",
+      "condiciones": "Salvo gravámenes por consumos del LOCATARIO y la parte proporcional de gastos comunes.",
+      "referencias": [
+        "CLÁUSULA 6"
+      ],
+      "confianza": 1.0
+    },
+    {
+      "numero": "6",
+      "titulo": "Gastos comunes del edificio",
+      "evidencias": [
+        {
+          "pagina": 2,
+          "texto": "SEXTA: Serán por cuenta del LOCADOR el pago de los impuestos, tasas, \ncontribuciones y gravámenes de cualquier naturaleza, existentes o a crearse, \nsalvo aquellos que obedecieran al uso que al inmueble le diera el LOCATARIO \ny se facturen en virtud de los consumos, y la parte proporcional de los gastos \ncomunes al edificio."
+        }
+      ],
+      "paginas": [
+        2
+      ],
+      "texto_original": "SEXTA: Serán por cuenta del LOCADOR el pago de los impuestos, tasas, \ncontribuciones y gravámenes de cualquier naturaleza, existentes o a crearse, \nsalvo aquellos que obedecieran al uso que al inmueble le diera el LOCATARIO \ny se facturen en virtud de los consumos, y la parte proporcional de los gastos \ncomunes al edificio.",
+      "resumen": "Se establece la parte proporcional de los gastos comunes del edificio.",
+      "categoria": "expensa",
+      "responsable": "no_especificado",
+      "uso_clasificador": "contexto",
+      "condiciones": null,
+      "referencias": [
+        "CLÁUSULA 6"
+      ],
+      "confianza": 0.6
+    },
+    {
+      "numero": "7",
+      "titulo": "Estado inicial, inventario y devolución",
+      "evidencias": [
+        {
+          "pagina": 2,
+          "texto": "SÉPTIMA: El LOCATARIO recibirá el inmueble desocupado, en perfecto \nestado de conservación , obligándose a mantener y a devolver el inmueble en \nlas mismas condiciones y a pagar el importe de los deterioros ocasionados, \nsalvo los que resulten del buen uso y de la acción del tiempo. Al momento de \ntomar posesión del inmueble se labrará el acta respectiva en la que se \nconsigne • la fecha de inicio de la posesión, el estado de recepción, y el \ninventario completo de las instalaciones."
+        }
+      ],
+      "paginas": [
+        2
+      ],
+      "texto_original": "SÉPTIMA: El LOCATARIO recibirá el inmueble desocupado, en perfecto \nestado de conservación , obligándose a mantener y a devolver el inmueble en \nlas mismas condiciones y a pagar el importe de los deterioros ocasionados, \nsalvo los que resulten del buen uso y de la acción del tiempo. Al momento de \ntomar posesión del inmueble se labrará el acta respectiva en la que se \nconsigne • la fecha de inicio de la posesión, el estado de recepción, y el \ninventario completo de las instalaciones.",
+      "resumen": "El LOCATARIO recibe el inmueble desocupado y en perfecto estado, obligándose a mantenerlo, devolverlo en las mismas condiciones y pagar deterioros no derivados del buen uso y el tiempo.",
+      "categoria": "devolucion",
+      "responsable": "inquilino",
+      "uso_clasificador": "contexto",
+      "condiciones": "Se labrará acta con fecha de inicio, estado de recepción e inventario completo.",
+      "referencias": [
+        "CLÁUSULA 7"
+      ],
+      "confianza": 1.0
+    },
+    {
+      "numero": "8",
+      "titulo": "Seguridad y normas municipales",
+      "evidencias": [
+        {
+          "pagina": 2,
+          "texto": "OCTAVA: El LOCATARIO no podrá tener en la propiedad cosas que pudieran \nafectar la seguridad de las personas, objetos e instalaciones, ni realizar actos \nque contraríen las normas municipales."
+        }
+      ],
+      "paginas": [
+        2
+      ],
+      "texto_original": "OCTAVA: El LOCATARIO no podrá tener en la propiedad cosas que pudieran \nafectar la seguridad de las personas, objetos e instalaciones, ni realizar actos \nque contraríen las normas municipales.",
+      "resumen": "El LOCATARIO no podrá tener cosas que afecten la seguridad ni realizar actos contrarios a las normas municipales.",
+      "categoria": "danio",
+      "responsable": "inquilino",
+      "uso_clasificador": "operativa",
+      "condiciones": null,
+      "referencias": [
+        "CLÁUSULA 8"
+      ],
+      "confianza": 1.0
+    },
+    {
+      "numero": "9",
+      "titulo": "Modificaciones al inmueble",
+      "evidencias": [
+        {
+          "pagina": 2,
+          "texto": "NOVENA: El LOCATARIO, previa conformidad del LOCADOR, podrá efectuar \nen el inmueble que se contrata las modificaciones que sean indispensables \npara adaptarlo a sus servicios, sin que ello importe la obligación de su parte de \ndevolverlo a su anterior estado en ocasión de desocuparlo, el que será \ndevuelto en el estado en que se encuentre sin ulteriores responsabilidades por \nparte del LOCATARIO."
+        }
+      ],
+      "paginas": [
+        2
+      ],
+      "texto_original": "NOVENA: El LOCATARIO, previa conformidad del LOCADOR, podrá efectuar \nen el inmueble que se contrata las modificaciones que sean indispensables \npara adaptarlo a sus servicios, sin que ello importe la obligación de su parte de \ndevolverlo a su anterior estado en ocasión de desocuparlo, el que será \ndevuelto en el estado en que se encuentre sin ulteriores responsabilidades por \nparte del LOCATARIO.",
+      "resumen": "El LOCATARIO podrá efectuar modificaciones indispensables para sus servicios previa conformidad del LOCADOR, sin obligación de devolverlo al estado anterior.",
+      "categoria": "otro",
+      "responsable": "inquilino",
+      "uso_clasificador": "operativa",
+      "condiciones": "Previa conformidad del LOCADOR.",
+      "referencias": [
+        "CLÁUSULA 9"
+      ],
+      "confianza": 1.0
+    },
+    {
+      "numero": null,
+      "titulo": "Texto sin encabezado reconocido",
+      "evidencias": [
+        {
+          "pagina": 1,
+          "texto": "t_L5-be:J4*-icz ad ,dca ~JCG \nc 91'94~ tbá e9~cb/c wb .o-9b \nANEXO II RESOLUCIÓN DGN N° \nMODELO DE CONTRATO DE LOCACIÓN DE INMUEBLE \nEn la Ciudad de , Provincia de , a los \ndías del mes de del año 20. .; entre DNI N° \n en el carácter de propietario, en adelante denominado \"EL \nLOCADOR\" por una parte, y DNI N° \nen representación de la Defensoría General de la Nación, conforme la \nautorización conferida mediante Resolución / , recaída en el Expte. \nDGN N° / , en adelante denominada \"El LOCATARIO\" por la otra, se \nconviene formalizar el presente contrato de locación, bajo las siguientes \ncláusulas:"
+        }
+      ],
+      "paginas": [
+        1
+      ],
+      "texto_original": "t_L5-be:J4*-icz ad ,dca ~JCG \nc 91'94~ tbá e9~cb/c wb .o-9b \nANEXO II RESOLUCIÓN DGN N° \nMODELO DE CONTRATO DE LOCACIÓN DE INMUEBLE \nEn la Ciudad de , Provincia de , a los \ndías del mes de del año 20. .; entre DNI N° \n en el carácter de propietario, en adelante denominado \"EL \nLOCADOR\" por una parte, y DNI N° \nen representación de la Defensoría General de la Nación, conforme la \nautorización conferida mediante Resolución / , recaída en el Expte. \nDGN N° / , en adelante denominada \"El LOCATARIO\" por la otra, se \nconviene formalizar el presente contrato de locación, bajo las siguientes \ncláusulas:",
+      "resumen": "Interpretación pendiente. Revisá el texto original antes de completar esta cláusula.",
+      "categoria": "otro",
+      "responsable": "no_especificado",
+      "uso_clasificador": "contexto",
+      "condiciones": null,
+      "referencias": [],
+      "confianza": 0.0
+    },
+    {
+      "numero": "2",
+      "titulo": "Cláusula 2",
+      "evidencias": [
+        {
+          "pagina": 1,
+          "texto": "SEGUNDA: Las partes convienen expresamente que la duración del presente \ncontrato será de treinta y seis (36) meses, a contar desde el día de \n de 20 En consecuencia, el vencimiento operará, de pleno \nderecho, el día de de 20"
+        }
+      ],
+      "paginas": [
+        1
+      ],
+      "texto_original": "SEGUNDA: Las partes convienen expresamente que la duración del presente \ncontrato será de treinta y seis (36) meses, a contar desde el día de \n de 20 En consecuencia, el vencimiento operará, de pleno \nderecho, el día de de 20",
+      "resumen": "Interpretación pendiente. Revisá el texto original antes de completar esta cláusula.",
+      "categoria": "otro",
+      "responsable": "no_especificado",
+      "uso_clasificador": "contexto",
+      "condiciones": null,
+      "referencias": [],
+      "confianza": 0.0
+    },
+    {
+      "numero": "3",
+      "titulo": "Cláusula 3",
+      "evidencias": [
+        {
+          "pagina": 1,
+          "texto": "TERCERA: El importe mensual de la locación se fija en la suma de pesos \n La factura o el recibo deberán \npresentarse el último día hábil del mes en curso a fin de que se abone el \nprecio de la locación antes del día once del mes siguiente, según el régimen \nestablecido por la Res. n° 262/95 de la Secretaría de Hacienda (régimen de \nbeneficiarios del Estado). Su percepción por parte del LOCADOR no impedirá \nen modo alguno que ejercite las restantes cláusulas de este contrato. Los \nintereses por mora en el pago se calcularán a la tasa activa del Banco de la \nNación Argentina."
+        }
+      ],
+      "paginas": [
+        1
+      ],
+      "texto_original": "TERCERA: El importe mensual de la locación se fija en la suma de pesos \n La factura o el recibo deberán \npresentarse el último día hábil del mes en curso a fin de que se abone el \nprecio de la locación antes del día once del mes siguiente, según el régimen \nestablecido por la Res. n° 262/95 de la Secretaría de Hacienda (régimen de \nbeneficiarios del Estado). Su percepción por parte del LOCADOR no impedirá \nen modo alguno que ejercite las restantes cláusulas de este contrato. Los \nintereses por mora en el pago se calcularán a la tasa activa del Banco de la \nNación Argentina.",
+      "resumen": "Interpretación pendiente. Revisá el texto original antes de completar esta cláusula.",
+      "categoria": "otro",
+      "responsable": "no_especificado",
+      "uso_clasificador": "contexto",
+      "condiciones": null,
+      "referencias": [],
+      "confianza": 0.0
+    },
+    {
+      "numero": "4",
+      "titulo": "Cláusula 4",
+      "evidencias": [
+        {
+          "pagina": 1,
+          "texto": "CUARTA: Queda prohibido al LOCATARIO la cesión de este contrato, así \ncomo subalquilar en todo o en parte el bien locado."
+        }
+      ],
+      "paginas": [
+        1
+      ],
+      "texto_original": "CUARTA: Queda prohibido al LOCATARIO la cesión de este contrato, así \ncomo subalquilar en todo o en parte el bien locado.",
+      "resumen": "Interpretación pendiente. Revisá el texto original antes de completar esta cláusula.",
+      "categoria": "otro",
+      "responsable": "no_especificado",
+      "uso_clasificador": "contexto",
+      "condiciones": null,
+      "referencias": [],
+      "confianza": 0.0
+    },
+    {
+      "numero": "10",
+      "titulo": "Cláusula 10",
+      "evidencias": [
+        {
+          "pagina": 2,
+          "texto": "DÉCIMA: Si antes del vencimiento del presente contrato, el LOCATARIO \nmanifestare la necesidad de continuar en la reconducción de este convenio, se \nconsiderará prorrogado por un período igual al establecido en la cláusula \nsegunda, salvo oposición expresa del LOCADOR."
+        }
+      ],
+      "paginas": [
+        2
+      ],
+      "texto_original": "DÉCIMA: Si antes del vencimiento del presente contrato, el LOCATARIO \nmanifestare la necesidad de continuar en la reconducción de este convenio, se \nconsiderará prorrogado por un período igual al establecido en la cláusula \nsegunda, salvo oposición expresa del LOCADOR.",
+      "resumen": "Interpretación pendiente. Revisá el texto original antes de completar esta cláusula.",
+      "categoria": "otro",
+      "responsable": "no_especificado",
+      "uso_clasificador": "contexto",
+      "condiciones": null,
+      "referencias": [],
+      "confianza": 0.0
+    },
+    {
+      "numero": "11",
+      "titulo": "Cláusula 11",
+      "evidencias": [
+        {
+          "pagina": 2,
+          "texto": "UNDÉCIMA: Las partes se someten para cualquier divergencia que pudiera \nsurgir de la aplicación e interpretación del presente contrato, a la jurisdicción \nde los Tribunales Federales de Capital Federal, renunciando a todo otro fuero \ny jurisdicción. Todas las notificaciones y diligencias que se practiquen se \nrealizarán en los siguientes domicilios: \nEl LOCADOR. \nEl LOCATARIO: Av. Callao 970 ; Ciudad Autónoma de Buenos Aires."
+        }
+      ],
+      "paginas": [
+        2
+      ],
+      "texto_original": "UNDÉCIMA: Las partes se someten para cualquier divergencia que pudiera \nsurgir de la aplicación e interpretación del presente contrato, a la jurisdicción \nde los Tribunales Federales de Capital Federal, renunciando a todo otro fuero \ny jurisdicción. Todas las notificaciones y diligencias que se practiquen se \nrealizarán en los siguientes domicilios: \nEl LOCADOR. \nEl LOCATARIO: Av. Callao 970 ; Ciudad Autónoma de Buenos Aires.",
+      "resumen": "Interpretación pendiente. Revisá el texto original antes de completar esta cláusula.",
+      "categoria": "otro",
+      "responsable": "no_especificado",
+      "uso_clasificador": "contexto",
+      "condiciones": null,
+      "referencias": [],
+      "confianza": 0.0
+    },
+    {
+      "numero": "12",
+      "titulo": "Cláusula 12",
+      "evidencias": [
+        {
+          "pagina": 2,
+          "texto": "DUODÉCIMA: Los gastos del sellado del presente c trato serán asumidos \npor el LOCADOR en su parte proporcional —si le rrespondieren-, habida \ncuenta de que el LOCATARIO se encuentra exento. \nEn prueba de conformidad se firman tres ejemplares e un mismo tenor y a un \nsolo efecto, en los lugares y fechas consignadas. \nA • IS MARTINEZ \nDEFENSORA GENERAL DE LA NACION"
+        }
+      ],
+      "paginas": [
+        2
+      ],
+      "texto_original": "DUODÉCIMA: Los gastos del sellado del presente c trato serán asumidos \npor el LOCADOR en su parte proporcional —si le rrespondieren-, habida \ncuenta de que el LOCATARIO se encuentra exento. \nEn prueba de conformidad se firman tres ejemplares e un mismo tenor y a un \nsolo efecto, en los lugares y fechas consignadas. \nA • IS MARTINEZ \nDEFENSORA GENERAL DE LA NACION",
+      "resumen": "Interpretación pendiente. Revisá el texto original antes de completar esta cláusula.",
+      "categoria": "otro",
+      "responsable": "no_especificado",
+      "uso_clasificador": "contexto",
+      "condiciones": null,
+      "referencias": [],
+      "confianza": 0.0
+    }
+  ],
+  "origins": [
+    "ia",
+    "ia",
+    "ia",
+    "ia",
+    "ia",
+    "ia",
+    "ia",
+    "literal",
+    "literal",
+    "literal",
+    "literal",
+    "literal",
+    "literal",
+    "literal"
+  ],
+  "source_rejected": [],
+  "complete_reading": true,
+  "pages": [
+    {
+      "pagina": 1,
+      "metodo": "digital",
+      "legible": true
+    },
+    {
+      "pagina": 2,
+      "metodo": "digital",
+      "legible": true
+    }
+  ],
+  "incidents": [],
+  "http_requests": 1,
+  "http_statuses": [
+    200
+  ],
+  "finished_at": "2026-10-05T12:29:07.976207+00:00"
+}

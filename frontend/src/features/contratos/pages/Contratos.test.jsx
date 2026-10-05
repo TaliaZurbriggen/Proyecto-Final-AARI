@@ -173,19 +173,20 @@ describe('consulta y gestión de contratos', () => {
     expect(screen.queryByText('Confirmada')).not.toBeInTheDocument()
   })
 
-  it('permite confirmar una propuesta y envía su revisión vigente', async () => {
+  it('confirma una propuesta sólo como contexto, incluso si una versión anterior la marcó operativa', async () => {
     const ui = userEvent.setup()
     const signedContract = { ...contract, estado: 'firmado', vigencia: 'Vigente', documentos: [{ id: 'doc-one', version: 1, nombre_archivo: 'contrato.pdf', tamano: 500, firmado: true, created_at: '2026-09-12' }] }
     const clause = { id: 'clause-one', ordinal: 1, numero: 'NOVENA', titulo: 'Daños', paginas: [5, 6], evidencias: [{ pagina: 5, texto: 'El inquilino responde' }, { pagina: 6, texto: 'cuando el daño le resulte imputable.' }], texto_original: 'El inquilino responde\n\ncuando el daño le resulte imputable.', resumen: 'La responsabilidad depende de que el daño sea imputable.', categoria: 'danio', responsable: 'condicional', uso_clasificador: 'operativa', condiciones: 'Debe existir imputabilidad.', referencias: [], confianza: 0.91, estado_revision: 'pendiente', revision: 1, revisado_por: null, revisado_en: null }
     const analysis = { id: 'analysis-one', contrato_id: contract.id, documento_id: 'doc-one', estado: 'completado', completo: true, paginas_total: 13, lectura_paginas: [], intentos: 1, ultimo_error: null, created_at: '2026-09-21', updated_at: '2026-09-21', clausulas: [clause] }
     const fetch = vi.spyOn(globalThis, 'fetch').mockImplementation(async (url) => {
-      if (url.includes('/clausulas/')) return json({ ...analysis, clausulas: [{ ...clause, estado_revision: 'confirmada', revision: 2 }] })
+      if (url.includes('/clausulas/')) return json({ ...analysis, clausulas: [{ ...clause, uso_clasificador: 'contexto', estado_revision: 'confirmada', revision: 2 }] })
       if (url.endsWith('/analisis')) return json(analysis)
       return json(signedContract)
     })
     renderRoute('/contratos/contract-one')
-    await ui.click(await screen.findByRole('button', { name: 'Confirmar' }))
+    await ui.click(await screen.findByRole('button', { name: 'Confirmar como contexto' }))
     expect(await screen.findByText('Confirmada')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Editar revisión' })).toBeInTheDocument()
     const call = fetch.mock.calls.find(([url]) => url.includes('/clausulas/'))
     expect(JSON.parse(call[1].body)).toEqual({ accion: 'confirmar', revision: 1 })
   })
@@ -205,13 +206,37 @@ describe('consulta y gestión de contratos', () => {
     const summary = await screen.findByLabelText(/Resumen/)
     await ui.clear(summary)
     await ui.type(summary, 'Resumen corregido.')
-    await ui.click(screen.getByRole('button', { name: 'Guardar y confirmar' }))
+    expect(screen.getByLabelText(/Uso en reclamos/)).toHaveValue('contexto')
+    await ui.click(screen.getByRole('button', { name: 'Guardar revisión' }))
     expect(await screen.findByText('Editada')).toBeInTheDocument()
     const call = fetch.mock.calls.find(([url]) => url.includes('/clausulas/'))
     expect(JSON.parse(call[1].body)).toMatchObject({
       accion: 'editar', revision: 1, resumen: 'Resumen corregido.',
-      categoria: 'danio', responsable: 'condicional', uso_clasificador: 'operativa',
+      categoria: 'danio', responsable: 'condicional', uso_clasificador: 'contexto',
     })
+  })
+
+  it('exige seleccionar operativa en el editor para habilitar una propuesta', async () => {
+    const ui = userEvent.setup()
+    const signedContract = { ...contract, estado: 'firmado', vigencia: 'Vigente', documentos: [{ id: 'doc-one', version: 1, nombre_archivo: 'contrato.pdf', tamano: 500, firmado: true, created_at: '2026-09-12' }] }
+    const clause = { id: 'clause-one', ordinal: 1, numero: 'SEXTA', titulo: 'Gastos', paginas: [2], evidencias: [{ pagina: 2, texto: 'Texto sujeto a revisión.' }], texto_original: 'Texto sujeto a revisión.', resumen: 'Resumen propuesto.', categoria: 'expensa', responsable: 'condicional', uso_clasificador: 'contexto', condiciones: 'Revisar la excepción.', referencias: [], confianza: 0.6, estado_revision: 'pendiente', revision: 1, habilitada_para_reclamos: false }
+    const analysis = { id: 'analysis-one', contrato_id: contract.id, documento_id: 'doc-one', estado: 'completado', completo: true, paginas_total: 2, lectura_paginas: [], intentos: 1, ultimo_error: null, created_at: '2026-09-21', updated_at: '2026-09-21', clausulas: [clause] }
+    const fetch = vi.spyOn(globalThis, 'fetch').mockImplementation(async (url) => {
+      if (url.includes('/clausulas/')) return json({ ...analysis, clausulas: [{ ...clause, uso_clasificador: 'operativa', estado_revision: 'editada', revision: 2, habilitada_para_reclamos: true }] })
+      if (url.endsWith('/analisis')) return json(analysis)
+      return json(signedContract)
+    })
+
+    renderRoute('/contratos/contract-one')
+    await ui.click(await screen.findByRole('button', { name: 'Editar', exact: true }))
+    expect(screen.getByLabelText(/Uso en reclamos/)).toHaveValue('contexto')
+    await ui.selectOptions(screen.getByLabelText(/Uso en reclamos/), 'operativa')
+    expect(screen.getByText(/Compará la interpretación y las excepciones/)).toBeInTheDocument()
+    await ui.click(screen.getByRole('button', { name: 'Guardar y habilitar' }))
+
+    const call = fetch.mock.calls.find(([url]) => url.includes('/clausulas/'))
+    expect(JSON.parse(call[1].body)).toMatchObject({ accion: 'editar', revision: 1, uso_clasificador: 'operativa' })
+    expect(await screen.findByText('Habilitada para reclamos')).toBeInTheDocument()
   })
 
   it('permite descartar una propuesta sin incorporarla al contexto', async () => {

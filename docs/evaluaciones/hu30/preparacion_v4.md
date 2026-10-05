@@ -53,9 +53,11 @@ regresión conocida; H01-H02 siguen reservados por Tobías/Oikos.
 
 ## Criterio para la siguiente etapa
 
-Sólo con autorización explícita se podrá ejecutar una llamada v4 por cada uno de
-V01-V04, sin reintentos ni cambios intermedios. Se mantendrán los umbrales de 85%
-general, 100% crítico y cero alucinaciones aceptadas. Los holdouts no se revelan
+Sólo con autorización explícita se podrá ejecutar una invocación v4 por cada uno de
+V01-V04, sin reintentos manuales ni cambios intermedios. En esas ejecuciones el
+adaptador todavía permitía reintentos internos del SDK; ver la corrección más abajo.
+Se mantendrán los umbrales de 85% general, 100% crítico y cero alucinaciones
+aceptadas. Los holdouts no se revelan
 hasta que la regresión conocida cumpla.
 
 ## Intento externo del 24/09/2026
@@ -81,3 +83,75 @@ enviados. El ejecutor no relanzó las llamadas fallidas.
 El incidente está registrado en `intento_v4_2026-09-25.json`. El prompt sigue
 congelado y la evaluación de regresión v4 continúa pendiente de disponibilidad
 del modelo.
+
+## Reintento de V01 del 25/09/2026
+
+Con autorización para volver a intentar, se ejecutó V01 una vez más. Gemini
+respondió nuevamente `503 UNAVAILABLE` con el mensaje de alta demanda. No se
+creó resultado ni se enviaron V02-V04 en este intento. El ejecutor no reintentó
+manualmente. La afirmación inicial de un solo intento HTTP por invocación fue
+incorrecta: no se midieron los reintentos internos de esa ejecución.
+El detalle seguro está en `intento_v4_2026-09-25_reintento_v01.json`.
+
+## Prueba con otro documento: V03, 25/09/2026
+
+Para distinguir si el fallo dependía de V01, se ejecutó V03 una vez. El modelo
+respondió `429 RESOURCE_EXHAUSTED` e identificó el límite gratuito de 20
+solicitudes por día, proyecto y modelo para `gemini-3.5-flash`. No se generó
+resultado. Este fallo de cuota impide concluir si V03 también habría recibido
+un `503` por alta demanda. No se enviaron más documentos. El detalle seguro
+está en `intento_v4_2026-09-25_v03.json`.
+
+## Reintento de V01 del 26/09/2026
+
+Con una nueva autorización se ejecutó V01. El modelo volvió a responder `503
+UNAVAILABLE` por alta demanda tras la espera del cliente. No apareció un error
+de cuota en esta ejecución, pero eso no acredita el saldo disponible. No se
+obtuvo resultado evaluable ni se enviaron V02-V04. El intento está registrado
+en `intento_v4_2026-09-26.json`.
+
+## Diagnóstico controlado del 26/09/2026
+
+- La extracción local completó las 9 páginas de V01 (33.048 caracteres) y las
+  3 de V03 (6.451 caracteres), todas digitales. No hubo error de OCR.
+- El modelo, el prompt v4 y el esquema de salida respondieron a una entrada
+  sintética breve: una propuesta con esquema válido. No se envió un contrato
+  real en esta prueba.
+- V03, con el prompt v4 y el mismo modelo, respondió: 14 propuestas, 14 con
+  citas ancladas y 0 propuestas rechazadas por el validador. La revisión humana
+  de sus 5 controles aún está pendiente; esto no demuestra precisión.
+- **Corrección del 26/09:** la inspección inicial vio `retry_options=None` en el
+  cliente base, pero omitió que `langchain-google-genai` asigna por solicitud
+  `max_retries=6` cuando el adaptador no indica otro valor. La biblioteca podía
+  reintentar `429` y `503` hasta seis intentos HTTP por invocación. Los registros
+  anteriores cuentan invocaciones del ejecutor, no intentos HTTP; el número
+  exacto de intentos de cada ejecución histórica no se puede reconstruir.
+- V01 ya había funcionado con v3 y el mismo modelo. La evidencia descarta una
+  falla general de credenciales, modelo, salida estructurada u OCR. No alcanza
+  para distinguir con certeza una saturación intermitente de una dificultad de
+  capacidad/latencia asociada a la carga de V01 bajo v4.
+
+Durante aquel diagnóstico no se modificaron el prompt congelado, el adaptador
+ni la metodología de la regresión. Después de detectar los reintentos ocultos,
+el adaptador se ajustó a `max_retries=1` para las invocaciones futuras; el prompt
+permanece congelado. Se actualizó su huella en el manifiesto v4 para que el
+preflight reconozca este cambio operativo; el prompt y las reglas de extracción
+no cambiaron. El resultado de V03 está en `resultados_corpus_v4`; no se
+ejecutaron V02 ni V04 en aquella sesión.
+
+## Pruebas de V02 y V04 del 27/09/2026
+
+V02 falló inicialmente **antes de llamar a Gemini** porque el worktree no tenía
+configurado Tesseract en el entorno de ejecución. Se reutilizaron el ejecutable
+ya instalado y el modelo oficial de español de la prueba OCR anterior; su
+SHA-256 coincidió con la huella documentada. La lectura local recuperó las tres
+páginas por OCR, completa, con 11.750 caracteres. V04 se leyó digitalmente:
+dos páginas completas y 4.709 caracteres. No se instaló nada ni se modificó el
+PDF o el prompt.
+
+Con autorización para una llamada por documento, Gemini devolvió `503
+UNAVAILABLE` tanto para V02 como para V04. El adaptador tenía
+`max_retries=1`; no se repitieron esas llamadas ni se crearon resultados o
+plantillas de revisión. Los dos fallos, sumados a los de V01, muestran que el
+problema no está limitado a ese documento, pero no prueban la causa precisa.
+El registro seguro de esta tanda está en `intento_v4_2026-09-27_v02_v04.json`.

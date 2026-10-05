@@ -1,0 +1,260 @@
+{
+  "document": "V04",
+  "source_sha256": "a921c2a9db516211b82398c52ad937e7a881d0ec6d248334fdf6d483bd303d1c",
+  "prompt_version": "v5-experimental",
+  "prompt_sha256": "2412cf4b50128b8ec307d05be07c22639acadf2683eeefb91e2777b6c8c4a4ba",
+  "input_builder_sha256": "cae6d66f3690ff97145772c9be17c6cd02c90b398436773f1088207b9c1d75d9",
+  "verifier_version": "hu30-v4-tramos-v2",
+  "verifier_sha256": "27bee6a898e94a364b1c494f9f8155b93f536bd4fea23de52e457414ef365ad8",
+  "model": "gemini-3.5-flash-lite",
+  "source_characters": 4709,
+  "prompt_characters": 9029,
+  "result_path": "docs\\evaluaciones\\hu30\\resultados_v5\\resultado_v04_v5.json",
+  "started_at": "2026-09-30T19:34:19.052498+00:00",
+  "authorized_adapter_invocations": 1,
+  "automatic_retries_setting": 1,
+  "http_attempts_verified": false,
+  "pages": [
+    {
+      "page": 1,
+      "method": "digital",
+      "readable": true
+    },
+    {
+      "page": 2,
+      "method": "digital",
+      "readable": true
+    }
+  ],
+  "state": "completed",
+  "finished_at": "2026-09-30T19:34:23.965027+00:00",
+  "adapter_invocations": 1,
+  "model_proposals": 5,
+  "proposals": [
+    {
+      "numero": "5",
+      "titulo": "QUINTA",
+      "evidencias": [
+        {
+          "pagina": 1,
+          "texto": "QUINTA: Queda también convenido que quedarán a cargo del LOCADOR los"
+        },
+        {
+          "pagina": 2,
+          "texto": "conservación , de manera que pueda servir satisfactoriamente al uso que se le"
+        }
+      ],
+      "paginas": [
+        1,
+        2
+      ],
+      "texto_original": "QUINTA: Queda también convenido que quedarán a cargo del LOCADOR los\n\nconservación , de manera que pueda servir satisfactoriamente al uso que se le",
+      "resumen": "El locador está a cargo de los gastos de reparaciones necesarias para mantener el edificio en buen estado de conservación y uso.",
+      "categoria": "reparacion",
+      "responsable": "propietario",
+      "uso_clasificador": "operativa",
+      "condiciones": "Durante la vigencia del contrato, para mantener el edificio en buen estado de conservación y para que pueda servir satisfactoriamente al uso destinado, conforme al Código Civil.",
+      "referencias": [],
+      "confianza": 1.0
+    },
+    {
+      "numero": "6",
+      "titulo": "SEXTA",
+      "evidencias": [
+        {
+          "pagina": 2,
+          "texto": "SEXTA: Serán por cuenta del LOCADOR el pago de los impuestos, tasas,"
+        }
+      ],
+      "paginas": [
+        2
+      ],
+      "texto_original": "SEXTA: Serán por cuenta del LOCADOR el pago de los impuestos, tasas,",
+      "resumen": "El locador paga impuestos, tasas y contribuciones, excepto los de consumo por el uso del locatario y la parte proporcional de gastos comunes del edificio.",
+      "categoria": "expensa",
+      "responsable": "condicional",
+      "uso_clasificador": "operativa",
+      "condiciones": "Salvo aquellos impuestos y tasas que obedecieran al uso que al inmueble le diera el locatario y se facturen en virtud de los consumos, y la parte proporcional de los gastos comunes al edificio.",
+      "referencias": [],
+      "confianza": 1.0
+    },
+    {
+      "numero": "7",
+      "titulo": "SÉPTIMA",
+      "evidencias": [
+        {
+          "pagina": 2,
+          "texto": "SÉPTIMA: El LOCATARIO recibirá el inmueble desocupado, en perfecto"
+        }
+      ],
+      "paginas": [
+        2
+      ],
+      "texto_original": "SÉPTIMA: El LOCATARIO recibirá el inmueble desocupado, en perfecto",
+      "resumen": "El locatario recibe el inmueble en perfecto estado, se obliga a mantenerlo y devolverlo en iguales condiciones (excepto buen uso y tiempo) y se labrará acta e inventario inicial.",
+      "categoria": "devolucion",
+      "responsable": "inquilino",
+      "uso_clasificador": "contexto",
+      "condiciones": "Al momento de tomar posesión se labrará acta con fecha de inicio, estado de recepción e inventario. El locatario debe mantener y devolver el inmueble en las mismas condiciones, pagando deterioros salvo los de buen uso y acción del tiempo.",
+      "referencias": [],
+      "confianza": 1.0
+    },
+    {
+      "numero": "8",
+      "titulo": "OCTAVA",
+      "evidencias": [
+        {
+          "pagina": 2,
+          "texto": "OCTAVA: El LOCATARIO no podrá tener en la propiedad cosas que pudieran"
+        }
+      ],
+      "paginas": [
+        2
+      ],
+      "texto_original": "OCTAVA: El LOCATARIO no podrá tener en la propiedad cosas que pudieran",
+      "resumen": "El locatario tiene prohibido almacenar cosas que afecten la seguridad o realizar actos contrarios a normas municipales.",
+      "categoria": "servicio",
+      "responsable": "inquilino",
+      "uso_clasificador": "operativa",
+      "condiciones": "Se prohíbe tener en la propiedad cosas que afecten la seguridad de personas, objetos e instalaciones, o realizar actos que contraríen normas municipales.",
+      "referencias": [],
+      "confianza": 1.0
+    },
+    {
+      "numero": "9",
+      "titulo": "NOVENA",
+      "evidencias": [
+        {
+          "pagina": 2,
+          "texto": "NOVENA: El LOCATARIO, previa conformidad del LOCADOR, podrá efectuar"
+        }
+      ],
+      "paginas": [
+        2
+      ],
+      "texto_original": "NOVENA: El LOCATARIO, previa conformidad del LOCADOR, podrá efectuar",
+      "resumen": "El locatario, con conformidad previa del locador, puede hacer modificaciones indispensables para sus servicios sin obligación de devolver el inmueble a su estado anterior.",
+      "categoria": "reparacion",
+      "responsable": "inquilino",
+      "uso_clasificador": "operativa",
+      "condiciones": "Previa conformidad del locador.",
+      "referencias": [],
+      "confianza": 1.0
+    }
+  ],
+  "valid_clauses": [
+    {
+      "numero": "5",
+      "titulo": "QUINTA",
+      "evidencias": [
+        {
+          "pagina": 1,
+          "texto": "QUINTA: Queda también convenido que quedarán a cargo del LOCADOR los"
+        },
+        {
+          "pagina": 2,
+          "texto": "conservación, de manera que pueda servir satisfactoriamente al uso que se le"
+        }
+      ],
+      "paginas": [
+        1,
+        2
+      ],
+      "texto_original": "QUINTA: Queda también convenido que quedarán a cargo del LOCADOR los\n\nconservación, de manera que pueda servir satisfactoriamente al uso que se le",
+      "resumen": "El locador está a cargo de los gastos de reparaciones necesarias para mantener el edificio en buen estado de conservación y uso.",
+      "categoria": "reparacion",
+      "responsable": "propietario",
+      "uso_clasificador": "operativa",
+      "condiciones": "Durante la vigencia del contrato, para mantener el edificio en buen estado de conservación y para que pueda servir satisfactoriamente al uso destinado, conforme al Código Civil.",
+      "referencias": [],
+      "confianza": 1.0
+    },
+    {
+      "numero": "6",
+      "titulo": "SEXTA",
+      "evidencias": [
+        {
+          "pagina": 2,
+          "texto": "SEXTA: Serán por cuenta del LOCADOR el pago de los impuestos, tasas"
+        }
+      ],
+      "paginas": [
+        2
+      ],
+      "texto_original": "SEXTA: Serán por cuenta del LOCADOR el pago de los impuestos, tasas",
+      "resumen": "El locador paga impuestos, tasas y contribuciones, excepto los de consumo por el uso del locatario y la parte proporcional de gastos comunes del edificio.",
+      "categoria": "expensa",
+      "responsable": "condicional",
+      "uso_clasificador": "operativa",
+      "condiciones": "Salvo aquellos impuestos y tasas que obedecieran al uso que al inmueble le diera el locatario y se facturen en virtud de los consumos, y la parte proporcional de los gastos comunes al edificio.",
+      "referencias": [],
+      "confianza": 1.0
+    },
+    {
+      "numero": "7",
+      "titulo": "SÉPTIMA",
+      "evidencias": [
+        {
+          "pagina": 2,
+          "texto": "SÉPTIMA: El LOCATARIO recibirá el inmueble desocupado, en perfecto"
+        }
+      ],
+      "paginas": [
+        2
+      ],
+      "texto_original": "SÉPTIMA: El LOCATARIO recibirá el inmueble desocupado, en perfecto",
+      "resumen": "El locatario recibe el inmueble en perfecto estado, se obliga a mantenerlo y devolverlo en iguales condiciones (excepto buen uso y tiempo) y se labrará acta e inventario inicial.",
+      "categoria": "devolucion",
+      "responsable": "inquilino",
+      "uso_clasificador": "contexto",
+      "condiciones": "Al momento de tomar posesión se labrará acta con fecha de inicio, estado de recepción e inventario. El locatario debe mantener y devolver el inmueble en las mismas condiciones, pagando deterioros salvo los de buen uso y acción del tiempo.",
+      "referencias": [],
+      "confianza": 1.0
+    },
+    {
+      "numero": "8",
+      "titulo": "OCTAVA",
+      "evidencias": [
+        {
+          "pagina": 2,
+          "texto": "OCTAVA: El LOCATARIO no podrá tener en la propiedad cosas que pudieran"
+        }
+      ],
+      "paginas": [
+        2
+      ],
+      "texto_original": "OCTAVA: El LOCATARIO no podrá tener en la propiedad cosas que pudieran",
+      "resumen": "El locatario tiene prohibido almacenar cosas que afecten la seguridad o realizar actos contrarios a normas municipales.",
+      "categoria": "servicio",
+      "responsable": "inquilino",
+      "uso_clasificador": "operativa",
+      "condiciones": "Se prohíbe tener en la propiedad cosas que afecten la seguridad de personas, objetos e instalaciones, o realizar actos que contraríen normas municipales.",
+      "referencias": [],
+      "confianza": 1.0
+    },
+    {
+      "numero": "9",
+      "titulo": "NOVENA",
+      "evidencias": [
+        {
+          "pagina": 2,
+          "texto": "NOVENA: El LOCATARIO, previa conformidad del LOCADOR, podrá efectuar"
+        }
+      ],
+      "paginas": [
+        2
+      ],
+      "texto_original": "NOVENA: El LOCATARIO, previa conformidad del LOCADOR, podrá efectuar",
+      "resumen": "El locatario, con conformidad previa del locador, puede hacer modificaciones indispensables para sus servicios sin obligación de devolver el inmueble a su estado anterior.",
+      "categoria": "reparacion",
+      "responsable": "inquilino",
+      "uso_clasificador": "operativa",
+      "condiciones": "Previa conformidad del locador.",
+      "referencias": [],
+      "confianza": 1.0
+    }
+  ],
+  "rejected_proposals": [],
+  "evidence_incidents": [],
+  "source_preserved": true
+}

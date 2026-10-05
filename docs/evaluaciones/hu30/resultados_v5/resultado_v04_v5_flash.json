@@ -1,0 +1,36 @@
+{
+  "document": "V04",
+  "source_sha256": "a921c2a9db516211b82398c52ad937e7a881d0ec6d248334fdf6d483bd303d1c",
+  "prompt_version": "v5-experimental",
+  "prompt_sha256": "2412cf4b50128b8ec307d05be07c22639acadf2683eeefb91e2777b6c8c4a4ba",
+  "input_builder_sha256": "cae6d66f3690ff97145772c9be17c6cd02c90b398436773f1088207b9c1d75d9",
+  "verifier_version": "hu30-v4-tramos-v2",
+  "verifier_sha256": "27bee6a898e94a364b1c494f9f8155b93f536bd4fea23de52e457414ef365ad8",
+  "model": "gemini-3.5-flash",
+  "source_characters": 4709,
+  "prompt_characters": 9029,
+  "result_path": "docs\\evaluaciones\\hu30\\resultados_v5\\resultado_v04_v5_flash.json",
+  "started_at": "2026-10-02T13:08:31.883225+00:00",
+  "authorized_adapter_invocations": 1,
+  "automatic_retries_setting": 1,
+  "http_attempts_verified": false,
+  "pages": [
+    {
+      "page": 1,
+      "method": "digital",
+      "readable": true
+    },
+    {
+      "page": 2,
+      "method": "digital",
+      "readable": true
+    }
+  ],
+  "state": "failed",
+  "finished_at": "2026-10-02T13:08:33.610315+00:00",
+  "adapter_invocations": 1,
+  "error": {
+    "type": "ServerError",
+    "http_status": 503
+  }
+}

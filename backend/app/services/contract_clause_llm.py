@@ -42,6 +42,9 @@ def get_clause_model() -> ClauseModel:
         model=os.getenv("CONTRACT_CLAUSE_MODEL", DEFAULT_MODEL),
         google_api_key=key,
         temperature=0,
+        # Una invocación autorizada debe generar un solo intento HTTP.
+        # La biblioteca reintenta 429/503 por defecto si no se configura.
+        max_retries=1,
     )
     # El endpoint generateContent rechazó el esquema JSON nativo de esta salida
     # con INVALID_ARGUMENT. Tool calling conserva la estructura tipada y deja la

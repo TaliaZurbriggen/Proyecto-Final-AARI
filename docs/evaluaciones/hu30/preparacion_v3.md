@@ -81,8 +81,9 @@ Resultados locales:
 
 ## Regresión externa
 
-Con autorización explícita se ejecutó una llamada v3 por V01-V04, sin reintentos
-ni cambios intermedios. V3 obtuvo 19/23 controles completos (82,6%), 12/15
+Con autorización explícita se ejecutó una invocación v3 por V01-V04, sin
+reintentos manuales ni cambios intermedios. Los eventuales reintentos HTTP
+internos del SDK no se midieron. V3 obtuvo 19/23 controles completos (82,6%), 12/15
 críticos completos (80%) y cero alucinaciones aceptadas. Mejoró de forma material
 frente a v2, pero no alcanzó los umbrales de 85% general y 100% crítico.
 

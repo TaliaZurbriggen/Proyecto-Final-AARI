@@ -1,0 +1,40 @@
+{
+  "document": "V04",
+  "result": "docs/evaluaciones/hu30/resultados_flash_lite_v4/resultado_v04_2026-09-30.json",
+  "model": "gemini-3.5-flash-lite",
+  "controls": [
+    {
+      "id": "V04-E01",
+      "state": "omitido",
+      "matched_proposals": [],
+      "notes": "La propuesta 1 identificó reparaciones a cargo del locador y dos páginas, pero se descartó porque la evidencia atribuida a la página 2 no coincide con el texto allí. No se cuenta como cobertura aceptada."
+    },
+    {
+      "id": "V04-E02",
+      "state": "incorrecto",
+      "matched_proposals": ["propuesta 2"],
+      "notes": "La propuesta SEXTA pasó el anclaje usando como evidencia un fragmento de SÉPTIMA. Además, el resumen atribuye al locador los gastos comunes, aunque la coordinación del original es ambigua. Las etiquetas no_especificado/contexto no corrigen esa afirmación."
+    },
+    {
+      "id": "V04-E03",
+      "state": "completo",
+      "matched_proposals": ["propuesta 3", "propuesta 4"],
+      "notes": "Las dos propuestas de SÉPTIMA conservan mantenimiento, devolución, deterioros, excepción por buen uso y tiempo, y acta e inventario inicial."
+    },
+    {
+      "id": "V04-E04",
+      "state": "omitido",
+      "matched_proposals": [],
+      "notes": "No hubo propuesta para OCTAVA: seguridad y normas municipales."
+    },
+    {
+      "id": "V04-E05",
+      "state": "completo",
+      "matched_proposals": ["propuesta 5"],
+      "notes": "Conserva conformidad previa para modificaciones indispensables y la ausencia de obligación de restituir al estado anterior. La categoría reparacion requiere revisión de dominio antes de uso operativo."
+    }
+  ],
+  "accepted_hallucinations": 1,
+  "reviewed_by": "Codex - comparación visual del PDF público, sin validación jurídica ni de Oikos",
+  "reviewed_at": "2026-09-30"
+}

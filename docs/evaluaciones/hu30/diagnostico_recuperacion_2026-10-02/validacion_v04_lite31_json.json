@@ -1,0 +1,292 @@
+{
+  "case": "v04_lite31_json",
+  "document": "V04",
+  "model": "gemini-3.1-flash-lite",
+  "original_record_sha256": "4dbb0f4e0437b0633945694cf5f11992c7fa0c02a5992a70b43e3ea0322413fd",
+  "external_calls": 0,
+  "validated_at": "2026-10-02T19:13:30.718261+00:00",
+  "raw_text": "{\n  \"clausulas\": [\n    {\n      \"tramo_id\": 5,\n      \"titulo\": \"Mantenimiento y reparaciones\",\n      \"resumen\": \"El locador es responsable de los gastos de reparaciones necesarias para mantener el edificio en buen estado de conservación para su uso funcional.\",\n      \"categoria\": \"reparacion\",\n      \"responsable\": \"propietario\",\n      \"uso_clasificador\": \"operativa\",\n      \"condiciones\": \"Deben realizarse conforme a las prescripciones del Código Civil (arts. 1515 y ss.) durante la vigencia del contrato.\",\n      \"referencias\": [\n        \"Código Civil arts. 1515 y ss.\"\n      ],\n      \"confianza\": 1.0\n    },\n    {\n      \"tramo_id\": 6,\n      \"titulo\": \"Impuestos, tasas y gastos comunes\",\n      \"resumen\": \"El locador pagará impuestos, tasas y gastos comunes. El locatario se hace cargo de aquellos impuestos o tasas derivados de su uso y consumos específicos.\",\n      \"categoria\": \"expensa\",\n      \"responsable\": \"condicional\",\n      \"uso_clasificador\": \"operativa\",\n      \"condiciones\": \"El locador paga impuestos y expensas, salvo consumos específicos o impuestos derivados del uso del locatario.\",\n      \"referencias\": [],\n      \"confianza\": 0.9\n    },\n    {\n      \"tramo_id\": 7,\n      \"titulo\": \"Estado, inventario y devolución\",\n      \"resumen\": \"El locatario recibe el inmueble desocupado y en perfecto estado. Se obliga a mantenerlo y devolverlo en iguales condiciones, siendo responsable por deterioros, excepto el uso y acción del tiempo.\",\n      \"categoria\": \"devolucion\",\n      \"responsable\": \"inquilino\",\n      \"uso_clasificador\": \"contexto\",\n      \"condiciones\": \"Se requiere labrar acta de inicio con inventario completo y fecha de posesión.\",\n      \"referencias\": [],\n      \"confianza\": 1.0\n    },\n    {\n      \"tramo_id\": 8,\n      \"titulo\": \"Seguridad y normas municipales\",\n      \"resumen\": \"El locatario tiene prohibido almacenar objetos peligrosos para personas o instalaciones y realizar actos contrarios a normas municipales.\",\n      \"categoria\": \"otro\",\n      \"responsable\": \"inquilino\",\n      \"uso_clasificador\": \"operativa\",\n      \"condiciones\": null,\n      \"referencias\": [],\n      \"confianza\": 1.0\n    },\n    {\n      \"tramo_id\": 9,\n      \"titulo\": \"Modificaciones al inmueble\",\n      \"resumen\": \"El locatario puede realizar modificaciones indispensables con conformidad previa del locador, sin obligación de devolver el inmueble a su estado original.\",\n      \"categoria\": \"mantenimiento\",\n      \"responsable\": \"inquilino\",\n      \"uso_clasificador\": \"operativa\",\n      \"condiciones\": \"Requiere conformidad previa del locador.\",\n      \"referencias\": [],\n      \"confianza\": 1.0\n    }\n  ]\n}",
+  "format_valid": true,
+  "semantic_review": "pending",
+  "raw_json": {
+    "clausulas": [
+      {
+        "tramo_id": 5,
+        "titulo": "Mantenimiento y reparaciones",
+        "resumen": "El locador es responsable de los gastos de reparaciones necesarias para mantener el edificio en buen estado de conservación para su uso funcional.",
+        "categoria": "reparacion",
+        "responsable": "propietario",
+        "uso_clasificador": "operativa",
+        "condiciones": "Deben realizarse conforme a las prescripciones del Código Civil (arts. 1515 y ss.) durante la vigencia del contrato.",
+        "referencias": [
+          "Código Civil arts. 1515 y ss."
+        ],
+        "confianza": 1.0
+      },
+      {
+        "tramo_id": 6,
+        "titulo": "Impuestos, tasas y gastos comunes",
+        "resumen": "El locador pagará impuestos, tasas y gastos comunes. El locatario se hace cargo de aquellos impuestos o tasas derivados de su uso y consumos específicos.",
+        "categoria": "expensa",
+        "responsable": "condicional",
+        "uso_clasificador": "operativa",
+        "condiciones": "El locador paga impuestos y expensas, salvo consumos específicos o impuestos derivados del uso del locatario.",
+        "referencias": [],
+        "confianza": 0.9
+      },
+      {
+        "tramo_id": 7,
+        "titulo": "Estado, inventario y devolución",
+        "resumen": "El locatario recibe el inmueble desocupado y en perfecto estado. Se obliga a mantenerlo y devolverlo en iguales condiciones, siendo responsable por deterioros, excepto el uso y acción del tiempo.",
+        "categoria": "devolucion",
+        "responsable": "inquilino",
+        "uso_clasificador": "contexto",
+        "condiciones": "Se requiere labrar acta de inicio con inventario completo y fecha de posesión.",
+        "referencias": [],
+        "confianza": 1.0
+      },
+      {
+        "tramo_id": 8,
+        "titulo": "Seguridad y normas municipales",
+        "resumen": "El locatario tiene prohibido almacenar objetos peligrosos para personas o instalaciones y realizar actos contrarios a normas municipales.",
+        "categoria": "otro",
+        "responsable": "inquilino",
+        "uso_clasificador": "operativa",
+        "condiciones": null,
+        "referencias": [],
+        "confianza": 1.0
+      },
+      {
+        "tramo_id": 9,
+        "titulo": "Modificaciones al inmueble",
+        "resumen": "El locatario puede realizar modificaciones indispensables con conformidad previa del locador, sin obligación de devolver el inmueble a su estado original.",
+        "categoria": "mantenimiento",
+        "responsable": "inquilino",
+        "uso_clasificador": "operativa",
+        "condiciones": "Requiere conformidad previa del locador.",
+        "referencias": [],
+        "confianza": 1.0
+      }
+    ]
+  },
+  "model_proposals": 5,
+  "proposals": [
+    {
+      "tramo_id": 5,
+      "titulo": "Mantenimiento y reparaciones",
+      "resumen": "El locador es responsable de los gastos de reparaciones necesarias para mantener el edificio en buen estado de conservación para su uso funcional.",
+      "categoria": "reparacion",
+      "responsable": "propietario",
+      "uso_clasificador": "operativa",
+      "condiciones": "Deben realizarse conforme a las prescripciones del Código Civil (arts. 1515 y ss.) durante la vigencia del contrato.",
+      "referencias": [
+        "Código Civil arts. 1515 y ss."
+      ],
+      "confianza": 1.0
+    },
+    {
+      "tramo_id": 6,
+      "titulo": "Impuestos, tasas y gastos comunes",
+      "resumen": "El locador pagará impuestos, tasas y gastos comunes. El locatario se hace cargo de aquellos impuestos o tasas derivados de su uso y consumos específicos.",
+      "categoria": "expensa",
+      "responsable": "condicional",
+      "uso_clasificador": "operativa",
+      "condiciones": "El locador paga impuestos y expensas, salvo consumos específicos o impuestos derivados del uso del locatario.",
+      "referencias": [],
+      "confianza": 0.9
+    },
+    {
+      "tramo_id": 7,
+      "titulo": "Estado, inventario y devolución",
+      "resumen": "El locatario recibe el inmueble desocupado y en perfecto estado. Se obliga a mantenerlo y devolverlo en iguales condiciones, siendo responsable por deterioros, excepto el uso y acción del tiempo.",
+      "categoria": "devolucion",
+      "responsable": "inquilino",
+      "uso_clasificador": "contexto",
+      "condiciones": "Se requiere labrar acta de inicio con inventario completo y fecha de posesión.",
+      "referencias": [],
+      "confianza": 1.0
+    },
+    {
+      "tramo_id": 8,
+      "titulo": "Seguridad y normas municipales",
+      "resumen": "El locatario tiene prohibido almacenar objetos peligrosos para personas o instalaciones y realizar actos contrarios a normas municipales.",
+      "categoria": "otro",
+      "responsable": "inquilino",
+      "uso_clasificador": "operativa",
+      "condiciones": null,
+      "referencias": [],
+      "confianza": 1.0
+    },
+    {
+      "tramo_id": 9,
+      "titulo": "Modificaciones al inmueble",
+      "resumen": "El locatario puede realizar modificaciones indispensables con conformidad previa del locador, sin obligación de devolver el inmueble a su estado original.",
+      "categoria": "mantenimiento",
+      "responsable": "inquilino",
+      "uso_clasificador": "operativa",
+      "condiciones": "Requiere conformidad previa del locador.",
+      "referencias": [],
+      "confianza": 1.0
+    }
+  ],
+  "valid_clauses": [
+    {
+      "numero": "5",
+      "titulo": "Mantenimiento y reparaciones",
+      "evidencias": [
+        {
+          "pagina": 1,
+          "texto": "QUINTA: Queda también convenido que quedarán a cargo del LOCADOR los \ngastos que demanden las reparaciones que fuera necesario efectuar durante \nla vigencia del presente contrato para mantener el edificio en buen estado de"
+        },
+        {
+          "pagina": 2,
+          "texto": "conservación, de manera que pueda servir satisfactoriamente al uso que se le \ndestine, con arreglo a las prescripciones del Código Civil (arts. 1515 y ss.)"
+        }
+      ],
+      "paginas": [
+        1,
+        2
+      ],
+      "texto_original": "QUINTA: Queda también convenido que quedarán a cargo del LOCADOR los \ngastos que demanden las reparaciones que fuera necesario efectuar durante \nla vigencia del presente contrato para mantener el edificio en buen estado de\n\nconservación, de manera que pueda servir satisfactoriamente al uso que se le \ndestine, con arreglo a las prescripciones del Código Civil (arts. 1515 y ss.)",
+      "resumen": "El locador es responsable de los gastos de reparaciones necesarias para mantener el edificio en buen estado de conservación para su uso funcional.",
+      "categoria": "reparacion",
+      "responsable": "propietario",
+      "uso_clasificador": "operativa",
+      "condiciones": "Deben realizarse conforme a las prescripciones del Código Civil (arts. 1515 y ss.) durante la vigencia del contrato.",
+      "referencias": [
+        "Código Civil arts. 1515 y ss."
+      ],
+      "confianza": 1.0
+    },
+    {
+      "numero": "6",
+      "titulo": "Impuestos, tasas y gastos comunes",
+      "evidencias": [
+        {
+          "pagina": 2,
+          "texto": "SEXTA: Serán por cuenta del LOCADOR el pago de los impuestos, tasas, \ncontribuciones y gravámenes de cualquier naturaleza, existentes o a crearse, \nsalvo aquellos que obedecieran al uso que al inmueble le diera el LOCATARIO \ny se facturen en virtud de los consumos, y la parte proporcional de los gastos \ncomunes al edificio."
+        }
+      ],
+      "paginas": [
+        2
+      ],
+      "texto_original": "SEXTA: Serán por cuenta del LOCADOR el pago de los impuestos, tasas, \ncontribuciones y gravámenes de cualquier naturaleza, existentes o a crearse, \nsalvo aquellos que obedecieran al uso que al inmueble le diera el LOCATARIO \ny se facturen en virtud de los consumos, y la parte proporcional de los gastos \ncomunes al edificio.",
+      "resumen": "El locador pagará impuestos, tasas y gastos comunes. El locatario se hace cargo de aquellos impuestos o tasas derivados de su uso y consumos específicos.",
+      "categoria": "expensa",
+      "responsable": "condicional",
+      "uso_clasificador": "operativa",
+      "condiciones": "El locador paga impuestos y expensas, salvo consumos específicos o impuestos derivados del uso del locatario.",
+      "referencias": [],
+      "confianza": 0.9
+    },
+    {
+      "numero": "7",
+      "titulo": "Estado, inventario y devolución",
+      "evidencias": [
+        {
+          "pagina": 2,
+          "texto": "SÉPTIMA: El LOCATARIO recibirá el inmueble desocupado, en perfecto \nestado de conservación , obligándose a mantener y a devolver el inmueble en \nlas mismas condiciones y a pagar el importe de los deterioros ocasionados, \nsalvo los que resulten del buen uso y de la acción del tiempo. Al momento de \ntomar posesión del inmueble se labrará el acta respectiva en la que se \nconsigne • la fecha de inicio de la posesión, el estado de recepción, y el \ninventario completo de las instalaciones."
+        }
+      ],
+      "paginas": [
+        2
+      ],
+      "texto_original": "SÉPTIMA: El LOCATARIO recibirá el inmueble desocupado, en perfecto \nestado de conservación , obligándose a mantener y a devolver el inmueble en \nlas mismas condiciones y a pagar el importe de los deterioros ocasionados, \nsalvo los que resulten del buen uso y de la acción del tiempo. Al momento de \ntomar posesión del inmueble se labrará el acta respectiva en la que se \nconsigne • la fecha de inicio de la posesión, el estado de recepción, y el \ninventario completo de las instalaciones.",
+      "resumen": "El locatario recibe el inmueble desocupado y en perfecto estado. Se obliga a mantenerlo y devolverlo en iguales condiciones, siendo responsable por deterioros, excepto el uso y acción del tiempo.",
+      "categoria": "devolucion",
+      "responsable": "inquilino",
+      "uso_clasificador": "contexto",
+      "condiciones": "Se requiere labrar acta de inicio con inventario completo y fecha de posesión.",
+      "referencias": [],
+      "confianza": 1.0
+    },
+    {
+      "numero": "8",
+      "titulo": "Seguridad y normas municipales",
+      "evidencias": [
+        {
+          "pagina": 2,
+          "texto": "OCTAVA: El LOCATARIO no podrá tener en la propiedad cosas que pudieran \nafectar la seguridad de las personas, objetos e instalaciones, ni realizar actos \nque contraríen las normas municipales."
+        }
+      ],
+      "paginas": [
+        2
+      ],
+      "texto_original": "OCTAVA: El LOCATARIO no podrá tener en la propiedad cosas que pudieran \nafectar la seguridad de las personas, objetos e instalaciones, ni realizar actos \nque contraríen las normas municipales.",
+      "resumen": "El locatario tiene prohibido almacenar objetos peligrosos para personas o instalaciones y realizar actos contrarios a normas municipales.",
+      "categoria": "otro",
+      "responsable": "inquilino",
+      "uso_clasificador": "operativa",
+      "condiciones": null,
+      "referencias": [],
+      "confianza": 1.0
+    },
+    {
+      "numero": "9",
+      "titulo": "Modificaciones al inmueble",
+      "evidencias": [
+        {
+          "pagina": 2,
+          "texto": "NOVENA: El LOCATARIO, previa conformidad del LOCADOR, podrá efectuar \nen el inmueble que se contrata las modificaciones que sean indispensables \npara adaptarlo a sus servicios, sin que ello importe la obligación de su parte de \ndevolverlo a su anterior estado en ocasión de desocuparlo, el que será \ndevuelto en el estado en que se encuentre sin ulteriores responsabilidades por \nparte del LOCATARIO."
+        }
+      ],
+      "paginas": [
+        2
+      ],
+      "texto_original": "NOVENA: El LOCATARIO, previa conformidad del LOCADOR, podrá efectuar \nen el inmueble que se contrata las modificaciones que sean indispensables \npara adaptarlo a sus servicios, sin que ello importe la obligación de su parte de \ndevolverlo a su anterior estado en ocasión de desocuparlo, el que será \ndevuelto en el estado en que se encuentre sin ulteriores responsabilidades por \nparte del LOCATARIO.",
+      "resumen": "El locatario puede realizar modificaciones indispensables con conformidad previa del locador, sin obligación de devolver el inmueble a su estado original.",
+      "categoria": "mantenimiento",
+      "responsable": "inquilino",
+      "uso_clasificador": "operativa",
+      "condiciones": "Requiere conformidad previa del locador.",
+      "referencias": [],
+      "confianza": 1.0
+    }
+  ],
+  "rejected_proposals": [],
+  "incidents": [],
+  "assignments": [
+    {
+      "proposal_ordinal": 1,
+      "tramo_id": 5,
+      "numero": "5",
+      "paginas": [
+        1,
+        2
+      ]
+    },
+    {
+      "proposal_ordinal": 2,
+      "tramo_id": 6,
+      "numero": "6",
+      "paginas": [
+        2
+      ]
+    },
+    {
+      "proposal_ordinal": 3,
+      "tramo_id": 7,
+      "numero": "7",
+      "paginas": [
+        2
+      ]
+    },
+    {
+      "proposal_ordinal": 4,
+      "tramo_id": 8,
+      "numero": "8",
+      "paginas": [
+        2
+      ]
+    },
+    {
+      "proposal_ordinal": 5,
+      "tramo_id": 9,
+      "numero": "9",
+      "paginas": [
+        2
+      ]
+    }
+  ],
+  "has_usable_clauses": true
+}

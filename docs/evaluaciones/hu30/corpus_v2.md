@@ -1,8 +1,9 @@
 # HU30 - Corpus de generalización para el prompt v2
 
 **Preparado:** 24/09/2026. **Estado:** evaluación ejecutada y revisada. Se
-realizaron cuatro llamadas autorizadas, una por V01-V04, sin reintentos ni
-cambios del prompt. Ver [resultados consolidados](evaluacion_corpus_v2.md).
+realizaron cuatro invocaciones autorizadas, una por V01-V04, sin reintentos
+manuales ni cambios del prompt. Los eventuales reintentos HTTP internos del SDK
+no se midieron en esa evaluación. Ver [resultados consolidados](evaluacion_corpus_v2.md).
 
 ## Objetivo
 
@@ -125,7 +126,7 @@ no se utilizarán para reescribirla.
 ## Validaciones de esta preparación
 
 - Preflight y extracción local completa de V01-V04: aprobados.
-- Cuatro llamadas externas autorizadas: completadas, una por documento y sin reintentos.
+- Cuatro invocaciones externas autorizadas: completadas, una por documento y sin reintentos manuales; los intentos HTTP internos no se midieron.
 - Pruebas específicas de cláusulas y corpus: **14 aprobadas, 1 OCR opcional omitida**.
 - Suite completa del backend: **313 aprobadas, 23 omitidas**.
 - Frontend: **24 archivos y 105 pruebas aprobadas**; ESLint y build aprobados.

@@ -1,0 +1,19 @@
+{
+  "document": "V04",
+  "result": "docs/evaluaciones/hu30/asistida_2026-10-05.json",
+  "model": "gemini-3.5-flash-lite",
+  "prompt_version": "v10-asistida",
+  "controls": [
+    {"id": "V04-E01", "state": "parcial", "matched_proposals": ["propuesta 2"], "notes": "La evidencia conserva QUINTA completa entre páginas 1 y 2. El resumen conserva reparación, locador y vigencia, pero omite la aptitud para el uso destinado; condiciones sólo remite al Código Civil. Tener la obligación en la cita no hace completa su interpretación."},
+    {"id": "V04-E02", "state": "incorrecto", "matched_proposals": ["propuesta 3", "propuesta 4"], "notes": "La propuesta 3 elige los gastos comunes como excepción del pago del locador en resumen y condiciones, con confianza 1. La propuesta 4 es neutral y no asigna pagador, pero no anula la interpretación no respaldada que sigue presente en la propuesta 3."},
+    {"id": "V04-E03", "state": "completo", "matched_proposals": ["propuesta 5"], "notes": "Conserva mantenimiento, devolución, deterioros, excepción por buen uso y tiempo, acta e inventario con la evidencia íntegra de SÉPTIMA."},
+    {"id": "V04-E04", "state": "completo", "matched_proposals": ["propuesta 6"], "notes": "Conserva seguridad y normas municipales con OCTAVA completa. La categoría aviso merece revisión separada; los controles congelados no fijaban taxonomía."},
+    {"id": "V04-E05", "state": "completo", "matched_proposals": ["propuesta 7"], "notes": "Conserva conformidad previa del locador, modificaciones indispensables y tratamiento de devolución sin inventar obligación de restaurar."}
+  ],
+  "accepted_hallucinations": 1,
+  "out_of_scope_operational_proposals": ["propuesta 1: destino institucional, sugerido como operativa por el modelo; almacenado como contexto por el backend"],
+  "additional_notes": "Mide las propuestas del modelo antes de corrección humana. 'Aceptadas' significa que superaron validación estructural/procedencia, no que se habilitaron para reclamos. El JSON original mantiene semantic_review=pending como checkpoint histórico; esta revisión vive en un archivo separado. Los 7 bloques literales no cuentan como interpretaciones correctas. No hay habilitación operativa automática.",
+  "metrics": {"complete_controls": 3, "total_controls": 5, "general_coverage": 0.6, "complete_critical_controls": 1, "total_critical_controls": 3, "critical_recall": 0.3333333333333333, "passes_frozen_thresholds": false},
+  "reviewed_by": "Codex - comparación documental con la fuente pública y los controles congelados; sin validación jurídica ni de Oikos",
+  "reviewed_at": "2026-10-05"
+}

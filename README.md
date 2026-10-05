@@ -125,20 +125,37 @@ Alcance, decisiones, pruebas y pendientes:
 
 Desde el detalle de un contrato, administración puede solicitar el análisis de
 la última versión firmada. La lectura del PDF se realiza primero de forma local:
-usa texto digital por página y reserva Tesseract para páginas escaneadas. Gemini
-propone cláusulas con evidencia separada por página, resumen, tema, responsable,
-condiciones y uso sugerido (`operativa`, `contexto` o `excluir`). El backend
-ancla cada cita a una coincidencia única de la página y almacena el texto exacto
-del PDF; una paráfrasis o palabra cambiada se conserva como rechazo auditable.
-Ninguna propuesta se usa hasta que una persona la confirma o la edita y confirma.
-También se puede descartar.
+usa texto digital por página y reserva Tesseract para páginas escaneadas.
+El flujo vigente, aprobado el **05/10/2026**, es **asistido**: Gemini propone
+interpretaciones por identificador de tramo y el backend adjunta su evidencia
+local completa, incluidas continuaciones entre páginas. No acepta identificadores
+inexistentes y conserva las propuestas rechazadas para auditoría. Los bloques
+sin interpretación se conservan como texto literal pendiente, sin asignar pagador.
 
-El trabajo se persiste en una cola durable con recuperación de intentos. El
-clasificador recibe únicamente cláusulas confirmadas del contrato aplicable al
-inquilino, propiedad y fecha de creación del reclamo, y guarda el contexto exacto
-utilizado. Las migraciones `backend/migrations/23_clausulas_contractuales.sql` y
+La opción **Extraer sin IA** realiza esa lectura local sin enviar el contrato
+a Google. Permite continuar aunque el servicio externo falle; no interpreta
+automáticamente obligaciones. Todas las propuestas quedan como contexto.
+**Confirmar como contexto no habilita una regla**: para que aporte al clasificador,
+administración debe editarla y elegir expresamente `Puede aportar al clasificador`.
+La revisión debe contrastar resumen, responsable y excepciones con el PDF.
+
+El trabajo se persiste en una cola durable con historial privado de intentos.
+Un error de Gemini termina ese intento, sin reintentos automáticos del proveedor;
+una respuesta tardía no reemplaza una ejecución nueva. El respaldo local no borra
+revisiones ni habilitaciones anteriores. El clasificador recibe únicamente
+cláusulas editadas con activación explícita del contrato aplicable al inquilino,
+propiedad y fecha del reclamo, y guarda el contexto exacto utilizado.
+Las migraciones `backend/migrations/23_clausulas_contractuales.sql` y
 `backend/migrations/24_evidencia_clausulas_contractuales.sql` fueron aplicadas al
-Supabase compartido el **21/09/2026**; no repetirlas al actualizar la rama.
+Supabase compartido el **21/09/2026**. La migración aditiva
+`25_extraccion_asistida_literal.sql` fue aplicada con autorización el **05/10/2026**:
+agrega origen e historial, con RLS y sin borrar datos. No repetirlas al actualizar
+la rama; ver la [guía de migraciones](backend/migrations/README.md).
+
+La ruta externa actual utiliza `CONTRACT_CLAUSE_MODEL=gemini-3.5-flash-lite`, SDK
+oficial y salida JSON validada localmente, con una petición HTTP por intento.
+El ensayo público respondió HTTP 200, pero **no alcanzó los umbrales de calidad
+automática del corpus**. Esto no se presenta como interpretación autónoma validada.
 
 Para OCR local se requieren `pypdfium2`, `pytesseract` y el motor Tesseract con
 idioma español. Docker lo instala automáticamente. En Windows, instalar
@@ -155,6 +172,19 @@ TESSDATA_PREFIX=C:\ruta\a\tessdata
 `TESSDATA_PREFIX` debe apuntar a la carpeta que contiene `spa.traineddata`; no
 se versiona ese archivo binario dentro del repositorio.
 
+En este equipo quedaron configurados el motor y español en el `.env` compartido
+de `backend/`. Si se levanta desde `backend/` del worktree HU30, cargarlo explícitamente
+(Git Bash):
+
+```bash
+../../../backend/venv/Scripts/python.exe -m uvicorn app.main:app --reload --env-file ../../../backend/.env
+```
+
+Luego levantar `frontend/` con `npm run dev` y abrir `http://localhost:5173/contratos`.
+Reiniciar el backend si ya estaba ejecutándose antes de estos cambios. Esta
+configuración local de OCR no se comparte por Git; otro equipo debe instalar
+Tesseract/español y configurar sus propias rutas.
+
 Por privacidad, `CONTRACT_ANALYSIS_EXTERNAL_ENABLED=false` es el valor seguro y
 predeterminado. Mientras permanezca así, ningún contrato se envía a Gemini. Las
 pruebas automatizadas usan modelos simulados; una evaluación externa con material
@@ -162,6 +192,8 @@ anonimizado requiere autorización específica y habilitación temporal.
 
 Alcance, decisiones, validaciones y pendientes:
 [`docs/hu30_extraccion_clausulas.md`](docs/hu30_extraccion_clausulas.md).
+Resultados actuales y límites:
+[`flujo asistido del 05/10`](docs/evaluaciones/hu30/flujo_asistido_2026-10-05.md).
 
 ### Gestión de propietarios
 
@@ -662,16 +694,22 @@ entorno compartido en la nube.
 - **HU29 / AARI-318 finalizada:** módulo contractual integrado, migración y
   Storage privado validados.
 - **HU30 / AARI-319 en validación:** extracción local/OCR, análisis
-  estructurado, revisión humana e integración del contexto contractual ya
-  implementados en su rama. Las migraciones 23 y 24 están aplicadas; las suites
-  locales, PostgreSQL y OCR están aprobados. V3 fue evaluada en cuatro modelos
+  asistido, respaldo literal sin IA, revisión humana e integración del contexto
+  contractual implementados en su rama. Las migraciones 23, 24 y 25 están
+  aplicadas; las suites locales, PostgreSQL y OCR están aprobados. V3 fue evaluada en cuatro modelos
   públicos con una llamada por documento y sin reintentos: obtuvo 19/23 controles
   completos, 12/15 críticos y cero alucinaciones aceptadas. Mejoró frente a v2,
-  pero aún no habilita los holdouts ni el cierre de la historia. V4 está en
-  preparación local para dividir reglas, acortar evidencia y conservar
-  coordinaciones ambiguas. Su primer intento externo fue bloqueado por el límite
-  gratuito diario. El segundo intento, el 25/09, recibió `503 UNAVAILABLE` en
-  V01 y V02; todavía no hay resultados evaluables de v4.
+  pero aún no habilita los holdouts ni el cierre de la historia. Las iteraciones
+  posteriores siguen fuera de producción: V04 no superó los controles
+  semánticos y varios ensayos recibieron `503 UNAVAILABLE`. El diagnóstico
+  directo del 02/10 también recibió 503 sin LangChain, herramientas ni esquema
+  obligatorio: una solicitud HTTP verificada, cero reintentos. Suite local
+  actual: 520 aprobadas y 23 omitidas; frontend: 112 aprobadas, lint y build
+  correctos. El flujo `v10-asistida` respondió HTTP 200 con V04 público, pero su
+  revisión semántica obtuvo 60% general y 33,3% crítico: no acredita los umbrales
+  automáticos. Confirmar como contexto no activa una cláusula; sólo una edición
+  que habilite expresamente su uso permite aportar a reclamos. Pendiente PR,
+  revisión y merge. Ver [alcance y resultados actuales de HU30](docs/evaluaciones/hu30/flujo_asistido_2026-10-05.md).
 - **Inicio previsto de Tobías:** AARI-116, base reutilizable para las
   notificaciones de AARI-135 y AARI-157.
 - **Seguimiento:** los story points conservan las estimaciones académicas

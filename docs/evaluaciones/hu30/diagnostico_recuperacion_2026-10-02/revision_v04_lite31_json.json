@@ -1,0 +1,34 @@
+{
+  "document": "V04",
+  "result": "docs/evaluaciones/hu30/diagnostico_recuperacion_2026-10-02/v04_lite31_json.json",
+  "local_validation": "docs/evaluaciones/hu30/diagnostico_recuperacion_2026-10-02/validacion_v04_lite31_json.json",
+  "model": "gemini-3.1-flash-lite",
+  "prompt_version": "v10-experimental",
+  "controls": [
+    {
+      "id": "V04-E01", "state": "completo", "matched_proposals": ["propuesta 1"],
+      "notes": "Conserva gastos de reparaciones necesarias del locador, aptitud para uso funcional, vigencia y referencia al Código Civil; QUINTA se materializa completa entre páginas 1 y 2."
+    },
+    {
+      "id": "V04-E02", "state": "incorrecto", "matched_proposals": ["propuesta 2"],
+      "notes": "Asigna los gastos comunes al locador y además atribuye al locatario impuestos o tasas derivados de su uso y consumos. La fuente no resuelve inequívocamente el alcance de la coordinación ni atribuye expresamente otro pagador por la excepción. Uso operativa y confianza 0.9 no son salvaguardas semánticas."
+    },
+    {
+      "id": "V04-E03", "state": "parcial", "matched_proposals": ["propuesta 3"],
+      "notes": "Conserva mantenimiento, devolución, deterioros, acta, fecha e inventario, pero resume la excepción como 'el uso y acción del tiempo' omitiendo el calificativo 'buen uso'. Se considera parcial conservadoramente porque amplía la excepción en el campo interpretativo, aunque la evidencia adjunta sí conserve la redacción original."
+    },
+    {
+      "id": "V04-E04", "state": "completo", "matched_proposals": ["propuesta 4"],
+      "notes": "Conserva la prohibición de objetos que comprometan la seguridad y actos contrarios a normas municipales, con OCTAVA íntegra."
+    },
+    {
+      "id": "V04-E05", "state": "completo", "matched_proposals": ["propuesta 5"],
+      "notes": "Conserva conformidad previa, modificaciones indispensables y ausencia de obligación de restaurar al estado original, respaldadas por NOVENA íntegra."
+    }
+  ],
+  "accepted_hallucinations": 2,
+  "out_of_scope_operational_proposals": [],
+  "additional_notes": "Dos propuestas con alteraciones de alcance no respaldadas: la 2 atribuye pagos y resuelve coordinación ambigua; la 3 amplía la excepción de buen uso. Se cuentan por propuesta, no por cada frase problemática. La referencia normativa de QUINTA sí existe. Una sola corrida no prueba estabilidad ni generalización. La validación de formato omitida inicialmente por un error del ejecutor fue agregada en un archivo lateral con cero llamadas externas; el resultado original no se sobrescribió.",
+  "reviewed_by": "Codex - comparación documental con fuente pública y controles validados; sin validación jurídica ni de Oikos",
+  "reviewed_at": "2026-10-02"
+}

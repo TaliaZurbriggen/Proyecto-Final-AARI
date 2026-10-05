@@ -1,0 +1,39 @@
+{
+  "document": "V03",
+  "result": "docs\\evaluaciones\\hu30\\resultados_corpus_v4\\resultado_v03_v4.json",
+  "controls": [
+    {
+      "id": "V03-E01",
+      "state": "pendiente",
+      "matched_proposals": [],
+      "notes": ""
+    },
+    {
+      "id": "V03-E02",
+      "state": "pendiente",
+      "matched_proposals": [],
+      "notes": ""
+    },
+    {
+      "id": "V03-E03",
+      "state": "pendiente",
+      "matched_proposals": [],
+      "notes": ""
+    },
+    {
+      "id": "V03-E04",
+      "state": "pendiente",
+      "matched_proposals": [],
+      "notes": ""
+    },
+    {
+      "id": "V03-E05",
+      "state": "pendiente",
+      "matched_proposals": [],
+      "notes": ""
+    }
+  ],
+  "accepted_hallucinations": null,
+  "reviewed_by": null,
+  "reviewed_at": null
+}

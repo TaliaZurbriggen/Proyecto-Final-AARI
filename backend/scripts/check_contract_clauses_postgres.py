@@ -1,4 +1,4 @@
-"""HU30: preflight, prueba aislada o aplicación explícita de migraciones 23/24."""
+"""HU30: preflight, prueba aislada o aplicación explícita de migraciones 23/24/25."""
 
 import argparse
 import os
@@ -9,7 +9,7 @@ from sqlalchemy import create_engine, text
 
 
 ROOT = Path(__file__).resolve().parents[1]
-TABLES = ("contrato_analisis", "contrato_clausulas", "contrato_clausula_eventos")
+TABLES = ("contrato_analisis", "contrato_clausulas", "contrato_clausula_eventos", "contrato_analisis_intentos")
 
 
 def main():
@@ -41,10 +41,18 @@ def main():
                       AND column_name='evidencias'
                 )
             """)).scalar_one()
+            assisted = connection.execute(text("""
+                SELECT to_regclass('public.contrato_analisis_intentos') IS NOT NULL
+                  AND EXISTS (SELECT 1 FROM information_schema.columns
+                    WHERE table_schema='public' AND table_name='contrato_analisis' AND column_name='modo')
+                  AND EXISTS (SELECT 1 FROM information_schema.columns
+                    WHERE table_schema='public' AND table_name='contrato_clausulas' AND column_name='origen')
+            """)).scalar_one()
             print("Conexión PostgreSQL: OK.")
             print("Migración 20:", "presente" if contracts else "FALTA")
             print("Migración 23:", "presente" if present else "pendiente")
             print("Migración 24:", "presente" if evidence else "pendiente")
+            print("Migración 25:", "presente" if assisted else "pendiente")
         if args.mode == "test":
             os.environ["RUN_CLAUSES_POSTGRES_TESTS"] = "1"
             import pytest
@@ -64,8 +72,10 @@ def main():
                     print("No se aplica 24: primero debe existir la migración 23.")
                     return 2
                 migrations.append("24_evidencia_clausulas_contractuales.sql")
+            if not assisted:
+                migrations.append("25_extraccion_asistida_literal.sql")
             if not migrations:
-                print("No se repiten las migraciones 23/24.")
+                print("No se repiten las migraciones 23/24/25.")
                 return 0
             raw = engine.raw_connection()
             try:
@@ -88,7 +98,7 @@ def main():
                 """), {"tables": list(TABLES)}).all()
                 if rows:
                     print("RLS y ausencia de lectura pública:",
-                          "OK" if len(rows) == 3 and all(row[1:] == (True, False, False) for row in rows) else "REVISAR")
+                          "OK" if len(rows) == len(TABLES) and all(row[1:] == (True, False, False) for row in rows) else "REVISAR")
         return 0
     except Exception as error:
         print(f"No se pudo completar la validación HU30 ({type(error).__name__}).")

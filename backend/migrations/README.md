@@ -391,3 +391,40 @@ permisos y el conteo anterior; ejecutar las pruebas PostgreSQL autorizadas de
 reapertura válida/inválida, historial y ambos órdenes de concurrencia con la
 baja. No confundir los controles de texto locales con pruebas SQL reales.
 Detalles y resultados en `docs/hu7_validacion_supabase.md`.
+
+## HU30: migración aditiva 25 — extracción asistida y respaldo literal
+
+**Aplicada con autorización al Supabase compartido de desarrollo el 05/10/2026.**
+Las migraciones 23 y 24 ya estaban presentes. No repetir 25 por integrante ni
+por pull: agrega columnas sin `IF NOT EXISTS` y debe ejecutarse una sola vez.
+En otra base, respetar el orden 20 → 23 → 24 → 25.
+
+`25_extraccion_asistida_literal.sql` agrega:
+
+- `contrato_analisis.modo`, `ejecucion_id` y `propuestas_fuente_rechazadas`.
+- `contrato_clausulas.origen` (`ia` o `literal`).
+- `contrato_analisis_intentos`: modelo, versiones, estado, resultado y tiempos
+  por ejecución. RLS habilitado y permisos revocados a public/anon/authenticated.
+
+No elimina contratos, cláusulas, eventos ni revisiones. El backend accede a la
+auditoría con su conexión privada y las rutas de revisión siguen restringidas
+a administración. No introducir políticas públicas para facilitar la prueba.
+Una respuesta tardía se conserva en su intento, pero no reemplaza la ejecución
+actual; los fallos externos requieren una nueva solicitud explícita.
+
+Desde `backend/` del worktree, el comprobador acepta el `.env` compartido:
+
+```bash
+../../../backend/venv/Scripts/python.exe scripts/check_contract_clauses_postgres.py --env-file ../../../backend/.env --mode check
+```
+
+`--mode apply` aplica solamente las migraciones faltantes y requiere aprobación
+explícita. `--mode test` crea un esquema aislado dentro de una transacción y
+hace rollback al terminar; también requiere autorización. No analiza contratos
+reales ni llama a Gemini. La comprobación final del 05/10 aprobó **1 prueba**,
+incluyendo preservación, revisiones, historial, respuestas tardías, falla terminal,
+activación explícita y RLS. El esquema de prueba no queda instalado.
+
+El resultado detallado está en
+`docs/evaluaciones/hu30/flujo_asistido_2026-10-05.md`. El éxito técnico no acredita
+la precisión semántica de las interpretaciones propuestas por Gemini.

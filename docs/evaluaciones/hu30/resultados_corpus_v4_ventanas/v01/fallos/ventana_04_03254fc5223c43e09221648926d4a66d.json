@@ -1,0 +1,18 @@
+{
+  "document": "V01",
+  "window_index": 4,
+  "pages": [
+    4,
+    5
+  ],
+  "source_sha256": "f20f157a6686a80ad1aff69c45d6b5335b3a7092032b26b77e48b8802a81da2c",
+  "prompt_version": "v4",
+  "model": "gemini-3.5-flash",
+  "attempted_at": "2026-09-27T17:07:01.306443+00:00",
+  "elapsed_seconds": 13.882,
+  "error_type": "ServerError",
+  "provider_status": 503,
+  "provider_code": "UNAVAILABLE",
+  "result_files_created": false,
+  "privacy": "No se registran claves ni texto contractual."
+}

@@ -1,0 +1,43 @@
+{
+  "experiment": "hu30-v4-interactions-v04",
+  "document": "V04",
+  "source": "output/pdf/hu30_corpus/validation/V04_modelo_inmueble_dgn_paginas_8_9.pdf",
+  "source_sha256": "a921c2a9db516211b82398c52ad937e7a881d0ec6d248334fdf6d483bd303d1c",
+  "model": "gemini-3.5-flash",
+  "prompt_version": "v4",
+  "extractor_version": "hu30-v4",
+  "transport": "interactions",
+  "response_method": "json_schema",
+  "store": false,
+  "output_schema_sha256": "31cf4512e872cd09045c1fbc7654ece35a7017b723ddd719661dd6a0801c324c",
+  "frozen_files": [
+    {
+      "path": "backend/prompts/prompt_extraccion_clausulas_v4.md",
+      "sha256": "cd017ef10aa4d62ebf29af5313d9a795d259f03779e1e80fe4e5bc47711b4ce5"
+    },
+    {
+      "path": "backend/app/services/contract_clause_llm.py",
+      "sha256": "8efa6a65c162e36cb09ed1612083f41d9a65f65c1e961ab05651e3ec938166ff"
+    },
+    {
+      "path": "backend/app/services/contract_clause_evidence.py",
+      "sha256": "e179ee2669212c0c8a1b35ead32a0cac4d3c0972437648ac7af144ecb7cbef2d"
+    }
+  ],
+  "executed_at": "2026-09-29T00:29:20.197696+00:00",
+  "pages": 2,
+  "local_extraction_complete": true,
+  "local_extraction_characters": 4709,
+  "external_requests": 1,
+  "automatic_retries": 0,
+  "generation_config": {
+    "max_output_tokens": 16384
+  },
+  "review_state": "not_applicable_provider_rejected",
+  "production_integration_changed": false,
+  "http_status": 400,
+  "status": "provider_error",
+  "provider_code": "invalid_request",
+  "provider_message": "Request contains an invalid argument.",
+  "elapsed_seconds": 14.374
+}

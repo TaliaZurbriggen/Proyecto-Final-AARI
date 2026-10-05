@@ -13,8 +13,9 @@ from app.schemas.contratos import (
     ContractCreate, ContractEnd, ContractResponse, ContractsPage,
     ContractUpdate, DocumentDownload,
 )
-from app.schemas.clausulas_contrato import (
-    ClauseReviewRequest, ContractAnalysisResponse,
+from app.schemas.analisis_asistido import (
+    AssistedAnalysisResponse as ContractAnalysisResponse, ContractAnalysisRequest,
+    AssistedReviewRequest as ClauseReviewRequest,
 )
 from app.services.contract_clause_service import ContractClauseService
 from app.services.contract_errors import ContractError
@@ -111,10 +112,11 @@ def end_contract(contract_id: UUID, payload: ContractEnd,
 )
 def request_clause_analysis(
     contract_id: UUID, document_id: UUID,
+    payload: ContractAnalysisRequest = ContractAnalysisRequest(),
     user: AuthenticatedUser = Depends(contract_user),
     service: ContractClauseService = Depends(get_contract_clause_service),
 ):
-    return service.request(contract_id, document_id, user)
+    return service.request(contract_id, document_id, user, mode=payload.modo)
 
 
 @router.get(

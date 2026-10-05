@@ -11,6 +11,7 @@ from pypdf import PdfReader
 
 MIN_DIGITAL_CHARACTERS = 80
 MAX_MODEL_CHARACTERS = 90_000
+OCR_RENDER_SCALE = 4.0
 
 
 class ContractTextError(Exception):
@@ -36,7 +37,7 @@ class TesseractOcrEngine:
         try:
             document = pdfium.PdfDocument(pdf)
             page = document[page_index]
-            image = page.render(scale=2.2).to_pil()
+            image = page.render(scale=OCR_RENDER_SCALE).to_pil()
             return pytesseract.image_to_string(image, lang=language)
         except Exception as error:
             raise ContractTextError("No se pudo leer una página escaneada con OCR.") from error

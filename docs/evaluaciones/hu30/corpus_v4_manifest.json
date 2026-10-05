@@ -3,6 +3,13 @@
   "purpose": "Validar reglas atómicas, evidencia breve y conservación de ambigüedades de HU30 v4 sobre la regresión conocida antes de revelar los holdouts.",
   "base_corpus": "docs/evaluaciones/hu30/corpus_v2_manifest.json",
   "results_directory": "docs/evaluaciones/hu30/resultados_corpus_v4",
+  "windowed_evaluation": {
+    "strategy": "overlapping_page_windows",
+    "allowed_documents": ["V01"],
+    "pages_per_window": 2,
+    "overlap_pages": 1,
+    "results_directory": "docs/evaluaciones/hu30/resultados_corpus_v4_ventanas"
+  },
   "prompt_freeze": {
     "prompt_version": "v4",
     "extractor_version": "hu30-v4",
@@ -15,7 +22,7 @@
       },
       {
         "path": "backend/app/services/contract_clause_llm.py",
-        "sha256": "77ff35bf2d242fabaf92214989bc2cec8efeb02adcfe436cee84d86a04009821"
+        "sha256": "8efa6a65c162e36cb09ed1612083f41d9a65f65c1e961ab05651e3ec938166ff"
       },
       {
         "path": "backend/app/services/contract_clause_evidence.py",

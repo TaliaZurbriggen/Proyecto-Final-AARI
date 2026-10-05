@@ -32,6 +32,7 @@ def test_migration_worker_review_context_rls_and_rollback():
     for migration in (
         "23_clausulas_contractuales.sql",
         "24_evidencia_clausulas_contractuales.sql",
+        "25_extraccion_asistida_literal.sql",
     ):
         sql = (Path(__file__).parents[1] / "migrations" / migration).read_text(encoding="utf-8")
         sql = "\n".join(line for line in sql.splitlines() if line.strip() not in {"begin;", "commit;"})
@@ -101,10 +102,13 @@ def test_migration_worker_review_context_rls_and_rollback():
                 job.id, pages=[{"pagina": 1, "metodo": "digital", "legible": True}],
                 clauses=[clause, context_clause], rejected=[rejected],
                 complete=True, incidents=["Una propuesta requiere revisión."],
+                execution_id=job.execution_id,
             )
             stored = repository.get(contract_id, analysis_id)
             assert stored["propuestas_rechazadas"][0]["ordinal"] == 3
             assert stored["clausulas"][0]["evidencias"][0]["pagina"] == 1
+            assert stored["clausulas"][0]["uso_clasificador"] == "contexto"
+            assert stored["clausulas"][0]["habilitada_para_reclamos"] is False
             reviewed = repository.review(
                 contract_id, stored["clausulas"][0]["id"],
                 ClauseReviewRequest(accion="confirmar", revision=1), uid(1),
@@ -114,9 +118,77 @@ def test_migration_worker_review_context_rls_and_rollback():
                 ClauseReviewRequest(accion="confirmar", revision=1), uid(1),
             )
             assert reviewed["clausulas"][0]["estado_revision"] == "confirmada"
+            assert reviewed["clausulas"][0]["habilitada_para_reclamos"] is False
+            assert repository.confirmed_for_claim(claim_id) == []
+            enabled = repository.review(
+                contract_id, stored["clausulas"][0]["id"],
+                ClauseReviewRequest(
+                    accion="editar", revision=2, uso_clasificador="operativa",
+                ), uid(1),
+            )
+            assert enabled["clausulas"][0]["habilitada_para_reclamos"] is True
             context = repository.confirmed_for_claim(claim_id)
             assert len(context) == 1 and context[0]["documento_version"] == 1
             assert context[0]["responsable"] == "condicional"
+
+            # El respaldo literal se incorpora sin borrar ni reemplazar lo revisado.
+            with pytest.raises(Exception):
+                repository.request_analysis(contract_id, document_id, uid(1),
+                    extractor="asistida", prompt="v10", model="fake", mode="ia")
+            assert repository.request_analysis(contract_id, document_id, uid(1),
+                extractor="asistida", prompt="sin-interpretacion", model="local", mode="literal") == analysis_id
+            literal_job = repository.claim_due(limit=1)[0]
+            assert literal_job.mode == "literal" and literal_job.execution_id != job.execution_id
+            # Una respuesta atrasada del primer intento se audita, pero no modifica filas.
+            assert repository.complete(job.id, pages=[], clauses=[], rejected=[],
+                complete=True, incidents=[], execution_id=job.execution_id) is False
+            literal = ExtractedClause(numero="SEXTA", evidencias=[{"pagina": 2, "texto": "SEXTA: Texto local."}],
+                resumen="Interpretación pendiente.", categoria="otro", responsable="no_especificado",
+                uso_clasificador="contexto", confianza=0)
+            assert repository.complete(literal_job.id, pages=[{"pagina": 1, "metodo": "digital", "legible": True},
+                {"pagina": 2, "metodo": "digital", "legible": True}], clauses=[literal], rejected=[],
+                complete=True, incidents=[], origins=["literal"], execution_id=literal_job.execution_id)
+            after_literal = repository.get(contract_id, analysis_id)
+            assert after_literal["clausulas"][0]["id"] == stored["clausulas"][0]["id"]
+            assert after_literal["clausulas"][0]["revision"] == 3
+            assert after_literal["clausulas"][0]["habilitada_para_reclamos"] is True
+            assert len(after_literal["clausulas"]) == 3
+            assert len(after_literal["historial_intentos"]) == 2
+            assert after_literal["propuestas_rechazadas"] == stored["propuestas_rechazadas"]
+            assert len(repository.confirmed_for_claim(claim_id)) == 1
+            # No se repite automáticamente un respaldo completado.
+            repository.request_analysis(contract_id, document_id, uid(1),
+                extractor="asistida", prompt="sin-interpretacion", model="local", mode="literal")
+            assert repository.claim_due(limit=1) == []
+            # Un error anterior a la migración 25 conserva su snapshot al reintentar.
+            legacy_doc, legacy_analysis = uid(41), uid(42)
+            connection.execute(text("""INSERT INTO contrato_documentos VALUES
+                (:id,:contract,2,'private/legacy.pdf',true)"""), {"id": legacy_doc, "contract": contract_id})
+            connection.execute(text("""INSERT INTO contrato_analisis
+                (id,contrato_id,documento_id,estado,extractor_version,prompt_version,modelo,intentos,ultimo_error)
+                VALUES (:id,:contract,:doc,'fallido','antiguo','v4','fake',1,'Error anterior preservado.')
+            """), {"id": legacy_analysis, "contract": contract_id, "doc": legacy_doc})
+            repository.request_analysis(contract_id, legacy_doc, uid(1),
+                extractor="asistida", prompt="sin-interpretacion", model="local", mode="literal")
+            legacy = repository.get(contract_id, legacy_analysis)
+            assert legacy["historial_intentos"][0]["error"] == "Error anterior preservado."
+            legacy_job = repository.claim_due(limit=1)[0]
+            assert repository.fail(legacy_job.id, legacy_job.attempt_number,
+                "Error local controlado.", execution_id=legacy_job.execution_id)
+            assert repository.claim_due(limit=1) == []  # Sin reintentos automáticos por falla.
+            assert len(repository.get(contract_id, legacy_analysis)["historial_intentos"]) == 2
+
+            unrelated_claim_id, expired_claim_id = uid(13), uid(14)
+            connection.execute(text("""
+                INSERT INTO reclamos (id,inquilino_id,propiedad_id,creado_en)
+                VALUES (:id,:tenant,:property,'2026-06-01T12:00:00Z')
+            """), {"id": unrelated_claim_id, "tenant": uid(20), "property": uid(31)})
+            connection.execute(text("""
+                INSERT INTO reclamos (id,inquilino_id,propiedad_id,creado_en)
+                VALUES (:id,:tenant,:property,'2027-01-01T12:00:00Z')
+            """), {"id": expired_claim_id, "tenant": uid(20), "property": uid(30)})
+            assert repository.confirmed_for_claim(unrelated_claim_id) == []
+            assert repository.confirmed_for_claim(expired_claim_id) == []
 
             security = connection.execute(text("""
                 SELECT c.relname, c.relrowsecurity,
@@ -124,9 +196,9 @@ def test_migration_worker_review_context_rls_and_rollback():
                     has_table_privilege('authenticated', c.oid, 'SELECT')
                 FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace
                 WHERE n.nspname=:schema AND c.relname IN
-                    ('contrato_analisis','contrato_clausulas','contrato_clausula_eventos')
+                    ('contrato_analisis','contrato_clausulas','contrato_clausula_eventos','contrato_analisis_intentos')
             """), {"schema": schema}).all()
-            assert len(security) == 3 and all(row[1:] == (True, False, False) for row in security)
+            assert len(security) == 4 and all(row[1:] == (True, False, False) for row in security)
         finally:
             transaction.rollback()
         assert connection.execute(text(

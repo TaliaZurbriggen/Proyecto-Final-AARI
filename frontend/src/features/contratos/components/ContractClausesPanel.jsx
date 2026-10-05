@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Check, Pencil, RotateCw, Sparkles, X } from 'lucide-react'
+import { Check, FileText, Pencil, RotateCw, Sparkles, X } from 'lucide-react'
 import { AlertMessage, Button, FormField, LoadingState, SelectInput, StatusBadge } from '../../../components/ui/index.js'
 import { getContractAnalysis, reviewContractClause, startContractAnalysis } from '../api/contratosApi.js'
 import styles from './ContractClausesPanel.module.css'
@@ -20,7 +20,7 @@ const responsibleLabels = {
   condicional: 'Depende de una condición', no_especificado: 'No especificado',
 }
 const usageLabels = {
-  operativa: 'Puede aportar al clasificador',
+  operativa: 'Habilitada para reclamos',
   contexto: 'Sólo contexto para revisión',
   excluir: 'Excluir del clasificador',
 }
@@ -31,15 +31,24 @@ function Badge({ state }) {
 }
 
 function ClauseEditor({ clause, busy, onCancel, onSave }) {
+  const [summaryError, setSummaryError] = useState('')
   const [values, setValues] = useState({
-    resumen: clause.resumen, categoria: clause.categoria,
+    resumen: clause.origen === 'literal' && clause.estado_revision === 'pendiente' ? '' : clause.resumen, categoria: clause.categoria,
     responsable: clause.responsable, condiciones: clause.condiciones ?? '',
-    uso_clasificador: clause.uso_clasificador ?? 'operativa',
+    uso_clasificador: clause.habilitada_para_reclamos
+      ? 'operativa' : clause.uso_clasificador === 'excluir' ? 'excluir' : 'contexto',
   })
-  const update = (field) => (event) => setValues(current => ({ ...current, [field]: event.target.value }))
-  return <form className={styles.editor} onSubmit={event => { event.preventDefault(); onSave(values) }}>
-    <FormField id={`summary-${clause.id}`} label="Resumen" required>
-      <textarea className={styles.textarea} value={values.resumen} onChange={update('resumen')} />
+  const update = (field) => (event) => {
+    if (field === 'resumen') setSummaryError('')
+    setValues(current => ({ ...current, [field]: event.target.value }))
+  }
+  return <form className={styles.editor} onSubmit={event => {
+    event.preventDefault()
+    if (!values.resumen.trim()) { setSummaryError('Completá el resumen de la cláusula.'); return }
+    onSave({ ...values, resumen: values.resumen.trim(), condiciones: values.condiciones.trim() })
+  }}>
+    <FormField id={`summary-${clause.id}`} label="Resumen" required error={summaryError}>
+      <textarea required maxLength={1200} className={styles.textarea} value={values.resumen} onChange={update('resumen')} />
     </FormField>
     <div className={styles.formGrid}>
       <FormField id={`category-${clause.id}`} label="Categoría" required>
@@ -52,23 +61,28 @@ function ClauseEditor({ clause, busy, onCancel, onSave }) {
           {Object.entries(responsibleLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
         </SelectInput>
       </FormField>
-      <FormField id={`usage-${clause.id}`} label="Uso en reclamos" required>
+      <FormField id={`usage-${clause.id}`} label="Uso en reclamos" required hint="Sólo una edición que seleccione 'Puede aportar al clasificador' habilita esta regla para reclamos.">
         <SelectInput value={values.uso_clasificador} onChange={update('uso_clasificador')}>
-          {Object.entries(usageLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+          <option value="contexto">Sólo contexto para revisión</option>
+          <option value="operativa">Puede aportar al clasificador</option>
+          <option value="excluir">Excluir del clasificador</option>
         </SelectInput>
       </FormField>
     </div>
     <FormField id={`conditions-${clause.id}`} label="Condiciones o excepciones" hint="Dejalo vacío solamente si el texto no establece condiciones.">
-      <textarea className={styles.textarea} value={values.condiciones} onChange={update('condiciones')} />
+      <textarea maxLength={1600} className={styles.textarea} value={values.condiciones} onChange={update('condiciones')} />
     </FormField>
+    {values.uso_clasificador === 'operativa' && <AlertMessage tone="warning">Compará la interpretación y las excepciones con el PDF antes de habilitarla para reclamos.</AlertMessage>}
     <div className={styles.actions}>
       <Button variant="secondary" disabled={busy} onClick={onCancel}>Cancelar</Button>
-      <Button type="submit" disabled={busy}>{busy ? 'Guardando…' : 'Guardar y confirmar'}</Button>
+      <Button type="submit" disabled={busy}>{busy ? 'Guardando…' : values.uso_clasificador === 'operativa' ? 'Guardar y habilitar' : 'Guardar revisión'}</Button>
     </div>
   </form>
 }
 
 function ClauseCard({ clause, busy, editing, onEdit, onReview }) {
+  const visibleUsage = clause.habilitada_para_reclamos
+    ? 'operativa' : clause.uso_clasificador === 'excluir' ? 'excluir' : 'contexto'
   const evidences = clause.evidencias?.length
     ? clause.evidencias
     : [{ pagina: null, texto: clause.texto_original }]
@@ -86,16 +100,16 @@ function ClauseCard({ clause, busy, editing, onEdit, onReview }) {
         </div>)}
       </div>
       <div className={styles.interpretation}>
-        <p className={styles.label}>Propuesta para revisión</p>
+        <p className={styles.label}>{clause.origen === 'literal' ? clause.estado_revision === 'editada' ? 'Interpretación revisada de extracción literal' : 'Extracción literal · interpretación pendiente' : 'Propuesta de IA para revisión'}</p>
         <p>{clause.resumen}</p>
-        <dl><div><dt>Categoría</dt><dd>{categoryLabels[clause.categoria]}</dd></div><div><dt>Responsable</dt><dd>{responsibleLabels[clause.responsable]}</dd></div><div><dt>Uso</dt><dd>{usageLabels[clause.uso_clasificador ?? 'operativa']}</dd></div></dl>
+        <dl><div><dt>Categoría</dt><dd>{categoryLabels[clause.categoria]}</dd></div><div><dt>Responsable</dt><dd>{responsibleLabels[clause.responsable]}</dd></div><div><dt>Uso actual</dt><dd>{usageLabels[visibleUsage]}</dd></div></dl>
         {clause.condiciones && <p className={styles.conditions}><strong>Condiciones:</strong> {clause.condiciones}</p>}
       </div>
     </div>
-    {editing ? <ClauseEditor clause={clause} busy={busy} onCancel={() => onEdit('')} onSave={values => onReview(clause, 'editar', values)} /> : clause.estado_revision === 'pendiente' && <div className={styles.actions}>
-      <Button variant="secondary" disabled={busy} leadingIcon={<X />} onClick={() => onReview(clause, 'descartar')}>Descartar</Button>
-      <Button variant="secondary" disabled={busy} leadingIcon={<Pencil />} onClick={() => onEdit(clause.id)}>Editar</Button>
-      <Button disabled={busy} leadingIcon={<Check />} onClick={() => onReview(clause, 'confirmar')}>Confirmar</Button>
+    {editing ? <ClauseEditor clause={clause} busy={busy} onCancel={() => onEdit('')} onSave={values => onReview(clause, 'editar', values)} /> : clause.estado_revision !== 'descartada' && <div className={styles.actions}>
+      {clause.estado_revision === 'pendiente' && <Button variant="secondary" disabled={busy} leadingIcon={<X />} onClick={() => onReview(clause, 'descartar')}>Descartar</Button>}
+      <Button variant="secondary" disabled={busy} leadingIcon={<Pencil />} onClick={() => onEdit(clause.id)}>{clause.estado_revision === 'pendiente' ? 'Editar' : 'Editar revisión'}</Button>
+      {clause.estado_revision === 'pendiente' && <Button disabled={busy} leadingIcon={<Check />} onClick={() => onReview(clause, 'confirmar')}>Confirmar como contexto</Button>}
     </div>}
   </article>
 }
@@ -119,14 +133,14 @@ function RejectedCard({ rejected }) {
   </article>
 }
 
-export default function ContractClausesPanel({ contractId, document }) {
+function ClausePanel({ contractId, document }) {
   const [analysis, setAnalysis] = useState(undefined)
   const [error, setError] = useState('')
   const [busy, setBusy] = useState('')
   const [editing, setEditing] = useState('')
 
   const load = (signal) => getContractAnalysis(contractId, document.id, { signal })
-    .then(setAnalysis).catch(err => { if (!signal?.aborted) setError(err.message) })
+    .then(value => { if (!signal?.aborted) setAnalysis(value) }).catch(err => { if (!signal?.aborted) setError(err.message) })
 
   useEffect(() => {
     const controller = new AbortController()
@@ -140,9 +154,9 @@ export default function ContractClausesPanel({ contractId, document }) {
     return () => window.clearInterval(timer)
   }, [analysis?.estado]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  const start = async () => {
+  const start = async (mode = 'ia') => {
     setBusy('start'); setError('')
-    try { setAnalysis(await startContractAnalysis(contractId, document.id)) }
+    try { setAnalysis(await startContractAnalysis(contractId, document.id, mode)) }
     catch (err) { setError(err.message) }
     finally { setBusy('') }
   }
@@ -156,24 +170,42 @@ export default function ContractClausesPanel({ contractId, document }) {
   }
 
   return <section className={styles.panel} aria-label="Cláusulas del contrato">
-    <div className={styles.heading}><div><h2>Cláusulas del contrato</h2><p>Versión {document.version} · revisión obligatoria antes de usar el contexto</p></div>{analysis && <Badge state={analysis.estado} />}</div>
+    <div className={styles.heading}><div><h2>Cláusulas del contrato</h2><p>Versión {document.version} · las propuestas no se usan como reglas sin una habilitación explícita</p></div>{analysis && <Badge state={analysis.estado} />}</div>
     <div className={styles.body}>
       {error && <AlertMessage>{error}</AlertMessage>}
       {analysis === undefined ? <LoadingState label="Cargando análisis" /> : !analysis ? <div className={styles.empty}>
-        <Sparkles aria-hidden="true" /><div><h3>Este documento todavía no fue analizado</h3><p>La IA propondrá cláusulas; ninguna se aplicará sin tu confirmación.</p></div>
-        <Button disabled={Boolean(busy)} leadingIcon={<Sparkles />} onClick={start}>{busy ? 'Preparando…' : 'Analizar cláusulas'}</Button>
+        <Sparkles aria-hidden="true" /><div><h3>Este documento todavía no fue analizado</h3><p>La IA propondrá cláusulas como contexto. Para usarlas en reclamos, tendrás que editarlas y habilitarlas.</p></div>
+        <div className={styles.actions}>
+          <Button disabled={Boolean(busy)} variant="secondary" leadingIcon={<FileText />} onClick={() => start('literal')}>Extraer sin IA</Button>
+          <Button disabled={Boolean(busy)} leadingIcon={<Sparkles />} onClick={() => start('ia')}>{busy ? 'Preparando…' : 'Analizar cláusulas'}</Button>
+        </div>
       </div> : <>
         {['pendiente', 'procesando'].includes(analysis.estado) && <LoadingState label="Analizando el contrato. Podés seguir usando AARI" />}
-        {analysis.ultimo_error && <AlertMessage tone={analysis.estado === 'incompleto' ? 'warning' : 'danger'}>{analysis.ultimo_error}</AlertMessage>}
-        {analysis.estado === 'fallido' && <div className={styles.actions}><Button disabled={Boolean(busy)} leadingIcon={<RotateCw />} onClick={start}>{busy ? 'Preparando…' : 'Reintentar análisis'}</Button></div>}
-        {analysis.estado === 'incompleto' && <div className={styles.actions}><Button disabled={Boolean(busy)} variant="secondary" leadingIcon={<RotateCw />} onClick={start}>{busy ? 'Preparando…' : 'Reintentar lectura'}</Button></div>}
-        {['completado', 'incompleto'].includes(analysis.estado) && !analysis.clausulas.length && !(analysis.propuestas_rechazadas?.length) && <p className={styles.muted}>No se encontraron cláusulas operativas. Revisá el PDF antes de dar por finalizada la lectura.</p>}
+        {analysis.ultimo_error && <AlertMessage tone={analysis.estado === 'incompleto' ? 'warning' : 'error'}>{analysis.ultimo_error}</AlertMessage>}
+        {!['pendiente', 'procesando'].includes(analysis.estado) && <div className={styles.actions}>
+          <Button disabled={Boolean(busy)} variant="secondary" leadingIcon={<FileText />} onClick={() => start('literal')}>Extraer sin IA</Button>
+          {analysis.modo === 'literal' && !analysis.clausulas.some(clause => clause.estado_revision !== 'pendiente') && <Button disabled={Boolean(busy)} leadingIcon={<Sparkles />} onClick={() => start('ia')}>Proponer con IA</Button>}
+          {['fallido', 'incompleto'].includes(analysis.estado) && <Button disabled={Boolean(busy) || (analysis.modo !== 'literal' && analysis.clausulas.some(clause => clause.estado_revision !== 'pendiente'))} leadingIcon={<RotateCw />} onClick={() => start(analysis.modo ?? 'ia')}>{busy ? 'Preparando…' : analysis.modo === 'literal' ? 'Reintentar lectura' : 'Reintentar análisis'}</Button>}
+        </div>}
+        {analysis.modo === 'literal' && <p className={styles.muted}>Extracción local sin IA. No se interpretaron responsables ni obligaciones: completá la revisión comparando con el PDF.</p>}
+        {['completado', 'incompleto'].includes(analysis.estado) && !analysis.clausulas.length && !(analysis.propuestas_rechazadas?.length) && <p className={styles.muted}>No se encontraron propuestas de cláusulas. Revisá el PDF antes de dar por finalizada la lectura.</p>}
         {analysis.clausulas.length > 0 && <div className={styles.list}>{analysis.clausulas.map(clause => <ClauseCard key={clause.id} clause={clause} busy={busy === clause.id} editing={editing === clause.id} onEdit={setEditing} onReview={review} />)}</div>}
         {analysis.propuestas_rechazadas?.length > 0 && <section className={styles.rejectedSection} aria-label="Propuestas con evidencia rechazada">
           <div><h3>Propuestas que requieren auditoría</h3><p>No se usarán en reclamos. Se conservan para comparar con el PDF y mejorar la extracción.</p></div>
-          <div className={styles.list}>{analysis.propuestas_rechazadas.map(rejected => <RejectedCard key={rejected.ordinal} rejected={rejected} />)}</div>
+          <div className={styles.list}>{analysis.propuestas_rechazadas.map((rejected, index) => <RejectedCard key={`${rejected.ordinal}-${index}`} rejected={rejected} />)}</div>
         </section>}
+        {analysis.propuestas_fuente_rechazadas?.length > 0 && <section className={styles.rejectedSection} aria-label="Propuestas sin tramo verificable">
+          <h3>Propuestas sin tramo verificable</h3>
+          {analysis.propuestas_fuente_rechazadas.map((item, index) => <div key={index}><p>{item.propuesta?.resumen}</p><p className={styles.muted}>{item.motivo} No se incorpora al clasificador.</p></div>)}
+        </section>}
+        {analysis.historial_intentos?.length > 0 && <details><summary>Historial de intentos ({analysis.historial_intentos.length})</summary>
+          <ul>{analysis.historial_intentos.map(attempt => <li key={attempt.id}>{attempt.modo === 'literal' ? 'Extracción local' : 'Análisis con IA'} · {stateLabels[attempt.estado]?.[0] ?? attempt.estado}{attempt.error ? ` · ${attempt.error}` : ''}</li>)}</ul>
+        </details>}
       </>}
     </div>
   </section>
+}
+
+export default function ContractClausesPanel({ contractId, document }) {
+  return <ClausePanel key={`${contractId}-${document.id}`} contractId={contractId} document={document} />
 }

@@ -22,7 +22,8 @@ from app.services.contract_clause_llm import (
 from app.services.contract_clause_service import ContractClauseService
 from app.services.contract_errors import ContractError
 from app.services.contract_text_extraction import (
-    ContractText, ContractTextError, PageText, extract_contract_text,
+    OCR_RENDER_SCALE, ContractText, ContractTextError, PageText, TesseractOcrEngine,
+    extract_contract_text,
     minimize_personal_data,
 )
 
@@ -67,6 +68,30 @@ def test_marks_partial_reading_and_rejects_a_fully_unreadable_pdf(monkeypatch):
                         lambda *_args, **_kwargs: SimpleNamespace(pages=[Page("")]))
     with pytest.raises(ContractTextError, match="obtener texto"):
         extract_contract_text(b"pdf", Ocr(error=True))
+
+
+def test_tesseract_renders_scanned_pages_at_validated_scale(monkeypatch):
+    import pypdfium2
+    import pytesseract
+
+    monkeypatch.delenv("TESSERACT_LANGUAGE", raising=False)
+    scales = []
+
+    class RenderedPage:
+        def to_pil(self):
+            return object()
+
+    class PdfPage:
+        def render(self, *, scale):
+            scales.append(scale)
+            return RenderedPage()
+
+    monkeypatch.setattr(pypdfium2, "PdfDocument", lambda _pdf: [PdfPage()])
+    monkeypatch.setattr(pytesseract, "image_to_string", lambda _image, *, lang: lang)
+
+    assert TesseractOcrEngine().read_page(b"pdf", 0) == "spa"
+    assert OCR_RENDER_SCALE == 4.0
+    assert scales == [OCR_RENDER_SCALE]
 
 
 @pytest.mark.skipif(
@@ -150,6 +175,7 @@ def test_external_model_uses_function_calling_and_pydantic_validation(monkeypatc
     assert get_clause_model() == "structured-model"
     assert captured["schema"] is ExtractedClauseBatch
     assert captured["method"] == "function_calling"
+    assert captured["configuration"]["max_retries"] == 1
 
 
 def test_discards_model_evidence_that_is_not_on_declared_pages():
@@ -214,14 +240,26 @@ class FakeRepository:
     failed: tuple | None = None
     def claim_due(self, *, limit=3): return [self.job]
     def complete(self, analysis_id, **data): self.completed = data; return True
-    def fail(self, analysis_id, attempt, error): self.failed = (attempt, error); return True
+    def fail(self, analysis_id, attempt, error, **kwargs): self.failed = (attempt, error); return True
 
 
 class FakeModel:
     def __init__(self, response): self.response = response
     def invoke(self, prompt):
         assert "[PÁGINA 1]" in prompt
-        return self.response
+        # Los ensayos v4 de evidencia siguen cubiertos arriba. El servicio real
+        # recibe ahora IDs de tramos; las citas las adjunta el backend, no Gemini.
+        from app.services.contract_clause_segments import normalize_clause_label
+        clauses = []
+        for item in self.response["clausulas"]:
+            value = {key: item[key] for key in ("titulo", "resumen", "categoria", "responsable",
+                     "uso_clasificador", "condiciones", "referencias", "confianza")}
+            label = normalize_clause_label(item["numero"])
+            marker = next((line for line in prompt.splitlines()
+                           if line.startswith("[TRAMO ") and f"CLÁUSULA {label}" in line), None)
+            value["tramo_id"] = int(marker.split()[1]) if marker else 999
+            clauses.append(value)
+        return {"clausulas": clauses}
 
 
 def test_only_administration_can_request_an_analysis():
@@ -237,7 +275,7 @@ def test_only_administration_can_request_an_analysis():
 def test_service_persists_only_validated_clauses(monkeypatch):
     job = AnalysisJob(uid(1), uid(2), uid(3), "private/doc.pdf", 1)
     repository = FakeRepository(job)
-    text = "El LOCATARIO responde si el daño es atribuible a su culpa."
+    text = "NOVENA: El LOCATARIO responde si el daño es atribuible a su culpa."
     monkeypatch.setattr("app.services.contract_clause_service.extract_contract_text",
                         lambda *_args: ContractText([PageText(1, text, "digital", True)], True))
     response = {"clausulas": [{
@@ -261,7 +299,7 @@ def test_service_keeps_an_ambiguous_rule_out_of_automatic_classification(monkeyp
     job = AnalysisJob(uid(11), uid(12), uid(13), "private/ambiguous.pdf", 1)
     repository = FakeRepository(job)
     text = (
-        "La parte A realizará las tareas, salvo las originadas por terceros "
+        "CUARTA: La parte A realizará las tareas, salvo las originadas por terceros "
         "y las inspecciones periódicas."
     )
     monkeypatch.setattr(
@@ -289,6 +327,73 @@ def test_service_keeps_an_ambiguous_rule_out_of_automatic_classification(monkeyp
     assert clause.uso_clasificador == "contexto"
     assert clause.confianza <= 0.6
     assert repository.completed["rejected"] == []
+
+
+def test_service_attaches_local_evidence_not_the_models_neighboring_quote(monkeypatch):
+    job = AnalysisJob(uid(21), uid(22), uid(23), "private/clauses.pdf", 1)
+    repository = FakeRepository(job)
+    text = (
+        "SEXTA: Los gastos comunes requieren revisión.\n"
+        "SÉPTIMA: El inquilino devolverá el inmueble en buen estado."
+    )
+    monkeypatch.setattr(
+        "app.services.contract_clause_service.extract_contract_text",
+        lambda *_args: ContractText([PageText(1, text, "digital", True)], True),
+    )
+    response = {"clausulas": [{
+        "numero": "SEXTA", "titulo": None,
+        "evidencias": [{"pagina": 1, "texto": "El inquilino devolverá el inmueble en buen estado"}],
+        "resumen": "El inquilino debe devolverlo en buen estado.",
+        "categoria": "devolucion", "responsable": "inquilino",
+        "uso_clasificador": "operativa", "condiciones": None,
+        "referencias": [], "confianza": 0.9,
+    }]}
+    service = ContractClauseService(
+        repository,
+        SimpleNamespace(download=lambda path: b"pdf"),
+        model_factory=lambda: FakeModel(response),
+    )
+
+    assert service.process_due() == 1
+    assert repository.completed["clauses"][0].texto_original == "SEXTA: Los gastos comunes requieren revisión."
+    assert repository.completed["clauses"][1].texto_original == "SÉPTIMA: El inquilino devolverá el inmueble en buen estado."
+    assert repository.completed["origins"] == ["ia", "literal"]
+    assert repository.completed["source_rejected"] == []
+    assert repository.completed["extractor_version"] == "hu30-asistida-v1"
+
+
+def test_service_does_not_anchor_evidence_from_unreadable_page(monkeypatch):
+    job = AnalysisJob(uid(31), uid(32), uid(33), "private/partial.pdf", 1)
+    repository = FakeRepository(job)
+    first = "QUINTA: El locador pagará reparaciones necesarias durante el contrato."
+    partial = "para mantener el edificio en buen estado de conservación."
+    monkeypatch.setattr(
+        "app.services.contract_clause_service.extract_contract_text",
+        lambda *_args: ContractText([
+            PageText(1, first, "digital", True),
+            PageText(2, partial, "sin_lectura", False),
+        ], False),
+    )
+    response = {"clausulas": [{
+        "numero": "QUINTA", "titulo": None,
+        "evidencias": [
+            {"pagina": 1, "texto": "El locador pagará reparaciones necesarias durante el contrato"},
+            {"pagina": 2, "texto": partial},
+        ],
+        "resumen": "El locador pagará reparaciones necesarias.",
+        "categoria": "reparacion", "responsable": "propietario",
+        "uso_clasificador": "operativa", "condiciones": None,
+        "referencias": [], "confianza": 0.9,
+    }]}
+    service = ContractClauseService(
+        repository,
+        SimpleNamespace(download=lambda path: b"pdf"),
+        model_factory=lambda: FakeModel(response),
+    )
+
+    assert service.process_due() == 1
+    assert repository.completed is None
+    assert repository.failed is not None
 
 
 def test_migration_protects_new_tables_and_snapshots_context():
