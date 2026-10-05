@@ -5,6 +5,7 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 
 from app.db.propiedades import SqlAlchemyPropiedadesRepository
+from app.schemas.list_filters import PropertiesListFilters
 from app.schemas.propiedades import (
     PropiedadCreate,
     PropiedadResponse,
@@ -63,9 +64,10 @@ def list_propiedades(
     page: int = Query(default=1, ge=1),
     page_size: int = Query(default=10, ge=1, le=100),
     search: str | None = Query(default=None, max_length=200),
+    filters: PropertiesListFilters = Depends(),
     service: PropiedadesService = Depends(get_propiedades_service),
 ) -> PropiedadesPage:
-    return service.list(page=page, page_size=page_size, search=search)
+    return service.list(page=page, page_size=page_size, search=search, filters=filters)
 
 
 @router.get("/{propiedad_id}", response_model=PropiedadResponse)

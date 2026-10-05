@@ -1,5 +1,5 @@
 const roleHomePaths = {
-  administrador: '/propietarios',
+  administrador: '/inicio',
   inquilino: '/inquilino',
   operador: '/operador',
   propietario: '/propietario',

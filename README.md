@@ -52,7 +52,7 @@ Proyecto-Final-AARI/
 │   ├── public/                  # Recursos estáticos
 │   ├── src/
 │   │   ├── components/          # UI y layouts reutilizables
-│   │   ├── features/            # Auth, personas, inmuebles, proveedores, operadores, reclamos y contratos
+│   │   ├── features/            # Auth, inicio, personas, inmuebles, proveedores, operadores, reclamos y contratos
 │   │   ├── pages/               # Pantallas generales de la aplicación
 │   │   └── styles/              # Tokens y estilos globales
 │   ├── AGENTS.md                # Reglas específicas del frontend
@@ -73,6 +73,39 @@ La identidad visual de AARI está centralizada para que los agentes y el equipo 
 - `frontend/src/pages/DesignSystemPreview.jsx`: vista ejecutable para revisar la dirección visual y los estados principales.
 
 La referencia aprobada se conserva dentro de la skill. Si una historia necesita apartarse de esa dirección, la decisión debe acordarse antes de implementarla.
+
+### Inicio del administrador (HU31)
+
+Después de iniciar sesión, el administrador accede a `/inicio`. El Home
+operativo consulta `GET /admin/resumen`: reclamos activos, pendientes de
+clasificación y totales de propietarios, propiedades, inquilinos, proveedores
+y operadores. Proveedores y operadores distinguen total registrado y activos.
+Los pendientes forman parte de los reclamos activos; no son cantidades que
+deban sumarse. La hora de consulta se muestra en horario argentino.
+
+Los accesos permiten abrir los módulos, contratos y el historial de reclamos
+por propiedad. La navegación administrativa usa tarjetas compactas en
+escritorio y un menú desplegable en móvil, manteniendo una única cabecera.
+Los demás roles conservan sus portales y el primer ingreso sigue exigiendo el
+cambio de contraseña. Se carga al entrar y se refresca con **Actualizar**;
+ante un error se retiran los contadores anteriores y no se inventan ceros.
+
+No agrega migraciones, variables de entorno ni dependencias. Reutiliza el
+esquema existente hasta `23_notificaciones_actor_responsable.sql`; una base
+sin esas tablas devuelve un error de resumen no disponible.
+Por acuerdo del equipo, **Revisar casos** queda deshabilitado hasta integrar
+HU13 en `main`; su conexión y recorrido integrado siguen pendientes antes
+del cierre de HU31. No incorpora gráficos ni indicadores predictivos (HU26).
+Decisiones, comandos, resultados y límites:
+[`docs/hu31_home_administrador.md`](docs/hu31_home_administrador.md).
+
+Durante la revisión se aprobó incorporar filtros combinables en propiedades,
+propietarios e inquilinos en esta misma rama. En los dos listados de personas
+hay búsqueda visible por nombre/DNI/email, sincronizada con la cabecera.
+Filtros, búsqueda y total se aplican antes de paginar; se conservan al cambiar
+de página y vuelve a la primera al aplicar o limpiar. Una última página que
+desaparece tras eliminar registros se recupera automáticamente.
+Detalle: [`docs/hu31_filtros_listados.md`](docs/hu31_filtros_listados.md).
 
 ### Agente de clasificación
 
@@ -782,6 +815,14 @@ entorno compartido en la nube.
   La extracción de cláusulas pertenece a HU30.
 - **HU10 / AARI-116 finalizada:** PR #25 mergeado; HU y subtareas listas en Jira.
   Infraestructura reutilizable para las notificaciones posteriores del Sprint.
+- **HU31 / AARI-332 en implementación:** Home operativo y navegación responsive
+  validados en `codex/AARI-332-home-administrador`, desde `main` en `80afb67`.
+  Incluye filtros de listados aprobados durante la revisión. Backend completo:
+  **429 passed / 41 skipped**; frontend: **191 passed**; PostgreSQL local:
+  **2 passed**; lint, build y revisión visual aprobados. Sin pruebas externas
+  ni consumo de cuota. Pendientes: conexión de HU13 tras su merge, revisión y PR.
+  Se registraron **2h reales** en sus subtareas, sin modificar la estimación original.
+  Evidencia en [`docs/hu31_home_administrador.md`](docs/hu31_home_administrador.md).
 - **HU12 / AARI-135 finalizada:** PR #26 mergeado en `main`; HU y subtareas
   listas en Jira, con **50 minutos reales** registrados. Evidencia en
   [`docs/hu12_notificacion_actor_responsable.md`](docs/hu12_notificacion_actor_responsable.md).

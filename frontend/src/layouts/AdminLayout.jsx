@@ -3,6 +3,7 @@ import { AppHeader } from '../components/layout/index.js'
 import { useAuth } from '../features/auth/authContext.js'
 
 const navigationItems = [
+  { href: '/inicio', label: 'Inicio' },
   { href: '/escalados', label: 'Casos escalados' },
   { href: '/propietarios', label: 'Propietarios' },
   { href: '/propiedades', label: 'Propiedades' },
@@ -23,8 +24,11 @@ function AdminLayout() {
   const isProviders = location.pathname.startsWith('/proveedores')
   const isOperators = location.pathname.startsWith('/operadores')
   const isContracts = location.pathname.startsWith('/contratos')
+  const isHome = location.pathname === '/inicio'
   const isExpenses = location.pathname.startsWith('/expensas')
-  const activeModule = isExpenses
+  const activeModule = isHome
+    ? { href: '/inicio', label: 'Inicio' }
+    : isExpenses
     ? { href: '/expensas', label: 'Expensas', placeholder: '' }
     : isEscalated
     ? { href: '/escalados', label: 'Casos escalados', placeholder: 'Buscar caso escalado' }
@@ -58,8 +62,13 @@ function AdminLayout() {
   const searchValue = new URLSearchParams(location.search).get('search') ?? ''
 
   const updateSearch = (value) => {
-    const params = new URLSearchParams()
-    if (value.trim()) params.set('search', value.trim())
+    const params = location.pathname === activeModule.href
+      ? new URLSearchParams(location.search) : new URLSearchParams()
+    params.delete('page')
+    // Conservar el espacio mientras se escribe un nombre compuesto.
+    // La API normaliza los extremos al consultar, no durante cada pulsación.
+    if (value.trim()) params.set('search', value)
+    else params.delete('search')
     const suffix = params.toString() ? `?${params.toString()}` : ''
     navigate(`${activeModule.href}${suffix}`, { replace: true })
   }
@@ -74,6 +83,7 @@ function AdminLayout() {
       <AppHeader
         activeItem={activeModule.label}
         items={navigationItems}
+        navigationVariant="tiles"
         onNavigate={(item) => navigate(item.href)}
         onLogout={handleLogout}
         onSearchChange={(event) => updateSearch(event.target.value)}
@@ -82,7 +92,8 @@ function AdminLayout() {
         profileRole="Administración"
         searchPlaceholder={activeModule.placeholder}
         searchValue={searchValue}
-        showSearch={!isExpenses && !isEscalated}
+        showSearch={!isHome && !isExpenses && !isEscalated}
+        showNotifications={!isHome}
       />
       <Outlet />
     </>

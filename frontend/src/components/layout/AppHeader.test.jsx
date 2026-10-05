@@ -7,6 +7,35 @@ const items = ['Propietarios', 'Propiedades', 'Inquilinos', 'Proveedores', 'Oper
   .map(label => ({ label, href: `/${label.toLowerCase()}` }))
 
 describe('cabecera compartida', () => {
+  it('abre el menú de tarjetas, navega y lo cierra con selección o Escape', async () => {
+    const navigate = vi.fn()
+    const user = userEvent.setup()
+    render(<AppHeader items={items} activeItem="Propiedades" navigationVariant="tiles"
+      onNavigate={navigate} showSearch={false} showNotifications={false} />)
+    const toggle = screen.getByRole('button', { name: /Menú/ })
+    const navigation = screen.getByRole('navigation')
+    expect(toggle).toHaveAttribute('aria-controls', navigation.id)
+    expect(toggle).toHaveAttribute('aria-expanded', 'false')
+    await user.click(toggle)
+    expect(toggle).toHaveAttribute('aria-expanded', 'true')
+    await user.click(screen.getByRole('link', { name: 'Contratos' }))
+    expect(navigate).toHaveBeenCalledWith(items[5])
+    expect(toggle).toHaveAttribute('aria-expanded', 'false')
+    await user.click(toggle)
+    await user.keyboard('{Escape}')
+    expect(toggle).toHaveAttribute('aria-expanded', 'false')
+    expect(toggle).toHaveFocus()
+  })
+
+  it('cierra el menú móvil al pulsar fuera de la navegación', async () => {
+    render(<AppHeader items={items} activeItem="Propiedades" navigationVariant="tiles" />)
+    const user = userEvent.setup()
+    const toggle = screen.getByRole('button', { name: /Menú/ })
+    await user.click(toggle)
+    await user.click(screen.getByRole('button', { name: /Abrir perfil/ }))
+    expect(toggle).toHaveAttribute('aria-expanded', 'false')
+  })
+
   it('conserva el correo completo como nombre accesible y ayuda del texto truncado', async () => {
     const email = 'administracion.inmobiliaria@example.com'
     const logout = vi.fn()

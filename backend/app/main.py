@@ -8,6 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
 
 from app.api.auth import require_admin, router as auth_router
+from app.api.admin_home import router as admin_home_router
 from app.api.configuracion import router as agency_configuration_router
 from app.api.expensas import router as expenses_router
 from app.api.contratos import get_contract_clause_service, router as contratos_router
@@ -85,6 +86,7 @@ app.add_middleware(
 app.include_router(auth_router)
 app.include_router(agency_configuration_router)
 app.include_router(expenses_router)
+app.include_router(admin_home_router)
 app.include_router(operadores_router)
 admin_dependencies = [Depends(require_admin)]
 app.include_router(propiedades_router, dependencies=admin_dependencies)

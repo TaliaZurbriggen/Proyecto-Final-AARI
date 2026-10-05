@@ -1,5 +1,6 @@
 import { Navigate, Route, Routes } from 'react-router'
 import AdminLayout from './layouts/AdminLayout.jsx'
+import AdminHomePage from './features/home/pages/AdminHomePage.jsx'
 import DesignSystemPreview from './pages/DesignSystemPreview.jsx'
 import NotFoundPage from './pages/NotFoundPage.jsx'
 import PropietarioDetailPage from './features/propietarios/pages/PropietarioDetailPage.jsx'
@@ -63,6 +64,7 @@ function App() {
         </Route>
         <Route element={<ProtectedRoute allowedRoles={['administrador']} />}>
           <Route element={<AdminLayout />}>
+            <Route path="inicio" element={<AdminHomePage />} />
             <Route path="escalados" element={<EscalatedClaimsPage />} />
             <Route path="escalados/:reclamoId" element={<EscalatedClaimDetailPage />} />
             <Route path="contratos" element={<ContractsListPage />} />

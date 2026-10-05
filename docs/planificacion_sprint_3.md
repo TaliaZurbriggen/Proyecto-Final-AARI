@@ -69,6 +69,26 @@ abierto, no borrador, con Talía solicitada como revisora. AARI-158 a AARI-169
 verificadas listas; AARI-157 conserva En curso hasta revisión/integración.
 El tiempo registrado sigue en 1 h 20 min, sin nuevas entradas. Notion continúa
 bloqueado por el límite de bloques; ejecución y decisiones quedan en el repo.
+**Seguimiento HU31 (05/10/2026):** implementación del Home operativo en una
+rama independiente desde `main` (`80afb67`). El equipo aprobó navegación en
+tarjetas para escritorio y desplegable en móvil. HU13 aún no está integrada;
+se acordó avanzar con los contadores y accesos existentes y completar
+“Revisar casos” después de su merge, sin apilar las ramas. No se cambia la
+estimación ni el compromiso del Sprint. Decisiones, pruebas locales y pendientes:
+[`hu31_home_administrador.md`](hu31_home_administrador.md).
+
+**Ampliación aprobada de HU31 (05/10/2026):** durante la revisión se autorizó
+agregar filtros en propiedades, propietarios e inquilinos **en la misma rama**,
+con búsqueda visible en los listados de personas y paginación conservando
+criterios. No se modifican estimaciones ni se registra otra HU. Alcance y pruebas:
+[`hu31_filtros_listados.md`](hu31_filtros_listados.md). Sincronización en Notion
+pendiente por el límite de bloques del espacio.
+
+**Publicación y tiempo de HU31 (05/10/2026):** la persona responsable aprobó
+la revisión visual y autorizó commit/push. Se registraron **2h reales** en
+AARI-333 a AARI-337 (10, 40, 35, 15 y 20 min), sin duplicarlas en la HU padre
+ni cambiar la estimación original. HU y subtareas continúan en curso hasta
+completar la integración y revisión; todavía no se autoriza merge o cierre.
 
 ## Punto de partida
 

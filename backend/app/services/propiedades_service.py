@@ -2,6 +2,7 @@
 
 from typing import Protocol
 from uuid import UUID
+from app.schemas.list_filters import PropertiesListFilters
 
 from app.schemas.propiedades import (
     PropiedadCreate,
@@ -35,7 +36,8 @@ class PropiedadesRepository(Protocol):
     def create(self, data: dict[str, object]) -> dict[str, object]: ...
 
     def list(
-        self, *, page: int, page_size: int, search: str | None
+        self, *, page: int, page_size: int, search: str | None,
+        filters: PropertiesListFilters | None = None,
     ) -> tuple[list[dict[str, object]], int]: ...
 
     def get_detail(self, propiedad_id: UUID) -> dict[str, object] | None: ...
@@ -58,13 +60,16 @@ class PropiedadesService:
         return PropiedadResponse.model_validate(record)
 
     def list(
-        self, *, page: int, page_size: int, search: str | None
+        self, *, page: int, page_size: int, search: str | None,
+        filters: PropertiesListFilters | None = None,
     ) -> PropiedadesPage:
         normalized_search = search.strip() if search and search.strip() else None
+        filter_args = {"filters": filters} if filters and filters.has_values() else {}
         items, total = self.repository.list(
             page=page,
             page_size=page_size,
             search=normalized_search,
+            **filter_args,
         )
         return PropiedadesPage.build(
             items=items,
