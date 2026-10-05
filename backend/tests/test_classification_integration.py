@@ -10,6 +10,7 @@ from app.api.reclamos import get_classification_service
 from app.main import app
 from app.schemas.reclamos import AgentClassificationResult, ClaimClassificationResponse
 from app.services.classification_service import ClaimForClassification, ClassificationService
+from app.services.classification_service import PersistedClassification
 
 
 class ControlledClassifier:
@@ -40,17 +41,24 @@ class InMemoryClaimsRepository:
         reclamo_id: UUID,
         result: AgentClassificationResult,
         contract_context: list[dict[str, object]],
-    ) -> ClaimClassificationResponse:
+    ) -> PersistedClassification:
         self.persisted = result
         self.persisted_context = contract_context
-        return ClaimClassificationResponse(
-            reclamo_id=reclamo_id,
-            estado="Escalado" if result.debe_escalar else "Clasificado",
-            tipo_gasto=result.tipo_gasto,
-            confianza=result.confianza,
-            fundamento=result.fundamento,
-            debe_escalar=result.debe_escalar,
-            motivo_escalado=result.motivo_escalado,
+        return PersistedClassification(
+            response=ClaimClassificationResponse(
+                reclamo_id=reclamo_id,
+                estado=(
+                    "Escalado"
+                    if result.debe_escalar
+                    else "Pendiente de respuesta del responsable"
+                ),
+                tipo_gasto=result.tipo_gasto,
+                confianza=result.confianza,
+                fundamento=result.fundamento,
+                debe_escalar=result.debe_escalar,
+                motivo_escalado=result.motivo_escalado,
+            ),
+            notification_id=None,
         )
 
 
@@ -111,11 +119,12 @@ def test_complete_flow_classifies_and_persists_a_high_confidence_claim():
         descripcion=descripcion,
     )
 
-    assert response.estado == "Clasificado"
+    assert response.estado == "Pendiente de respuesta del responsable"
     assert response.tipo_gasto == "ordinario"
     assert response.debe_escalar is False
     assert repository.persisted is not None
     assert repository.persisted.estado_clasificacion == "clasificado"
+    assert repository.persisted.actor_responsable == "inquilino"
     assert classifier.prompt is not None
     assert descripcion in classifier.prompt
     assert '"plomeria-01"' in classifier.prompt

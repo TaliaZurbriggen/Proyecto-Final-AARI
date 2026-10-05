@@ -132,7 +132,8 @@ def test_external_flag_and_key_are_checked_without_any_request(monkeypatch):
 def service_for(monkeypatch, mode, extracted=None, error=None):
     repository = Mock()
     job = AnalysisJob(uid(1), uid(2), uid(3), "private/synthetic.pdf", 1, mode, uid(4))
-    repository.claim_due.return_value = [job]
+    repository.claim_due.side_effect = [[job], []]
+    repository.renew_lease.return_value = True
     model = Mock()
     model.invoke.side_effect = error
     model.invoke.return_value = {"clausulas": [proposal()]}
@@ -232,8 +233,8 @@ def test_additive_migration_protects_attempt_history():
 
 def test_previous_prompt_job_is_not_sent_as_a_new_prompt(monkeypatch):
     service, repository, _, model = service_for(monkeypatch, "ia")
-    repository.claim_due.return_value = [AnalysisJob(uid(1), uid(2), uid(3),
-        "private/synthetic.pdf", 1, "ia", uid(4), "fake", "v4")]
+    repository.claim_due.side_effect = [[AnalysisJob(uid(1), uid(2), uid(3),
+        "private/synthetic.pdf", 1, "ia", uid(4), "fake", "v4")], []]
     service.process_due()
     model.invoke.assert_not_called()
     repository.fail.assert_called_once()

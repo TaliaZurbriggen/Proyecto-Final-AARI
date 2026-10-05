@@ -11,6 +11,18 @@ class ClaimNotFoundError(Exception):
     """Señala que no existe el reclamo solicitado."""
 
 
+class ClaimClassificationConflictError(Exception):
+    """La clasificación automática no puede reemplazar una gestión iniciada."""
+
+
+def ensure_classification_allowed(*, estado: str, clasificado: bool) -> None:
+    if clasificado or estado not in {"Recibido", "Clasificación pendiente"}:
+        raise ClaimClassificationConflictError(
+            "El reclamo ya fue clasificado o avanzó de etapa. "
+            "No se puede volver a clasificar automáticamente."
+        )
+
+
 @dataclass(frozen=True)
 class ClaimForClassification:
     """Datos existentes que necesita el grafo para clasificar."""
@@ -20,6 +32,16 @@ class ClaimForClassification:
     urgencia: str
     rubro_declarado: str | None
     clausulas_contrato: list[dict[str, object]]
+    estado: str = "Recibido"
+    clasificado: bool = False
+
+
+@dataclass(frozen=True)
+class PersistedClassification:
+    """Resultado público y notificación que puede intentarse inmediatamente."""
+
+    response: ClaimClassificationResponse
+    notification_id: UUID | None
 
 
 class ClaimsRepository(Protocol):
@@ -33,7 +55,7 @@ class ClaimsRepository(Protocol):
         reclamo_id: UUID,
         result: AgentClassificationResult,
         contract_context: list[dict[str, object]],
-    ) -> ClaimClassificationResponse:
+    ) -> PersistedClassification:
         """Guarda el resultado y registra el origen agente en una transacción."""
 
 
@@ -51,11 +73,14 @@ class ClassificationService:
         self.repository = repository
         self.graph = graph
 
-    def classify(self, reclamo_id: UUID) -> ClaimClassificationResponse:
+    def classify(self, reclamo_id: UUID) -> PersistedClassification:
         claim = self.repository.get_for_classification(reclamo_id)
         if claim is None:
             raise ClaimNotFoundError
 
+        ensure_classification_allowed(
+            estado=claim.estado, clasificado=claim.clasificado
+        )
         graph_result = self.graph.invoke(
             {
                 "reclamo_id": str(claim.reclamo_id),

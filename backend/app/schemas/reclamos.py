@@ -6,10 +6,14 @@ from uuid import UUID
 
 from pydantic import BaseModel, Field, model_validator
 
-from app.agents.classification.state import MotivoEscalado, TipoGasto
+from app.agents.classification.state import ActorResponsable, MotivoEscalado, TipoGasto
 
 
-EstadoPersistido = Literal["Clasificado", "Escalado"]
+EstadoPersistido = Literal[
+    "Clasificado",
+    "Escalado",
+    "Pendiente de respuesta del responsable",
+]
 EstadoReclamo = Literal[
     "Recibido",
     "Clasificado",
@@ -109,6 +113,8 @@ class AgentClassificationResult(BaseModel):
     debe_escalar: bool
     motivo_escalado: MotivoEscalado | None
     estado_clasificacion: Literal["clasificado", "escalado"]
+    actor_responsable: ActorResponsable | None
+    notificacion_responsable_requerida: bool
 
     @model_validator(mode="after")
     def validate_contract(self) -> "AgentClassificationResult":
@@ -119,10 +125,14 @@ class AgentClassificationResult(BaseModel):
                 raise ValueError("Un escalado requiere tipo_gasto nulo y motivo_escalado.")
             if self.estado_clasificacion != "escalado":
                 raise ValueError("Un escalado debe tener estado_clasificacion escalado.")
+            if self.actor_responsable is not None or self.notificacion_responsable_requerida:
+                raise ValueError("Un escalado no debe iniciar la notificación al responsable.")
         elif self.tipo_gasto is None or self.motivo_escalado is not None:
             raise ValueError("Una clasificación requiere tipo_gasto y no admite motivo.")
         elif self.estado_clasificacion != "clasificado":
             raise ValueError("Una clasificación debe tener estado_clasificacion clasificado.")
+        elif self.actor_responsable is None or not self.notificacion_responsable_requerida:
+            raise ValueError("Una clasificación requiere un actor responsable notificable.")
         return self
 
 

@@ -3,7 +3,14 @@
 from .llm import ClaimClassifier, build_classification_prompt, get_gemini_classifier
 from .resources import get_confidence_threshold, validate_confidence_threshold
 from .schemas import ModelClassification
-from .state import ClassificationState
+from .state import ActorResponsable, ClassificationState, TipoGasto
+
+
+ACTOR_BY_EXPENSE_TYPE: dict[TipoGasto, ActorResponsable] = {
+    "ordinario": "inquilino",
+    "extraordinario": "propietario",
+    "expensa": "inmobiliaria",
+}
 
 
 def _invalid_model_response() -> dict[str, object]:
@@ -62,3 +69,19 @@ def classify_claim(
         return _invalid_model_response()
 
     return _apply_confidence_threshold(classification, threshold)
+
+
+def determine_responsible_actor(state: ClassificationState) -> dict[str, object]:
+    """Prepara la intención durable sin realizar persistencia ni llamadas externas."""
+
+    expense_type = state.get("tipo_gasto")
+    if state.get("debe_escalar") or expense_type is None:
+        return {
+            "actor_responsable": None,
+            "notificacion_responsable_requerida": False,
+        }
+
+    return {
+        "actor_responsable": ACTOR_BY_EXPENSE_TYPE[expense_type],
+        "notificacion_responsable_requerida": True,
+    }

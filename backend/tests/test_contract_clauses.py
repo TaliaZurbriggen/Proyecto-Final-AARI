@@ -238,7 +238,13 @@ class FakeRepository:
     job: AnalysisJob
     completed: dict | None = None
     failed: tuple | None = None
-    def claim_due(self, *, limit=3): return [self.job]
+    claimed: bool = False
+    def claim_due(self, *, limit=3):
+        if self.claimed:
+            return []
+        self.claimed = True
+        return [self.job]
+    def renew_lease(self, analysis_id, *, execution_id): return True
     def complete(self, analysis_id, **data): self.completed = data; return True
     def fail(self, analysis_id, attempt, error, **kwargs): self.failed = (attempt, error); return True
 

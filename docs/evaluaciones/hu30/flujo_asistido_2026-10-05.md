@@ -2,8 +2,10 @@
 
 Fecha: 05/10/2026. Rama: `feat/AARI-319-extraccion-clausulas`.
 Estado: implementación validada y entrega para revisión; Talía autorizó el
-commit/push y registrar dos horas adicionales el 05/10. Pendiente de crear el
-PR, revisión de Tobías y merge. No se cerró la HU ni se modificaron sus estimaciones.
+commit/push y registrar dos horas adicionales el 05/10. El PR #28 está abierto;
+pendiente revisión de Tobías y merge. Las correcciones posteriores y nuevas
+pruebas están en [el seguimiento del PR](correcciones_pr28_2026-10-05.md).
+No se cerró la HU ni se modificaron sus estimaciones.
 
 ## Decisión y alcance aprobado
 

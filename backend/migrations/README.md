@@ -32,8 +32,17 @@ La instalación nueva debe aplicar además, en orden:
    seguros de entrega.
 8. `22_corregir_alerta_cancelaciones.sql` — adapta la alerta histórica de tres
    cancelaciones al contrato obligatorio de la bandeja de salida de la 21.
-9. `23_clausulas_contractuales.sql` — análisis durable de documentos,
-   cláusulas revisables, auditoría y contexto contractual de clasificación.
+9. `23_notificaciones_actor_responsable.sql` — registra al actor responsable
+   de cada reclamo clasificado, sus plazos y notificaciones idempotentes.
+10. `23_clausulas_contractuales.sql` — análisis durable de documentos,
+    cláusulas revisables, auditoría y contexto contractual de clasificación.
+11. `24_evidencia_clausulas_contractuales.sql` — evidencia por página y
+    propuestas rechazadas.
+12. `25_extraccion_asistida_literal.sql` — origen e historial de extracción asistida.
+
+Las dos migraciones con prefijo `23_` corresponden a historias independientes
+y ambas ya fueron aplicadas en desarrollo. Se identifican por el nombre completo
+del archivo, no sólo por el número; no reemplazar una por la otra ni repetirlas.
 
 El módulo de administración inicial ya incorpora el resultado de las
 migraciones incrementales 07, 08, 09, 10, 11, 12, 15 y 16. No deben repetirse
@@ -84,9 +93,12 @@ Aplicar únicamente las migraciones pendientes y respetar este orden:
     inicial. WhatsApp permanece desacoplado hasta su historia específica.
 17. `22_corregir_alerta_cancelaciones.sql` — redefine la función de alerta de
     cancelaciones para completar asunto, estado y próxima fecha de intento.
-18. `23_clausulas_contractuales.sql` — agrega análisis y revisión de cláusulas
+18. `23_notificaciones_actor_responsable.sql` — agrega el seguimiento durable
+    del responsable, los eventos de notificación y los trabajos de recordatorio
+    y vencimiento. Aplicar después de 22.
+19. `23_clausulas_contractuales.sql` — agrega análisis y revisión de cláusulas
     contractuales. Aplicar después de 22 y de la migración 20 de contratos.
-19. `24_evidencia_clausulas_contractuales.sql` — conserva evidencia por página,
+20. `24_evidencia_clausulas_contractuales.sql` — conserva evidencia por página,
     propuestas rechazadas y el uso operativo/contextual de cada cláusula. Aplicar
     después de 23.
 
@@ -122,6 +134,31 @@ prueba PostgreSQL crea un esquema aislado, recorre solicitud idempotente,
 procesamiento, confirmación, consulta del contexto y permisos, y termina con
 `ROLLBACK`. El análisis externo continúa deshabilitado por defecto y no forma
 parte de esta migración.
+## HU12: preparación de la migración 23
+
+La migración es aditiva, transaccional y limita la espera de bloqueos a cinco
+segundos y cada sentencia a treinta segundos. Agrega la preferencia de canal
+del propietario, tipifica los eventos de la bandeja de salida y crea
+`reclamo_responsables` con RLS habilitado y permisos revocados para `anon` y
+`authenticated`.
+
+Los plazos se leen de `configuracion_sistema`: el recordatorio se programa con
+`plazo_recordatorio_horas` (48 horas por defecto) y el vencimiento suma
+`plazo_escalado_horas` (24 horas por defecto). El worker materializa los
+eventos con `FOR UPDATE ... SKIP LOCKED` y claves de idempotencia, sin mantener
+la transacción abierta durante la llamada al proveedor de correo.
+
+La migración también redefine las funciones de notificación de estados y de
+alertas por cancelaciones para completar `tipo_evento` y
+`clave_idempotencia`. No modifica reclamos existentes, no genera
+notificaciones por sí sola y no envía correos.
+
+**Aplicación confirmada:** se ejecutó con autorización en el Supabase
+compartido AARI de desarrollo el **17/09/2026 (Argentina)** y quedó registrada
+como `20260917200108_hu12_notificaciones_actor_responsable`. No repetirla al
+hacer pull. Se recorrieron gasto ordinario, extraordinario, expensa,
+recordatorio y vencimiento; el QA finalizó con `ROLLBACK` y no invocó SMTP.
+Evidencia y decisiones: `docs/hu12_notificacion_actor_responsable.md`.
 
 ## HU29: migración 20
 

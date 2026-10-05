@@ -79,7 +79,7 @@ La referencia aprobada se conserva dentro de la skill. Si una historia necesita 
 El primer flujo del agente está implementado con LangGraph:
 
 ```text
-Inicio → clasificar_reclamo → Fin
+Inicio → clasificar_reclamo → determinar_actor_responsable → Fin
 ```
 
 El grafo usa Gemini con salida estructurada, la base de conocimiento v1.1 y un umbral de confianza configurable (`0.75` inicial). Las respuestas inválidas o de confianza insuficiente se escalan de manera segura.
@@ -92,7 +92,25 @@ Con el backend levantado y un reclamo existente en Supabase, se puede ejecutar:
 POST /reclamos/{reclamo_id}/clasificar
 ```
 
-El endpoint obtiene el reclamo, invoca el grafo y guarda el resultado. Devuelve `Clasificado` o `Escalado`, junto con el tipo de gasto cuando corresponda, la confianza, el fundamento y el motivo de escalado. La migración `backend/migrations/06_clasificacion_agente.sql` debe haberse aplicado una vez antes de utilizarlo. Cada cambio de estado queda registrado con origen `agente`.
+El endpoint obtiene el reclamo, invoca el grafo y guarda el resultado. Con HU12,
+una clasificación confiable determina al responsable y deja el reclamo en
+`Pendiente de respuesta del responsable`; si requiere revisión, devuelve
+`Escalado`. Incluye el tipo de gasto cuando corresponda, la confianza, el
+fundamento y el motivo de escalado. Cada cambio queda registrado con origen
+`agente`.
+
+Solo se admite la clasificación automática inicial de un reclamo `Recibido` o
+en `Clasificación pendiente`, sin clasificación ni solicitud de responsable
+previas. Repetirla o intentarla después de avanzar de etapa devuelve HTTP `409`
+sin reemplazar el actor ni sus notificaciones. También se revalida esta regla
+bajo bloqueo al guardar el resultado.
+
+Requiere las migraciones de clasificación y notificaciones hasta
+`backend/migrations/23_notificaciones_actor_responsable.sql`, siguiendo
+`backend/migrations/README.md`. La 23 ya fue aplicada al Supabase compartido el
+17/09/2026: no repetirla al actualizar la rama. La revisión del PR #26 no añade
+migraciones. Decisiones y pruebas:
+[`docs/hu12_notificacion_actor_responsable.md`](docs/hu12_notificacion_actor_responsable.md).
 
 ### Gestión de contratos de alquiler (HU29)
 
@@ -703,13 +721,15 @@ entorno compartido en la nube.
   posteriores siguen fuera de producción: V04 no superó los controles
   semánticos y varios ensayos recibieron `503 UNAVAILABLE`. El diagnóstico
   directo del 02/10 también recibió 503 sin LangChain, herramientas ni esquema
-  obligatorio: una solicitud HTTP verificada, cero reintentos. Suite local
-  actual: 520 aprobadas y 23 omitidas; frontend: 112 aprobadas, lint y build
+  obligatorio: una solicitud HTTP verificada, cero reintentos. Suite integrada
+  actual con PostgreSQL local: 574 aprobadas y 28 omitidas; frontend: 112 aprobadas, lint y build
   correctos. El flujo `v10-asistida` respondió HTTP 200 con V04 público, pero su
   revisión semántica obtuvo 60% general y 33,3% crítico: no acredita los umbrales
   automáticos. Confirmar como contexto no activa una cláusula; sólo una edición
-  que habilite expresamente su uso permite aportar a reclamos. Pendiente PR,
-  revisión y merge. Ver [alcance y resultados actuales de HU30](docs/evaluaciones/hu30/flujo_asistido_2026-10-05.md).
+  que habilite expresamente su uso permite aportar a reclamos. El PR #28 integra
+  AARI-135, calcula la vigencia en horario argentino y renueva la reserva del
+  trabajo activo. Pendiente revisión y merge. Ver [alcance y resultados actuales de HU30](docs/evaluaciones/hu30/flujo_asistido_2026-10-05.md)
+  y [regresiones del PR #28](docs/evaluaciones/hu30/correcciones_pr28_2026-10-05.md).
 - **Inicio previsto de Tobías:** AARI-116, base reutilizable para las
   notificaciones de AARI-135 y AARI-157.
 - **Seguimiento:** los story points conservan las estimaciones académicas

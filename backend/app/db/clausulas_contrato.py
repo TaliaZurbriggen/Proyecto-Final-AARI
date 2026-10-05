@@ -241,6 +241,22 @@ class SqlAlchemyContractClausesRepository:
                             int(row["intentos"]) + 1, row["modo"], execution, row["modelo"], row["prompt_version"]))
         return jobs
 
+    def renew_lease(self, analysis_id, *, execution_id):
+        """Sólo el dueño vigente puede extender la reserva, nunca revivirla."""
+        if execution_id is None:
+            return False
+        with self.session_factory.begin() as session:
+            result = session.execute(text("""
+                UPDATE contrato_analisis
+                SET bloqueado_hasta=clock_timestamp() + make_interval(secs=>:lease),
+                    updated_at=clock_timestamp()
+                WHERE id=:id AND estado='procesando'
+                  AND ejecucion_id=CAST(:execution AS uuid)
+                  AND bloqueado_hasta>clock_timestamp()
+            """), {"id": str(analysis_id), "execution": str(execution_id),
+                    "lease": ANALYSIS_LEASE_SECONDS})
+        return result.rowcount == 1
+
     def complete(
         self, analysis_id, *, pages, clauses: list[ExtractedClause],
         rejected: list[RejectedClause], complete, incidents,
@@ -417,8 +433,9 @@ class SqlAlchemyContractClausesRepository:
                     JOIN contratos c ON c.inquilino_id=r.inquilino_id
                         AND c.propiedad_id=r.propiedad_id
                         AND c.estado<>'borrador'
-                        AND c.fecha_inicio<=r.creado_en::date
-                        AND coalesce(c.fecha_finalizacion, c.fecha_fin)>=r.creado_en::date
+                        AND c.fecha_inicio<=(r.creado_en AT TIME ZONE 'America/Argentina/Buenos_Aires')::date
+                        AND coalesce(c.fecha_finalizacion, c.fecha_fin)>=
+                            (r.creado_en AT TIME ZONE 'America/Argentina/Buenos_Aires')::date
                     WHERE r.id=:claim_id
                     ORDER BY c.fecha_inicio DESC LIMIT 1
                 ), latest_document AS (

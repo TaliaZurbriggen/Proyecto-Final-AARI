@@ -13,6 +13,7 @@ en los registros históricos, que se mantienen intactos.
 - [Revisión documental separada](revision_asistida_2026-10-05.json).
 - [Comprobación local de V01–V04](lectura_asistida_2026-10-05.json).
 - [Decisión y resumen de implementación](flujo_asistido_2026-10-05.md).
+- [Correcciones y regresiones del PR #28](correcciones_pr28_2026-10-05.md).
 
 Notion rechazó el registro del ADR por límite de bloques gratuitos del espacio.
 La documentación queda en el repositorio; no se borraron páginas ni se cambió

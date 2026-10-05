@@ -509,7 +509,12 @@ La [decisión completa y resultados](evaluaciones/hu30/flujo_asistido_2026-10-05
 detallan el alcance y la revisión pendiente. Notion rechazó el ADR por límite
 de bloques gratuitos; la documentación quedó en el proyecto. Talía autorizó
 entregar los cambios de `feat/AARI-319-extraccion-clausulas` mediante commit/push
-y registrar dos horas adicionales el 05/10. Creará el PR para revisión de Tobías;
+y registrar dos horas adicionales el 05/10. El PR #28 está abierto para revisión de Tobías;
 la HU sigue en curso, sin autorización de cierre o merge. Antes del cierre, corresponde revisar el
 flujo asistido y aceptar explícitamente ese alcance, sin confundirlo con haber
 cumplido los indicadores del modelo automático.
+
+Las [correcciones del PR #28](evaluaciones/hu30/correcciones_pr28_2026-10-05.md)
+integran `main` preservando AARI-135, corrigen la vigencia en horario argentino
+y protegen la reserva de cada trabajo de extracción. Se verificaron con
+PostgreSQL local descartable y Gemini simulado, sin modificar Supabase.
