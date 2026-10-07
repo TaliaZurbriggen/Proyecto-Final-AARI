@@ -1,0 +1,94 @@
+{
+  "version": "2026-09-24-v4",
+  "purpose": "Validar reglas atómicas, evidencia breve y conservación de ambigüedades de HU30 v4 sobre la regresión conocida antes de revelar los holdouts.",
+  "base_corpus": "docs/evaluaciones/hu30/corpus_v2_manifest.json",
+  "results_directory": "docs/evaluaciones/hu30/resultados_corpus_v4",
+  "windowed_evaluation": {
+    "strategy": "overlapping_page_windows",
+    "allowed_documents": ["V01"],
+    "pages_per_window": 2,
+    "overlap_pages": 1,
+    "results_directory": "docs/evaluaciones/hu30/resultados_corpus_v4_ventanas"
+  },
+  "prompt_freeze": {
+    "prompt_version": "v4",
+    "extractor_version": "hu30-v4",
+    "model": "gemini-3.5-flash",
+    "frozen_at": "2026-09-24",
+    "files": [
+      {
+        "path": "backend/prompts/prompt_extraccion_clausulas_v4.md",
+        "sha256": "cd017ef10aa4d62ebf29af5313d9a795d259f03779e1e80fe4e5bc47711b4ce5"
+      },
+      {
+        "path": "backend/app/services/contract_clause_llm.py",
+        "sha256": "8efa6a65c162e36cb09ed1612083f41d9a65f65c1e961ab05651e3ec938166ff"
+      },
+      {
+        "path": "backend/app/services/contract_clause_evidence.py",
+        "sha256": "e179ee2669212c0c8a1b35ead32a0cac4d3c0972437648ac7af144ecb7cbef2d"
+      }
+    ]
+  },
+  "thresholds": {
+    "minimum_general_coverage": 0.85,
+    "minimum_critical_recall": 1.0,
+    "maximum_accepted_hallucinations": 0
+  },
+  "split_policy": {
+    "regression": "V01-V04 son conocidos y sólo miden si v4 corrige los defectos de evidencia y ambigüedad sin perder los aciertos de v3.",
+    "holdout": "H01-H02 continúan reservados por Tobías/Oikos hasta que la regresión v4 cumpla los criterios."
+  },
+  "documents": [
+    {
+      "id": "V01",
+      "role": "regression",
+      "path": "output/pdf/hu30_corpus/validation/V01_modelo_vivienda_cels.pdf",
+      "sha256": "f20f157a6686a80ad1aff69c45d6b5335b3a7092032b26b77e48b8802a81da2c",
+      "expectations_state": "validated",
+      "external_run": "requires_explicit_per_run_authorization"
+    },
+    {
+      "id": "V02",
+      "role": "regression",
+      "path": "output/pdf/hu30_corpus/validation/V02_modelo_inmueble_mendoza_2024_paginas_4_6.pdf",
+      "sha256": "ea31e4c14934389984c4f7eaf9ff8de02924e12068e7197604f1280832cd7479",
+      "expectations_state": "validated",
+      "external_run": "requires_explicit_per_run_authorization"
+    },
+    {
+      "id": "V03",
+      "role": "regression",
+      "path": "output/pdf/hu30_corpus/validation/V03_modelo_inmueble_unipe.pdf",
+      "sha256": "aaaa338ceb76f6f61993a75e4b49bc1547de35cb22b9a1b26b18207f9efe6073",
+      "expectations_state": "validated",
+      "external_run": "requires_explicit_per_run_authorization"
+    },
+    {
+      "id": "V04",
+      "role": "regression",
+      "path": "output/pdf/hu30_corpus/validation/V04_modelo_inmueble_dgn_paginas_8_9.pdf",
+      "sha256": "a921c2a9db516211b82398c52ad937e7a881d0ec6d248334fdf6d483bd303d1c",
+      "expectations_state": "validated",
+      "external_run": "requires_explicit_per_run_authorization"
+    },
+    {
+      "id": "H01",
+      "role": "holdout",
+      "path": null,
+      "sha256": null,
+      "custodian": "Tobías/Oikos",
+      "expectations_state": "withheld",
+      "external_run": "blocked_until_regression_passes"
+    },
+    {
+      "id": "H02",
+      "role": "holdout",
+      "path": null,
+      "sha256": null,
+      "custodian": "Tobías/Oikos",
+      "expectations_state": "withheld",
+      "external_run": "blocked_until_regression_passes"
+    }
+  ]
+}

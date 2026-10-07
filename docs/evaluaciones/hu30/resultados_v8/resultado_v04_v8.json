@@ -1,0 +1,342 @@
+{
+  "document": "V04",
+  "source_sha256": "a921c2a9db516211b82398c52ad937e7a881d0ec6d248334fdf6d483bd303d1c",
+  "prompt_version": "v8-experimental",
+  "frozen_files": [
+    {
+      "path": "backend/prompts/prompt_extraccion_clausulas_v8.md",
+      "sha256": "6ed32b3336ae88c0bee41f13bbd63a2dbcf09c686ba7d9399db47d0ced10562d"
+    },
+    {
+      "path": "backend/app/services/contract_clause_v8.py",
+      "sha256": "1790f3ba9c2a2e1aec02b010a269da778a25513890c741b34d3e63797788474a"
+    },
+    {
+      "path": "backend/app/services/contract_clause_reference_trial.py",
+      "sha256": "ae48823f323e2fb5af1eeb88a1e65d71da2ef0192b7e30d69db413b689455506"
+    },
+    {
+      "path": "backend/scripts/evaluate_contract_clause_reference.py",
+      "sha256": "34177122ac2273ba0438541f262df68c9bf0eeac38c45a7544a429331af8e8b6"
+    },
+    {
+      "path": "backend/scripts/evaluate_contract_clause_v7.py",
+      "sha256": "e5dcb2b5571e3b96664c30344f0231f483e111c95f9426516f286cccb5422184"
+    },
+    {
+      "path": "backend/prompts/prompt_extraccion_clausulas_v7.md",
+      "sha256": "2925c8a648b5e38613cf91be8261af84f6a97c1d57f0ba70b8ab1675aa002537"
+    },
+    {
+      "path": "backend/app/services/contract_clause_v7.py",
+      "sha256": "db066fe5fe14dc9965ce4394b1155f79461049af9ac6cb076849c13c5859a9f6"
+    },
+    {
+      "path": "backend/app/services/contract_clause_v7_trial.py",
+      "sha256": "405ba645ca69f01dedf9db8d5b3c5707231bc536984f96e6bf96fb781e517ecf"
+    },
+    {
+      "path": "backend/app/services/contract_clause_v5.py",
+      "sha256": "cae6d66f3690ff97145772c9be17c6cd02c90b398436773f1088207b9c1d75d9"
+    },
+    {
+      "path": "backend/app/services/contract_clause_segments.py",
+      "sha256": "27bee6a898e94a364b1c494f9f8155b93f536bd4fea23de52e457414ef365ad8"
+    },
+    {
+      "path": "backend/app/services/contract_text_extraction.py",
+      "sha256": "2450ca33aa76b70e80ec9a96f313943db8a97d6608307ad63aa6c1f4e07923a2"
+    },
+    {
+      "path": "backend/app/schemas/clausulas_contrato.py",
+      "sha256": "9357909c22f20cf1eee68975a23ba9bc6b3e7948c4553e86f05a653821dced2a"
+    },
+    {
+      "path": "docs/evaluaciones/hu30/controles_corpus_v2.json",
+      "sha256": "936252d6cc344bda79c2b0aa8c872e7bc6089e7ec22af2cf38003632087729cf"
+    }
+  ],
+  "model": "gemini-3.5-flash-lite",
+  "source_characters": 4709,
+  "prompt_characters": 9131,
+  "result_path": "docs\\evaluaciones\\hu30\\resultados_v8\\resultado_v04_v8.json",
+  "ocr_language": "spa",
+  "ocr_traineddata_sha256": null,
+  "extracted_pages_sha256": "18f6fd085061b0f0979ce4025971664a40c3e446c920ca3ef7a17b9c03ba2385",
+  "started_at": "2026-10-02T14:04:41.263422+00:00",
+  "authorized_adapter_invocations": 1,
+  "automatic_retries_setting": 1,
+  "http_attempts_verified": false,
+  "pages": [
+    {
+      "page": 1,
+      "method": "digital",
+      "readable": true
+    },
+    {
+      "page": 2,
+      "method": "digital",
+      "readable": true
+    }
+  ],
+  "state": "completed",
+  "finished_at": "2026-10-02T14:05:31.727521+00:00",
+  "adapter_invocations": 1,
+  "model_proposals": 6,
+  "proposals": [
+    {
+      "tramo_id": 5,
+      "titulo": "Cláusula Quinta - Reparaciones",
+      "resumen": "El locador tiene a su cargo los gastos de las reparaciones necesarias para mantener el edificio en buen estado de conservación y uso durante la vigencia del contrato.",
+      "categoria": "reparacion",
+      "responsable": "propietario",
+      "uso_clasificador": "operativa",
+      "condiciones": "Durante la vigencia del contrato para mantener el edificio en buen estado de conservación y para que pueda servir satisfactoriamente al uso destinado, conforme al Código Civil.",
+      "referencias": [],
+      "confianza": 1.0
+    },
+    {
+      "tramo_id": 6,
+      "titulo": "Cláusula Sexta - Impuestos y gravámenes",
+      "resumen": "Regulación del pago de impuestos, tasas, contribuciones y gravámenes, estableciendo excepciones por consumos del locatario y gastos comunes, con redacción parcialmente ambigua sobre la totalidad de los rubros exceptuados.",
+      "categoria": "expensa",
+      "responsable": "no_especificado",
+      "uso_clasificador": "contexto",
+      "condiciones": "Salvo los impuestos y gravámenes que obedezcan al uso del inmueble por parte del locatario y se facturen por consumo, así como la parte proporcional de los gastos comunes del edificio.",
+      "referencias": [],
+      "confianza": 0.6
+    },
+    {
+      "tramo_id": 7,
+      "titulo": "Cláusula Séptima - Estado inicial y devolución",
+      "resumen": "El locatario se obliga a mantener y devolver el inmueble en el mismo perfecto estado de conservación en que lo recibe, pagando el importe de los deterioros ocasionados, excepto los derivados del buen uso y paso del tiempo.",
+      "categoria": "danio",
+      "responsable": "inquilino",
+      "uso_clasificador": "operativa",
+      "condiciones": "Salvo los deterioros que resulten del buen uso y de la acción del tiempo. Se requiere labrar acta de recepción e inventario al tomar posesión.",
+      "referencias": [],
+      "confianza": 1.0
+    },
+    {
+      "tramo_id": 7,
+      "titulo": "Cláusula Séptima - Acta e inventario",
+      "resumen": "Se establece la obligación de labrar un acta al momento de tomar posesión del inmueble consignando la fecha de inicio, el estado de recepción y el inventario completo de las instalaciones.",
+      "categoria": "devolucion",
+      "responsable": "no_especificado",
+      "uso_clasificador": "contexto",
+      "condiciones": "Al momento de tomar posesión.",
+      "referencias": [],
+      "confianza": 1.0
+    },
+    {
+      "tramo_id": 8,
+      "titulo": "Cláusula Octava - Seguridad",
+      "resumen": "El locatario tiene prohibido mantener en la propiedad cosas que afecten la seguridad o realizar actos contrarios a las normas municipales.",
+      "categoria": "servicio",
+      "responsable": "inquilino",
+      "uso_clasificador": "operativa",
+      "condiciones": "Prohibición de tener cosas que afecten la seguridad de personas, objetos e instalaciones, y de realizar actos que contraríen normas municipales.",
+      "referencias": [],
+      "confianza": 1.0
+    },
+    {
+      "tramo_id": 9,
+      "titulo": "Cláusula Novena - Modificaciones",
+      "resumen": "El locatario podrá efectuar modificaciones indispensables para adaptar el inmueble a sus servicios previa conformidad del locador, sin obligación de devolverlo a su estado anterior al desocuparlo.",
+      "categoria": "reparacion",
+      "responsable": "inquilino",
+      "uso_clasificador": "operativa",
+      "condiciones": "Previa conformidad del locador.",
+      "referencias": [],
+      "confianza": 1.0
+    }
+  ],
+  "valid_clauses": [
+    {
+      "numero": "5",
+      "titulo": "Cláusula Quinta - Reparaciones",
+      "evidencias": [
+        {
+          "pagina": 1,
+          "texto": "QUINTA: Queda también convenido que quedarán a cargo del LOCADOR los \ngastos que demanden las reparaciones que fuera necesario efectuar durante \nla vigencia del presente contrato para mantener el edificio en buen estado de"
+        },
+        {
+          "pagina": 2,
+          "texto": "conservación, de manera que pueda servir satisfactoriamente al uso que se le \ndestine, con arreglo a las prescripciones del Código Civil (arts. 1515 y ss.)"
+        }
+      ],
+      "paginas": [
+        1,
+        2
+      ],
+      "texto_original": "QUINTA: Queda también convenido que quedarán a cargo del LOCADOR los \ngastos que demanden las reparaciones que fuera necesario efectuar durante \nla vigencia del presente contrato para mantener el edificio en buen estado de\n\nconservación, de manera que pueda servir satisfactoriamente al uso que se le \ndestine, con arreglo a las prescripciones del Código Civil (arts. 1515 y ss.)",
+      "resumen": "El locador tiene a su cargo los gastos de las reparaciones necesarias para mantener el edificio en buen estado de conservación y uso durante la vigencia del contrato.",
+      "categoria": "reparacion",
+      "responsable": "propietario",
+      "uso_clasificador": "operativa",
+      "condiciones": "Durante la vigencia del contrato para mantener el edificio en buen estado de conservación y para que pueda servir satisfactoriamente al uso destinado, conforme al Código Civil.",
+      "referencias": [],
+      "confianza": 1.0
+    },
+    {
+      "numero": "6",
+      "titulo": "Cláusula Sexta - Impuestos y gravámenes",
+      "evidencias": [
+        {
+          "pagina": 2,
+          "texto": "SEXTA: Serán por cuenta del LOCADOR el pago de los impuestos, tasas, \ncontribuciones y gravámenes de cualquier naturaleza, existentes o a crearse, \nsalvo aquellos que obedecieran al uso que al inmueble le diera el LOCATARIO \ny se facturen en virtud de los consumos, y la parte proporcional de los gastos \ncomunes al edificio."
+        }
+      ],
+      "paginas": [
+        2
+      ],
+      "texto_original": "SEXTA: Serán por cuenta del LOCADOR el pago de los impuestos, tasas, \ncontribuciones y gravámenes de cualquier naturaleza, existentes o a crearse, \nsalvo aquellos que obedecieran al uso que al inmueble le diera el LOCATARIO \ny se facturen en virtud de los consumos, y la parte proporcional de los gastos \ncomunes al edificio.",
+      "resumen": "Regulación del pago de impuestos, tasas, contribuciones y gravámenes, estableciendo excepciones por consumos del locatario y gastos comunes, con redacción parcialmente ambigua sobre la totalidad de los rubros exceptuados.",
+      "categoria": "expensa",
+      "responsable": "no_especificado",
+      "uso_clasificador": "contexto",
+      "condiciones": "Salvo los impuestos y gravámenes que obedezcan al uso del inmueble por parte del locatario y se facturen por consumo, así como la parte proporcional de los gastos comunes del edificio.",
+      "referencias": [],
+      "confianza": 0.6
+    },
+    {
+      "numero": "7",
+      "titulo": "Cláusula Séptima - Estado inicial y devolución",
+      "evidencias": [
+        {
+          "pagina": 2,
+          "texto": "SÉPTIMA: El LOCATARIO recibirá el inmueble desocupado, en perfecto \nestado de conservación , obligándose a mantener y a devolver el inmueble en \nlas mismas condiciones y a pagar el importe de los deterioros ocasionados, \nsalvo los que resulten del buen uso y de la acción del tiempo. Al momento de \ntomar posesión del inmueble se labrará el acta respectiva en la que se \nconsigne • la fecha de inicio de la posesión, el estado de recepción, y el \ninventario completo de las instalaciones."
+        }
+      ],
+      "paginas": [
+        2
+      ],
+      "texto_original": "SÉPTIMA: El LOCATARIO recibirá el inmueble desocupado, en perfecto \nestado de conservación , obligándose a mantener y a devolver el inmueble en \nlas mismas condiciones y a pagar el importe de los deterioros ocasionados, \nsalvo los que resulten del buen uso y de la acción del tiempo. Al momento de \ntomar posesión del inmueble se labrará el acta respectiva en la que se \nconsigne • la fecha de inicio de la posesión, el estado de recepción, y el \ninventario completo de las instalaciones.",
+      "resumen": "El locatario se obliga a mantener y devolver el inmueble en el mismo perfecto estado de conservación en que lo recibe, pagando el importe de los deterioros ocasionados, excepto los derivados del buen uso y paso del tiempo.",
+      "categoria": "danio",
+      "responsable": "inquilino",
+      "uso_clasificador": "operativa",
+      "condiciones": "Salvo los deterioros que resulten del buen uso y de la acción del tiempo. Se requiere labrar acta de recepción e inventario al tomar posesión.",
+      "referencias": [],
+      "confianza": 1.0
+    },
+    {
+      "numero": "7",
+      "titulo": "Cláusula Séptima - Acta e inventario",
+      "evidencias": [
+        {
+          "pagina": 2,
+          "texto": "SÉPTIMA: El LOCATARIO recibirá el inmueble desocupado, en perfecto \nestado de conservación , obligándose a mantener y a devolver el inmueble en \nlas mismas condiciones y a pagar el importe de los deterioros ocasionados, \nsalvo los que resulten del buen uso y de la acción del tiempo. Al momento de \ntomar posesión del inmueble se labrará el acta respectiva en la que se \nconsigne • la fecha de inicio de la posesión, el estado de recepción, y el \ninventario completo de las instalaciones."
+        }
+      ],
+      "paginas": [
+        2
+      ],
+      "texto_original": "SÉPTIMA: El LOCATARIO recibirá el inmueble desocupado, en perfecto \nestado de conservación , obligándose a mantener y a devolver el inmueble en \nlas mismas condiciones y a pagar el importe de los deterioros ocasionados, \nsalvo los que resulten del buen uso y de la acción del tiempo. Al momento de \ntomar posesión del inmueble se labrará el acta respectiva en la que se \nconsigne • la fecha de inicio de la posesión, el estado de recepción, y el \ninventario completo de las instalaciones.",
+      "resumen": "Se establece la obligación de labrar un acta al momento de tomar posesión del inmueble consignando la fecha de inicio, el estado de recepción y el inventario completo de las instalaciones.",
+      "categoria": "devolucion",
+      "responsable": "no_especificado",
+      "uso_clasificador": "contexto",
+      "condiciones": "Al momento de tomar posesión.",
+      "referencias": [],
+      "confianza": 1.0
+    },
+    {
+      "numero": "8",
+      "titulo": "Cláusula Octava - Seguridad",
+      "evidencias": [
+        {
+          "pagina": 2,
+          "texto": "OCTAVA: El LOCATARIO no podrá tener en la propiedad cosas que pudieran \nafectar la seguridad de las personas, objetos e instalaciones, ni realizar actos \nque contraríen las normas municipales."
+        }
+      ],
+      "paginas": [
+        2
+      ],
+      "texto_original": "OCTAVA: El LOCATARIO no podrá tener en la propiedad cosas que pudieran \nafectar la seguridad de las personas, objetos e instalaciones, ni realizar actos \nque contraríen las normas municipales.",
+      "resumen": "El locatario tiene prohibido mantener en la propiedad cosas que afecten la seguridad o realizar actos contrarios a las normas municipales.",
+      "categoria": "servicio",
+      "responsable": "inquilino",
+      "uso_clasificador": "operativa",
+      "condiciones": "Prohibición de tener cosas que afecten la seguridad de personas, objetos e instalaciones, y de realizar actos que contraríen normas municipales.",
+      "referencias": [],
+      "confianza": 1.0
+    },
+    {
+      "numero": "9",
+      "titulo": "Cláusula Novena - Modificaciones",
+      "evidencias": [
+        {
+          "pagina": 2,
+          "texto": "NOVENA: El LOCATARIO, previa conformidad del LOCADOR, podrá efectuar \nen el inmueble que se contrata las modificaciones que sean indispensables \npara adaptarlo a sus servicios, sin que ello importe la obligación de su parte de \ndevolverlo a su anterior estado en ocasión de desocuparlo, el que será \ndevuelto en el estado en que se encuentre sin ulteriores responsabilidades por \nparte del LOCATARIO."
+        }
+      ],
+      "paginas": [
+        2
+      ],
+      "texto_original": "NOVENA: El LOCATARIO, previa conformidad del LOCADOR, podrá efectuar \nen el inmueble que se contrata las modificaciones que sean indispensables \npara adaptarlo a sus servicios, sin que ello importe la obligación de su parte de \ndevolverlo a su anterior estado en ocasión de desocuparlo, el que será \ndevuelto en el estado en que se encuentre sin ulteriores responsabilidades por \nparte del LOCATARIO.",
+      "resumen": "El locatario podrá efectuar modificaciones indispensables para adaptar el inmueble a sus servicios previa conformidad del locador, sin obligación de devolverlo a su estado anterior al desocuparlo.",
+      "categoria": "reparacion",
+      "responsable": "inquilino",
+      "uso_clasificador": "operativa",
+      "condiciones": "Previa conformidad del locador.",
+      "referencias": [],
+      "confianza": 1.0
+    }
+  ],
+  "rejected_proposals": [],
+  "evidence_incidents": [],
+  "source_assignments": [
+    {
+      "proposal_ordinal": 1,
+      "tramo_id": 5,
+      "numero": "5",
+      "paginas": [
+        1,
+        2
+      ]
+    },
+    {
+      "proposal_ordinal": 2,
+      "tramo_id": 6,
+      "numero": "6",
+      "paginas": [
+        2
+      ]
+    },
+    {
+      "proposal_ordinal": 3,
+      "tramo_id": 7,
+      "numero": "7",
+      "paginas": [
+        2
+      ]
+    },
+    {
+      "proposal_ordinal": 4,
+      "tramo_id": 7,
+      "numero": "7",
+      "paginas": [
+        2
+      ]
+    },
+    {
+      "proposal_ordinal": 5,
+      "tramo_id": 8,
+      "numero": "8",
+      "paginas": [
+        2
+      ]
+    },
+    {
+      "proposal_ordinal": 6,
+      "tramo_id": 9,
+      "numero": "9",
+      "paginas": [
+        2
+      ]
+    }
+  ],
+  "evidence_origin": "complete_local_segment_fragments",
+  "source_preserved": true
+}

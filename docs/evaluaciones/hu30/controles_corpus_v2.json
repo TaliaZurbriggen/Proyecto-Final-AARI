@@ -1,0 +1,165 @@
+{
+  "version": "2026-09-24",
+  "state": "validated_against_source_documents",
+  "instructions": "Controles validados por lectura directa de las fuentes el 24/09/2026. Describen fidelidad al texto, no validez jurídica ni reglas universales de Oikos.",
+  "documents": {
+    "V01": {
+      "state": "validated",
+      "controls": [
+        {
+          "id": "V01-E01",
+          "pages": [4, 5],
+          "critical": true,
+          "expected": "Conservar el estado inicial, la devolución en condiciones equivalentes y la excepción por desgaste normal, sin tratar el inventario como asignación automática de una reparación."
+        },
+        {
+          "id": "V01-E02",
+          "pages": [5],
+          "critical": true,
+          "expected": "Registrar literalmente la atribución amplia al locatario de reparaciones necesarias para preservar y restituir, incluida la ausencia de reembolso, sin ocultar que convive con reglas posteriores."
+        },
+        {
+          "id": "V01-E03",
+          "pages": [5],
+          "critical": true,
+          "expected": "Distinguir las reparaciones atribuidas al locador por fuerza mayor, terceros, vicios o uso normal, y la posibilidad de que el locatario las realice a cuenta del locador si éste no actúa."
+        },
+        {
+          "id": "V01-E04",
+          "pages": [5],
+          "critical": true,
+          "expected": "Separar servicios, ABL y expensas ordinarias del locatario de expensas extraordinarias e impuesto inmobiliario atribuidos al locador."
+        },
+        {
+          "id": "V01-E05",
+          "pages": [5],
+          "critical": true,
+          "expected": "Conservar el mecanismo para reparaciones urgentes: aviso previo, falta de resolución dentro del plazo que exige la urgencia, acreditación y eventual descuento del alquiler."
+        },
+        {
+          "id": "V01-E06",
+          "pages": [5],
+          "critical": false,
+          "expected": "Detectar consentimiento previo escrito para alteraciones y la posible remoción a cargo del locatario, sin convertirlo en una prohibición de reparaciones necesarias."
+        },
+        {
+          "id": "V01-E07",
+          "pages": [5],
+          "critical": false,
+          "expected": "Conservar el aviso de al menos 72 horas para visitas del locador y no confundirlo con avisos de daños."
+        },
+        {
+          "id": "V01-E08",
+          "pages": [6, 7],
+          "critical": false,
+          "expected": "Relacionar devolución de llaves y comprobante de recepción con la retención del depósito sólo por daños atribuibles al locatario observados al finalizar."
+        }
+      ]
+    },
+    "V02": {
+      "state": "validated",
+      "controls": [
+        {
+          "id": "V02-E01",
+          "pages": [1, 2],
+          "critical": false,
+          "expected": "Conservar la entrega en estado apropiado y el acta de recepción con descripción de conservación e instalaciones como contexto."
+        },
+        {
+          "id": "V02-E02",
+          "pages": [2],
+          "critical": true,
+          "expected": "Distinguir reparaciones estructurales no imputables al locatario a cargo del locador, incluso fuerza mayor, siniestros y desgaste natural."
+        },
+        {
+          "id": "V02-E03",
+          "pages": [2],
+          "critical": true,
+          "expected": "Conservar el procedimiento de reparación urgente por el locatario: notificación, transcurso mínimo de 24 horas, intimación para reparaciones no urgentes y posibilidad de descontar o compensar el valor."
+        },
+        {
+          "id": "V02-E04",
+          "pages": [2],
+          "critical": true,
+          "expected": "Separar cargas de la actividad, gravámenes del inmueble, expensas habituales por servicios normales y servicios medidos sin inventar una regla única para todos los gastos."
+        },
+        {
+          "id": "V02-E05",
+          "pages": [2, 3],
+          "critical": true,
+          "expected": "Conservar mantenimiento no estructural, daños atribuidos al locatario con excepciones expresas y restitución de llaves, junto con el inventario inicial del anexo."
+        }
+      ]
+    },
+    "V03": {
+      "state": "validated",
+      "controls": [
+        {
+          "id": "V03-E01",
+          "pages": [1, 2],
+          "critical": false,
+          "expected": "Vincular restitución al estado de la cláusula séptima y conservar la excepción por tiempo y uso normal."
+        },
+        {
+          "id": "V03-E02",
+          "pages": [2],
+          "critical": true,
+          "expected": "Distinguir obligación del locatario de mantener y restituir del deber del locador de realizar reformas cuando el inmueble no esté en condiciones de uso."
+        },
+        {
+          "id": "V03-E03",
+          "pages": [2],
+          "critical": true,
+          "expected": "Separar servicios y expensas ordinarias del locatario de expensas extraordinarias e impuestos sobre la titularidad a cargo del locador."
+        },
+        {
+          "id": "V03-E04",
+          "pages": [2],
+          "critical": false,
+          "expected": "Detectar acceso para inspección y trabajos de conservación, reparación o mejora, sin inventar un plazo de preaviso que el texto no contiene."
+        },
+        {
+          "id": "V03-E05",
+          "pages": [2, 3],
+          "critical": true,
+          "expected": "Conservar autorización previa para modificaciones y la excepción de adecuaciones funcionales no estructurales; unir la continuación de la cláusula en la página siguiente."
+        }
+      ]
+    },
+    "V04": {
+      "state": "validated",
+      "controls": [
+        {
+          "id": "V04-E01",
+          "pages": [1, 2],
+          "critical": true,
+          "expected": "Unir la cláusula quinta entre páginas y atribuir al locador las reparaciones necesarias durante la vigencia para mantener el edificio apto para su uso."
+        },
+        {
+          "id": "V04-E02",
+          "pages": [2],
+          "critical": true,
+          "expected": "Conservar la redacción de impuestos, tasas, consumos y gastos comunes sin resolver automáticamente su sintaxis ni asignar conceptos ausentes."
+        },
+        {
+          "id": "V04-E03",
+          "pages": [2],
+          "critical": true,
+          "expected": "Distinguir mantenimiento y devolución por el locatario, deterioros a su cargo y excepción por buen uso y acción del tiempo, junto con acta e inventario inicial."
+        },
+        {
+          "id": "V04-E04",
+          "pages": [2],
+          "critical": false,
+          "expected": "Detectar la obligación de no conservar elementos ni realizar actos que comprometan seguridad o normas municipales."
+        },
+        {
+          "id": "V04-E05",
+          "pages": [2],
+          "critical": false,
+          "expected": "Conservar la conformidad previa del locador para modificaciones indispensables y el tratamiento particular de la devolución, sin inventar una obligación de restaurar."
+        }
+      ]
+    }
+  }
+}

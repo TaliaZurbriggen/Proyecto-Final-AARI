@@ -27,7 +27,8 @@ class FakeRepository:
         return self.claim if self.claim and self.claim.reclamo_id == reclamo_id else None
 
     def persist_classification(
-        self, reclamo_id: UUID, result: AgentClassificationResult
+        self, reclamo_id: UUID, result: AgentClassificationResult,
+        contract_context: list[dict[str, object]],
     ) -> PersistedClassification:
         self.persisted = result
         return PersistedClassification(
@@ -282,7 +283,7 @@ def test_reclassification_returns_409_before_calling_the_model(estado, clasifica
 
 def test_classification_race_returns_409_without_delivering_notifications():
     class ConcurrentRepository(FakeRepository):
-        def persist_classification(self, reclamo_id, result):
+        def persist_classification(self, reclamo_id, result, contract_context):
             raise ClaimClassificationConflictError("El reclamo avanzó de etapa.")
 
     claim = ClaimForClassification(

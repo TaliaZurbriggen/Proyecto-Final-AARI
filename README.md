@@ -139,6 +139,80 @@ separadas y reiniciar el backend después de modificar `.env`.
 Alcance, decisiones, pruebas y pendientes:
 [`docs/hu29_gestion_contratos.md`](docs/hu29_gestion_contratos.md).
 
+### Extracción y revisión de cláusulas contractuales (HU30)
+
+Desde el detalle de un contrato, administración puede solicitar el análisis de
+la última versión firmada. La lectura del PDF se realiza primero de forma local:
+usa texto digital por página y reserva Tesseract para páginas escaneadas.
+El flujo vigente, aprobado el **05/10/2026**, es **asistido**: Gemini propone
+interpretaciones por identificador de tramo y el backend adjunta su evidencia
+local completa, incluidas continuaciones entre páginas. No acepta identificadores
+inexistentes y conserva las propuestas rechazadas para auditoría. Los bloques
+sin interpretación se conservan como texto literal pendiente, sin asignar pagador.
+
+La opción **Extraer sin IA** realiza esa lectura local sin enviar el contrato
+a Google. Permite continuar aunque el servicio externo falle; no interpreta
+automáticamente obligaciones. Todas las propuestas quedan como contexto.
+**Confirmar como contexto no habilita una regla**: para que aporte al clasificador,
+administración debe editarla y elegir expresamente `Puede aportar al clasificador`.
+La revisión debe contrastar resumen, responsable y excepciones con el PDF.
+
+El trabajo se persiste en una cola durable con historial privado de intentos.
+Un error de Gemini termina ese intento, sin reintentos automáticos del proveedor;
+una respuesta tardía no reemplaza una ejecución nueva. El respaldo local no borra
+revisiones ni habilitaciones anteriores. El clasificador recibe únicamente
+cláusulas editadas con activación explícita del contrato aplicable al inquilino,
+propiedad y fecha del reclamo, y guarda el contexto exacto utilizado.
+Las migraciones `backend/migrations/23_clausulas_contractuales.sql` y
+`backend/migrations/24_evidencia_clausulas_contractuales.sql` fueron aplicadas al
+Supabase compartido el **21/09/2026**. La migración aditiva
+`25_extraccion_asistida_literal.sql` fue aplicada con autorización el **05/10/2026**:
+agrega origen e historial, con RLS y sin borrar datos. No repetirlas al actualizar
+la rama; ver la [guía de migraciones](backend/migrations/README.md).
+
+La ruta externa actual utiliza `CONTRACT_CLAUSE_MODEL=gemini-3.5-flash-lite`, SDK
+oficial y salida JSON validada localmente, con una petición HTTP por intento.
+El ensayo público respondió HTTP 200, pero **no alcanzó los umbrales de calidad
+automática del corpus**. Esto no se presenta como interpretación autónoma validada.
+
+Para OCR local se requieren `pypdfium2`, `pytesseract` y el motor Tesseract con
+idioma español. Docker lo instala automáticamente. En Windows, instalar
+Tesseract por separado, comprobar que `spa` aparezca en `tesseract --list-langs`
+y configurar, si el ejecutable o los datos de idioma no están en las rutas por
+defecto:
+
+```env
+TESSERACT_CMD=C:\Program Files\Tesseract-OCR\tesseract.exe
+TESSERACT_LANGUAGE=spa
+TESSDATA_PREFIX=C:\ruta\a\tessdata
+```
+
+`TESSDATA_PREFIX` debe apuntar a la carpeta que contiene `spa.traineddata`; no
+se versiona ese archivo binario dentro del repositorio.
+
+En este equipo quedaron configurados el motor y español en el `.env` compartido
+de `backend/`. Si se levanta desde `backend/` del worktree HU30, cargarlo explícitamente
+(Git Bash):
+
+```bash
+../../../backend/venv/Scripts/python.exe -m uvicorn app.main:app --reload --env-file ../../../backend/.env
+```
+
+Luego levantar `frontend/` con `npm run dev` y abrir `http://localhost:5173/contratos`.
+Reiniciar el backend si ya estaba ejecutándose antes de estos cambios. Esta
+configuración local de OCR no se comparte por Git; otro equipo debe instalar
+Tesseract/español y configurar sus propias rutas.
+
+Por privacidad, `CONTRACT_ANALYSIS_EXTERNAL_ENABLED=false` es el valor seguro y
+predeterminado. Mientras permanezca así, ningún contrato se envía a Gemini. Las
+pruebas automatizadas usan modelos simulados; una evaluación externa con material
+anonimizado requiere autorización específica y habilitación temporal.
+
+Alcance, decisiones, validaciones y pendientes:
+[`docs/hu30_extraccion_clausulas.md`](docs/hu30_extraccion_clausulas.md).
+Resultados actuales y límites:
+[`flujo asistido del 05/10`](docs/evaluaciones/hu30/flujo_asistido_2026-10-05.md).
+
 ### Gestión de propietarios
 
 El Sprint 2 incorpora el primer módulo funcional de administración. La API
@@ -635,6 +709,34 @@ entorno compartido en la nube.
 - **Tobías:** AARI-116, AARI-125, AARI-135 y AARI-157, más su participación en
   el despliegue.
 - **Trabajo conjunto:** AARI-338, despliegue del entorno compartido.
+- **HU30 / AARI-319 aprobada para integración:** extracción local/OCR, análisis
+  asistido, respaldo literal sin IA, revisión humana e integración del contexto
+  contractual implementados en su rama. Las migraciones 23, 24 y 25 están
+  aplicadas; las suites locales, PostgreSQL y OCR están aprobados. V3 fue evaluada en cuatro modelos
+  públicos con una llamada por documento y sin reintentos: obtuvo 19/23 controles
+  completos, 12/15 críticos y cero alucinaciones aceptadas. Mejoró frente a v2,
+  pero no habilita interpretación autónoma ni los holdouts. Las iteraciones
+  posteriores siguen fuera de producción: V04 no superó los controles
+  semánticos y varios ensayos recibieron `503 UNAVAILABLE`. El diagnóstico
+  directo del 02/10 también recibió 503 sin LangChain, herramientas ni esquema
+  obligatorio: una solicitud HTTP verificada, cero reintentos. La validación
+  previa con PostgreSQL local aprobó 574 pruebas y omitió 28. Tras integrar HU11,
+  el checkout Windows con CRLF activado aprobó 588 de backend y omitió 50;
+  frontend: 122 aprobadas, lint y build correctos. El flujo
+  `v10-asistida` respondió HTTP 200 con V04 público, pero su
+  revisión semántica obtuvo 60% general y 33,3% crítico: no acredita los umbrales
+  automáticos. Confirmar como contexto no activa una cláusula; sólo una edición
+  que habilite expresamente su uso permite aportar a reclamos. El PR #28 integra
+  AARI-135, calcula la vigencia en horario argentino y renueva la reserva del
+  trabajo activo. Conserva hashes reproducibles en Windows y cierre explícito
+  de recursos OCR. Tobías aprobó el PR #28 el 07/10/2026; se actualiza sobre
+  `main` con HU14 preservando evidencia congelada y revisión humana obligatoria.
+  Validación final del 07/10, incluido PostgreSQL local: **643 pruebas backend
+  aprobadas, 28 omitidas; 134 frontend**, lint/build y formato correctos.
+  El cierre queda condicionado al merge y las pruebas de integración finales.
+  Ver [alcance y resultados actuales de HU30](docs/evaluaciones/hu30/flujo_asistido_2026-10-05.md)
+  y [regresiones del PR #28](docs/evaluaciones/hu30/correcciones_pr28_2026-10-05.md).
+  [Actualización final del PR #28](docs/evaluaciones/hu30/cierre_pr28_2026-10-07.md).
 - **HU29 / AARI-318 finalizada:** PR #24 mergeado; HU y subtareas listas en Jira.
   La extracción de cláusulas pertenece a HU30.
 - **HU10 / AARI-116 finalizada:** PR #25 mergeado; HU y subtareas listas en Jira.

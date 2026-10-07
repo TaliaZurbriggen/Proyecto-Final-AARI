@@ -2,16 +2,22 @@
 
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, File, Form, Query, Response, UploadFile
+from fastapi import APIRouter, Depends, File, Form, Query, Response, UploadFile, status
 from starlette.concurrency import run_in_threadpool
 
 from app.api.auth import require_roles
 from app.db.contratos import SqlAlchemyContractsRepository
+from app.db.clausulas_contrato import SqlAlchemyContractClausesRepository
 from app.schemas.auth import AuthenticatedUser
 from app.schemas.contratos import (
     ContractCreate, ContractEnd, ContractResponse, ContractsPage,
     ContractUpdate, DocumentDownload,
 )
+from app.schemas.analisis_asistido import (
+    AssistedAnalysisResponse as ContractAnalysisResponse, ContractAnalysisRequest,
+    AssistedReviewRequest as ClauseReviewRequest,
+)
+from app.services.contract_clause_service import ContractClauseService
 from app.services.contract_errors import ContractError
 from app.services.contract_storage import SupabaseContractStorage
 from app.services.contracts_service import ContractsService, MAX_PDF_SIZE
@@ -22,6 +28,12 @@ contract_user = require_roles("administrador", "inquilino", "propietario")
 
 def get_contracts_service():
     return ContractsService(SqlAlchemyContractsRepository(), SupabaseContractStorage())
+
+
+def get_contract_clause_service():
+    return ContractClauseService(
+        SqlAlchemyContractClausesRepository(), SupabaseContractStorage()
+    )
 
 
 @router.get("", response_model=ContractsPage)
@@ -91,3 +103,42 @@ def end_contract(contract_id: UUID, payload: ContractEnd,
                  user: AuthenticatedUser = Depends(contract_user),
                  service: ContractsService = Depends(get_contracts_service)):
     return service.end(contract_id, payload, user)
+
+
+@router.post(
+    "/{contract_id}/documentos/{document_id}/analisis",
+    response_model=ContractAnalysisResponse,
+    status_code=status.HTTP_202_ACCEPTED,
+)
+def request_clause_analysis(
+    contract_id: UUID, document_id: UUID,
+    payload: ContractAnalysisRequest = ContractAnalysisRequest(),
+    user: AuthenticatedUser = Depends(contract_user),
+    service: ContractClauseService = Depends(get_contract_clause_service),
+):
+    return service.request(contract_id, document_id, user, mode=payload.modo)
+
+
+@router.get(
+    "/{contract_id}/documentos/{document_id}/analisis",
+    response_model=ContractAnalysisResponse | None,
+)
+def get_clause_analysis(
+    contract_id: UUID, document_id: UUID, response: Response,
+    user: AuthenticatedUser = Depends(contract_user),
+    service: ContractClauseService = Depends(get_contract_clause_service),
+):
+    response.headers["Cache-Control"] = "no-store"
+    return service.get_for_document(contract_id, document_id, user)
+
+
+@router.patch(
+    "/{contract_id}/clausulas/{clause_id}",
+    response_model=ContractAnalysisResponse,
+)
+def review_clause(
+    contract_id: UUID, clause_id: UUID, payload: ClauseReviewRequest,
+    user: AuthenticatedUser = Depends(contract_user),
+    service: ContractClauseService = Depends(get_contract_clause_service),
+):
+    return service.review(contract_id, clause_id, payload, user)

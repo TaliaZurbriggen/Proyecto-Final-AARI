@@ -1,0 +1,33 @@
+{
+  "document": "V04",
+  "result": "docs/evaluaciones/hu30/resultados_v7/resultado_v04_v7.json",
+  "model": "gemini-3.5-flash-lite",
+  "prompt_version": "v7-experimental",
+  "controls": [
+    {
+      "id": "V04-E01", "state": "completo", "matched_proposals": ["propuesta 4"],
+      "notes": "QUINTA conserva las reparaciones del locador durante la vigencia, conservación y uso. La evidencia local contiene la cláusula íntegra en páginas 1 y 2, sin la atribución de página errónea de v6."
+    },
+    {
+      "id": "V04-E02", "state": "incorrecto", "matched_proposals": ["propuestas 5 y 6"],
+      "notes": "La fuente completa está disponible, pero el modelo vuelve a resolver la coordinación de gastos comunes como excepción definida y agrega una obligación de pago del locatario no expresamente atribuida por esa redacción. Ambas propuestas quedan operativas con confianza 1. Debía conservarse el alcance ambiguo como contexto y sin asignación segura."
+    },
+    {
+      "id": "V04-E03", "state": "completo", "matched_proposals": ["propuesta 7"],
+      "notes": "Recupera mantenimiento, devolución, deterioros, excepción por buen uso y tiempo, acta e inventario inicial; todo el contenido tiene evidencia en el tramo local de SÉPTIMA."
+    },
+    {
+      "id": "V04-E04", "state": "completo", "matched_proposals": ["propuesta 8"],
+      "notes": "Conserva prohibición de elementos que afecten seguridad y de actos contrarios a normas municipales, con la fuente completa de OCTAVA."
+    },
+    {
+      "id": "V04-E05", "state": "completo", "matched_proposals": ["propuesta 9"],
+      "notes": "Conserva conformidad previa, modificaciones indispensables y ausencia de obligación de restaurar, con el tramo íntegro de NOVENA."
+    }
+  ],
+  "accepted_hallucinations": 2,
+  "out_of_scope_operational_proposals": [10],
+  "additional_notes": "La propuesta 10 marca renovación contractual como operativa para reclamos, aunque su contenido no pertenece a conservación ni asignación de gastos. Las propuestas excluidas de precio/jurisdicción no contribuyen a los controles y no autorizan su uso en reclamos.",
+  "reviewed_by": "Codex - comparación documental con fuente pública y controles validados; sin validación jurídica ni de Oikos",
+  "reviewed_at": "2026-10-02"
+}

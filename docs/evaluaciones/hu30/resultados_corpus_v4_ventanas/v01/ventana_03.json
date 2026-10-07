@@ -1,0 +1,82 @@
+{
+  "document": "V01",
+  "window_index": 3,
+  "pages": [
+    3,
+    4
+  ],
+  "source_sha256": "f20f157a6686a80ad1aff69c45d6b5335b3a7092032b26b77e48b8802a81da2c",
+  "prompt_version": "v4",
+  "model": "gemini-3.5-flash",
+  "executed_at": "2026-09-27T16:17:33.845807+00:00",
+  "elapsed_seconds": 33.859,
+  "external_calls": 1,
+  "model_proposals": 3,
+  "valid_clauses": [
+    {
+      "numero": "PREÁMBULO",
+      "titulo": "Identificación de las partes contratantes",
+      "evidencias": [
+        {
+          "pagina": 4,
+          "texto": "D.N.I. Nº … …………..), con domicilio en …………, por una parte, en lo sucesivo \ndenominado como LOCADOR, y por la otra ………. DNI ………….., en adelante llamado LOCATARIO, \nconvienen en celebrar el presente contrato de LOCACIÓN"
+        }
+      ],
+      "paginas": [
+        4
+      ],
+      "texto_original": "D.N.I. Nº … …………..), con domicilio en …………, por una parte, en lo sucesivo \ndenominado como LOCADOR, y por la otra ………. DNI ………….., en adelante llamado LOCATARIO, \nconvienen en celebrar el presente contrato de LOCACIÓN",
+      "resumen": "Identificación y definición de los roles de las partes contratantes como LOCADOR y LOCATARIO.",
+      "categoria": "otro",
+      "responsable": "no_especificado",
+      "uso_clasificador": "contexto",
+      "condiciones": "Establece la denominación de las partes (LOCADOR y LOCATARIO) para el resto del contrato.",
+      "referencias": [],
+      "confianza": 1.0
+    },
+    {
+      "numero": "SEGUNDA",
+      "titulo": "Notificación de no renovación y reconducción automática",
+      "evidencias": [
+        {
+          "pagina": 4,
+          "texto": "Si el LOCADOR no quisiera continuar la relación \nlocativa al vencimiento del plazo, deberá notificar al locatario con una antelación mínima de sesenta \n(60) días. Caso contrario, el contrato se considerará automáticamente reconducido"
+        }
+      ],
+      "paginas": [
+        4
+      ],
+      "texto_original": "Si el LOCADOR no quisiera continuar la relación \nlocativa al vencimiento del plazo, deberá notificar al locatario con una antelación mínima de sesenta \n(60) días. Caso contrario, el contrato se considerará automáticamente reconducido",
+      "resumen": "Obligación del locador de notificar al locatario con al menos 60 días de anticipación si no desea continuar la relación locativa al vencimiento del plazo; de lo contrario, el contrato se reconduce automáticamente.",
+      "categoria": "aviso",
+      "responsable": "propietario",
+      "uso_clasificador": "operativa",
+      "condiciones": "Aplica al vencimiento del plazo de la locación si el locador decide no continuar la relación.",
+      "referencias": [],
+      "confianza": 1.0
+    },
+    {
+      "numero": "CUARTA",
+      "titulo": "Declaración de estado de conservación e inventario inicial",
+      "evidencias": [
+        {
+          "pagina": 4,
+          "texto": "El LOCA TARIO declara que ha visitado el inmueble y comprobado que el mismo se \nencuentra desocupado, y en el siguiente estado de conservación"
+        }
+      ],
+      "paginas": [
+        4
+      ],
+      "texto_original": "El LOCA TARIO declara que ha visitado el inmueble y comprobado que el mismo se \nencuentra desocupado, y en el siguiente estado de conservación",
+      "resumen": "Declaración del locatario sobre la visita, desocupación y estado de conservación detallado del inmueble al inicio de la locación.",
+      "categoria": "otro",
+      "responsable": "inquilino",
+      "uso_clasificador": "contexto",
+      "condiciones": "Declaración unilateral del locatario al momento de recibir el inmueble.",
+      "referencias": [],
+      "confianza": 1.0
+    }
+  ],
+  "rejected_proposals": [],
+  "evidence_incidents": []
+}

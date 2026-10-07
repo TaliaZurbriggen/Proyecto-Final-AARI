@@ -4,6 +4,7 @@ import { Link, useLocation, useParams } from 'react-router'
 import { PageContainer, PageHeading } from '../../../components/layout/index.js'
 import { AlertMessage, Button, FormField, LoadingState, StatusBadge, TextInput } from '../../../components/ui/index.js'
 import { useAuth } from '../../auth/authContext.js'
+import ContractClausesPanel from '../components/ContractClausesPanel.jsx'
 import { downloadContract, endContract, getContract, uploadContract } from '../api/contratosApi.js'
 import { contractBase, contractTone, dateLabel, fileError } from '../validation.js'
 import styles from './Contratos.module.css'
@@ -77,6 +78,7 @@ function ContractDetail({ contractId }) {
   if (result.id !== contractId) return <PageContainer><LoadingState label="Cargando contrato" /></PageContainer>
   if (!contract) return <PageContainer><AlertMessage>{result.error}</AlertMessage></PageContainer>
   const today = new Intl.DateTimeFormat('sv-SE', { timeZone: 'America/Argentina/Buenos_Aires' }).format(new Date())
+  const latestSignedDocument = contract.documentos.find(document => document.firmado)
   return <PageContainer>
     <Link to={base} className={styles.back}><ArrowLeft aria-hidden="true" />Volver a contratos</Link>
     <PageHeading eyebrow="Contrato de alquiler" title={contract.direccion} description={`${contract.localidad}, ${contract.provincia}`}
@@ -117,6 +119,7 @@ function ContractDetail({ contractId }) {
           </div>
         </form>}
       </section>
+      {admin && latestSignedDocument && <ContractClausesPanel key={latestSignedDocument.id} contractId={contractId} document={latestSignedDocument} />}
       {admin && contract.estado !== 'borrador' && <section className={styles.panel}>
         <div className={styles.panelHeading}><h2>Continuidad del alquiler</h2></div>
         <div className={styles.content}><p className={styles.muted}>Una renovación crea otro registro con su propia vigencia y PDF. Este contrato permanece en el historial.</p><div><Link className={styles.primaryLink} to={`/contratos/nuevo?anterior=${contractId}`}>Registrar renovación</Link></div></div>

@@ -1,0 +1,36 @@
+{
+  "document": "V04",
+  "result": "docs/evaluaciones/hu30/diagnostico_recuperacion_2026-10-02/v04_lite31_json_high.json",
+  "model": "gemini-3.1-flash-lite",
+  "prompt_version": "v10-experimental",
+  "thinking_level": "HIGH",
+  "controls": [
+    {
+      "id": "V04-E01", "state": "parcial", "matched_proposals": ["propuesta 3"],
+      "notes": "Conserva locador, reparaciones necesarias, conservación, aptitud para uso y referencia normativa; evidencia completa entre páginas 1 y 2. Omite la condición temporal de vigencia del contrato en los campos interpretativos, por lo que se considera parcial conservadoramente."
+    },
+    {
+      "id": "V04-E02", "state": "incorrecto", "matched_proposals": ["propuestas 4 y 5"],
+      "notes": "Divide SEXTA en dos obligaciones inequívocas: atribuye gastos comunes al locador y servicios por consumo al locatario. Resuelve la coordinación ambigua y deduce un pagador a partir de una excepción sin atribución expresa; ambas propuestas operativas tienen confianza 1.0."
+    },
+    {
+      "id": "V04-E03", "state": "parcial", "matched_proposals": ["propuestas 6 y 7"],
+      "notes": "Conserva estado inicial, acta, fecha, inventario, devolución y la excepción por buen uso y tiempo en condiciones. Omite la obligación actual de mantener el inmueble en sus campos interpretativos. Además marca la devolución futura como operativa, incidencia de uso registrada aparte."
+    },
+    {
+      "id": "V04-E04", "state": "completo", "matched_proposals": ["propuesta 8"],
+      "notes": "Conserva prohibiciones relativas a seguridad y normas municipales con evidencia íntegra."
+    },
+    {
+      "id": "V04-E05", "state": "completo", "matched_proposals": ["propuesta 9"],
+      "notes": "Conserva modificaciones indispensables, conformidad del locador y ausencia de obligación de restaurar al estado anterior."
+    }
+  ],
+  "accepted_hallucinations": 2,
+  "out_of_scope_operational_proposals": [
+    "propuesta 1: destino institucional", "propuesta 2: cesión y subalquiler", "propuesta 10: sellado"
+  ],
+  "additional_notes": "Dos propuestas técnicamente aceptadas con interpretaciones no respaldadas: 4 y 5. Más propuestas no significa mejor cobertura. No se adoptó HIGH ni se activaron cláusulas para reclamos. El resultado original permanece intacto; este juicio documental no es validación jurídica ni de Oikos.",
+  "reviewed_by": "Codex - comparación documental con fuente pública y controles validados; sin validación jurídica ni de Oikos",
+  "reviewed_at": "2026-10-02"
+}

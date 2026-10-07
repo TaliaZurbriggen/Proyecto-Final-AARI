@@ -72,6 +72,22 @@ La instalación nueva debe aplicar además, en orden:
    cancelaciones al contrato obligatorio de la bandeja de salida de la 21.
 9. `23_notificaciones_actor_responsable.sql` — registra al actor responsable
    de cada reclamo clasificado, sus plazos y notificaciones idempotentes.
+10. `23_clausulas_contractuales.sql` — análisis durable de documentos,
+    cláusulas revisables, auditoría y contexto contractual de clasificación.
+11. `24_evidencia_clausulas_contractuales.sql` — evidencia por página y
+    propuestas rechazadas.
+12. `25_extraccion_asistida_literal.sql` — origen e historial de extracción asistida.
+
+Las dos migraciones con prefijo `23_` corresponden a historias independientes
+y ambas ya fueron aplicadas en desarrollo. Se identifican por el nombre completo
+del archivo, no sólo por el número; no reemplazar una por la otra ni repetirlas.
+El orden publicado es explícito: `23_notificaciones_actor_responsable.sql`,
+`23_clausulas_contractuales.sql`, `24_evidencia_clausulas_contractuales.sql` y
+`25_extraccion_asistida_literal.sql`. HU14 utiliza las versiones únicas con
+timestamp documentadas arriba, después de sus dependencias. Para futuras
+migraciones, acordar una versión única y verificar el historial completo;
+`26_` está reservado para HU13. No renombrar las ya aplicadas para corregir
+la colisión histórica de prefijos.
 
 El módulo de administración inicial ya incorpora el resultado de las
 migraciones incrementales 07, 08, 09, 10, 11, 12, 15 y 16. No deben repetirse
@@ -125,7 +141,46 @@ Aplicar únicamente las migraciones pendientes y respetar este orden:
 18. `23_notificaciones_actor_responsable.sql` — agrega el seguimiento durable
     del responsable, los eventos de notificación y los trabajos de recordatorio
     y vencimiento. Aplicar después de 22.
+19. `23_clausulas_contractuales.sql` — agrega análisis y revisión de cláusulas
+    contractuales. Aplicar después de 22 y de la migración 20 de contratos.
+20. `24_evidencia_clausulas_contractuales.sql` — conserva evidencia por página,
+    propuestas rechazadas y el uso operativo/contextual de cada cláusula. Aplicar
+    después de `23_clausulas_contractuales.sql`.
+21. `25_extraccion_asistida_literal.sql` — origen e historial del análisis
+    asistido/literal. Aplicar después de `24_evidencia_clausulas_contractuales.sql`.
 
+## HU30: migración 24
+
+Aplicada el **21/09/2026 al Supabase compartido de desarrollo** mediante
+`scripts/check_contract_clauses_postgres.py --mode apply`. La ejecución no creó
+análisis ni llamó a Gemini. Se volvió a comprobar que las tablas mantienen RLS
+activo y no conceden lectura pública. No repetirla al actualizar la rama.
+
+La migración aditiva agrega JSONB de propuestas
+rechazadas al análisis y, en cada cláusula, evidencia separada por página y una
+clasificación `operativa`, `contexto` o `excluir`. Los registros anteriores
+conservan sus campos originales, reciben evidencia vacía y uso `operativa`; no se
+inventan fragmentos por página durante la migración.
+
+No crea tablas expuestas ni cambia las políticas existentes: las columnas quedan
+protegidas por el RLS y las revocaciones de las tablas de la migración 23. Antes
+de aplicarla en otra base, comprobar que 23 esté instalada y que no existan
+columnas homónimas agregadas manualmente.
+
+## HU30: migración 23
+
+Aplicada el **21/09/2026 al Supabase compartido de desarrollo** mediante
+`scripts/check_contract_clauses_postgres.py --mode apply`. No repetirla al hacer
+pull. La ejecución no creó análisis ni llamó a Gemini: únicamente agregó la cola
+durable, las cláusulas revisables, su auditoría y el snapshot contractual de cada
+clasificación. Las tres tablas nuevas tienen RLS activo y no conceden lectura a
+`public`, `anon` ni `authenticated`.
+
+Antes de aplicarla en otra base, ejecutar el mismo script en modo `check`. La
+prueba PostgreSQL crea un esquema aislado, recorre solicitud idempotente,
+procesamiento, confirmación, consulta del contexto y permisos, y termina con
+`ROLLBACK`. El análisis externo continúa deshabilitado por defecto y no forma
+parte de esta migración.
 ## HU12: preparación de la migración 23
 
 La migración es aditiva, transaccional y limita la espera de bloqueos a cinco
@@ -420,3 +475,40 @@ permisos y el conteo anterior; ejecutar las pruebas PostgreSQL autorizadas de
 reapertura válida/inválida, historial y ambos órdenes de concurrencia con la
 baja. No confundir los controles de texto locales con pruebas SQL reales.
 Detalles y resultados en `docs/hu7_validacion_supabase.md`.
+
+## HU30: migración aditiva 25 — extracción asistida y respaldo literal
+
+**Aplicada con autorización al Supabase compartido de desarrollo el 05/10/2026.**
+Las migraciones 23 y 24 ya estaban presentes. No repetir 25 por integrante ni
+por pull: agrega columnas sin `IF NOT EXISTS` y debe ejecutarse una sola vez.
+En otra base, respetar el orden 20 → 23 → 24 → 25.
+
+`25_extraccion_asistida_literal.sql` agrega:
+
+- `contrato_analisis.modo`, `ejecucion_id` y `propuestas_fuente_rechazadas`.
+- `contrato_clausulas.origen` (`ia` o `literal`).
+- `contrato_analisis_intentos`: modelo, versiones, estado, resultado y tiempos
+  por ejecución. RLS habilitado y permisos revocados a public/anon/authenticated.
+
+No elimina contratos, cláusulas, eventos ni revisiones. El backend accede a la
+auditoría con su conexión privada y las rutas de revisión siguen restringidas
+a administración. No introducir políticas públicas para facilitar la prueba.
+Una respuesta tardía se conserva en su intento, pero no reemplaza la ejecución
+actual; los fallos externos requieren una nueva solicitud explícita.
+
+Desde `backend/` del worktree, el comprobador acepta el `.env` compartido:
+
+```bash
+../../../backend/venv/Scripts/python.exe scripts/check_contract_clauses_postgres.py --env-file ../../../backend/.env --mode check
+```
+
+`--mode apply` aplica solamente las migraciones faltantes y requiere aprobación
+explícita. `--mode test` crea un esquema aislado dentro de una transacción y
+hace rollback al terminar; también requiere autorización. No analiza contratos
+reales ni llama a Gemini. La comprobación final del 05/10 aprobó **1 prueba**,
+incluyendo preservación, revisiones, historial, respuestas tardías, falla terminal,
+activación explícita y RLS. El esquema de prueba no queda instalado.
+
+El resultado detallado está en
+`docs/evaluaciones/hu30/flujo_asistido_2026-10-05.md`. El éxito técnico no acredita
+la precisión semántica de las interpretaciones propuestas por Gemini.

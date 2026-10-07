@@ -1,0 +1,33 @@
+{
+  "document": "V04",
+  "result": "docs/evaluaciones/hu30/diagnostico_recuperacion_2026-10-02/v04_lite_json.json",
+  "model": "gemini-3.5-flash-lite",
+  "prompt_version": "v10-experimental",
+  "controls": [
+    {
+      "id": "V04-E01", "state": "parcial", "matched_proposals": ["propuesta 2"],
+      "notes": "Conserva reparaciones necesarias a cargo del locador, vigencia y conservación; la evidencia une íntegramente páginas 1 y 2. El resumen no conserva expresamente la finalidad de aptitud para el uso destinado; el criterio conservador no considera completo ese calificativo por estar sólo en la evidencia literal. No introduce condiciones ajenas como v9."
+    },
+    {
+      "id": "V04-E02", "state": "incorrecto", "matched_proposals": ["propuesta 3"],
+      "notes": "Resumen y condiciones ponen los gastos comunes dentro de la excepción del pago del locador. Responsable condicional, uso operativa y confianza 1.0 no preservan la coordinación ambigua validada en el control. No asigna explícitamente otro pagador, pero resuelve el alcance sin respaldo inequívoco."
+    },
+    {
+      "id": "V04-E03", "state": "completo", "matched_proposals": ["propuesta 4"],
+      "notes": "Conserva recepción, mantenimiento, devolución, pago de deterioros, excepción por buen uso y tiempo, acta con estado de recepción e inventario completo; la evidencia es íntegra."
+    },
+    {
+      "id": "V04-E04", "state": "completo", "matched_proposals": ["propuesta 5"],
+      "notes": "Conserva seguridad y prohibición de actos contrarios a normas municipales, respaldadas por OCTAVA."
+    },
+    {
+      "id": "V04-E05", "state": "completo", "matched_proposals": ["propuesta 6"],
+      "notes": "Conserva conformidad previa del locador, modificaciones indispensables y ausencia de obligación de restaurar el estado anterior; NOVENA queda íntegra como evidencia."
+    }
+  ],
+  "accepted_hallucinations": 1,
+  "out_of_scope_operational_proposals": ["propuesta 1: destino institucional del inmueble"],
+  "additional_notes": "Se cuenta una propuesta con interpretación no respaldada: la 3 resuelve el alcance de una coordinación ambigua. No hay citas ni páginas literales inventadas. Los seis elementos de referencias identifican la propia cláusula en vez de referencias cruzadas o normativas: calidad de metadatos pendiente, registrada separadamente. La propuesta 1 amplía el alcance operativo sin pertenecer a los cinco controles. No corregir los resultados ni los controles para hacer pasar la prueba. Evaluación documental conservadora de una sola ejecución, no validación jurídica ni prueba de generalización.",
+  "reviewed_by": "Codex - comparación documental con fuente pública y controles validados; sin validación jurídica ni de Oikos",
+  "reviewed_at": "2026-10-02"
+}

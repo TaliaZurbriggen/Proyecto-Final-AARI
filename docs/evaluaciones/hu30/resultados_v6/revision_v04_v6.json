@@ -1,0 +1,44 @@
+{
+  "document": "V04",
+  "result": "docs/evaluaciones/hu30/resultados_v6/resultado_v04_v6.json",
+  "model": "gemini-3.5-flash-lite",
+  "prompt_version": "v6-experimental",
+  "review_scope": "Contenido y cobertura de citas para todas las condiciones relevantes. La revisión histórica v5 era más permisiva con citas breves; no comparar ambos porcentajes como una caída de comprensión semántica.",
+  "controls": [
+    {
+      "id": "V04-E01",
+      "state": "parcial",
+      "matched_proposals": ["propuesta 1 (rechazada)"],
+      "notes": "Reconoce reparaciones a cargo del locador durante la vigencia, pero atribuye a la página 2 una oración que está en la página 1. La evidencia fue rechazada y tampoco cubre toda la condición de conservación y uso."
+    },
+    {
+      "id": "V04-E02",
+      "state": "parcial",
+      "matched_proposals": ["propuesta 2 (rechazada)"],
+      "notes": "Mejora semántica: conserva la coordinación ambigua, responsable no_especificado, contexto y confianza 0.6. Las citas sólo muestran impuestos y gravámenes, sin la excepción de consumos ni la coordinación de gastos comunes; el control de cobertura la rechaza."
+    },
+    {
+      "id": "V04-E03",
+      "state": "parcial",
+      "matched_proposals": ["propuesta 3 (rechazada)"],
+      "notes": "Reconoce mantenimiento, devolución, deterioros y excepción por buen uso y tiempo. Cita sólo el inicio; no respalda esas condiciones con sus citas y omite el acta y el inventario. Rechazada por cobertura insuficiente."
+    },
+    {
+      "id": "V04-E04",
+      "state": "parcial",
+      "matched_proposals": ["propuesta 4 (aceptada técnicamente)"],
+      "notes": "El contenido sobre seguridad y normas municipales es fiel al contrato, pero la cita termina antes de normas municipales. El control de cinco palabras no detecta esa paráfrasis sin cita: requiere revisión aunque el filtro automático la acepte."
+    },
+    {
+      "id": "V04-E05",
+      "state": "parcial",
+      "matched_proposals": ["propuesta 5 (aceptada técnicamente)"],
+      "notes": "Reconoce autorización previa y ausencia de obligación de restaurar, pero la cita no incluye la excepción sobre devolución. El filtro no detecta el detalle parafraseado sin cita. No se considera completa con cobertura de evidencia."
+    }
+  ],
+  "accepted_hallucinations": 0,
+  "technically_accepted_with_incomplete_evidence": 2,
+  "ambiguous_clause_preserved_as_context": true,
+  "reviewed_by": "Codex - comparación documental con la fuente pública y controles validados; sin validación jurídica ni de Oikos",
+  "reviewed_at": "2026-10-02"
+}

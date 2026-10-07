@@ -1,0 +1,99 @@
+{
+  "example": "hu30-ejemplo-01",
+  "pages": 13,
+  "source_unchanged": true,
+  "output_sha256": "3e27aa10c53c72abdeee176175420067d109456465010e5fc61a46437896b16b",
+  "preserved_characters_match": true,
+  "redaction_zones": 17,
+  "identifiers_checked": 15,
+  "residual_identifier_matches": 0,
+  "removed_unique_sequences_checked": 208,
+  "attachments": 0,
+  "annotations": 0,
+  "form_fields": 0,
+  "original_objects_copied": false,
+  "external_api_calls_during_preparation": 0,
+  "visual_review": "passed_all_13_pages",
+  "visual_review_date": "2026-09-14",
+  "page_checks": [
+    {
+      "page": 1,
+      "kept": 1499,
+      "removed": 414,
+      "zones": 3
+    },
+    {
+      "page": 2,
+      "kept": 1817,
+      "removed": 62,
+      "zones": 3
+    },
+    {
+      "page": 3,
+      "kept": 1876,
+      "removed": 73,
+      "zones": 1
+    },
+    {
+      "page": 4,
+      "kept": 1856,
+      "removed": 0,
+      "zones": 0
+    },
+    {
+      "page": 5,
+      "kept": 1950,
+      "removed": 16,
+      "zones": 1
+    },
+    {
+      "page": 6,
+      "kept": 1968,
+      "removed": 0,
+      "zones": 0
+    },
+    {
+      "page": 7,
+      "kept": 1988,
+      "removed": 0,
+      "zones": 0
+    },
+    {
+      "page": 8,
+      "kept": 1717,
+      "removed": 227,
+      "zones": 1
+    },
+    {
+      "page": 9,
+      "kept": 1401,
+      "removed": 448,
+      "zones": 1
+    },
+    {
+      "page": 10,
+      "kept": 1861,
+      "removed": 0,
+      "zones": 0
+    },
+    {
+      "page": 11,
+      "kept": 294,
+      "removed": 1012,
+      "zones": 1
+    },
+    {
+      "page": 12,
+      "kept": 1315,
+      "removed": 338,
+      "zones": 5
+    },
+    {
+      "page": 13,
+      "kept": 257,
+      "removed": 79,
+      "zones": 1
+    }
+  ],
+  "limitations": "Documento concreto; no garantiza anonimización de otros PDF. Requiere inspección visual."
+}

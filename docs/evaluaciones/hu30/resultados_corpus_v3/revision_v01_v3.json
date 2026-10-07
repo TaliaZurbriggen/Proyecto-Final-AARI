@@ -1,0 +1,17 @@
+{
+  "document": "V01",
+  "result": "docs/evaluaciones/hu30/resultados_corpus_v3/resultado_v01_v3.json",
+  "controls": [
+    {"id": "V01-E01", "state": "completo", "matched_proposals": ["V02"], "notes": "Conservó estado inicial, restitución equivalente y excepción por desgaste normal, con evidencia anclada en las páginas 4 y 5."},
+    {"id": "V01-E02", "state": "completo", "matched_proposals": ["V03"], "notes": "Registró la atribución amplia al locatario, la falta de reembolso y la ejecución por el locador a cuenta del locatario."},
+    {"id": "V01-E03", "state": "completo", "matched_proposals": ["V04"], "notes": "Diferenció fuerza mayor, terceros, vicios y uso normal, y conservó la posibilidad de descuento si el locador no actúa."},
+    {"id": "V01-E04", "state": "parcial", "matched_proposals": ["V06", "R07", "R11"], "notes": "El pago de servicios quedó aceptado, pero expensas ordinarias, extraordinarias e impuesto inmobiliario fueron detectados con citas que el anclaje rechazó."},
+    {"id": "V01-E05", "state": "parcial", "matched_proposals": ["R10"], "notes": "Encontró aviso, urgencia, acreditación y descuento, pero la cita modificaba caracteres del origen y no puede utilizarse automáticamente."},
+    {"id": "V01-E06", "state": "completo", "matched_proposals": ["V08"], "notes": "Conservó consentimiento escrito, efecto de las mejoras y posible remoción a cargo del locatario."},
+    {"id": "V01-E07", "state": "parcial", "matched_proposals": ["R09"], "notes": "Identificó correctamente el aviso mínimo de 72 horas, pero la evidencia no pasó el anclaje literal."},
+    {"id": "V01-E08", "state": "completo", "matched_proposals": ["V09", "V10"], "notes": "Relacionó devolución de llaves y comprobante con la retención del depósito sólo por daños imputables observados al finalizar."}
+  ],
+  "accepted_hallucinations": 0,
+  "reviewed_by": "Codex - comparación documental local",
+  "reviewed_at": "2026-09-24"
+}

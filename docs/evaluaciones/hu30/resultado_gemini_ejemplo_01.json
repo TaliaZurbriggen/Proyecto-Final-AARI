@@ -1,0 +1,220 @@
+{
+  "fuente": "hu30_contrato_anonimizado.pdf",
+  "fuente_sha256": "3e27aa10c53c72abdeee176175420067d109456465010e5fc61a46437896b16b",
+  "ejecutado_en": "2026-09-21T23:19:49.979619+00:00",
+  "modelo": "gemini-3.5-flash",
+  "prompt_version": "v1",
+  "extractor_version": "hu30-v1",
+  "llamadas_externas": 1,
+  "paginas": 13,
+  "extraccion_local_completa": true,
+  "clausulas_validas": [
+    {
+      "numero": "PRIMERA",
+      "titulo": "Restitución del inmueble al finalizar la locación",
+      "paginas": [
+        2
+      ],
+      "texto_original": "al finalizar la locación, el LOCATARIO deberá restituir el inmueble totalmente desocupado y limpio, pisos aseados, griferías, sanitarios y demás bienes elementos y accesorios en correcto funcionamiento.",
+      "resumen": "Al finalizar la locación, el locatario debe restituir el inmueble totalmente desocupado, limpio, con los pisos aseados, y con las griferías, sanitarios y demás bienes, elementos y accesorios en correcto funcionamiento.",
+      "categoria": "devolucion",
+      "responsable": "inquilino",
+      "condiciones": "Al finalizar la locación.",
+      "referencias": [],
+      "confianza": 0.98
+    },
+    {
+      "numero": "SEGUNDA",
+      "titulo": "Devolución de llaves y estado de entrega",
+      "paginas": [
+        2
+      ],
+      "texto_original": "debiendo ese día el LOCATARIO devolver las llaves en el domicilio que constituye en este acto el LOCADOR, entregando el inmueble totalmente desocupado, limpio, pintado y con todos sus artefactos y accesorios en buen estado de funcionamiento.",
+      "resumen": "Al vencimiento del contrato, el locatario debe devolver las llaves en el domicilio constituido por el locador, entregando el inmueble totalmente desocupado, limpio, pintado y con todos sus artefactos y accesorios en buen estado de funcionamiento.",
+      "categoria": "devolucion",
+      "responsable": "inquilino",
+      "condiciones": "Al vencimiento del plazo contractual.",
+      "referencias": [],
+      "confianza": 0.98
+    },
+    {
+      "numero": "QUINTA",
+      "titulo": "Efectos y multas por la no restitución de la unidad",
+      "paginas": [
+        4
+      ],
+      "texto_original": "En el supuesto de NO restitución de la UNIDAD: dentro del plazo pactado o bajo las condiciones pactadas, deberá abonar además del alquiler mensual que se devengue a favor del LOCADOR por todo el tiempo que le demande recibir la unidad o colocarla en su debido estado de mantenimiento y funcionamiento, una multa diaria (sanción / clausula penal) del 2,5% del valor del alquiler.",
+      "resumen": "Si el locatario no restituye la unidad en el plazo o condiciones pactadas, deberá abonar el alquiler mensual por todo el tiempo que le demande al locador recibir la unidad o colocarla en su debido estado de mantenimiento y funcionamiento, además de una multa diaria del 2,5% del valor del alquiler.",
+      "categoria": "devolucion",
+      "responsable": "inquilino",
+      "condiciones": "En caso de no restitución de la unidad en el plazo o condiciones pactadas.",
+      "referencias": [],
+      "confianza": 0.95
+    },
+    {
+      "numero": "NOVENA (a)",
+      "titulo": "Mantenimiento y reparaciones a cargo del locatario",
+      "paginas": [
+        5
+      ],
+      "texto_original": "se compromete a mantenerlo durante el tiempo que dure la locación y restituirlo en las mismas condiciones que las consignadas más arriba, siendo a su cargo, las reparaciones de muros, revoques, puertas, cerraduras, vidrios, cañerías, artefactos, perillas, instalaciones en general, desagües y desagotes, incluso la reposición de los elementos que fuesen necesarios para el mantenimiento y las reparaciones referidas supra, por cualquier causa o motivo.",
+      "resumen": "El locatario se compromete a mantener el inmueble y restituirlo en las mismas condiciones detalladas en la cláusula primera. Son a su cargo las reparaciones de muros, revoques, puertas, cerraduras, vidrios, cañerías, artefactos, perillas, instalaciones en general, desagües y desagotes, incluyendo la reposición de elementos necesarios para el mantenimiento y reparación, por cualquier causa o motivo.",
+      "categoria": "reparacion",
+      "responsable": "inquilino",
+      "condiciones": "Durante todo el tiempo que dure la locación.",
+      "referencias": [
+        "PRIMERA"
+      ],
+      "confianza": 0.98
+    },
+    {
+      "numero": "NOVENA (b)",
+      "titulo": "Responsabilidad por daños de moradores o terceros",
+      "paginas": [
+        5
+      ],
+      "texto_original": "Asimismo, el LOCATARIO responde por los hechos dañosos cuyo origen provenga del accionar culposo o negligente de los moradores del inmueble o terceros que circunstancialmente estuvieren en el mismo.",
+      "resumen": "El locatario responde por los hechos dañosos cuyo origen provenga del accionar culposo o negligente de los moradores del inmueble o de terceros que se encuentren circunstancialmente en él.",
+      "categoria": "danio",
+      "responsable": "condicional",
+      "condiciones": "Daños causados por moradores o terceros.",
+      "referencias": [],
+      "confianza": 0.98
+    },
+    {
+      "numero": "NOVENA (c)",
+      "titulo": "Pintura del inmueble al finalizar la locación",
+      "paginas": [
+        5
+      ],
+      "texto_original": "al finalizar el contrato, sea por vencimiento de plazo o por rescisión del mismo, el LOCATARIO ofrece que la unidad será pintada por un pintor designado por la administración a efectos de que se respete la calidad de la mano de obra y los materiales como así también colores o tonos de la pintura. Tanto una como otra (materiales y mano de obra) serán abonados por el LOCATARIO.",
+      "resumen": "Al finalizar el contrato, el locatario ofrece que la unidad sea pintada por un pintor designado por la administración para respetar la calidad de la mano de obra, materiales y colores. Tanto los materiales como la mano de obra serán abonados por el locatario.",
+      "categoria": "mantenimiento",
+      "responsable": "inquilino",
+      "condiciones": "Al finalizar el contrato por vencimiento o rescisión.",
+      "referencias": [],
+      "confianza": 0.98
+    },
+    {
+      "numero": "NOVENA (e)",
+      "titulo": "Pago de alquiler durante el período de reparación de desperfectos post-entrega",
+      "paginas": [
+        6
+      ],
+      "texto_original": "Si al entregar las llaves y desocupar el inmueble se comprobara la existencia de desperfecto, averías y/u obstrucciones de lo que sea responsable el LOCATARIO, éste quedará obligado a satisfacer el importe del alquiler mensual por todo el tiempo necesario que transcurra hasta que los desperfectos y deterioros sean reparados.",
+      "resumen": "Si al desocupar el inmueble y entregar las llaves se constatan desperfectos, averías u obstrucciones bajo responsabilidad del locatario, este queda obligado a pagar el importe del alquiler mensual por todo el tiempo necesario para realizar las reparaciones correspondientes.",
+      "categoria": "devolucion",
+      "responsable": "inquilino",
+      "condiciones": "Si al entregar las llaves se comprueban desperfectos de los que sea responsable el locatario.",
+      "referencias": [],
+      "confianza": 0.98
+    },
+    {
+      "numero": "NOVENA (f)",
+      "titulo": "Notificación previa de desocupación y verificación",
+      "paginas": [
+        6
+      ],
+      "texto_original": "La parte LOCATARIA, se obliga a notificar al LOCADOR con 30 días de anticipación a la fecha de desocupar el inmueble, por la causa que fuere, para que éste lo verifique en forma inmediata, y proceda al pintado del mismo.",
+      "resumen": "El locatario se obliga a notificar al locador con 30 días de anticipación a la fecha de desocupación del inmueble, por cualquier causa, para que este lo verifique inmediatamente y proceda a su pintado.",
+      "categoria": "aviso",
+      "responsable": "inquilino",
+      "condiciones": "Previo a desocupar el inmueble por cualquier causa.",
+      "referencias": [],
+      "confianza": 0.98
+    },
+    {
+      "numero": "DECIMA (1)",
+      "titulo": "Obligación de permitir el acceso e inspección del inmueble",
+      "paginas": [
+        6
+      ],
+      "texto_original": "Permitir la entrada del LOCADOR [o al administrador en su defecto], previo aviso de 24 hs. antes, las veces que este o la persona por el autorizada, lo crea necesario, ya sea a inspeccionar la misma o para realizar algún trabajo;",
+      "resumen": "El locatario está obligado a permitir la entrada del locador (o del administrador) previo aviso de 24 horas de anticipación, las veces que lo considere necesario para inspeccionar la propiedad o realizar trabajos.",
+      "categoria": "acceso",
+      "responsable": "inquilino",
+      "condiciones": "Previo aviso de 24 horas.",
+      "referencias": [],
+      "confianza": 0.98
+    },
+    {
+      "numero": "DECIMA (2)",
+      "titulo": "Gastos de reparación por siniestros o robos",
+      "paginas": [
+        6
+      ],
+      "texto_original": "Cargar los gastos de reparación del inmueble en caso de incendio, explosión, etc. y cualquier otro motivo culposo como así por robo o tentativa del mismo;",
+      "resumen": "El locatario debe asumir los gastos de reparación del inmueble en caso de incendio, explosión, cualquier otro motivo culposo, así como por robo o tentativa de robo.",
+      "categoria": "reparacion",
+      "responsable": "condicional",
+      "condiciones": "En caso de siniestro o motivo culposo, robo o tentativa de robo.",
+      "referencias": [],
+      "confianza": 0.95
+    },
+    {
+      "numero": "DECIMA (9)",
+      "titulo": "Obligación de comunicar daños o deterioros",
+      "paginas": [
+        7
+      ],
+      "texto_original": "Comunicar al LOCADOR o a su representante, cualquier daño o deterioro que sufra el inmueble o bienes muebles, cualquiera sea el motivo dentro de las 24 hs., de producido.",
+      "resumen": "El locatario debe comunicar al locador o a su representante cualquier daño o deterioro que sufra el inmueble o los bienes muebles, por cualquier motivo, dentro de las 24 horas de producido.",
+      "categoria": "aviso",
+      "responsable": "inquilino",
+      "condiciones": "Dentro de las 24 horas de producido cualquier daño.",
+      "referencias": [],
+      "confianza": 0.98
+    },
+    {
+      "numero": "DECIMO PRIMERA",
+      "titulo": "Pago de impuestos, tasas y servicios a cargo del locatario",
+      "paginas": [
+        7
+      ],
+      "texto_original": "Son a cargo del LOCATARIO el pago íntegro de los impuestos [tanto MUNICIPALES como PROVINCIALES), tasas y servicios [AMOS, EPEC, EMUGAS, EXPENSAS] como cualquier otro que contrate, durante o con posterioridad a la vigencia de este contrato y que correspondan a períodos ocupados por el LOCATARIO del inmueble aquí locado.",
+      "resumen": "Son a cargo exclusivo del locatario el pago íntegro de los impuestos municipales y provinciales, tasas y servicios (incluyendo AMOS, EPEC, EMUGAS, EXPENSAS) o cualquier otro que contrate, correspondientes a los períodos ocupados, incluso con posterioridad a la vigencia del contrato.",
+      "categoria": "servicio",
+      "responsable": "inquilino",
+      "condiciones": "Durante o con posterioridad a la vigencia del contrato por períodos ocupados.",
+      "referencias": [],
+      "confianza": 0.98
+    },
+    {
+      "numero": "DECIMO CUARTA",
+      "titulo": "Eximición de responsabilidad del locador por siniestros o accidentes",
+      "paginas": [
+        8
+      ],
+      "texto_original": "El LOCADOR no se responsabiliza de los daños y perjuicios que pudieran producirle al LOCATARIO, a su núcleo conviviente o a las personas que pudieses encontrarse momentáneamente en el inmueble, las inundaciones, temblores, desprendimientos provenientes de roturas, desprendimientos de techos, etc. o de cualquier otro accidente producido en la propiedad locada.",
+      "resumen": "El locador no se responsabiliza por los daños y perjuicios que puedan sufrir el locatario, su núcleo conviviente o terceros en el inmueble debido a inundaciones, temblores, desprendimientos por roturas, desprendimientos de techos o cualquier otro accidente producido en la propiedad locada.",
+      "categoria": "danio",
+      "responsable": "no_especificado",
+      "condiciones": "Exención de responsabilidad del locador ante accidentes o siniestros en la propiedad.",
+      "referencias": [],
+      "confianza": 0.98
+    },
+    {
+      "numero": "DECIMO OCTAVA",
+      "titulo": "Procedimiento de devolución de llaves y estado de deudas",
+      "paginas": [
+        10
+      ],
+      "texto_original": "La devolución de las llaves de la propiedad deberá justificarlas el LOCATARIO con constancia escrita fehaciente emanada del LOCADOR o sus representantes, no admitiéndose otro medio de prueba, debiendo restituirse el inmueble libre de ocupantes y cosas, en las mismas condiciones en que se lo recibe y con todos los impuestos, tasas y servicios establecidos en cláusula décimo primera y décimo segunda, totalmente pagos al día de entrega de la propiedad. En caso de consignación de las llaves el alquiler regirá hasta el día en que el LOCADOR tome tenencia real y efectiva de la propiedad, estando a cargo del LOCATARIO todos los gastos y diligencias contundentes a permitirle al LOCADOR recuperar la tenencia del inmueble.",
+      "resumen": "La devolución de llaves debe justificarse únicamente mediante constancia escrita del locador o sus representantes. El inmueble debe restituirse libre de ocupantes y cosas, en las mismas condiciones de recepción y con todos los impuestos, tasas y servicios (de las cláusulas 11 y 12) totalmente pagos al día. En caso de consignación de llaves, el alquiler corre hasta que el locador tome la tenencia real y efectiva, siendo a cargo del locatario los gastos para recuperarla.",
+      "categoria": "devolucion",
+      "responsable": "inquilino",
+      "condiciones": "Al momento de la restitución efectiva del inmueble.",
+      "referencias": [
+        "DECIMO PRIMERA",
+        "DECIMO SEGUNDA"
+      ],
+      "confianza": 0.98
+    }
+  ],
+  "incidencias_evidencia": [
+    "La cláusula 4 no pudo vincularse con sus páginas de origen.",
+    "La cláusula 8 no pudo vincularse con sus páginas de origen.",
+    "La cláusula 13 no pudo vincularse con sus páginas de origen.",
+    "La cláusula 16 no pudo vincularse con sus páginas de origen."
+  ]
+}

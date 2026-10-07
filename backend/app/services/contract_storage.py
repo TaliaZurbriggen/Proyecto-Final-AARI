@@ -47,6 +47,10 @@ class SupabaseContractStorage:
     def delete(self, path: str) -> None:
         self._request("DELETE", f"object/{BUCKET}", json={"prefixes": [path]})
 
+    def download(self, path: str) -> bytes:
+        response, _ = self._request("GET", f"object/{BUCKET}/{quote(path, safe='/')}")
+        return response.content
+
     def signed_url(self, path: str) -> str:
         response, url = self._request(
             "POST", f"object/sign/{BUCKET}/{quote(path, safe='/')}",

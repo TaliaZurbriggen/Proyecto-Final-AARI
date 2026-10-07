@@ -1,0 +1,22 @@
+{
+  "date": "2026-09-25",
+  "prompt_version": "v4",
+  "model": "gemini-3.5-flash",
+  "manifest": "docs/evaluaciones/hu30/corpus_v4_manifest.json",
+  "attempted_documents": ["V03"],
+  "executor_invocations_per_document": 1,
+  "executor_retries": 0,
+  "sdk_internal_retries": null,
+  "sdk_internal_retries_note": "No medidos. El adaptador permitía hasta seis intentos HTTP por invocación; el valor 0 registrado inicialmente era incorrecto.",
+  "completed_results": 0,
+  "status": "blocked_by_free_tier_quota",
+  "provider_status": 429,
+  "provider_code": "RESOURCE_EXHAUSTED",
+  "quota_metric": "generativelanguage.googleapis.com/generate_content_free_tier_requests",
+  "quota_id": "GenerateRequestsPerDayPerProjectPerModel-FreeTier",
+  "quota_limit": 20,
+  "result_files_created": false,
+  "remaining_documents_not_sent": ["V01", "V02", "V04"],
+  "decision": "Detener las pruebas de documentos tras la respuesta 429; el resultado no permite evaluar si el problema de disponibilidad depende de V01.",
+  "privacy": "No se registran credenciales ni contenido contractual."
+}

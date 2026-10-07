@@ -1,0 +1,111 @@
+{
+  "document": "V04",
+  "model": "gemini-3.1-flash-lite",
+  "prompt_version": "v9-experimental",
+  "source_sha256": "a921c2a9db516211b82398c52ad937e7a881d0ec6d248334fdf6d483bd303d1c",
+  "frozen_files": [
+    {
+      "path": "backend/prompts/prompt_extraccion_clausulas_v9.md",
+      "sha256": "cd1329993efe6187698281426454095cf4bf499755b6b7998e7469f9f707341e"
+    },
+    {
+      "path": "backend/app/services/contract_clause_v9.py",
+      "sha256": "ba2c60165351ddfbe0118c8d9654a65f7ee5bede1f1cb79774428acb0ac8fc28"
+    },
+    {
+      "path": "backend/scripts/evaluate_contract_clause_v9.py",
+      "sha256": "9c5e7d03208ca44408bde7c3220eeade8f29d3e0987fd0234c9e8afd93dba1c4"
+    },
+    {
+      "path": "backend/prompts/prompt_extraccion_clausulas_v8.md",
+      "sha256": "6ed32b3336ae88c0bee41f13bbd63a2dbcf09c686ba7d9399db47d0ced10562d"
+    },
+    {
+      "path": "backend/app/services/contract_clause_v8.py",
+      "sha256": "1790f3ba9c2a2e1aec02b010a269da778a25513890c741b34d3e63797788474a"
+    },
+    {
+      "path": "backend/app/services/contract_clause_reference_trial.py",
+      "sha256": "ae48823f323e2fb5af1eeb88a1e65d71da2ef0192b7e30d69db413b689455506"
+    },
+    {
+      "path": "backend/scripts/evaluate_contract_clause_reference.py",
+      "sha256": "34177122ac2273ba0438541f262df68c9bf0eeac38c45a7544a429331af8e8b6"
+    },
+    {
+      "path": "backend/scripts/evaluate_contract_clause_v7.py",
+      "sha256": "e5dcb2b5571e3b96664c30344f0231f483e111c95f9426516f286cccb5422184"
+    },
+    {
+      "path": "backend/prompts/prompt_extraccion_clausulas_v7.md",
+      "sha256": "2925c8a648b5e38613cf91be8261af84f6a97c1d57f0ba70b8ab1675aa002537"
+    },
+    {
+      "path": "backend/app/services/contract_clause_v7.py",
+      "sha256": "db066fe5fe14dc9965ce4394b1155f79461049af9ac6cb076849c13c5859a9f6"
+    },
+    {
+      "path": "backend/app/services/contract_clause_v7_trial.py",
+      "sha256": "405ba645ca69f01dedf9db8d5b3c5707231bc536984f96e6bf96fb781e517ecf"
+    },
+    {
+      "path": "backend/app/services/contract_clause_v5.py",
+      "sha256": "cae6d66f3690ff97145772c9be17c6cd02c90b398436773f1088207b9c1d75d9"
+    },
+    {
+      "path": "backend/app/services/contract_clause_segments.py",
+      "sha256": "27bee6a898e94a364b1c494f9f8155b93f536bd4fea23de52e457414ef365ad8"
+    },
+    {
+      "path": "backend/app/services/contract_text_extraction.py",
+      "sha256": "2450ca33aa76b70e80ec9a96f313943db8a97d6608307ad63aa6c1f4e07923a2"
+    },
+    {
+      "path": "backend/app/schemas/clausulas_contrato.py",
+      "sha256": "9357909c22f20cf1eee68975a23ba9bc6b3e7948c4553e86f05a653821dced2a"
+    },
+    {
+      "path": "docs/evaluaciones/hu30/controles_corpus_v2.json",
+      "sha256": "936252d6cc344bda79c2b0aa8c872e7bc6089e7ec22af2cf38003632087729cf"
+    }
+  ],
+  "source_characters": 4709,
+  "prompt_characters": 11167,
+  "ocr_language": "spa",
+  "ocr_traineddata_sha256": null,
+  "extracted_pages_sha256": "18f6fd085061b0f0979ce4025971664a40c3e446c920ca3ef7a17b9c03ba2385",
+  "experiment": "model_only_comparison",
+  "execution_mode": "existing_pipeline_one_off",
+  "comparison_baseline": "docs\\evaluaciones\\hu30\\resultados_v9\\resultado_v04_v9.json",
+  "comparison_baseline_sha256": "b39a2f6343fcc75a1bdc0c613717a86ce0b37551f266c2cbb017d0a5d0058f1d",
+  "structured_output_method": "function_calling",
+  "schema_sha256": "cfafb5b9cd18763a44847df1d84a3aaec4ad2ec8c3253274e30a74be07ea9853",
+  "packages": {
+    "langchain-google-genai": "4.3.2",
+    "google-genai": "2.14.0"
+  },
+  "private_contracts_sent": 0,
+  "started_at": "2026-10-02T18:00:06.122986+00:00",
+  "authorized_adapter_invocations": 1,
+  "automatic_retries_setting": 1,
+  "http_attempts_verified": false,
+  "pages": [
+    {
+      "page": 1,
+      "method": "digital",
+      "readable": true
+    },
+    {
+      "page": 2,
+      "method": "digital",
+      "readable": true
+    }
+  ],
+  "state": "failed",
+  "finished_at": "2026-10-02T18:00:37.027469+00:00",
+  "adapter_invocations": 1,
+  "error": {
+    "type": "ServerError",
+    "http_status": 503
+  }
+}

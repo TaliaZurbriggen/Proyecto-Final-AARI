@@ -1,0 +1,17 @@
+{
+  "document": "V01",
+  "result": "docs/evaluaciones/hu30/resultados_corpus_v2/resultado_v01_v2.json",
+  "controls": [
+    {"id": "V01-E01", "state": "parcial", "matched_proposals": ["R01"], "notes": "Encontró estado inicial, restitución y desgaste normal, pero la propuesta completa fue rechazada porque una evidencia de la página 5 no era literal."},
+    {"id": "V01-E02", "state": "parcial", "matched_proposals": ["R01"], "notes": "La atribución amplia al locatario aparece en el resumen, pero comparte la evidencia inválida de R01."},
+    {"id": "V01-E03", "state": "parcial", "matched_proposals": ["R01"], "notes": "Diferenció las reparaciones del locador y el descuento, pero no superó la comprobación literal."},
+    {"id": "V01-E04", "state": "parcial", "matched_proposals": ["R02", "R05", "R06"], "notes": "Detectó ambas partes de la distribución de gastos, pero las tres propuestas fueron rechazadas por citas no literales."},
+    {"id": "V01-E05", "state": "parcial", "matched_proposals": ["R04"], "notes": "Conservó aviso, urgencia, acreditación y descuento, pero la cita no fue literal."},
+    {"id": "V01-E06", "state": "completo", "matched_proposals": ["V05"], "notes": "Conservó autorización escrita, efectos de las mejoras y eventual remoción a cargo del locatario."},
+    {"id": "V01-E07", "state": "parcial", "matched_proposals": ["R03"], "notes": "Encontró correctamente las 72 horas, pero la evidencia fue rechazada por no ser literal."},
+    {"id": "V01-E08", "state": "parcial", "matched_proposals": ["V06", "R09"], "notes": "La devolución de llaves fue válida; la retención condicionada del depósito fue detectada pero rechazada por la cita."}
+  ],
+  "accepted_hallucinations": 0,
+  "reviewed_by": "Codex - comparación documental local",
+  "reviewed_at": "2026-09-24"
+}

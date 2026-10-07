@@ -1,0 +1,14 @@
+{
+  "document": "V04",
+  "result": "docs/evaluaciones/hu30/resultados_corpus_v2/resultado_v04_v2.json",
+  "controls": [
+    {"id": "V04-E01", "state": "completo", "matched_proposals": ["V02"], "notes": "Unió correctamente la cláusula quinta entre las dos páginas y conservó al locador como responsable."},
+    {"id": "V04-E02", "state": "incorrecto", "matched_proposals": ["V03"], "notes": "La evidencia es literal, pero el resumen resolvió la sintaxis ambigua atribuyendo los gastos comunes al locador en vez de conservar la redacción para revisión."},
+    {"id": "V04-E03", "state": "completo", "matched_proposals": ["V04"], "notes": "Conservó mantenimiento, devolución, deterioros, excepción por uso/tiempo y acta inicial."},
+    {"id": "V04-E04", "state": "completo", "matched_proposals": ["V05"], "notes": "Conservó las prohibiciones vinculadas con seguridad y normas municipales."},
+    {"id": "V04-E05", "state": "completo", "matched_proposals": ["V06"], "notes": "Conservó conformidad previa, adaptación y ausencia de obligación de restaurar."}
+  ],
+  "accepted_hallucinations": 0,
+  "reviewed_by": "Codex - comparación documental local",
+  "reviewed_at": "2026-09-24"
+}

@@ -31,6 +31,7 @@ class InMemoryClaimsRepository:
 
     claim: ClaimForClassification
     persisted: AgentClassificationResult | None = None
+    persisted_context: list[dict[str, object]] | None = None
 
     def get_for_classification(self, reclamo_id: UUID) -> ClaimForClassification | None:
         return self.claim if self.claim.reclamo_id == reclamo_id else None
@@ -39,8 +40,10 @@ class InMemoryClaimsRepository:
         self,
         reclamo_id: UUID,
         result: AgentClassificationResult,
+        contract_context: list[dict[str, object]],
     ) -> PersistedClassification:
         self.persisted = result
+        self.persisted_context = contract_context
         return PersistedClassification(
             response=ClaimClassificationResponse(
                 reclamo_id=reclamo_id,
@@ -125,6 +128,24 @@ def test_complete_flow_classifies_and_persists_a_high_confidence_claim():
     assert classifier.prompt is not None
     assert descripcion in classifier.prompt
     assert '"plomeria-01"' in classifier.prompt
+
+
+def test_complete_flow_passes_and_snapshots_confirmed_contract_context():
+    clause = {
+        "id": "clause-one", "resumen": "El inquilino responde solo si existe culpa.",
+        "responsable": "condicional", "condiciones": "Daño atribuible a culpa.",
+    }
+    _, repository, classifier = classify_through_http(
+        {
+            "tipo_gasto": "ordinario", "confianza": 0.9,
+            "fundamento": "La cláusula confirmada asigna la responsabilidad.",
+            "debe_escalar": False, "motivo_escalado": None,
+        },
+        descripcion="Se rompió una puerta por un golpe del ocupante.",
+        clausulas_contrato=[clause],
+    )
+    assert repository.persisted_context == [clause]
+    assert "clause-one" in classifier.prompt
 
 
 def test_complete_flow_forces_escalation_below_the_confidence_threshold():

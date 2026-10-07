@@ -1,0 +1,332 @@
+{
+  "document": "V03",
+  "source": "output\\pdf\\hu30_corpus\\validation\\V03_modelo_inmueble_unipe.pdf",
+  "source_sha256": "aaaa338ceb76f6f61993a75e4b49bc1547de35cb22b9a1b26b18207f9efe6073",
+  "prompt_version": "v4",
+  "model": "gemini-3.5-flash",
+  "frozen_files": [
+    {
+      "path": "backend/prompts/prompt_extraccion_clausulas_v4.md",
+      "sha256": "cd017ef10aa4d62ebf29af5313d9a795d259f03779e1e80fe4e5bc47711b4ce5"
+    },
+    {
+      "path": "backend/app/services/contract_clause_llm.py",
+      "sha256": "77ff35bf2d242fabaf92214989bc2cec8efeb02adcfe436cee84d86a04009821"
+    },
+    {
+      "path": "backend/app/services/contract_clause_evidence.py",
+      "sha256": "e179ee2669212c0c8a1b35ead32a0cac4d3c0972437648ac7af144ecb7cbef2d"
+    }
+  ],
+  "expectations_state": "validated",
+  "expected_controls": 5,
+  "external_calls": 1,
+  "executed_at": "2026-09-26T18:38:07.029838+00:00",
+  "extractor_version": "hu30-v4",
+  "pages": 3,
+  "local_extraction_complete": true,
+  "model_proposals": 14,
+  "valid_clauses": [
+    {
+      "numero": "INTRODUCCION",
+      "titulo": "Partes contratantes y roles",
+      "evidencias": [
+        {
+          "pagina": 1,
+          "texto": "Entre…………….representada por…….,con domicilio en la , en adelante EL \nLOCADOR y la UNIVERSIDAD PEDAGÓGICA NACIONAL, representada por \nel Rector, señor Carlos Alberto RODRIGUEZ,D.N.I. N°……………,con domicilio \nlegal en la calle Piedras 1080 CIUDAD AUTONOMA DE BUEN OS AIRES, en \nadelante El LOCATARIO"
+        }
+      ],
+      "paginas": [
+        1
+      ],
+      "texto_original": "Entre…………….representada por…….,con domicilio en la , en adelante EL \nLOCADOR y la UNIVERSIDAD PEDAGÓGICA NACIONAL, representada por \nel Rector, señor Carlos Alberto RODRIGUEZ,D.N.I. N°……………,con domicilio \nlegal en la calle Piedras 1080 CIUDAD AUTONOMA DE BUEN OS AIRES, en \nadelante El LOCATARIO",
+      "resumen": "Identificación de las partes contratantes: el Locador (representante no especificado en este fragmento) y el Locatario (Universidad Pedagógica Nacional, representada por su Rector Carlos Alberto Rodriguez).",
+      "categoria": "otro",
+      "responsable": "no_especificado",
+      "uso_clasificador": "contexto",
+      "condiciones": null,
+      "referencias": [],
+      "confianza": 0.95
+    },
+    {
+      "numero": "SEGUNDA",
+      "titulo": "Restitución al vencimiento del plazo",
+      "evidencias": [
+        {
+          "pagina": 1,
+          "texto": "Operado el vencimiento de pleno dere cho, sin necesidad de notificación \nalguna, el día XX/XX/XXXX, fecha en la que EL LOCATARIO deberá restituir el \ninmueble al LOCADOR en el estado previsto en la cláusula SEPTIMA, salvo el \ncaso en que las partes acuerden la opción a prórroga por hasta un plaz o de \nTREINTA Y SEIS (36) meses más"
+        }
+      ],
+      "paginas": [
+        1
+      ],
+      "texto_original": "Operado el vencimiento de pleno dere cho, sin necesidad de notificación \nalguna, el día XX/XX/XXXX, fecha en la que EL LOCATARIO deberá restituir el \ninmueble al LOCADOR en el estado previsto en la cláusula SEPTIMA, salvo el \ncaso en que las partes acuerden la opción a prórroga por hasta un plaz o de \nTREINTA Y SEIS (36) meses más",
+      "resumen": "Al vencimiento del plazo de locación, el locatario debe restituir el inmueble al locador en el estado previsto en la cláusula séptima, salvo que se acuerde una prórroga.",
+      "categoria": "devolucion",
+      "responsable": "inquilino",
+      "uso_clasificador": "operativa",
+      "condiciones": null,
+      "referencias": [],
+      "confianza": 0.95
+    },
+    {
+      "numero": "TERCERA",
+      "titulo": "Estado de restitución y desocupación",
+      "evidencias": [
+        {
+          "pagina": 1,
+          "texto": "Vencido dicho plazo el LOCATARIO deberá restituir al LOCADOR \nel inmueble objeto del presente Contrato, totalmente desocupado, en el estado \nindicado en la cláusula SEPTIMA"
+        }
+      ],
+      "paginas": [
+        1
+      ],
+      "texto_original": "Vencido dicho plazo el LOCATARIO deberá restituir al LOCADOR \nel inmueble objeto del presente Contrato, totalmente desocupado, en el estado \nindicado en la cláusula SEPTIMA",
+      "resumen": "Vencido el plazo contractual, el locatario tiene la obligación de restituir el inmueble totalmente desocupado y en el estado indicado en la cláusula séptima.",
+      "categoria": "devolucion",
+      "responsable": "inquilino",
+      "uso_clasificador": "operativa",
+      "condiciones": null,
+      "referencias": [],
+      "confianza": 0.95
+    },
+    {
+      "numero": "SEPTIMA",
+      "titulo": "Declaración de estado inicial del inmueble",
+      "evidencias": [
+        {
+          "pagina": 2,
+          "texto": "El LOCATARIO declara que ha comprobado que el inmueble se \nencuentra en buen estado de conservación e higiene, con todos sus vidrios, \nherrajes, llaves y demás accesorios, desocupado y en funcionamiento todas \nsus partes"
+        }
+      ],
+      "paginas": [
+        2
+      ],
+      "texto_original": "El LOCATARIO declara que ha comprobado que el inmueble se \nencuentra en buen estado de conservación e higiene, con todos sus vidrios, \nherrajes, llaves y demás accesorios, desocupado y en funcionamiento todas \nsus partes",
+      "resumen": "El locatario declara recibir el inmueble en buen estado de conservación e higiene, desocupado, con todos sus accesorios y con todas sus partes en funcionamiento.",
+      "categoria": "devolucion",
+      "responsable": "inquilino",
+      "uso_clasificador": "contexto",
+      "condiciones": null,
+      "referencias": [],
+      "confianza": 0.95
+    },
+    {
+      "numero": "SEPTIMA",
+      "titulo": "Obligación de conservación y restitución",
+      "evidencias": [
+        {
+          "pagina": 2,
+          "texto": "obligándose a mantener y a restituir el inmueble en las mismas \ncondiciones a las de la recepción, excepto los deterioros provenientes del mero \ntranscurso del tiempo y uso"
+        }
+      ],
+      "paginas": [
+        2
+      ],
+      "texto_original": "obligándose a mantener y a restituir el inmueble en las mismas \ncondiciones a las de la recepción, excepto los deterioros provenientes del mero \ntranscurso del tiempo y uso",
+      "resumen": "El locatario se obliga a mantener y restituir el inmueble en las mismas condiciones en que lo recibió, exceptuando el desgaste natural por el transcurso del tiempo y el uso.",
+      "categoria": "mantenimiento",
+      "responsable": "inquilino",
+      "uso_clasificador": "operativa",
+      "condiciones": null,
+      "referencias": [],
+      "confianza": 0.95
+    },
+    {
+      "numero": "SEPTIMA",
+      "titulo": "Reformas para puesta en condiciones de uso",
+      "evidencias": [
+        {
+          "pagina": 2,
+          "texto": "En caso de que el inmueble no se encontrara en \ncondiciones de uso, el locador será responsable por las reformas necesarias \npara la puesta en condición de uso del inmueble"
+        }
+      ],
+      "paginas": [
+        2
+      ],
+      "texto_original": "En caso de que el inmueble no se encontrara en \ncondiciones de uso, el locador será responsable por las reformas necesarias \npara la puesta en condición de uso del inmueble",
+      "resumen": "Si el inmueble no se encuentra en condiciones de uso al inicio, el locador es responsable de realizar las reformas necesarias para ponerlo en condiciones.",
+      "categoria": "reparacion",
+      "responsable": "propietario",
+      "uso_clasificador": "operativa",
+      "condiciones": null,
+      "referencias": [],
+      "confianza": 0.95
+    },
+    {
+      "numero": "OCTAVA",
+      "titulo": "Pago de servicios y expensas ordinarias",
+      "evidencias": [
+        {
+          "pagina": 2,
+          "texto": "EL LOCATARIO deberá abonar mensualmente las facturas \ncorrespondientes a los servicios de: alumbrado, barrido y limpieza, gas, luz, \nteléfono y agua (en caso de contar con servicio medido) y los gast os comunes \nordinarios para inmuebles afectados al régimen de propiedad horizontal \n(expensas ordinarias"
+        }
+      ],
+      "paginas": [
+        2
+      ],
+      "texto_original": "EL LOCATARIO deberá abonar mensualmente las facturas \ncorrespondientes a los servicios de: alumbrado, barrido y limpieza, gas, luz, \nteléfono y agua (en caso de contar con servicio medido) y los gast os comunes \nordinarios para inmuebles afectados al régimen de propiedad horizontal \n(expensas ordinarias",
+      "resumen": "El locatario debe pagar mensualmente los servicios de alumbrado, barrido y limpieza, gas, luz, teléfono, agua (si es medido) y las expensas ordinarias.",
+      "categoria": "servicio",
+      "responsable": "inquilino",
+      "uso_clasificador": "operativa",
+      "condiciones": null,
+      "referencias": [],
+      "confianza": 0.95
+    },
+    {
+      "numero": "OCTAVA",
+      "titulo": "Pago de impuestos y expensas extraordinarias",
+      "evidencias": [
+        {
+          "pagina": 2,
+          "texto": "Se pacta a cargo del LOCADOR el pago de los \nsiguientes servicios e impuestos: expensas extraordinarias, impuesto \ninmobiliario y cualquier otro impuesto que recaiga sobre la titularidad del \ninmueble"
+        }
+      ],
+      "paginas": [
+        2
+      ],
+      "texto_original": "Se pacta a cargo del LOCADOR el pago de los \nsiguientes servicios e impuestos: expensas extraordinarias, impuesto \ninmobiliario y cualquier otro impuesto que recaiga sobre la titularidad del \ninmueble",
+      "resumen": "Corresponde al locador el pago de expensas extraordinarias, impuesto inmobiliario y cualquier otro impuesto que grave la titularidad del inmueble.",
+      "categoria": "expensa",
+      "responsable": "propietario",
+      "uso_clasificador": "operativa",
+      "condiciones": null,
+      "referencias": [],
+      "confianza": 0.95
+    },
+    {
+      "numero": "NOVENA",
+      "titulo": "Visitas de constatación del locador",
+      "evidencias": [
+        {
+          "pagina": 2,
+          "texto": "EL LOCADOR o sus representantes podrán visitar el inmueble, en \ndías hábiles y en horario diurno, para constatar el cuidado que en general se le \nprodiga al mismo"
+        }
+      ],
+      "paginas": [
+        2
+      ],
+      "texto_original": "EL LOCADOR o sus representantes podrán visitar el inmueble, en \ndías hábiles y en horario diurno, para constatar el cuidado que en general se le \nprodiga al mismo",
+      "resumen": "El locador o sus representantes están facultados para visitar el inmueble en días hábiles y horario diurno para constatar su estado de cuidado.",
+      "categoria": "acceso",
+      "responsable": "propietario",
+      "uso_clasificador": "operativa",
+      "condiciones": null,
+      "referencias": [],
+      "confianza": 0.95
+    },
+    {
+      "numero": "NOVENA",
+      "titulo": "Acceso para conservación, reparación o mejora",
+      "evidencias": [
+        {
+          "pagina": 2,
+          "texto": "EL LOCATARIO le permitirá el libre acceso para \ninspeccionar y ejecutar todo trabajo que sea necesario para su conservación, \nreparación o mejora"
+        }
+      ],
+      "paginas": [
+        2
+      ],
+      "texto_original": "EL LOCATARIO le permitirá el libre acceso para \ninspeccionar y ejecutar todo trabajo que sea necesario para su conservación, \nreparación o mejora",
+      "resumen": "El locatario debe permitir el libre acceso al inmueble para inspecciones y para la ejecución de cualquier trabajo necesario para su conservación, reparación o mejora.",
+      "categoria": "acceso",
+      "responsable": "inquilino",
+      "uso_clasificador": "operativa",
+      "condiciones": null,
+      "referencias": [],
+      "confianza": 0.95
+    },
+    {
+      "numero": "DECIMA",
+      "titulo": "Prohibición de modificaciones y mejoras sin autorización",
+      "evidencias": [
+        {
+          "pagina": 2,
+          "texto": "Queda prohibido al LOCATARIO introducir modificaciones o real izar \nmejoras de cualquier índole, sin la autorización previa y expresa del \nLOCADOR, salvo aquellas que, sin tener carácter estructural, sean necesarias \na los fines de adecuar el inmueble a las necesidades funcionales del \nLOCATARIO"
+        }
+      ],
+      "paginas": [
+        2
+      ],
+      "texto_original": "Queda prohibido al LOCATARIO introducir modificaciones o real izar \nmejoras de cualquier índole, sin la autorización previa y expresa del \nLOCADOR, salvo aquellas que, sin tener carácter estructural, sean necesarias \na los fines de adecuar el inmueble a las necesidades funcionales del \nLOCATARIO",
+      "resumen": "Se prohíbe al locatario realizar modificaciones o mejoras sin autorización previa y expresa del locador, con excepción de aquellas no estructurales necesarias para adecuar el inmueble a sus necesidades funcionales.",
+      "categoria": "mantenimiento",
+      "responsable": "inquilino",
+      "uso_clasificador": "operativa",
+      "condiciones": null,
+      "referencias": [],
+      "confianza": 0.95
+    },
+    {
+      "numero": "DECIMA",
+      "titulo": "Destino y reembolso de las mejoras",
+      "evidencias": [
+        {
+          "pagina": 2,
+          "texto": "Todas las mejoras que s e introduzcan en el inmueble locado"
+        },
+        {
+          "pagina": 3,
+          "texto": "quedarán en beneficio del LOCADOR, sin tener éste que reembolsar pago \nalguno, ni EL LOCATARIO tendrá derecho a ejercer retención alguna"
+        }
+      ],
+      "paginas": [
+        2,
+        3
+      ],
+      "texto_original": "Todas las mejoras que s e introduzcan en el inmueble locado\n\nquedarán en beneficio del LOCADOR, sin tener éste que reembolsar pago \nalguno, ni EL LOCATARIO tendrá derecho a ejercer retención alguna",
+      "resumen": "Todas las mejoras introducidas en el inmueble quedarán a beneficio del locador sin obligación de reembolso, y el locatario no podrá ejercer derecho de retención sobre ellas.",
+      "categoria": "otro",
+      "responsable": "no_especificado",
+      "uso_clasificador": "operativa",
+      "condiciones": null,
+      "referencias": [],
+      "confianza": 0.95
+    },
+    {
+      "numero": "UNDECIMA",
+      "titulo": "Destino del inmueble",
+      "evidencias": [
+        {
+          "pagina": 3,
+          "texto": "El inmueble locado será destinado para funcionamiento de la \nBIBLIOTECA"
+        }
+      ],
+      "paginas": [
+        3
+      ],
+      "texto_original": "El inmueble locado será destinado para funcionamiento de la \nBIBLIOTECA",
+      "resumen": "El inmueble locado se destinará exclusivamente al funcionamiento de la biblioteca.",
+      "categoria": "otro",
+      "responsable": "inquilino",
+      "uso_clasificador": "contexto",
+      "condiciones": null,
+      "referencias": [],
+      "confianza": 0.95
+    },
+    {
+      "numero": "DECIMOCUARTA",
+      "titulo": "Colocación de letreros y propaganda",
+      "evidencias": [
+        {
+          "pagina": 3,
+          "texto": "El LOCADOR consiente que el LOCATARIO coloque \nletreros o cualquier otra clase de propaganda, siempre y cuando se ajuste a lo \nque determina el reglamento Municipal y esté dentro de las normas exigidas"
+        }
+      ],
+      "paginas": [
+        3
+      ],
+      "texto_original": "El LOCADOR consiente que el LOCATARIO coloque \nletreros o cualquier otra clase de propaganda, siempre y cuando se ajuste a lo \nque determina el reglamento Municipal y esté dentro de las normas exigidas",
+      "resumen": "El locatario está autorizado a colocar letreros o propaganda, siempre que se ajuste a la reglamentación municipal y a las normas exigidas.",
+      "categoria": "otro",
+      "responsable": "inquilino",
+      "uso_clasificador": "operativa",
+      "condiciones": null,
+      "referencias": [],
+      "confianza": 0.95
+    }
+  ],
+  "rejected_proposals": [],
+  "evidence_incidents": []
+}

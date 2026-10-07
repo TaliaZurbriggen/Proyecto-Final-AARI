@@ -1,0 +1,17 @@
+{
+  "document": "V01",
+  "window_index": 3,
+  "pages": [
+    3,
+    4
+  ],
+  "source_sha256": "f20f157a6686a80ad1aff69c45d6b5335b3a7092032b26b77e48b8802a81da2c",
+  "prompt_version": "v4",
+  "model": "gemini-3.5-flash",
+  "attempted_at": "2026-09-27T16:16:21.111836+00:00",
+  "elapsed_seconds": 0.0,
+  "error_type": "RuntimeError",
+  "provider_status": null,
+  "result_files_created": false,
+  "privacy": "No se registran claves ni texto contractual."
+}

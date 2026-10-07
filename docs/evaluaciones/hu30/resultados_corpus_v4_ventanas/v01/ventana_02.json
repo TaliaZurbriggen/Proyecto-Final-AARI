@@ -1,0 +1,18 @@
+{
+  "document": "V01",
+  "window_index": 2,
+  "pages": [
+    2,
+    3
+  ],
+  "source_sha256": "f20f157a6686a80ad1aff69c45d6b5335b3a7092032b26b77e48b8802a81da2c",
+  "prompt_version": "v4",
+  "model": "gemini-3.5-flash",
+  "executed_at": "2026-09-26T19:07:28.211984+00:00",
+  "elapsed_seconds": 77.857,
+  "external_calls": 1,
+  "model_proposals": 0,
+  "valid_clauses": [],
+  "rejected_proposals": [],
+  "evidence_incidents": []
+}

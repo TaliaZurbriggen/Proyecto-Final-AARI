@@ -1,0 +1,227 @@
+{
+  "document": "V03",
+  "source": "output\\pdf\\hu30_corpus\\validation\\V03_modelo_inmueble_unipe.pdf",
+  "source_sha256": "aaaa338ceb76f6f61993a75e4b49bc1547de35cb22b9a1b26b18207f9efe6073",
+  "prompt_version": "v2",
+  "model": "gemini-3.5-flash",
+  "frozen_files": [
+    {
+      "path": "backend/prompts/prompt_extraccion_clausulas_v2.md",
+      "sha256": "1de25b61d81b28e67b6ee03559565349367ca840b3cd8801bda42eb1f906e1e8"
+    },
+    {
+      "path": "backend/app/services/contract_clause_llm.py",
+      "sha256": "f9596c37f4fbef1279701f0a7c8793f9c421ee387a6c1c1f3954bfc8977926e6"
+    }
+  ],
+  "expectations_state": "validated",
+  "expected_controls": 5,
+  "external_calls": 1,
+  "executed_at": "2026-09-24T22:12:38.004150+00:00",
+  "extractor_version": "hu30-v2",
+  "pages": 3,
+  "local_extraction_complete": true,
+  "model_proposals": 9,
+  "valid_clauses": [
+    {
+      "numero": "SEGUNDA",
+      "titulo": "Plazo de locación y restitución",
+      "evidencias": [
+        {
+          "pagina": 1,
+          "texto": "SEGUNDA: Fíjase el término de la locación en TREINTA Y SEIS (36) meses, computables a partir del día ……….. y venciendo en consecuencia el día… Operado el vencimiento de pleno dere cho, sin necesidad de notificación alguna, el día XX/XX/XXXX, fecha en la que EL LOCATARIO deberá restituir el inmueble al LOCADOR en el estado previsto en la cláusula SEPTIMA, salvo el caso en que las partes acuerden la opción a prórroga por hasta un plaz o de TREINTA Y SEIS (36) meses más."
+        }
+      ],
+      "paginas": [
+        1
+      ],
+      "texto_original": "SEGUNDA: Fíjase el término de la locación en TREINTA Y SEIS (36) meses, computables a partir del día ……….. y venciendo en consecuencia el día… Operado el vencimiento de pleno dere cho, sin necesidad de notificación alguna, el día XX/XX/XXXX, fecha en la que EL LOCATARIO deberá restituir el inmueble al LOCADOR en el estado previsto en la cláusula SEPTIMA, salvo el caso en que las partes acuerden la opción a prórroga por hasta un plaz o de TREINTA Y SEIS (36) meses más.",
+      "resumen": "Establece el plazo de locación en 36 meses (con opción a prórroga por hasta 36 meses más) y la obligación del locatario de restituir el inmueble al vencimiento en el estado previsto en la cláusula séptima.",
+      "categoria": "devolucion",
+      "responsable": "inquilino",
+      "uso_clasificador": "contexto",
+      "condiciones": "Al vencimiento del plazo contractual o de su prórroga.",
+      "referencias": [
+        "SEPTIMA"
+      ],
+      "confianza": 1.0
+    },
+    {
+      "numero": "TERCERA",
+      "titulo": "Restitución del inmueble desocupado",
+      "evidencias": [
+        {
+          "pagina": 1,
+          "texto": "TERCERA: Vencido dicho plazo el LOCATARIO deberá restituir al LOCADOR el inmueble objeto del presente Contrato, totalmente desocupado, en el estado indicado en la cláusula SEPTIMA."
+        }
+      ],
+      "paginas": [
+        1
+      ],
+      "texto_original": "TERCERA: Vencido dicho plazo el LOCATARIO deberá restituir al LOCADOR el inmueble objeto del presente Contrato, totalmente desocupado, en el estado indicado en la cláusula SEPTIMA.",
+      "resumen": "Obliga al locatario a restituir el inmueble totalmente desocupado y en el estado indicado en la cláusula séptima una vez vencido el plazo del contrato.",
+      "categoria": "devolucion",
+      "responsable": "inquilino",
+      "uso_clasificador": "contexto",
+      "condiciones": "Al vencimiento del plazo contractual.",
+      "referencias": [
+        "SEPTIMA"
+      ],
+      "confianza": 1.0
+    },
+    {
+      "numero": "CUARTA",
+      "titulo": "Rescisión unilateral y preaviso",
+      "evidencias": [
+        {
+          "pagina": 1,
+          "texto": "CUARTA: El LOCATARIO podrá rescindir unilateralmente el presente Contrato, en cualquier momento de su ejecución, sin que la misma genere derecho a indemnización alguna. La voluntad de rescindir debe rá comunicarse fehacientemente con una anticipación mínima de TREINTA (30) días."
+        }
+      ],
+      "paginas": [
+        1
+      ],
+      "texto_original": "CUARTA: El LOCATARIO podrá rescindir unilateralmente el presente Contrato, en cualquier momento de su ejecución, sin que la misma genere derecho a indemnización alguna. La voluntad de rescindir debe rá comunicarse fehacientemente con una anticipación mínima de TREINTA (30) días.",
+      "resumen": "Faculta al locatario a rescindir unilateralmente el contrato en cualquier momento sin indemnización, debiendo notificar fehacientemente su voluntad con una anticipación mínima de 30 días.",
+      "categoria": "aviso",
+      "responsable": "inquilino",
+      "uso_clasificador": "operativa",
+      "condiciones": "Rescisión unilateral por parte del locatario en cualquier momento.",
+      "referencias": [],
+      "confianza": 1.0
+    },
+    {
+      "numero": "SEPTIMA",
+      "titulo": "Estado del inmueble, mantenimiento y reformas iniciales",
+      "evidencias": [
+        {
+          "pagina": 2,
+          "texto": "SEPTIMA: El LOCATARIO declara que ha comprobado que el inmueble se encuentra en buen estado de conservación e higiene, con todos sus vidrios, herrajes, llaves y demás accesorios, desocupado y en funcionamiento todas sus partes, obligándose a mantener y a restituir el inmueble en las mismas condiciones a las de la recepción, excepto los deterioros provenientes del mero transcurso del tiempo y uso. En caso de que el inmueble no se encontrara en condiciones de uso, el locador será responsable por las reformas necesarias para la puesta en condición de uso del inmueble"
+        }
+      ],
+      "paginas": [
+        2
+      ],
+      "texto_original": "SEPTIMA: El LOCATARIO declara que ha comprobado que el inmueble se encuentra en buen estado de conservación e higiene, con todos sus vidrios, herrajes, llaves y demás accesorios, desocupado y en funcionamiento todas sus partes, obligándose a mantener y a restituir el inmueble en las mismas condiciones a las de la recepción, excepto los deterioros provenientes del mero transcurso del tiempo y uso. En caso de que el inmueble no se encontrara en condiciones de uso, el locador será responsable por las reformas necesarias para la puesta en condición de uso del inmueble",
+      "resumen": "El locatario declara recibir el inmueble en buen estado de conservación, higiene y funcionamiento, y se obliga a mantenerlo y devolverlo en las mismas condiciones, salvo el desgaste natural por el tiempo y uso. Si el inmueble no estuviera inicialmente en condiciones de uso, el locador será responsable de realizar las reformas necesarias para ponerlo en condiciones.",
+      "categoria": "mantenimiento",
+      "responsable": "condicional",
+      "uso_clasificador": "operativa",
+      "condiciones": "Durante toda la vigencia del contrato y al momento de la entrega/restitución.",
+      "referencias": [],
+      "confianza": 1.0
+    },
+    {
+      "numero": "OCTAVA",
+      "titulo": "Pago de servicios, tasas e impuestos",
+      "evidencias": [
+        {
+          "pagina": 2,
+          "texto": "OCTAVA: EL LOCATARIO deberá abonar mensualmente las facturas correspondientes a los servicios de: alumbrado, barrido y limpieza, gas, luz, teléfono y agua (en caso de contar con servicio medido) y los gast os comunes ordinarios para inmuebles afectados al régimen de propiedad horizontal (expensas ordinarias). Se pacta a cargo del LOCADOR el pago de los siguientes servicios e impuestos: expensas extraordinarias, impuesto inmobiliario y cualquier otro impuesto que recaiga sobre la titularidad del inmueble"
+        }
+      ],
+      "paginas": [
+        2
+      ],
+      "texto_original": "OCTAVA: EL LOCATARIO deberá abonar mensualmente las facturas correspondientes a los servicios de: alumbrado, barrido y limpieza, gas, luz, teléfono y agua (en caso de contar con servicio medido) y los gast os comunes ordinarios para inmuebles afectados al régimen de propiedad horizontal (expensas ordinarias). Se pacta a cargo del LOCADOR el pago de los siguientes servicios e impuestos: expensas extraordinarias, impuesto inmobiliario y cualquier otro impuesto que recaiga sobre la titularidad del inmueble",
+      "resumen": "Distribuye el pago de servicios e impuestos: el locatario debe pagar mensualmente los servicios (ABL, gas, luz, teléfono, agua medida) y las expensas ordinarias. El locador tiene a su cargo las expensas extraordinarias, el impuesto inmobiliario y cualquier otro tributo sobre la titularidad del inmueble.",
+      "categoria": "expensa",
+      "responsable": "condicional",
+      "uso_clasificador": "operativa",
+      "condiciones": "Mensualmente durante la vigencia del contrato.",
+      "referencias": [],
+      "confianza": 1.0
+    },
+    {
+      "numero": "NOVENA",
+      "titulo": "Inspección, acceso y reparaciones del locador",
+      "evidencias": [
+        {
+          "pagina": 2,
+          "texto": "NOVENA: EL LOCADOR o sus representantes podrán visitar el inmueble, en días hábiles y en horario diurno, para constatar el cuidado que en general se le prodiga al mismo. EL LOCATARIO le permitirá el libre acceso para inspeccionar y ejecutar todo trabajo que sea necesario para su conservación, reparación o mejora."
+        }
+      ],
+      "paginas": [
+        2
+      ],
+      "texto_original": "NOVENA: EL LOCADOR o sus representantes podrán visitar el inmueble, en días hábiles y en horario diurno, para constatar el cuidado que en general se le prodiga al mismo. EL LOCATARIO le permitirá el libre acceso para inspeccionar y ejecutar todo trabajo que sea necesario para su conservación, reparación o mejora.",
+      "resumen": "Autoriza al locador o sus representantes a visitar el inmueble en días hábiles y horario diurno para constatar su estado. Obliga al locatario a permitir el libre acceso para inspecciones y para la ejecución de trabajos necesarios de conservación, reparación o mejora.",
+      "categoria": "acceso",
+      "responsable": "condicional",
+      "uso_clasificador": "operativa",
+      "condiciones": "En días hábiles y horario diurno para visitas; libre acceso para trabajos de conservación, reparación o mejora.",
+      "referencias": [],
+      "confianza": 1.0
+    },
+    {
+      "numero": "DECIMA",
+      "titulo": "Prohibición de modificaciones y régimen de mejoras",
+      "evidencias": [
+        {
+          "pagina": 2,
+          "texto": "DECIMA: Queda prohibido al LOCATARIO introducir modificaciones o real izar mejoras de cualquier índole, sin la autorización previa y expresa del LOCADOR, salvo aquellas que, sin tener carácter estructural, sean necesarias a los fines de adecuar el inmueble a las necesidades funcionales del LOCATARIO. Todas las mejoras que s e introduzcan en el inmueble locado"
+        },
+        {
+          "pagina": 3,
+          "texto": "quedarán en beneficio del LOCADOR, sin tener éste que reembolsar pago alguno, ni EL LOCATARIO tendrá derecho a ejercer retención alguna."
+        }
+      ],
+      "paginas": [
+        2,
+        3
+      ],
+      "texto_original": "DECIMA: Queda prohibido al LOCATARIO introducir modificaciones o real izar mejoras de cualquier índole, sin la autorización previa y expresa del LOCADOR, salvo aquellas que, sin tener carácter estructural, sean necesarias a los fines de adecuar el inmueble a las necesidades funcionales del LOCATARIO. Todas las mejoras que s e introduzcan en el inmueble locado\n\nquedarán en beneficio del LOCADOR, sin tener éste que reembolsar pago alguno, ni EL LOCATARIO tendrá derecho a ejercer retención alguna.",
+      "resumen": "Prohíbe al locatario realizar modificaciones o mejoras sin autorización previa y expresa del locador, exceptuando las no estructurales necesarias para adecuar el inmueble a sus necesidades funcionales. Todas las mejoras introducidas quedarán a beneficio del locador sin derecho a reembolso ni retención por parte del locatario.",
+      "categoria": "mantenimiento",
+      "responsable": "inquilino",
+      "uso_clasificador": "operativa",
+      "condiciones": "Requiere autorización previa y expresa del locador, salvo adecuaciones funcionales no estructurales.",
+      "referencias": [],
+      "confianza": 1.0
+    },
+    {
+      "numero": "UNDECIMA",
+      "titulo": "Destino del inmueble",
+      "evidencias": [
+        {
+          "pagina": 3,
+          "texto": "UNDECIMA: El inmueble locado será destinado para funcionamiento de la BIBLIOTECA….."
+        }
+      ],
+      "paginas": [
+        3
+      ],
+      "texto_original": "UNDECIMA: El inmueble locado será destinado para funcionamiento de la BIBLIOTECA…..",
+      "resumen": "Establece que el destino exclusivo del inmueble locado será el funcionamiento de una biblioteca.",
+      "categoria": "otro",
+      "responsable": "inquilino",
+      "uso_clasificador": "contexto",
+      "condiciones": "Durante toda la vigencia del contrato.",
+      "referencias": [],
+      "confianza": 1.0
+    },
+    {
+      "numero": "DECIMOQUINTA",
+      "titulo": "Integración documental y pliegos aplicables",
+      "evidencias": [
+        {
+          "pagina": 3,
+          "texto": "DECIMOQUINTA: Rige para el presente Contrato, todas las Especificaciones Técnicas, Clausulas Generales, Cláusulas Particulares y Oferta que estableciera la Contratación Directa N°……., la cual t ramitara por el Expediente Electrónico EXPD-UNIPE…….."
+        }
+      ],
+      "paginas": [
+        3
+      ],
+      "texto_original": "DECIMOQUINTA: Rige para el presente Contrato, todas las Especificaciones Técnicas, Clausulas Generales, Cláusulas Particulares y Oferta que estableciera la Contratación Directa N°……., la cual t ramitara por el Expediente Electrónico EXPD-UNIPE……..",
+      "resumen": "Incorpora al contrato, con carácter vinculante, todas las especificaciones técnicas, cláusulas generales, particulares y la oferta de la Contratación Directa correspondiente.",
+      "categoria": "otro",
+      "responsable": "no_especificado",
+      "uso_clasificador": "contexto",
+      "condiciones": "Durante toda la vigencia del contrato.",
+      "referencias": [],
+      "confianza": 1.0
+    }
+  ],
+  "rejected_proposals": [],
+  "evidence_incidents": []
+}

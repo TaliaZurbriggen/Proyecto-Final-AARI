@@ -53,14 +53,21 @@ def local_engine():
                         file_size_limit bigint, allowed_mime_types text[]
                     );
                 """)
-                for number in (1, 2, 3, 4, 6, 17, 18, 19, 21, 22, 23):
-                    migration = (MIGRATIONS / "23_notificaciones_actor_responsable.sql"
-                                 if number == 23 else next(MIGRATIONS.glob(f"{number:02d}_*.sql")))
+                for number in (1, 2, 3, 4, 6, 17, 18, 19, 20, 21, 22):
+                    migration = next(MIGRATIONS.glob(f"{number:02d}_*.sql"))
                     sql = migration.read_text(encoding="utf-8")
                     if number == 4:
                         # No cargar contactos reales del seed histórico.
                         sql = sql.split("-- Seed de parámetros")[0]
                     cursor.execute(sql)
+                # Los dos archivos 23 son independientes; no elegir uno con glob.
+                for filename in (
+                    "23_notificaciones_actor_responsable.sql",
+                    "23_clausulas_contractuales.sql",
+                    "24_evidencia_clausulas_contractuales.sql",
+                    "25_extraccion_asistida_literal.sql",
+                ):
+                    cursor.execute((MIGRATIONS / filename).read_text(encoding="utf-8"))
                 # HU14 especializa expensas; archivo explícito, no glob por número.
                 cursor.execute((MIGRATIONS / "20261007133447_hu14_derivacion_expensas.sql").read_text(encoding="utf-8"))
                 cursor.execute((MIGRATIONS / "20261007150410_hu14_indice_fk_derivacion_expensas.sql").read_text(encoding="utf-8"))

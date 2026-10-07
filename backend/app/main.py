@@ -10,7 +10,7 @@ from sqlalchemy import text
 from app.api.auth import require_admin, router as auth_router
 from app.api.configuracion import router as agency_configuration_router
 from app.api.expensas import router as expenses_router
-from app.api.contratos import router as contratos_router
+from app.api.contratos import get_contract_clause_service, router as contratos_router
 from app.services.contract_errors import ContractError
 from app.api.inquilinos import property_router as property_tenant_router
 from app.api.inquilinos import router as inquilinos_router
@@ -24,6 +24,7 @@ from app.api.reclamos import get_claim_notification_service
 from app.api.reclamos import router as reclamos_router
 from app.db.database import engine
 from app.services.claim_notifications import run_notification_worker
+from app.services.contract_clause_service import run_contract_analysis_worker
 
 
 def _notification_worker_enabled() -> bool:
@@ -31,23 +32,33 @@ def _notification_worker_enabled() -> bool:
     return configured not in {"0", "false", "no"} and "PYTEST_CURRENT_TEST" not in os.environ
 
 
+def _contract_worker_enabled() -> bool:
+    configured = os.getenv("CONTRACT_ANALYSIS_WORKER_ENABLED", "true").lower()
+    return configured not in {"0", "false", "no"} and "PYTEST_CURRENT_TEST" not in os.environ
+
+
 @asynccontextmanager
 async def lifespan(_: FastAPI):
     """Mantiene activa la bandeja de salida sin bloquear las peticiones."""
 
-    if not _notification_worker_enabled():
+    workers = []
+    stop_event = asyncio.Event()
+    if _notification_worker_enabled():
+        workers.append(asyncio.create_task(
+            run_notification_worker(get_claim_notification_service(), stop_event)
+        ))
+    if _contract_worker_enabled():
+        workers.append(asyncio.create_task(
+            run_contract_analysis_worker(get_contract_clause_service(), stop_event)
+        ))
+    if not workers:
         yield
         return
-
-    stop_event = asyncio.Event()
-    worker = asyncio.create_task(
-        run_notification_worker(get_claim_notification_service(), stop_event)
-    )
     try:
         yield
     finally:
         stop_event.set()
-        await worker
+        await asyncio.gather(*workers)
 
 
 app = FastAPI(

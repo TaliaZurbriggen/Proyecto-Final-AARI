@@ -1,0 +1,280 @@
+{
+  "experiment": "hu30-v4-flash-lite-v04",
+  "document": "V04",
+  "source": "output/pdf/hu30_corpus/validation/V04_modelo_inmueble_dgn_paginas_8_9.pdf",
+  "source_sha256": "a921c2a9db516211b82398c52ad937e7a881d0ec6d248334fdf6d483bd303d1c",
+  "model": "gemini-3.5-flash-lite",
+  "prompt_version": "v4",
+  "transport": "generateContent",
+  "response_method": "function_calling",
+  "frozen_files": [
+    {
+      "path": "backend/prompts/prompt_extraccion_clausulas_v4.md",
+      "sha256": "cd017ef10aa4d62ebf29af5313d9a795d259f03779e1e80fe4e5bc47711b4ce5"
+    },
+    {
+      "path": "backend/app/services/contract_clause_llm.py",
+      "sha256": "8efa6a65c162e36cb09ed1612083f41d9a65f65c1e961ab05651e3ec938166ff"
+    },
+    {
+      "path": "backend/app/services/contract_clause_evidence.py",
+      "sha256": "e179ee2669212c0c8a1b35ead32a0cac4d3c0972437648ac7af144ecb7cbef2d"
+    }
+  ],
+  "executed_at": "2026-09-30T16:40:06.484019+00:00",
+  "pages": 2,
+  "local_extraction_complete": true,
+  "local_extraction_characters": 4709,
+  "external_invocations": 1,
+  "adapter_max_retries": 1,
+  "review_state": "pending",
+  "production_integration_changed": false,
+  "status": "ok",
+  "model_proposals": 5,
+  "model_clauses": [
+    {
+      "numero": "QUINTA",
+      "titulo": null,
+      "evidencias": [
+        {
+          "pagina": 1,
+          "texto": "QUINTA: Queda tambi�n convenido que quedar�n a cargo del LOCADOR los"
+        },
+        {
+          "pagina": 2,
+          "texto": "gastos que demanden las reparaciones que fuera necesario efectuar durante"
+        }
+      ],
+      "paginas": [
+        1,
+        2
+      ],
+      "texto_original": "QUINTA: Queda tambi�n convenido que quedar�n a cargo del LOCADOR los\n\ngastos que demanden las reparaciones que fuera necesario efectuar durante",
+      "resumen": "Quedar�n a cargo del LOCADOR los gastos que demanden las reparaciones que fuera necesario efectuar durante la vigencia del presente contrato para mantener el edificio en buen estado de conservaci�n, de manera que pueda servir satisfactoriamente al uso que se le destine.",
+      "categoria": "reparacion",
+      "responsable": "propietario",
+      "uso_clasificador": "operativa",
+      "condiciones": "Gastos que demanden las reparaciones necesarias para mantener el edificio en buen estado de conservaci�n.",
+      "referencias": [
+        "arts. 1515 y ss."
+      ],
+      "confianza": 1
+    },
+    {
+      "numero": "SEXTA",
+      "titulo": null,
+      "evidencias": [
+        {
+          "pagina": 2,
+          "texto": "S�PTIMA: El LOCATARIO recibir� el inmueble desocupado, en perfecto"
+        }
+      ],
+      "paginas": [
+        2
+      ],
+      "texto_original": "S�PTIMA: El LOCATARIO recibir� el inmueble desocupado, en perfecto",
+      "resumen": "El LOCADOR asume el pago de los impuestos, tasas, contribuciones, grav�menes y la parte proporcional de los gastos comunes, con excepci�n de los consumos del locatario. Ambiguamente coordinado.",
+      "categoria": "expensa",
+      "responsable": "no_especificado",
+      "uso_clasificador": "contexto",
+      "condiciones": "Salvo aquellos que obedecieran al uso que al inmueble le diera el LOCATARIO y se facturen en virtud de los consumos.",
+      "referencias": [],
+      "confianza": 0.6
+    },
+    {
+      "numero": "S�PTIMA",
+      "titulo": null,
+      "evidencias": [
+        {
+          "pagina": 2,
+          "texto": "S�PTIMA: El LOCATARIO recibir� el inmueble desocupado, en perfecto"
+        }
+      ],
+      "paginas": [
+        2
+      ],
+      "texto_original": "S�PTIMA: El LOCATARIO recibir� el inmueble desocupado, en perfecto",
+      "resumen": "El LOCATARIO se obliga a mantener y a devolver el inmueble en las mismas condiciones en que lo recibe, y a pagar el importe de los deterioros ocasionados, salvo los que resulten del buen uso y de la acci�n del tiempo.",
+      "categoria": "devolucion",
+      "responsable": "inquilino",
+      "uso_clasificador": "operativa",
+      "condiciones": "Obligaci�n de mantener y devolver el inmueble en las mismas condiciones en las que se recibe, pagando el importe de los deterioros ocasionados, salvo los que resulten del buen uso y de la acci�n del tiempo.",
+      "referencias": [],
+      "confianza": 1
+    },
+    {
+      "numero": "S�PTIMA",
+      "titulo": null,
+      "evidencias": [
+        {
+          "pagina": 2,
+          "texto": "Al momento de tomar posesi�n del inmueble se labrar� el acta respectiva en la que se consigne � la fecha de inicio de la posesi�n, el estado de recepci�n, y el inventario completo de las instalaciones."
+        }
+      ],
+      "paginas": [
+        2
+      ],
+      "texto_original": "Al momento de tomar posesi�n del inmueble se labrar� el acta respectiva en la que se consigne � la fecha de inicio de la posesi�n, el estado de recepci�n, y el inventario completo de las instalaciones.",
+      "resumen": "Al momento de tomar posesi�n del inmueble se labrar� un acta con la fecha de inicio, el estado de recepci�n y el inventario completo de las instalaciones.",
+      "categoria": "servicio",
+      "responsable": "no_especificado",
+      "uso_clasificador": "contexto",
+      "condiciones": "Al momento de tomar posesi�n del inmueble se labrar� el acta respectiva en la que se consigne la fecha de inicio de la posesi�n, el estado de recepci�n, y el inventario completo de las instalaciones.",
+      "referencias": [],
+      "confianza": 1
+    },
+    {
+      "numero": "NOVENA",
+      "titulo": null,
+      "evidencias": [
+        {
+          "pagina": 2,
+          "texto": "NOVENA: El LOCATARIO, previa conformidad del LOCADOR, podr� efectuar"
+        }
+      ],
+      "paginas": [
+        2
+      ],
+      "texto_original": "NOVENA: El LOCATARIO, previa conformidad del LOCADOR, podr� efectuar",
+      "resumen": "El LOCATARIO, previa conformidad del LOCADOR, podr� efectuar en el inmueble las modificaciones indispensables para adaptarlo a sus servicios, sin obligaci�n de devolverlo a su anterior estado.",
+      "categoria": "reparacion",
+      "responsable": "inquilino",
+      "uso_clasificador": "operativa",
+      "condiciones": "Previa conformidad del LOCADOR.",
+      "referencias": [],
+      "confianza": 1
+    }
+  ],
+  "valid_clauses": [
+    {
+      "numero": "SEXTA",
+      "titulo": null,
+      "evidencias": [
+        {
+          "pagina": 2,
+          "texto": "S�PTIMA: El LOCATARIO recibir� el inmueble desocupado, en perfecto"
+        }
+      ],
+      "paginas": [
+        2
+      ],
+      "texto_original": "S�PTIMA: El LOCATARIO recibir� el inmueble desocupado, en perfecto",
+      "resumen": "El LOCADOR asume el pago de los impuestos, tasas, contribuciones, grav�menes y la parte proporcional de los gastos comunes, con excepci�n de los consumos del locatario. Ambiguamente coordinado.",
+      "categoria": "expensa",
+      "responsable": "no_especificado",
+      "uso_clasificador": "contexto",
+      "condiciones": "Salvo aquellos que obedecieran al uso que al inmueble le diera el LOCATARIO y se facturen en virtud de los consumos.",
+      "referencias": [],
+      "confianza": 0.6
+    },
+    {
+      "numero": "S�PTIMA",
+      "titulo": null,
+      "evidencias": [
+        {
+          "pagina": 2,
+          "texto": "S�PTIMA: El LOCATARIO recibir� el inmueble desocupado, en perfecto"
+        }
+      ],
+      "paginas": [
+        2
+      ],
+      "texto_original": "S�PTIMA: El LOCATARIO recibir� el inmueble desocupado, en perfecto",
+      "resumen": "El LOCATARIO se obliga a mantener y a devolver el inmueble en las mismas condiciones en que lo recibe, y a pagar el importe de los deterioros ocasionados, salvo los que resulten del buen uso y de la acci�n del tiempo.",
+      "categoria": "devolucion",
+      "responsable": "inquilino",
+      "uso_clasificador": "operativa",
+      "condiciones": "Obligaci�n de mantener y devolver el inmueble en las mismas condiciones en las que se recibe, pagando el importe de los deterioros ocasionados, salvo los que resulten del buen uso y de la acci�n del tiempo.",
+      "referencias": [],
+      "confianza": 1
+    },
+    {
+      "numero": "S�PTIMA",
+      "titulo": null,
+      "evidencias": [
+        {
+          "pagina": 2,
+          "texto": "Al momento de \ntomar posesi�n del inmueble se labrar� el acta respectiva en la que se \nconsigne � la fecha de inicio de la posesi�n, el estado de recepci�n, y el \ninventario completo de las instalaciones"
+        }
+      ],
+      "paginas": [
+        2
+      ],
+      "texto_original": "Al momento de \ntomar posesi�n del inmueble se labrar� el acta respectiva en la que se \nconsigne � la fecha de inicio de la posesi�n, el estado de recepci�n, y el \ninventario completo de las instalaciones",
+      "resumen": "Al momento de tomar posesi�n del inmueble se labrar� un acta con la fecha de inicio, el estado de recepci�n y el inventario completo de las instalaciones.",
+      "categoria": "servicio",
+      "responsable": "no_especificado",
+      "uso_clasificador": "contexto",
+      "condiciones": "Al momento de tomar posesi�n del inmueble se labrar� el acta respectiva en la que se consigne la fecha de inicio de la posesi�n, el estado de recepci�n, y el inventario completo de las instalaciones.",
+      "referencias": [],
+      "confianza": 1
+    },
+    {
+      "numero": "NOVENA",
+      "titulo": null,
+      "evidencias": [
+        {
+          "pagina": 2,
+          "texto": "NOVENA: El LOCATARIO, previa conformidad del LOCADOR, podr� efectuar"
+        }
+      ],
+      "paginas": [
+        2
+      ],
+      "texto_original": "NOVENA: El LOCATARIO, previa conformidad del LOCADOR, podr� efectuar",
+      "resumen": "El LOCATARIO, previa conformidad del LOCADOR, podr� efectuar en el inmueble las modificaciones indispensables para adaptarlo a sus servicios, sin obligaci�n de devolverlo a su anterior estado.",
+      "categoria": "reparacion",
+      "responsable": "inquilino",
+      "uso_clasificador": "operativa",
+      "condiciones": "Previa conformidad del LOCADOR.",
+      "referencias": [],
+      "confianza": 1
+    }
+  ],
+  "rejected_proposals": [
+    {
+      "ordinal": 1,
+      "propuesta": {
+        "numero": "QUINTA",
+        "titulo": null,
+        "evidencias": [
+          {
+            "pagina": 1,
+            "texto": "QUINTA: Queda tambi�n convenido que quedar�n a cargo del LOCADOR los"
+          },
+          {
+            "pagina": 2,
+            "texto": "gastos que demanden las reparaciones que fuera necesario efectuar durante"
+          }
+        ],
+        "paginas": [
+          1,
+          2
+        ],
+        "texto_original": "QUINTA: Queda tambi�n convenido que quedar�n a cargo del LOCADOR los\n\ngastos que demanden las reparaciones que fuera necesario efectuar durante",
+        "resumen": "Quedar�n a cargo del LOCADOR los gastos que demanden las reparaciones que fuera necesario efectuar durante la vigencia del presente contrato para mantener el edificio en buen estado de conservaci�n, de manera que pueda servir satisfactoriamente al uso que se le destine.",
+        "categoria": "reparacion",
+        "responsable": "propietario",
+        "uso_clasificador": "operativa",
+        "condiciones": "Gastos que demanden las reparaciones necesarias para mantener el edificio en buen estado de conservaci�n.",
+        "referencias": [
+          "arts. 1515 y ss."
+        ],
+        "confianza": 1
+      },
+      "motivo": "el fragmento de la p�gina 2 cambia caracteres del texto de origen.",
+      "evidencias_invalidas": [
+        {
+          "pagina": 2,
+          "texto": "gastos que demanden las reparaciones que fuera necesario efectuar durante"
+        }
+      ]
+    }
+  ],
+  "evidence_incidents": [
+    "La propuesta 1 requiere revisi�n de evidencia: el fragmento de la p�gina 2 cambia caracteres del texto de origen."
+  ],
+  "elapsed_seconds": 9.846,
+  "capture_warning": "La captura de consola reemplazó algunos caracteres acentuados por U+FFFD. Este JSON conserva la estructura y los conteos, pero no sirve para repetir el anclaje literal carácter por carácter.",
+  "literal_replayable": false
+}

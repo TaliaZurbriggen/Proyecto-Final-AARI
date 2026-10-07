@@ -1,0 +1,40 @@
+{
+  "document": "V01",
+  "window_index": 1,
+  "pages": [
+    1,
+    2
+  ],
+  "source_sha256": "f20f157a6686a80ad1aff69c45d6b5335b3a7092032b26b77e48b8802a81da2c",
+  "prompt_version": "v4",
+  "model": "gemini-3.5-flash",
+  "executed_at": "2026-09-26T19:05:30.273095+00:00",
+  "elapsed_seconds": 62.06,
+  "external_calls": 1,
+  "model_proposals": 1,
+  "valid_clauses": [
+    {
+      "numero": "Artículo 1°",
+      "titulo": "Límite y exención de comisiones y honorarios inmobiliarios",
+      "evidencias": [
+        {
+          "pagina": 1,
+          "texto": "Para los casos de locación de inmuebles destinados a vivienda, el monto máximo por comisiones y/u \nhonorarios que el/la corredor/a podrá cobrar al locador/a será del cuatro, quince centésimo s por \nciento (4,15%) del total del contrato. El/la locatario/a está por fuera de la relación de corretaje y \nquedará exceptuado del pago de cualquier comisión u honorario -incluyendo aquellas relacionadas \ncon la celebración del contrato y las gestiones que requieran, las vinculadas a su administración \nmensual, así como cualquier otra que le corresponda cobrar al corredor/a inmobiliario/a"
+        }
+      ],
+      "paginas": [
+        1
+      ],
+      "texto_original": "Para los casos de locación de inmuebles destinados a vivienda, el monto máximo por comisiones y/u \nhonorarios que el/la corredor/a podrá cobrar al locador/a será del cuatro, quince centésimo s por \nciento (4,15%) del total del contrato. El/la locatario/a está por fuera de la relación de corretaje y \nquedará exceptuado del pago de cualquier comisión u honorario -incluyendo aquellas relacionadas \ncon la celebración del contrato y las gestiones que requieran, las vinculadas a su administración \nmensual, así como cualquier otra que le corresponda cobrar al corredor/a inmobiliario/a",
+      "resumen": "En las locaciones de inmuebles con destino a vivienda, el corredor inmobiliario solo podrá cobrar honorarios o comisiones al locador (con un tope del 4,15% del total del contrato). El locatario queda eximido de pagar cualquier comisión u honorario, incluyendo los de celebración del contrato, gestiones, administración mensual o cualquier otro concepto del corredor.",
+      "categoria": "otro",
+      "responsable": "propietario",
+      "uso_clasificador": "excluir",
+      "condiciones": "Aplica exclusivamente para los casos de locación de inmuebles destinados a vivienda.",
+      "referencias": [],
+      "confianza": 1.0
+    }
+  ],
+  "rejected_proposals": [],
+  "evidence_incidents": []
+}

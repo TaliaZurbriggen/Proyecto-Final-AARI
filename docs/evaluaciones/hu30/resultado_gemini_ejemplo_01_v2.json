@@ -1,0 +1,515 @@
+{
+  "fuente": "hu30_contrato_anonimizado.pdf",
+  "fuente_sha256": "3e27aa10c53c72abdeee176175420067d109456465010e5fc61a46437896b16b",
+  "ejecutado_en": "2026-09-22T00:50:23.778066+00:00",
+  "modelo": "gemini-3.5-flash",
+  "prompt_version": "v2",
+  "extractor_version": "hu30-v2",
+  "llamadas_externas": 1,
+  "paginas": 13,
+  "extraccion_local_completa": true,
+  "clausulas_validas": [
+    {
+      "numero": "PRIMERA",
+      "titulo": "Objeto e Inventario Inicial",
+      "evidencias": [
+        {
+          "pagina": 1,
+          "texto": "PRIMERA: Objeto . El LOCADOR cede en locación al LOCATARIO y éste acepta un inmueble sito en calle ; de ahora en adelante denominada [UNIDAD]; la cual consta de: Cocina - Comedor: Cuenta con azulejos de color blanco hasta una altura aproximada de un metro y medio en la zona de la cocina, el resto de las paredes y el techo pintados de color blanco, mesada completa de mármol con su bacha de acero inoxidable, bajo mesada color negro con sus puertas y cajones en buenas condiciones y funcionamiento. La cocina cuenta con grifería completa y se encuentran las conexiones necesarias para instalación de lavarropas automático. Con un calefón a gas marca y portero eléctrico, todo en perfecto estado de uso y funcionamiento. Con dos ventanas de doble hoja de vidrio corredizas, con sus vidrios sanos y en perfecto estado, puerta ventana con salida al patio de doble hoja en perfecto estado y funcionamiento. Dormitorio: Paredes y techo pintados de blanco en perfectas condiciones. Con una ventana de doble hoja de vidrio corrediza en perfecto funcionamiento, con sus vidrios nuevos y sanos, con una persiana blanca sana y en perfecto estado. En el dormitorio también hay un placard doble con sus puertas corredizas negras, con sus puertas y"
+        },
+        {
+          "pagina": 2,
+          "texto": "cajones en perfecto estado y funcionamiento. Baño: Paredes revestidas en azulejos hasta la altura del techo, la mitad inferior con azulejos color negro y la mitad superior con azulejos color blanco, el techo está pintado en color blanco. Accesorios y sanitarios, sanos y en perfecto estado de uso y funcionamiento, con un lavatorio de mármol negro, con su grifería completa. Una ventana nueva y sana. Con un espejo en la pared, sobre la bacha, sano y en perfecto estado. \nLa unidad locada se encuentra pintada con pintura blanca de buena calidad y en muy buen estado, al finalizar la locación, el LOCATARIO deberá restituir el inmueble totalmente desocupado y limpio, pisos aseados, griferías, sanitarios y demás bienes elementos y accesorios en correcto funcionamiento."
+        }
+      ],
+      "paginas": [
+        1,
+        2
+      ],
+      "texto_original": "PRIMERA: Objeto . El LOCADOR cede en locación al LOCATARIO y éste acepta un inmueble sito en calle ; de ahora en adelante denominada [UNIDAD]; la cual consta de: Cocina - Comedor: Cuenta con azulejos de color blanco hasta una altura aproximada de un metro y medio en la zona de la cocina, el resto de las paredes y el techo pintados de color blanco, mesada completa de mármol con su bacha de acero inoxidable, bajo mesada color negro con sus puertas y cajones en buenas condiciones y funcionamiento. La cocina cuenta con grifería completa y se encuentran las conexiones necesarias para instalación de lavarropas automático. Con un calefón a gas marca y portero eléctrico, todo en perfecto estado de uso y funcionamiento. Con dos ventanas de doble hoja de vidrio corredizas, con sus vidrios sanos y en perfecto estado, puerta ventana con salida al patio de doble hoja en perfecto estado y funcionamiento. Dormitorio: Paredes y techo pintados de blanco en perfectas condiciones. Con una ventana de doble hoja de vidrio corrediza en perfecto funcionamiento, con sus vidrios nuevos y sanos, con una persiana blanca sana y en perfecto estado. En el dormitorio también hay un placard doble con sus puertas corredizas negras, con sus puertas y\n\ncajones en perfecto estado y funcionamiento. Baño: Paredes revestidas en azulejos hasta la altura del techo, la mitad inferior con azulejos color negro y la mitad superior con azulejos color blanco, el techo está pintado en color blanco. Accesorios y sanitarios, sanos y en perfecto estado de uso y funcionamiento, con un lavatorio de mármol negro, con su grifería completa. Una ventana nueva y sana. Con un espejo en la pared, sobre la bacha, sano y en perfecto estado. \nLa unidad locada se encuentra pintada con pintura blanca de buena calidad y en muy buen estado, al finalizar la locación, el LOCATARIO deberá restituir el inmueble totalmente desocupado y limpio, pisos aseados, griferías, sanitarios y demás bienes elementos y accesorios en correcto funcionamiento.",
+      "resumen": "Describe detalladamente el estado inicial de la cocina-comedor, dormitorio, baño y pintura de la unidad. Establece la obligación del locatario de restituir el inmueble al finalizar la locación totalmente desocupado, limpio, con pisos aseados, y con las griferías, sanitarios y demás accesorios en correcto funcionamiento.",
+      "categoria": "otro",
+      "responsable": "inquilino",
+      "uso_clasificador": "operativa",
+      "condiciones": "Se detalla el estado de conservación inicial de cada ambiente y accesorio para servir de base en la devolución.",
+      "referencias": [],
+      "confianza": 0.95
+    },
+    {
+      "numero": "SEGUNDA",
+      "titulo": "Término y Devolución de la Unidad",
+      "evidencias": [
+        {
+          "pagina": 2,
+          "texto": "SEGUNDA: Término. La duración del presente contrato será por el término de 24 meses contados a partir del día , por lo que su vencimiento operará de pleno derecho el día , debiendo ese día el LOCATARIO devolver las llaves en el domicilio que constituye en este acto el LOCADOR, entregando el inmueble totalmente desocupado, limpio, pintado y con todos sus artefactos y accesorios en buen estado de funcionamiento."
+        }
+      ],
+      "paginas": [
+        2
+      ],
+      "texto_original": "SEGUNDA: Término. La duración del presente contrato será por el término de 24 meses contados a partir del día , por lo que su vencimiento operará de pleno derecho el día , debiendo ese día el LOCATARIO devolver las llaves en el domicilio que constituye en este acto el LOCADOR, entregando el inmueble totalmente desocupado, limpio, pintado y con todos sus artefactos y accesorios en buen estado de funcionamiento.",
+      "resumen": "Al vencimiento del plazo de la locación, el locatario debe devolver las llaves en el domicilio constituido por el locador, entregando el inmueble totalmente desocupado, limpio, pintado y con todos sus artefactos y accesorios en buen estado de funcionamiento.",
+      "categoria": "devolucion",
+      "responsable": "inquilino",
+      "uso_clasificador": "operativa",
+      "condiciones": "Al vencimiento del plazo contractual de 24 meses.",
+      "referencias": [],
+      "confianza": 0.98
+    },
+    {
+      "numero": "QUINTA (parte)",
+      "titulo": "Efectos de la No Restitución y Costos de Puesta a Punto",
+      "evidencias": [
+        {
+          "pagina": 3,
+          "texto": "Operada la resolución contractual, en caso de que el LOCATARIO no restituya la propiedad, se aplica"
+        },
+        {
+          "pagina": 4,
+          "texto": "la misma multa prevista para el caso de no devolución del inmueble una vez vencido el contrato, ello sin perjuicio de los intereses que correspondan por las cantidades adeudadas según lo previsto ut-supra. En el supuesto de NO restitución de la UNIDAD: dentro del plazo pactado o bajo las condiciones pactadas, deberá abonar además del alquiler mensual que se devengue a favor del LOCADOR por todo el tiempo que le demande recibir la unidad o colocarla en su debido estado de mantenimiento y funcionamiento, una multa diaria (sanción / clausula penal) del 2,5% del valor del alquiler."
+        }
+      ],
+      "paginas": [
+        3,
+        4
+      ],
+      "texto_original": "Operada la resolución contractual, en caso de que el LOCATARIO no restituya la propiedad, se aplica\n\nla misma multa prevista para el caso de no devolución del inmueble una vez vencido el contrato, ello sin perjuicio de los intereses que correspondan por las cantidades adeudadas según lo previsto ut-supra. En el supuesto de NO restitución de la UNIDAD: dentro del plazo pactado o bajo las condiciones pactadas, deberá abonar además del alquiler mensual que se devengue a favor del LOCADOR por todo el tiempo que le demande recibir la unidad o colocarla en su debido estado de mantenimiento y funcionamiento, una multa diaria (sanción / clausula penal) del 2,5% del valor del alquiler.",
+      "resumen": "Si el locatario no restituye la unidad en el plazo o bajo las condiciones pactadas, deberá abonar el alquiler mensual devengado por todo el tiempo que le demande al locador recibir la unidad o colocarla en su debido estado de mantenimiento y funcionamiento, además de una multa diaria del 2,5% del valor del alquiler.",
+      "categoria": "devolucion",
+      "responsable": "inquilino",
+      "uso_clasificador": "operativa",
+      "condiciones": "En caso de no restitución de la unidad en el plazo o condiciones pactadas.",
+      "referencias": [],
+      "confianza": 0.95
+    },
+    {
+      "numero": "OCTAVA",
+      "titulo": "Régimen de Mejoras y Alteraciones",
+      "evidencias": [
+        {
+          "pagina": 4,
+          "texto": "OCTAVA: Mejoras. El LOCATARIO no podrá efectuar en el inmueble ninguna alteración o innovación sin previo consentimiento expreso del LOCADOR; caso contrario este podrá ordenar la demolición o reconstrucción a costa del LOCATARIO, no teniendo este derecho a indemnización de ninguna índole. En caso de autorizarse mejoras o aún en la"
+        },
+        {
+          "pagina": 5,
+          "texto": "hipótesis de realizarse mejoras sin autorización, las mismas quedarán en beneficio del inmueble, sin derecho de parte del LOCATARIO a indemnizaciones de ningún tipo, pudiendo el LOCADOR si lo estima conveniente exigir la demolición o reconstrucción a costa del LOCATARIO sin posibilidad de reclamo de parte de éste o derecho a indemnización de ninguna especie."
+        }
+      ],
+      "paginas": [
+        4,
+        5
+      ],
+      "texto_original": "OCTAVA: Mejoras. El LOCATARIO no podrá efectuar en el inmueble ninguna alteración o innovación sin previo consentimiento expreso del LOCADOR; caso contrario este podrá ordenar la demolición o reconstrucción a costa del LOCATARIO, no teniendo este derecho a indemnización de ninguna índole. En caso de autorizarse mejoras o aún en la\n\nhipótesis de realizarse mejoras sin autorización, las mismas quedarán en beneficio del inmueble, sin derecho de parte del LOCATARIO a indemnizaciones de ningún tipo, pudiendo el LOCADOR si lo estima conveniente exigir la demolición o reconstrucción a costa del LOCATARIO sin posibilidad de reclamo de parte de éste o derecho a indemnización de ninguna especie.",
+      "resumen": "Prohíbe al locatario realizar alteraciones o innovaciones sin consentimiento previo y expreso del locador. En caso de incumplimiento, el locador puede ordenar la demolición o reconstrucción a costa del locatario. Todas las mejoras (autorizadas o no) quedarán en beneficio del inmueble sin derecho a indemnización, pudiendo el locador exigir su demolición o reconstrucción a costa del locatario.",
+      "categoria": "mantenimiento",
+      "responsable": "inquilino",
+      "uso_clasificador": "operativa",
+      "condiciones": "Requiere consentimiento previo y expreso del locador para realizar mejoras.",
+      "referencias": [],
+      "confianza": 0.98
+    },
+    {
+      "numero": "NOVENA inciso a)",
+      "titulo": "Conservación y Reparaciones a Cargo del Locatario",
+      "evidencias": [
+        {
+          "pagina": 5,
+          "texto": "NOVENA: Estado del Inmueble y Accesorios. a) El LOCATARIO declara haber visitado y examinado el inmueble con anterioridad a la firma del presente contrato, recibiéndolo en el estado en que se detalló en la cláusula primera, y en perfecto estado de aseo, al igual que los bienes muebles y accesorios que lo componen, por lo que se compromete a mantenerlo durante el tiempo que dure la locación y restituirlo en las mismas condiciones que las consignadas más arriba, siendo a su cargo, las reparaciones de muros, revoques, puertas, cerraduras, vidrios, cañerías, artefactos, perillas, instalaciones en general, desagües y desagotes, incluso la reposición de los elementos que fuesen necesarios para el mantenimiento y las reparaciones referidas supra, por cualquier causa o motivo."
+        }
+      ],
+      "paginas": [
+        5
+      ],
+      "texto_original": "NOVENA: Estado del Inmueble y Accesorios. a) El LOCATARIO declara haber visitado y examinado el inmueble con anterioridad a la firma del presente contrato, recibiéndolo en el estado en que se detalló en la cláusula primera, y en perfecto estado de aseo, al igual que los bienes muebles y accesorios que lo componen, por lo que se compromete a mantenerlo durante el tiempo que dure la locación y restituirlo en las mismas condiciones que las consignadas más arriba, siendo a su cargo, las reparaciones de muros, revoques, puertas, cerraduras, vidrios, cañerías, artefactos, perillas, instalaciones en general, desagües y desagotes, incluso la reposición de los elementos que fuesen necesarios para el mantenimiento y las reparaciones referidas supra, por cualquier causa o motivo.",
+      "resumen": "El locatario se compromete a mantener el inmueble y sus accesorios en el estado recibido y a restituirlo en las mismas condiciones. Serán a su cargo las reparaciones de muros, revoques, puertas, cerraduras, vidrios, cañerías, artefactos, perillas, instalaciones, desagües y desagotes, incluyendo la reposición de elementos necesarios para el mantenimiento y reparación, por cualquier causa o motivo.",
+      "categoria": "reparacion",
+      "responsable": "inquilino",
+      "uso_clasificador": "operativa",
+      "condiciones": "Obligación general de mantenimiento y reparación durante la locación.",
+      "referencias": [
+        "PRIMERA"
+      ],
+      "confianza": 0.98
+    },
+    {
+      "numero": "NOVENA inciso b)",
+      "titulo": "Responsabilidad por Daños de Moradores o Terceros",
+      "evidencias": [
+        {
+          "pagina": 5,
+          "texto": "b) Asimismo, el LOCATARIO responde por los hechos dañosos cuyo origen provenga del accionar culposo o negligente de los moradores del inmueble o terceros que circunstancialmente estuvieren en el mismo."
+        }
+      ],
+      "paginas": [
+        5
+      ],
+      "texto_original": "b) Asimismo, el LOCATARIO responde por los hechos dañosos cuyo origen provenga del accionar culposo o negligente de los moradores del inmueble o terceros que circunstancialmente estuvieren en el mismo.",
+      "resumen": "El locatario responde por los hechos dañosos originados por el accionar culposo o negligente de los moradores del inmueble o de terceros que se encuentren circunstancialmente en él.",
+      "categoria": "danio",
+      "responsable": "condicional",
+      "uso_clasificador": "operativa",
+      "condiciones": "Daños causados por culpa o negligencia de moradores o terceros.",
+      "referencias": [],
+      "confianza": 0.98
+    },
+    {
+      "numero": "NOVENA inciso d)",
+      "titulo": "Reparaciones por Deterioros Culposos del Locatario",
+      "evidencias": [
+        {
+          "pagina": 5,
+          "texto": "d) El LOCATARIO se compromete a arreglar por su propia cuenta cualquier"
+        },
+        {
+          "pagina": 6,
+          "texto": "desperfecto o rotura que se produzca en la propiedad, como en sus implementos e instalaciones, etc.; cuando la causa de dicho deterioro hubiere sido provocada por motivos culposos imputables al LOCATARIO, no considerándose terminado el arrendamiento por parte del LOCATARIO mientras no se hayan cumplido todas y cada una de las obligaciones asumidas en el presente contrato."
+        }
+      ],
+      "paginas": [
+        5,
+        6
+      ],
+      "texto_original": "d) El LOCATARIO se compromete a arreglar por su propia cuenta cualquier\n\ndesperfecto o rotura que se produzca en la propiedad, como en sus implementos e instalaciones, etc.; cuando la causa de dicho deterioro hubiere sido provocada por motivos culposos imputables al LOCATARIO, no considerándose terminado el arrendamiento por parte del LOCATARIO mientras no se hayan cumplido todas y cada una de las obligaciones asumidas en el presente contrato.",
+      "resumen": "El locatario debe reparar por su cuenta cualquier desperfecto o rotura en la propiedad, implementos o instalaciones cuando el deterioro sea provocado por motivos culposos imputables a él. El arrendamiento no se considerará terminado hasta el cumplimiento de todas las obligaciones asumidas.",
+      "categoria": "reparacion",
+      "responsable": "condicional",
+      "uso_clasificador": "operativa",
+      "condiciones": "Deterioros provocados por motivos culposos imputables al locatario.",
+      "referencias": [],
+      "confianza": 0.95
+    },
+    {
+      "numero": "NOVENA inciso f)",
+      "titulo": "Plazo de Preaviso para Desocupación y Verificación",
+      "evidencias": [
+        {
+          "pagina": 6,
+          "texto": "f) La parte LOCATARIA, se obliga a notificar al LOCADOR con 30 días de anticipación a la fecha de desocupar el inmueble, por la causa que fuere, para que éste lo verifique en forma inmediata, y proceda al pintado del mismo."
+        }
+      ],
+      "paginas": [
+        6
+      ],
+      "texto_original": "f) La parte LOCATARIA, se obliga a notificar al LOCADOR con 30 días de anticipación a la fecha de desocupar el inmueble, por la causa que fuere, para que éste lo verifique en forma inmediata, y proceda al pintado del mismo.",
+      "resumen": "El locatario debe notificar al locador con 30 días de anticipación su intención de desocupar el inmueble, por cualquier causa, para permitir la verificación inmediata y proceder al pintado del mismo.",
+      "categoria": "aviso",
+      "responsable": "inquilino",
+      "uso_clasificador": "operativa",
+      "condiciones": "Previo a desocupar el inmueble por cualquier causa.",
+      "referencias": [],
+      "confianza": 0.98
+    },
+    {
+      "numero": "DECIMA inciso 1)",
+      "titulo": "Derecho de Acceso e Inspección del Inmueble",
+      "evidencias": [
+        {
+          "pagina": 6,
+          "texto": "DECIMA: Obligaciones. Inspección. Comunicación de desperfectos. Gastos. El LOCATARIO está obligado a: 1) Permitir la entrada del LOCADOR [o al administrador en su defecto], previo aviso de 24 hs. antes, las veces que este o la persona por el autorizada, lo crea necesario, ya sea a inspeccionar la misma o para realizar algún trabajo;"
+        }
+      ],
+      "paginas": [
+        6
+      ],
+      "texto_original": "DECIMA: Obligaciones. Inspección. Comunicación de desperfectos. Gastos. El LOCATARIO está obligado a: 1) Permitir la entrada del LOCADOR [o al administrador en su defecto], previo aviso de 24 hs. antes, las veces que este o la persona por el autorizada, lo crea necesario, ya sea a inspeccionar la misma o para realizar algún trabajo;",
+      "resumen": "El locatario está obligado a permitir el ingreso del locador (o administrador) previo aviso de 24 horas, para inspeccionar el inmueble o realizar trabajos cuando lo consideren necesario.",
+      "categoria": "acceso",
+      "responsable": "inquilino",
+      "uso_clasificador": "operativa",
+      "condiciones": "Previo aviso de 24 horas por parte del locador o administrador.",
+      "referencias": [],
+      "confianza": 0.98
+    },
+    {
+      "numero": "DECIMA inciso 2)",
+      "titulo": "Gastos de Reparación por Siniestros o Robos",
+      "evidencias": [
+        {
+          "pagina": 6,
+          "texto": "2) Cargar los gastos de reparación del inmueble en caso de incendio, explosión, etc. y cualquier otro motivo culposo como así por robo o tentativa del mismo;"
+        }
+      ],
+      "paginas": [
+        6
+      ],
+      "texto_original": "2) Cargar los gastos de reparación del inmueble en caso de incendio, explosión, etc. y cualquier otro motivo culposo como así por robo o tentativa del mismo;",
+      "resumen": "El locatario debe asumir los gastos de reparación del inmueble en caso de incendio, explosión, cualquier otro motivo culposo, así como por robo o tentativa de robo.",
+      "categoria": "reparacion",
+      "responsable": "condicional",
+      "uso_clasificador": "operativa",
+      "condiciones": "En caso de siniestros, robos o motivos culposos.",
+      "referencias": [],
+      "confianza": 0.98
+    },
+    {
+      "numero": "DECIMA incisos 6), 7) y 8)",
+      "titulo": "Conservación y Estado de Restitución de la Unidad",
+      "evidencias": [
+        {
+          "pagina": 6,
+          "texto": "6) Conservar el inmueble en perfecto estado durante todo el tiempo que lo ocupe; 7) Entregar el inmueble y los bienes muebles al término del"
+        },
+        {
+          "pagina": 7,
+          "texto": "contrato, en buen estado de conservación e higiene; 8) La propiedad que en este acto se entrega en alquiler debe ser devuelta en el mismo estado de conservación en que se recibe, según lo especificado en Cláusula Primera;"
+        }
+      ],
+      "paginas": [
+        6,
+        7
+      ],
+      "texto_original": "6) Conservar el inmueble en perfecto estado durante todo el tiempo que lo ocupe; 7) Entregar el inmueble y los bienes muebles al término del\n\ncontrato, en buen estado de conservación e higiene; 8) La propiedad que en este acto se entrega en alquiler debe ser devuelta en el mismo estado de conservación en que se recibe, según lo especificado en Cláusula Primera;",
+      "resumen": "El locatario debe conservar el inmueble en perfecto estado durante la ocupación y restituirlo junto con los bienes muebles al finalizar el contrato en buen estado de conservación e higiene, respetando el estado inicial detallado en la Cláusula Primera.",
+      "categoria": "devolucion",
+      "responsable": "inquilino",
+      "uso_clasificador": "operativa",
+      "condiciones": "Al término del contrato.",
+      "referencias": [
+        "PRIMERA"
+      ],
+      "confianza": 0.95
+    },
+    {
+      "numero": "DECIMA inciso 9)",
+      "titulo": "Obligación de Notificar Daños y Deterioros",
+      "evidencias": [
+        {
+          "pagina": 7,
+          "texto": "9) Comunicar al LOCADOR o a su representante, cualquier daño o deterioro que sufra el inmueble o bienes muebles, cualquiera sea el motivo dentro de las 24 hs., de producido."
+        }
+      ],
+      "paginas": [
+        7
+      ],
+      "texto_original": "9) Comunicar al LOCADOR o a su representante, cualquier daño o deterioro que sufra el inmueble o bienes muebles, cualquiera sea el motivo dentro de las 24 hs., de producido.",
+      "resumen": "El locatario debe notificar al locador o a su representante cualquier daño o deterioro que sufra el inmueble o los bienes muebles, por cualquier motivo, dentro de las 24 horas de producido.",
+      "categoria": "aviso",
+      "responsable": "inquilino",
+      "uso_clasificador": "operativa",
+      "condiciones": "Dentro de las 24 horas de producido cualquier daño o deterioro.",
+      "referencias": [],
+      "confianza": 0.98
+    },
+    {
+      "numero": "DECIMA PRIMERA",
+      "titulo": "Pago de Impuestos, Tasas, Servicios y Expensas",
+      "evidencias": [
+        {
+          "pagina": 7,
+          "texto": "DECIMA PRIMERA: Impuestos. Tasas. Servicios. Son a cargo del LOCATARIO el pago íntegro de los impuestos [tanto MUNICIPALES como PROVINCIALES), tasas y servicios [AMOS, EPEC, EMUGAS, EXPENSAS] como cualquier otro que contrate, durante o con posterioridad a la vigencia de este contrato y que correspondan a períodos ocupados por el LOCATARIO del inmueble aquí locado. En caso de incumplimiento en el pago de los mismos, el LOCATARIO incurrirá en mora de pleno derecho por el transcurso del tiempo, sin necesidad de interpelación o reclamación judicial o extrajudicial alguna."
+        }
+      ],
+      "paginas": [
+        7
+      ],
+      "texto_original": "DECIMA PRIMERA: Impuestos. Tasas. Servicios. Son a cargo del LOCATARIO el pago íntegro de los impuestos [tanto MUNICIPALES como PROVINCIALES), tasas y servicios [AMOS, EPEC, EMUGAS, EXPENSAS] como cualquier otro que contrate, durante o con posterioridad a la vigencia de este contrato y que correspondan a períodos ocupados por el LOCATARIO del inmueble aquí locado. En caso de incumplimiento en el pago de los mismos, el LOCATARIO incurrirá en mora de pleno derecho por el transcurso del tiempo, sin necesidad de interpelación o reclamación judicial o extrajudicial alguna.",
+      "resumen": "El locatario tiene a su cargo el pago íntegro de los impuestos municipales y provinciales, tasas, servicios (AMOS, EPEC, EMUGAS, expensas) y cualquier otro servicio contratado durante o con posterioridad a la vigencia del contrato que corresponda a los períodos ocupados.",
+      "categoria": "servicio",
+      "responsable": "inquilino",
+      "uso_clasificador": "operativa",
+      "condiciones": "Durante o con posterioridad a la vigencia del contrato por períodos ocupados.",
+      "referencias": [],
+      "confianza": 0.98
+    },
+    {
+      "numero": "DECIMO SEGUNDA",
+      "titulo": "Vencimiento de Servicios y Entrega de Comprobantes",
+      "evidencias": [
+        {
+          "pagina": 7,
+          "texto": "DECIMO SEGUNDA: Cedulones. Entrega al LOCADOR. El LOCATARIO está obligado a abonar los impuestos, tasas, servicios y gastos comunes dentro de las fechas de vencimiento y entregar los comprobantes pagos a la administración. La falta de pago en"
+        },
+        {
+          "pagina": 8,
+          "texto": "término del alquiler y/o de cualquiera otro importe a cargo del LOCATARIO lo hará incurrir en mora de pleno derecho y será causal de desalojo, sin necesidad de interpelación previa judicial ni extrajudicial alguna, siendo responsable el LOCATARIO por los eventuales daños y perjuicios que sufriere el LOCADOR como consecuencia de la falta de pago en término de los tributos, expensas y tarifas de los servicios públicos."
+        }
+      ],
+      "paginas": [
+        7,
+        8
+      ],
+      "texto_original": "DECIMO SEGUNDA: Cedulones. Entrega al LOCADOR. El LOCATARIO está obligado a abonar los impuestos, tasas, servicios y gastos comunes dentro de las fechas de vencimiento y entregar los comprobantes pagos a la administración. La falta de pago en\n\ntérmino del alquiler y/o de cualquiera otro importe a cargo del LOCATARIO lo hará incurrir en mora de pleno derecho y será causal de desalojo, sin necesidad de interpelación previa judicial ni extrajudicial alguna, siendo responsable el LOCATARIO por los eventuales daños y perjuicios que sufriere el LOCADOR como consecuencia de la falta de pago en término de los tributos, expensas y tarifas de los servicios públicos.",
+      "resumen": "El locatario debe abonar los impuestos, tasas, servicios y gastos comunes antes de sus vencimientos y entregar los comprobantes de pago a la administración. Es responsable por los daños y perjuicios que sufra el locador debido a la falta de pago en término de estos conceptos.",
+      "categoria": "servicio",
+      "responsable": "inquilino",
+      "uso_clasificador": "operativa",
+      "condiciones": "Obligación de pago en término y entrega de comprobantes.",
+      "referencias": [],
+      "confianza": 0.95
+    },
+    {
+      "numero": "DECIMO TERCERA",
+      "titulo": "Imputación de Pagos y Composición del Precio",
+      "evidencias": [
+        {
+          "pagina": 8,
+          "texto": "DECIMO TERCERA: Conformación del Precio. Vía ejecutiva. Forman parte integrante del precio pactado, los conceptos convenidos en las cláusulas: TERCERA y DÉCIMO PRIMERA, es decir “PRECIO LOCATIVO MAS IMPUESTOS, TASAS, EXPENSAS, SERVICIOS, ETC”, pudiendo negarse el LOCADOR a recibir pagos parciales. Se conviene entre las partes que, en todos los casos de mora, se utilizará la vía ejecutiva para su ejecución. En el caso de que el LOCATARIO adeudara impuestos, servicios, tasas y/o contribuciones, etc. toda suma que abonase se imputará primero al pago de éstos y el resto si hubiere, a alquileres, pudiendo negarse el LOCADOR a recibir pagos parciales, conviniéndose entre las partes que se adopten en todos los casos de mora la vía judicial del precio convenido o cualquiera de los conceptos parciales que lo componen, de acuerdo a lo establecido precedentemente."
+        }
+      ],
+      "paginas": [
+        8
+      ],
+      "texto_original": "DECIMO TERCERA: Conformación del Precio. Vía ejecutiva. Forman parte integrante del precio pactado, los conceptos convenidos en las cláusulas: TERCERA y DÉCIMO PRIMERA, es decir “PRECIO LOCATIVO MAS IMPUESTOS, TASAS, EXPENSAS, SERVICIOS, ETC”, pudiendo negarse el LOCADOR a recibir pagos parciales. Se conviene entre las partes que, en todos los casos de mora, se utilizará la vía ejecutiva para su ejecución. En el caso de que el LOCATARIO adeudara impuestos, servicios, tasas y/o contribuciones, etc. toda suma que abonase se imputará primero al pago de éstos y el resto si hubiere, a alquileres, pudiendo negarse el LOCADOR a recibir pagos parciales, conviniéndose entre las partes que se adopten en todos los casos de mora la vía judicial del precio convenido o cualquiera de los conceptos parciales que lo componen, de acuerdo a lo establecido precedentemente.",
+      "resumen": "Establece que los impuestos, tasas, expensas y servicios forman parte integrante del precio pactado. En caso de deudas acumuladas, cualquier pago realizado por el locatario se imputará primero a saldar los impuestos, servicios, tasas y contribuciones adeudados, y el remanente se aplicará a los alquileres.",
+      "categoria": "servicio",
+      "responsable": "inquilino",
+      "uso_clasificador": "contexto",
+      "condiciones": "En caso de deudas acumuladas por impuestos, servicios, tasas o contribuciones.",
+      "referencias": [
+        "TERCERA",
+        "DECIMA PRIMERA"
+      ],
+      "confianza": 0.98
+    },
+    {
+      "numero": "DECIMO CUARTA",
+      "titulo": "Exención de Responsabilidad del Locador por Siniestros",
+      "evidencias": [
+        {
+          "pagina": 8,
+          "texto": "DECIMO CUARTA: Eximición del LOCADOR. El LOCADOR no se responsabiliza de los daños y perjuicios que pudieran producirle al LOCATARIO, a su núcleo conviviente o a las personas que pudieses encontrarse momentáneamente en el inmueble, las inundaciones, temblores, desprendimientos provenientes de roturas, desprendimientos de techos, etc. o de cualquier otro accidente producido en la propiedad locada."
+        }
+      ],
+      "paginas": [
+        8
+      ],
+      "texto_original": "DECIMO CUARTA: Eximición del LOCADOR. El LOCADOR no se responsabiliza de los daños y perjuicios que pudieran producirle al LOCATARIO, a su núcleo conviviente o a las personas que pudieses encontrarse momentáneamente en el inmueble, las inundaciones, temblores, desprendimientos provenientes de roturas, desprendimientos de techos, etc. o de cualquier otro accidente producido en la propiedad locada.",
+      "resumen": "Exime al locador de toda responsabilidad por daños y perjuicios que sufran el locatario, su grupo conviviente o terceros en el inmueble debido a inundaciones, temblores, desprendimientos por roturas, desprendimientos de techos o cualquier otro accidente ocurrido en la propiedad.",
+      "categoria": "danio",
+      "responsable": "no_especificado",
+      "uso_clasificador": "operativa",
+      "condiciones": "Exención de responsabilidad del locador ante siniestros o accidentes en la propiedad.",
+      "referencias": [],
+      "confianza": 0.98
+    },
+    {
+      "numero": "VIGÉSIMO",
+      "titulo": "Designación de Administración y Pago de Honorarios",
+      "evidencias": [
+        {
+          "pagina": 12,
+          "texto": "VIGÉSIMO: Administración. LAS PARTES aquí contratantes, reconocen la intervención de la firma en la negociación y definición de los términos del contrato de locación que han sido convenidos por las partes con anticipación, como así también la redacción del presente instrumento, por parte de profesionales en la materia. En consecuencia, ACUERDAN y CONVIENEN que la misma percibirá en concepto de honorarios profesionales la suma de más IVA en caso de corresponder; importe que será abonado por el Locatario en dos cuotas, oportunidad en la que se extenderá suficiente recibo de pago. Asimismo, el LOCADOR designa en éste acto a la firma , como administradora de la UNIDAD, percibiendo por dichas tareas, una suma de dinero equivalente al 8% mensual sobre los alquileres que ella perciba desde el comienzo y hasta el finiquito de éste contrato o sus posibles renovaciones, estando a su cargo el pago de dichos importes."
+        }
+      ],
+      "paginas": [
+        12
+      ],
+      "texto_original": "VIGÉSIMO: Administración. LAS PARTES aquí contratantes, reconocen la intervención de la firma en la negociación y definición de los términos del contrato de locación que han sido convenidos por las partes con anticipación, como así también la redacción del presente instrumento, por parte de profesionales en la materia. En consecuencia, ACUERDAN y CONVIENEN que la misma percibirá en concepto de honorarios profesionales la suma de más IVA en caso de corresponder; importe que será abonado por el Locatario en dos cuotas, oportunidad en la que se extenderá suficiente recibo de pago. Asimismo, el LOCADOR designa en éste acto a la firma , como administradora de la UNIDAD, percibiendo por dichas tareas, una suma de dinero equivalente al 8% mensual sobre los alquileres que ella perciba desde el comienzo y hasta el finiquito de éste contrato o sus posibles renovaciones, estando a su cargo el pago de dichos importes.",
+      "resumen": "El locador designa a la firma administradora para la gestión de la unidad, estableciendo que los honorarios de administración (8% mensual sobre los alquileres percibidos) estarán a cargo del locador. Los honorarios de redacción del contrato están a cargo del locatario.",
+      "categoria": "otro",
+      "responsable": "propietario",
+      "uso_clasificador": "contexto",
+      "condiciones": "Designación de la firma administradora y pago de sus honorarios.",
+      "referencias": [],
+      "confianza": 0.98
+    }
+  ],
+  "propuestas_rechazadas": [
+    {
+      "ordinal": 7,
+      "propuesta": {
+        "numero": "NOVENA inciso c)",
+        "titulo": "Obligación de Pintura al Finalizar la Locación",
+        "evidencias": [
+          {
+            "pagina": 5,
+            "texto": "c). En relación a la pintura, se hace constar que se entrega recién pintado con pintura marca “ ALBA LATEX ” en paredes interiores y techos; por lo que, al finalizar el contrato, sea por vencimiento de plazo o por rescisión del mismo, el LOCATARIO ofrece que la unidad será pintada por un pintor designado por la administración a efectos de que se respete la"
+          },
+          {
+            "pagina": 6,
+            "texto": "calidad de la mano de obra y los materiales como así también colores o tonos de la pintura. Tanto una como otra (materiales y mano de obra) serán abonados por el LOCATARIO."
+          }
+        ],
+        "paginas": [
+          5,
+          6
+        ],
+        "texto_original": "c). En relación a la pintura, se hace constar que se entrega recién pintado con pintura marca “ ALBA LATEX ” en paredes interiores y techos; por lo que, al finalizar el contrato, sea por vencimiento de plazo o por rescisión del mismo, el LOCATARIO ofrece que la unidad será pintada por un pintor designado por la administración a efectos de que se respete la\n\ncalidad de la mano de obra y los materiales como así también colores o tonos de la pintura. Tanto una como otra (materiales y mano de obra) serán abonados por el LOCATARIO.",
+        "resumen": "El inmueble se entrega recién pintado con pintura \"Alba Latex\" en interiores y techos. Al finalizar el contrato, el locatario se obliga a que la unidad sea pintada por un pintor designado por la administración para garantizar la calidad de la mano de obra, materiales, colores y tonos, debiendo el locatario abonar tanto los materiales como la mano de obra.",
+        "categoria": "mantenimiento",
+        "responsable": "inquilino",
+        "uso_clasificador": "operativa",
+        "condiciones": "Al finalizar el contrato por vencimiento o rescisión.",
+        "referencias": [],
+        "confianza": 0.95
+      },
+      "motivo": "el fragmento de la página 6 no es literal.",
+      "evidencias_invalidas": [
+        {
+          "pagina": 6,
+          "texto": "calidad de la mano de obra y los materiales como así también colores o tonos de la pintura. Tanto una como otra (materiales y mano de obra) serán abonados por el LOCATARIO."
+        }
+      ]
+    },
+    {
+      "ordinal": 9,
+      "propuesta": {
+        "numero": "NOVENA inciso e)",
+        "titulo": "Alquiler Devengado por Tiempo de Reparación Post-Entrega",
+        "evidencias": [
+          {
+            "pagina": 6,
+            "texto": "e) Si al entregar las llaves and desocupar el inmueble se comprobara la existencia de desperfecto, averías y/u obstrucciones de lo que sea responsable el LOCATARIO, éste quedará obligado a satisfacer el importe del alquiler mensual por todo el tiempo necesario que transcurra hasta que los desperfectos y deterioros sean reparados."
+          }
+        ],
+        "paginas": [
+          6
+        ],
+        "texto_original": "e) Si al entregar las llaves and desocupar el inmueble se comprobara la existencia de desperfecto, averías y/u obstrucciones de lo que sea responsable el LOCATARIO, éste quedará obligado a satisfacer el importe del alquiler mensual por todo el tiempo necesario que transcurra hasta que los desperfectos y deterioros sean reparados.",
+        "resumen": "Si al desocupar y entregar las llaves se constatan desperfectos, averías u obstrucciones de los cuales el locatario sea responsable, este quedará obligado a pagar el importe del alquiler mensual por todo el tiempo necesario para realizar las reparaciones correspondientes.",
+        "categoria": "devolucion",
+        "responsable": "inquilino",
+        "uso_clasificador": "operativa",
+        "condiciones": "Si al desocupar se constatan desperfectos de los que sea responsable el locatario.",
+        "referencias": [],
+        "confianza": 0.98
+      },
+      "motivo": "el fragmento de la página 6 no es literal.",
+      "evidencias_invalidas": [
+        {
+          "pagina": 6,
+          "texto": "e) Si al entregar las llaves and desocupar el inmueble se comprobara la existencia de desperfecto, averías y/u obstrucciones de lo que sea responsable el LOCATARIO, éste quedará obligado a satisfacer el importe del alquiler mensual por todo el tiempo necesario que transcurra hasta que los desperfectos y deterioros sean reparados."
+        }
+      ]
+    },
+    {
+      "ordinal": 19,
+      "propuesta": {
+        "numero": "DECIMO OCTAVA",
+        "titulo": "Procedimiento de Devolución de Llaves y Estado de Cuentas",
+        "evidencias": [
+          {
+            "pagina": 10,
+            "texto": "DECIMO OCTAVA: Devolución de Llaves. La devolución de las llaves de la propiedad deberá justificarlas el LOCATARIO con constancia escrita fehaciente emanada del LOCADOR o sus representantes, no admitiéndose otro medio de prueba, debiendo restituirse el inmueble libre de ocupantes y cosas, en las mismas condiciones en que se lo recibe y con todos los impuestos, tasas y servicios establecidos en cláusula décimo primara y décimo segunda, totalmente pagos al día de entrega de la propiedad. En caso de consignación de las llaves el alquiler regirá hasta el día en que el LOCADOR tome tenencia real y efectiva de la propiedad, estando a cargo del LOCATARIO todos los gastos y diligencias contundentes a permitirle al LOCADOR recuperar la tenencia del inmueble. El LOCADOR autoriza al LOCATARIO o al GARANTE para la devolución de las llaves la que podrá ser en forma indistinta."
+          }
+        ],
+        "paginas": [
+          10
+        ],
+        "texto_original": "DECIMO OCTAVA: Devolución de Llaves. La devolución de las llaves de la propiedad deberá justificarlas el LOCATARIO con constancia escrita fehaciente emanada del LOCADOR o sus representantes, no admitiéndose otro medio de prueba, debiendo restituirse el inmueble libre de ocupantes y cosas, en las mismas condiciones en que se lo recibe y con todos los impuestos, tasas y servicios establecidos en cláusula décimo primara y décimo segunda, totalmente pagos al día de entrega de la propiedad. En caso de consignación de las llaves el alquiler regirá hasta el día en que el LOCADOR tome tenencia real y efectiva de la propiedad, estando a cargo del LOCATARIO todos los gastos y diligencias contundentes a permitirle al LOCADOR recuperar la tenencia del inmueble. El LOCADOR autoriza al LOCATARIO o al GARANTE para la devolución de las llaves la que podrá ser en forma indistinta.",
+        "resumen": "La devolución de llaves debe probarse únicamente mediante constancia escrita del locador o sus representantes. El inmueble debe entregarse desocupado, libre de cosas, en las mismas condiciones de recepción, y con todos los impuestos, tasas y servicios (cláusulas 11 y 12) totalmente pagos al día de la entrega. En caso de consignación judicial de llaves, el alquiler se devengará hasta que el locador tome tenencia real y efectiva, siendo a cargo del locatario los gastos y diligencias para recuperar la tenencia.",
+        "categoria": "devolucion",
+        "responsable": "inquilino",
+        "uso_clasificador": "operativa",
+        "condiciones": "Al momento de la restitución efectiva del inmueble.",
+        "referencias": [
+          "DECIMA PRIMERA",
+          "DECIMO SEGUNDA"
+        ],
+        "confianza": 0.98
+      },
+      "motivo": "el fragmento de la página 10 no es literal.",
+      "evidencias_invalidas": [
+        {
+          "pagina": 10,
+          "texto": "DECIMO OCTAVA: Devolución de Llaves. La devolución de las llaves de la propiedad deberá justificarlas el LOCATARIO con constancia escrita fehaciente emanada del LOCADOR o sus representantes, no admitiéndose otro medio de prueba, debiendo restituirse el inmueble libre de ocupantes y cosas, en las mismas condiciones en que se lo recibe y con todos los impuestos, tasas y servicios establecidos en cláusula décimo primara y décimo segunda, totalmente pagos al día de entrega de la propiedad. En caso de consignación de las llaves el alquiler regirá hasta el día en que el LOCADOR tome tenencia real y efectiva de la propiedad, estando a cargo del LOCATARIO todos los gastos y diligencias contundentes a permitirle al LOCADOR recuperar la tenencia del inmueble. El LOCADOR autoriza al LOCATARIO o al GARANTE para la devolución de las llaves la que podrá ser en forma indistinta."
+        }
+      ]
+    }
+  ],
+  "incidencias_evidencia": [
+    "La propuesta 7 requiere revisión de evidencia: el fragmento de la página 6 no es literal.",
+    "La propuesta 9 requiere revisión de evidencia: el fragmento de la página 6 no es literal.",
+    "La propuesta 19 requiere revisión de evidencia: el fragmento de la página 10 no es literal."
+  ]
+}

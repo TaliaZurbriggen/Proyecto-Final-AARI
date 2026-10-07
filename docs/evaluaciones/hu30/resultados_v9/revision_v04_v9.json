@@ -1,0 +1,33 @@
+{
+  "document": "V04",
+  "result": "docs/evaluaciones/hu30/resultados_v9/resultado_v04_v9.json",
+  "model": "gemini-3.5-flash-lite",
+  "prompt_version": "v9-experimental",
+  "controls": [
+    {
+      "id": "V04-E01", "state": "parcial", "matched_proposals": ["propuesta 1"],
+      "notes": "Resumen y evidencia conservan correctamente las reparaciones necesarias del locador, la vigencia, la conservación y la aptitud para el uso, con continuación íntegra entre páginas 1 y 2. Sin embargo, condiciones añade exclusiones de precio, mora y garantías financieras tomadas de las instrucciones de alcance del prompt, no de QUINTA. Esa condición ajena impide considerar la propuesta íntegramente fiel al contrato."
+    },
+    {
+      "id": "V04-E02", "state": "incorrecto", "matched_proposals": ["propuesta 2"],
+      "notes": "Resumen y condiciones vuelven a presentar los gastos comunes como excepción definida del pago del locador. Responsable condicional, uso operativa y confianza 0.9 no conservan la coordinación ambigua del texto. Regresión respecto de v8, que mantenía este tramo como contexto sin pagador definido y confianza 0.6."
+    },
+    {
+      "id": "V04-E03", "state": "completo", "matched_proposals": ["propuesta 3"],
+      "notes": "Conserva estado inicial, mantenimiento, devolución, deterioros, excepción por buen uso y tiempo, acta e inventario; la evidencia local contiene SÉPTIMA completa. Queda como contexto de devolución sin omitir las obligaciones expresas."
+    },
+    {
+      "id": "V04-E04", "state": "completo", "matched_proposals": ["propuesta 4"],
+      "notes": "Conserva seguridad y normas municipales con evidencia completa. La categoría aviso requiere revisión de taxonomía, pero el control congelado no establece categoría esperada; se registra por separado sin modificar el control."
+    },
+    {
+      "id": "V04-E05", "state": "completo", "matched_proposals": ["propuesta 5"],
+      "notes": "Conserva conformidad previa del locador, modificaciones indispensables y ausencia de obligación de restaurar al estado anterior, con NOVENA íntegra."
+    }
+  ],
+  "accepted_hallucinations": 2,
+  "out_of_scope_operational_proposals": [],
+  "additional_notes": "Dos propuestas con afirmaciones no respaldadas: la 1 convierte instrucciones de alcance en condiciones contractuales; la 2 resuelve una coordinación ambigua. No se inventaron citas ni páginas. La categoría aviso de la propuesta 4 se registra aparte, no como tercera alucinación. Una ejecución por versión no demuestra estabilidad ni permite atribuir causalmente la regresión a la longitud del prompt o a la capacidad del modelo.",
+  "reviewed_by": "Codex - comparación documental con fuente pública y controles validados; sin validación jurídica ni de Oikos",
+  "reviewed_at": "2026-10-02"
+}

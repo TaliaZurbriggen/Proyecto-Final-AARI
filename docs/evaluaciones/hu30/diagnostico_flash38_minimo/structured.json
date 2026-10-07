@@ -1,0 +1,24 @@
+{
+  "diagnostic_version": "flash38-minimal-2026-10-02",
+  "script_sha256": "6edd1aabfc59d8e92e5aecc1d9671d776faa234b73f24468d0c7af8909eed90c",
+  "packages": {
+    "langchain-google-genai": "4.3.2",
+    "google-genai": "2.14.0"
+  },
+  "maximum_authorized_adapter_invocations": 2,
+  "model": "gemini-3.8-flash",
+  "mode": "structured",
+  "prompt": "Responde solamente OK.",
+  "contracts_sent": 0,
+  "automatic_retries_setting": 1,
+  "http_attempts_verified": false,
+  "started_at": "2026-10-02T15:16:13.383113+00:00",
+  "state": "completed",
+  "response_received": true,
+  "expected_ok": true,
+  "response_characters": 2,
+  "safe_response": "OK",
+  "adapter_invocations": 1,
+  "finished_at": "2026-10-02T15:16:26.780329+00:00",
+  "elapsed_seconds": 13.394
+}

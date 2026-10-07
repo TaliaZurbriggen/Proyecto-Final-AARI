@@ -1,0 +1,33 @@
+{
+  "document": null,
+  "source_kind": "synthetic_health_control",
+  "case": "health38",
+  "model": "gemini-3.8-flash",
+  "prompt": "Respondé solamente OK.",
+  "prompt_characters": 22,
+  "prompt_sha256": "80d83ffa97ce45c66811bd41ce4183c21418b854358d04f9f2ded79d4d406afd",
+  "script_sha256": "9b2d328babd9b3b86f0154c5aaa6dbc0e29cc97d54dd45d4566c15eae67f192c",
+  "maximum_http_requests": 1,
+  "automatic_retries": 0,
+  "production_changed": false,
+  "counts_towards_corpus_metrics": false,
+  "tools": false,
+  "state": "completed",
+  "started_at": "2026-10-02T18:59:40.369930+00:00",
+  "sdk_invocations": 1,
+  "http_requests": 1,
+  "raw_text": "OK",
+  "response_received": true,
+  "semantic_review": "not_applicable",
+  "usage": {
+    "prompt_token_count": 6,
+    "candidates_token_count": 1,
+    "thoughts_token_count": 98,
+    "total_token_count": 105
+  },
+  "finished_at": "2026-10-02T19:00:08.814418+00:00",
+  "duration_seconds": 28.443,
+  "http_statuses": [
+    200
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "date": "2026-09-25",
+  "prompt_version": "v4",
+  "model": "gemini-3.5-flash",
+  "manifest": "docs/evaluaciones/hu30/corpus_v4_manifest.json",
+  "attempted_documents": ["V01", "V02"],
+  "executor_invocations_per_document": 1,
+  "executor_retries": 0,
+  "completed_results": 0,
+  "status": "blocked_by_provider_availability",
+  "provider_status": 503,
+  "provider_code": "UNAVAILABLE",
+  "provider_message": "This model is currently experiencing high demand.",
+  "result_files_created": false,
+  "remaining_documents_not_sent": ["V03", "V04"],
+  "decision": "Detener la pasada tras dos respuestas 503. No repetir V01 ni V02 durante esta ejecución; continuar cuando Gemini vuelva a responder.",
+  "privacy": "No se registran credenciales ni contenido contractual."
+}

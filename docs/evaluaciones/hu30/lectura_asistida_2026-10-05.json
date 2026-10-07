@@ -1,0 +1,13 @@
+{
+  "date": "2026-10-05",
+  "extractor_version": "hu30-asistida-v1",
+  "comparison": "Texto por página conservado en orden, ignorando espacios y saltos de línea",
+  "external_calls": 0,
+  "checks": [
+    {"document": "V01", "pages": 9, "method": "digital", "literal_records": 34, "complete_reading": true, "all_page_text_preserved": true},
+    {"document": "V02", "pages": 3, "method": "ocr", "literal_records": 16, "complete_reading": true, "all_page_text_preserved": true},
+    {"document": "V03", "pages": 3, "method": "digital", "literal_records": 13, "complete_reading": true, "all_page_text_preserved": true},
+    {"document": "V04", "pages": 2, "method": "digital", "literal_records": 13, "complete_reading": true, "all_page_text_preserved": true}
+  ],
+  "limitations": "No acredita fidelidad de OCR al píxel, corrección semántica ni generalización del modelo. H01-H02 no inspeccionados."
+}

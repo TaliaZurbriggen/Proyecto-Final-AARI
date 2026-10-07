@@ -1,0 +1,41 @@
+{
+  "date": "2026-09-27",
+  "prompt_version": "v4",
+  "model": "gemini-3.5-flash",
+  "manifest": "docs/evaluaciones/hu30/corpus_v4_manifest.json",
+  "documents": [
+    {
+      "id": "V02",
+      "local_extraction": {
+        "initial_attempt": "blocked_before_provider_call_by_missing_ocr_configuration",
+        "verified_attempt": "complete",
+        "pages": 3,
+        "method": "ocr",
+        "characters": 11750,
+        "spanish_ocr_model_sha256": "6f2e04d02774a18f01bed44b1111f2cd7f3ba7ac9dc4373cd3f898a40ea6b464"
+      },
+      "provider_invocations": 1,
+      "automatic_retries": 0,
+      "provider_status": 503,
+      "provider_code": "UNAVAILABLE",
+      "result_files_created": false
+    },
+    {
+      "id": "V04",
+      "local_extraction": {
+        "verified_attempt": "complete",
+        "pages": 2,
+        "method": "digital",
+        "characters": 4709
+      },
+      "provider_invocations": 1,
+      "automatic_retries": 0,
+      "provider_status": 503,
+      "provider_code": "UNAVAILABLE",
+      "result_files_created": false
+    }
+  ],
+  "total_provider_invocations": 2,
+  "interpretation": "Distintos documentos recibieron 503; el fallo no es exclusivo de V01. No se conoce la causa exacta ni se obtuvieron resultados evaluables.",
+  "privacy": "No se registran claves ni texto contractual."
+}
