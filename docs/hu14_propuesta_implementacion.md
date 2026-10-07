@@ -4,7 +4,9 @@ Preparada y **aprobada el 07/10/2026**. Implementación de desarrollo terminada;
 evidencia, migración y pendientes en [hu14_derivacion_expensas.md](hu14_derivacion_expensas.md).
 Jira: [AARI-157](https://taliazurbriggen.atlassian.net/browse/AARI-157),
 asignada a Tobías; revisión final de entrega pendiente de Talía. Commit/push/PR
-autorizados el 07/10. Seguimiento de HU/subtareas en el documento de ejecución.
+autorizados el 07/10 y [PR #30](https://github.com/TaliaZurbriggen/Proyecto-Final-AARI/pull/30)
+publicado. Doce subtareas listas; HU En curso hasta revisión/integración.
+Seguimiento y evidencias en el documento de ejecución.
 Base revisada: `main` en `80afb67`. Estimación del Sprint: **5 HH**,
 distribuidas entre las 12 subtareas; los 30 puntos académicos originales se
 conservan. El tiempo real se registra solo después de confirmación del usuario.

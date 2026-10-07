@@ -26,7 +26,7 @@ Jira y mantiene trabajo pendiente. No se cerró el Sprint ni se alteró su alcan
 | HU30 / AARI-319 | En curso, Talía | PR #28 abierto; correcciones subidas, pendiente nueva revisión. |
 | HU13 / AARI-147 | En curso, Talía | PR #29 abierto, pendiente revisión. |
 | HU31 / AARI-332 | En curso, Talía | Rama subida; PR pendiente. Integración del acceso a escalados después de HU13. |
-| HU14 / AARI-157 | En curso, Tobías | Implementación y migraciones principal/de índice validadas en Supabase con autorización; revisión e integración pendientes. |
+| HU14 / AARI-157 | Desarrollo entregado; HU En curso, doce subtareas listas | PR #30 abierto con revisión solicitada a Talía. Implementación y migraciones principal/de índice validadas; revisión e integración pendientes. |
 | Despliegue / AARI-338 | Por hacer, conjunto | Pendiente integración del incremento y definición del servicio. |
 
 El cierre de HU11 fue autorizado; no se agregaron worklogs ni se modificaron
@@ -61,6 +61,14 @@ publicar HU14 para revisión. Validación final de la rama real: 387 backend
 aprobadas/26 omitidas, 122 frontend, lint/build correctos. El PR de HU14 incluye
 solo su desarrollo desde el main vigente y una guía de integración; no incorpora
 las historias pendientes de Talía ni implica revisión/merge aprobados.
+
+**Entrega publicada el 07/10:** commit de implementación `734386b` en
+`codex/AARI-157-derivacion-expensas` y
+[PR #30](https://github.com/TaliaZurbriggen/Proyecto-Final-AARI/pull/30)
+abierto, no borrador, con Talía solicitada como revisora. AARI-158 a AARI-169
+verificadas listas; AARI-157 conserva En curso hasta revisión/integración.
+El tiempo registrado sigue en 1 h 20 min, sin nuevas entradas. Notion continúa
+bloqueado por el límite de bloques; ejecución y decisiones quedan en el repo.
 
 ## Punto de partida
 

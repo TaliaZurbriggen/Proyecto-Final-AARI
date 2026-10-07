@@ -658,7 +658,7 @@ entorno compartido en la nube.
   con rama subida y PR pendiente; su acceso a escalados espera integrar HU13.
   El despliegue conjunto AARI-338 sigue por hacer.
   El Sprint permanece activo; no se considera cerrado por su fecha prevista.
-- **HU14 / AARI-157 en curso:** plan aprobado e implementación local de
+- **HU14 / AARI-157 entregada para revisión:** desarrollo de
   reportes, entrega con tres intentos, panel privado, configuración y notas.
   Deriva solo después de aceptación SMTP registrada; fallos visibles sin
   informar éxito falso. Backend 385 pruebas aprobadas/26 omitidas, frontend
@@ -678,8 +678,11 @@ entorno compartido en la nube.
   API/SQL aprobados. Ajustes y pruebas únicamente en la copia aislada:
   todavía falta trasladar/revalidar la integración definitiva, sin modificar
   las ramas de Talía. El botón interno de revisión del Home sigue pendiente
-  de habilitación en HU31; la navegación combinada sí fue probada. El PR de
-  HU14 se prepara con su alcance desde main, sin historias ajenas. Detalles en
+  de habilitación en HU31; la navegación combinada sí fue probada.
+  [PR #30](https://github.com/TaliaZurbriggen/Proyecto-Final-AARI/pull/30)
+  publicado desde main, sin historias ajenas, con revisión solicitada a Talía.
+  Las doce subtareas están listas; la HU principal sigue En curso hasta revisión
+  e integración. Commit de implementación `734386b`. Detalles en
   [`docs/hu14_derivacion_expensas.md`](docs/hu14_derivacion_expensas.md) y
   [guía de integración](docs/hu14_integracion_hu13_hu31.md).
 - **Seguimiento:** los story points conservan las estimaciones académicas

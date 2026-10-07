@@ -464,6 +464,29 @@ Las migraciones ya aplicadas no se repiten. Recepción SMTP real y recorrido
 funcional previos siguen acreditados arriba; no se enviaron nuevos mensajes.
 Tiempo confirmado permanece en **1 h 20 min**; no se infiere tiempo adicional.
 
+### Publicación y cierre de nuestro desarrollo — 07/10/2026
+
+- Rama subida: `codex/AARI-157-derivacion-expensas`, base `main` en `80afb67`.
+- Commit de implementación: `734386b6197c45a15d1c976b4389e27a48f18dfa`.
+- [PR #30](https://github.com/TaliaZurbriggen/Proyecto-Final-AARI/pull/30)
+  publicado y verificado abierto, no borrador, con revisión solicitada a Talía.
+  La conexión GitHub no permitía crear PR (403); se publicó mediante la sesión
+  autenticada del navegador, sin cambiar permisos ni crear credenciales.
+- Doce subtareas **AARI-158 a AARI-169 listas**, verificadas tras el cierre
+  autorizado de nuestro desarrollo. La HU **AARI-157 sigue En curso** hasta
+  revisión e integración; ni el PR ni las dependencias se fusionaron.
+- Tiempo real sin cambios: **1 h 20 min**. No se agregó ni estimó otra entrada.
+- Solo archivos HU14 y seguimiento del Sprint en la entrega. El cambio previo
+  de documentación HU11 y las carpetas de revisión/output quedan fuera del PR.
+- README, esta evidencia y contrato de integración actualizados. Notion sigue
+  bloqueado por su límite de bloques; el ADR se conserva aquí para sincronizar
+  cuando el espacio admita escrituras.
+
+El commit posterior de documentación registra esta entrega sin cambiar código
+ni migraciones; las validaciones 387/122 corresponden al código publicado.
+La revisión de Talía y la integración de las versiones aprobadas HU13/HU31
+son los siguientes pasos externos, no pruebas de desarrollo omitidas.
+
 ## Decisión técnica y pendientes
 
 Se descartó enviar SMTP dentro del grafo/transacción porque bloquearía peticiones
@@ -481,8 +504,10 @@ Pendientes para entrega definitiva:
    HU13 confirma clasificaciones humanas en un helper compartido: al integrar,
    conservar su auditoría/origen y reutilizar esta misma cola para expensas
    humanas, sin LLM. No se fusionaron ni editaron las ramas de Talía.
-3. Publicación autorizada del PR de HU14 y revisión de Talía antes de merge.
+3. Revisión de Talía e integración del PR #30 antes del cierre definitivo de HU.
 4. Registro en Notion cuando el espacio permita escrituras; mientras permanece
    bloqueado por el límite de bloques, este documento conserva el ADR y pruebas.
 
-La HU y subtareas no se marcan listas ni se registran minutos automáticamente.
+Las subtareas se cerraron por autorización explícita tras validar y publicar;
+la HU principal no se cierra antes de revisión/integración ni se registran
+minutos automáticamente.
