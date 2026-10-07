@@ -9,6 +9,7 @@ const navigationItems = [
   { href: '/proveedores', label: 'Proveedores' },
   { href: '/operadores', label: 'Operadores' },
   { href: '/contratos', label: 'Contratos' },
+  { href: '/expensas', label: 'Expensas' },
 ]
 
 function AdminLayout() {
@@ -20,7 +21,10 @@ function AdminLayout() {
   const isProviders = location.pathname.startsWith('/proveedores')
   const isOperators = location.pathname.startsWith('/operadores')
   const isContracts = location.pathname.startsWith('/contratos')
-  const activeModule = isContracts
+  const isExpenses = location.pathname.startsWith('/expensas')
+  const activeModule = isExpenses
+    ? { href: '/expensas', label: 'Expensas', placeholder: '' }
+    : isContracts
     ? { href: '/contratos', label: 'Contratos', placeholder: 'Buscar inmueble o participante' }
     : isOperators
     ? { href: '/operadores', label: 'Operadores', placeholder: 'Buscar operador por nombre o email' }
@@ -74,6 +78,7 @@ function AdminLayout() {
         profileRole="Administración"
         searchPlaceholder={activeModule.placeholder}
         searchValue={searchValue}
+        showSearch={!isExpenses}
       />
       <Outlet />
     </>
