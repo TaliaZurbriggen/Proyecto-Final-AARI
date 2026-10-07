@@ -12,7 +12,9 @@ Durante la revisión del Home se propuso facilitar la búsqueda en los módulos
 de propiedades, propietarios e inquilinos. La persona responsable aprobó
 explícitamente incorporarlo **en la misma rama de HU31**, como excepción al
 flujo habitual de una rama por tarea. No se cambia la estimación del Sprint,
-no se crea otra historia ni se incorpora la rama de HU13.
+no se crea otra historia ni se incorpora la rama de HU13 en esa entrega inicial.
+El 07/10 esta rama se actualizó desde main, que ya contiene HU13/HU30/HU14,
+para completar la conexión aprobada del Home sin alterar los filtros.
 
 La primera propuesta conservaba la búsqueda en la cabecera y agregaba criterios
 estructurados. En la revisión se pidió que buscar una persona fuera más evidente
@@ -90,7 +92,7 @@ al consultar y al aplicar el panel.
 No se agregan migraciones, paquetes ni variables de entorno. Se mantienen las
 rutas privadas de administración y los contratos de respuesta existentes.
 
-## Pruebas y resultados
+## Pruebas y resultados de la entrega inicial — 05/10/2026
 
 | Validación | Resultado |
 |---|---|
@@ -125,8 +127,8 @@ por Git, con datos ficticios.
 ## Límites y cierre
 
 No se consumieron APIs externas, cuota, Storage ni SMTP; no se consultó ni
-modificó Supabase para estas validaciones. La app local queda disponible para
-revisión manual. Se registraron las 2h confirmadas por la persona responsable
+modificó Supabase para estas validaciones. Se revisó una app local aislada
+con datos ficticios. Se registraron las 2h confirmadas por la persona responsable
 en las subtareas de HU31, sin duplicarlas en la HU ni cambiar estados de cierre
 o estimaciones originales. Reparto y worklogs en
 [`hu31_home_administrador.md`](hu31_home_administrador.md).
@@ -134,5 +136,19 @@ o estimaciones originales. Reparto y worklogs en
 Notion sigue pendiente de sincronización: el intento anterior de HU31 respondió
 HTTP 403 por el límite de bloques gratuitos. No se declara publicada allí
 esta ampliación; queda preservada en el repositorio según el acuerdo del Sprint.
-HU31 aún requiere la conexión con HU13 después de su merge y revisión del PR.
-Commit y push están autorizados; no se autoriza todavía el merge ni el cierre.
+La conexión con HU13 se completó el 07/10 después del rebase sobre main
+`69d0ec6`. La revalidación final conservó todos los filtros y la paginación:
+**808 backend aprobadas / 37 omitidas**, **235 frontend aprobadas**, lint/build
+correctos. Se repitió Chrome en los tres listados a 1440, 1024, 768, 390 y
+320 px: alineación, área táctil, búsqueda sincronizada, conservación de filtros
+al cambiar de página, teclado, error sin resultados viejos y limpieza aprobados.
+Comandos, recorrido con HU13 y límites en
+[`hu31_home_administrador.md`](hu31_home_administrador.md).
+
+La entrega inicial se publicó con autorización el 05/10. La persona responsable
+autorizó el commit/push de la continuación el 07/10 después de aprobar la vista.
+La revisión final repitió **808 backend aprobadas / 37 omitidas**,
+**238 frontend aprobadas**, lint/build y el recorrido integrado en Chrome aislado.
+Se registraron **1h 15m adicionales**: la HU acumula **3h 15m**, solo en sus
+subtareas. Registro y worklogs en el informe del Home. Quedan revisión y PR;
+no se autoriza todavía el merge ni el cierre de HU31.

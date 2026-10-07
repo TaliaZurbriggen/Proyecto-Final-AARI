@@ -1,4 +1,5 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import App from '../../../App.jsx'
@@ -54,5 +55,53 @@ describe('integración del Home con sesión y rutas', () => {
     renderApp('/inicio')
     await screen.findByRole('heading', { name: 'Creá tu contraseña' })
     expect(fetchMock.mock.calls.some(([url]) => url.endsWith('/admin/resumen'))).toBe(false)
+  })
+
+  it.each(['ordinario', 'extraordinario', 'expensa'])('revisa un caso desde el Home y actualiza pendientes sin cerrar la reparación: %s', async (expense) => {
+    const user = userEvent.setup()
+    const claim = {
+      id: '00000000-0000-0000-0000-000000000101', numero: 25,
+      descripcion: 'Desperfecto sintético cuyo origen requiere revisión.',
+      estado: 'Escalado', urgencia: 'media', creado_en: '2026-10-01T10:00:00Z',
+      escalado_en: '2026-10-01T12:00:00Z', updated_at: '2026-10-01T12:00:00.123456Z',
+      motivo_escalado: 'confianza_insuficiente', confianza_clasificacion: 0.55,
+      propiedad: { direccion: 'Unidad de prueba 100', provincia: 'Córdoba', localidad: 'Localidad de prueba', tipo: 'casa' },
+      inquilino_nombre: 'Inquilino de prueba', puede_resolver: true, fotos: [], decisiones: [], historial: [],
+    }
+    let classified = false
+    const json = (body) => new Response(JSON.stringify(body), { headers: { 'Content-Type': 'application/json' } })
+    const fetchMock = vi.fn(async (url, options) => {
+      const path = new URL(url).pathname
+      if (path === '/auth/me') return json({ user: { email: 'admin@example.com', rol: 'administrador', primer_ingreso: false } })
+      if (path === '/admin/resumen') return json({ ...summary, reclamos: { activos: 1, pendientes_clasificacion: classified ? 0 : 1 } })
+      if (path === '/reclamos/escalados') return json({ items: classified ? [] : [claim], total: classified ? 0 : 1, page: 1, page_size: 20, total_pages: 1 })
+      if (path === `/reclamos/${claim.id}/resolver-escalado` && options.method === 'POST') {
+        classified = true
+        return json({})
+      }
+      if (path === `/reclamos/escalados/${claim.id}`) return json({ ...claim, puede_resolver: !classified,
+        estado: classified ? 'Pendiente de respuesta del responsable' : claim.estado })
+      throw new Error(`Solicitud no prevista: ${path}`)
+    })
+    vi.stubGlobal('fetch', fetchMock)
+    renderApp('/inicio')
+    await screen.findByText('Requieren revisión')
+    await user.click(screen.getByRole('link', { name: 'Revisar casos' }))
+    await user.click(await screen.findByRole('link', { name: 'Resolver clasificación del reclamo #000025' }))
+    await user.selectOptions(await screen.findByLabelText(/Tipo de gasto/), expense)
+    await user.type(screen.getByLabelText(/Fundamento de la decisión/), 'La revisión manual confirmó la causa del desperfecto.')
+    await user.click(screen.getByRole('button', { name: 'Confirmar clasificación' }))
+    await screen.findByText(/la reparación todavía no está resuelta/)
+    const posts = fetchMock.mock.calls.filter(([, options]) => options.method === 'POST')
+    expect(posts).toHaveLength(1)
+    expect(JSON.parse(posts[0][1].body)).toEqual({ tipo_gasto: expense,
+      fundamento: 'La revisión manual confirmó la causa del desperfecto.', expected_updated_at: claim.updated_at })
+    await user.click(screen.getByRole('link', { name: 'Inicio' }))
+    await screen.findByText('Sin pendientes')
+    const activeCard = screen.getByRole('heading', { name: 'Reclamos activos' }).closest('article')
+    expect(within(activeCard).getByText('1')).toBeInTheDocument()
+    expect(fetchMock.mock.calls.filter(([url]) => url.endsWith('/admin/resumen'))).toHaveLength(2)
+    await user.click(screen.getByRole('link', { name: 'Revisar casos' }))
+    expect(await screen.findByText('No hay casos en esta página')).toBeInTheDocument()
   })
 })

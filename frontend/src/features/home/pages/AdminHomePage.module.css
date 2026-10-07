@@ -14,7 +14,7 @@
 .number { font-size: calc(var(--aari-font-size-xl) * 2); line-height: var(--aari-line-height-tight); font-weight: var(--aari-font-weight-bold); color: var(--aari-color-ink); font-variant-numeric: tabular-nums; letter-spacing: -0.04em; }
 .summary p, .summary small { color: var(--aari-color-muted); font-size: var(--aari-font-size-sm); }
 .summary small { font-size: var(--aari-font-size-xs); }
-.reviewButton { margin-top: var(--aari-space-2); }
+.reviewButton { margin-top: var(--aari-space-2); text-decoration: none; }
 .sectionHeading { display: flex; align-items: center; justify-content: space-between; gap: var(--aari-space-4); margin-bottom: var(--aari-space-4); }
 .sectionHeading h2 { font-size: var(--aari-font-size-lg); }
 .sectionHeading p { color: var(--aari-color-muted); font-size: var(--aari-font-size-sm); }

@@ -36,8 +36,51 @@ describe('cola de revisión humana', () => {
     show({ operator: true })
     await screen.findByRole('table')
     expect(screen.getByText('Motivo de revisión')).toBeInTheDocument()
+    expect(screen.getByRole('columnheader', { name: 'Acciones' })).toBeInTheDocument()
     expect(screen.getByText(escalationReason('confianza_insuficiente'))).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Revisar reclamo #000025' })).toHaveAttribute('href', `/operador/escalados/${claim.id}?page=1&search=`)
+    expect(screen.getByRole('link', { name: 'Resolver clasificación del reclamo #000025' }))
+      .toHaveAttribute('href', `/operador/escalados/${claim.id}?page=1&search=`)
+  })
+
+  it.each([false, true])('abre y vuelve sin perder búsqueda o página ni guardar una decisión (operador: %s)', async (operator) => {
+    const user = userEvent.setup()
+    const base = operator ? '/operador/escalados' : '/escalados'
+    const query = new URLSearchParams({ page: '2', search: 'canilla de prueba' }).toString()
+    const fetchMock = vi.spyOn(globalThis, 'fetch').mockImplementation((url) => Promise.resolve(response(
+      new URL(url).pathname.endsWith(claim.id) ? claim : { ...page, page: 2, total: 21, total_pages: 2 },
+    )))
+    show({ operator, query: `?${query}` })
+    const action = await screen.findByRole('link', { name: 'Resolver clasificación del reclamo #000025' })
+    expect(action).toHaveTextContent('Resolver clasificación')
+    expect(action).toHaveAttribute('href', `${base}/${claim.id}?${query}`)
+    action.focus()
+    expect(action).toHaveFocus()
+    await user.keyboard('{Enter}')
+    await screen.findByRole('heading', { name: 'Reclamo #000025' })
+    const back = screen.getByRole('link', { name: 'Volver a casos escalados' })
+    expect(back).toHaveAttribute('href', `${base}?${query}`)
+    await user.click(back)
+    expect(await screen.findByRole('searchbox', { name: 'Buscar casos escalados' })).toHaveValue('canilla de prueba')
+    expect(await screen.findByText('Página 2 de 2')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Siguiente' })).toBeDisabled()
+    expect(screen.getByRole('button', { name: 'Anterior' })).toBeEnabled()
+    expect(fetchMock.mock.calls.every(([, options]) => (options.method ?? 'GET') === 'GET')).toBe(true)
+    expect(new URL(fetchMock.mock.calls.at(-1)[0]).search).toBe(`?${query}`)
+  })
+
+  it('identifica la acción de cada caso y conserva el acceso por número', async () => {
+    const another = { ...claim, id: '00000000-0000-0000-0000-000000000102', numero: 26 }
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(response({ ...page, items: [claim, another], total: 2 }))
+    show()
+    await screen.findByRole('table')
+    for (const item of [claim, another]) {
+      const number = `#${String(item.numero).padStart(6, '0')}`
+      expect(screen.getByRole('link', { name: `Resolver clasificación del reclamo ${number}` }))
+        .toHaveAttribute('href', `/escalados/${item.id}?page=1&search=`)
+      expect(screen.getByRole('link', { name: `Revisar reclamo ${number}` }))
+        .toHaveAttribute('href', `/escalados/${item.id}?page=1&search=`)
+    }
   })
 
   it('permite búsqueda y paginación sin mostrar resultados viejos cuando falla', async () => {

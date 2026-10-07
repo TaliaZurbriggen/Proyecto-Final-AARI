@@ -40,9 +40,8 @@ describe('Home administrativo operativo', () => {
     }
     expect(screen.getByRole('link', { name: /Contratos de alquiler/ })).toHaveAttribute('href', '/contratos')
     expect(screen.getByRole('link', { name: /Historial de reclamos/ })).toHaveAttribute('href', '/propiedades')
-    expect(screen.getByRole('button', { name: 'Revisar casos' })).toBeDisabled()
-    expect(screen.queryByRole('link', { name: /Revisar casos/ })).not.toBeInTheDocument()
-    expect(screen.getByText(/se habilitará cuando se integre HU13/)).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Revisar casos' })).toHaveAttribute('href', '/escalados')
+    expect(screen.queryByText(/se habilitará cuando se integre HU13/)).not.toBeInTheDocument()
   })
 
   it('conserva contexto y accesos mientras carga sin inventar ceros', async () => {
@@ -54,6 +53,7 @@ describe('Home administrativo operativo', () => {
     expect(screen.queryByText('0')).not.toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Actualizar' })).toBeDisabled()
     expect(screen.getByRole('link', { name: /Propietarios/ })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Revisar casos' })).toHaveAttribute('href', '/escalados')
     await act(async () => resolve(jsonResponse(summary)))
     expect(await screen.findByText('24')).toBeInTheDocument()
   })
@@ -70,6 +70,7 @@ describe('Home administrativo operativo', () => {
     expect(await screen.findByRole('heading', { name: 'Tu base de trabajo está lista para empezar' })).toBeInTheDocument()
     expect(screen.getAllByText('0')).toHaveLength(7)
     expect(screen.getByText('Sin pendientes')).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Revisar casos' })).toHaveAttribute('href', '/escalados')
   })
 
   it('permite reintentar después de un fallo sin falsear los datos', async () => {
@@ -81,6 +82,7 @@ describe('Home administrativo operativo', () => {
     expect(await screen.findByRole('alert')).toHaveTextContent('No pudimos obtener el resumen.')
     expect(screen.getAllByText('—')).toHaveLength(7)
     expect(screen.queryByText('0')).not.toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Revisar casos' })).toHaveAttribute('href', '/escalados')
     await userEvent.setup().click(screen.getByRole('button', { name: 'Actualizar' }))
     expect(await screen.findByText('24')).toBeInTheDocument()
     expect(screen.queryByRole('alert')).not.toBeInTheDocument()

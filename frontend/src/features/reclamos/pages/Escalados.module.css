@@ -9,7 +9,10 @@
 .table th { text-align: left; color: var(--aari-color-muted); background: var(--aari-color-surface-soft); font-size: var(--aari-font-size-sm); }
 .table th, .table td { padding: var(--aari-space-4); vertical-align: top; overflow-wrap: anywhere; border-bottom: 1px solid var(--aari-color-border); }
 .table th:nth-child(2) { width: 30%; }
+.table th:last-child { width: 12rem; }
 .table td:first-child { display: grid; gap: var(--aari-space-2); }
+.table .actionsCell { vertical-align: middle; }
+.resolveLink { width: 100%; min-width: 0; padding-block: var(--aari-space-2); line-height: var(--aari-line-height-body); text-align: center; text-decoration: none; }
 .claimLink { color: var(--aari-color-primary-strong); font-weight: var(--aari-font-weight-semibold); }
 .description { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; margin-bottom: var(--aari-space-2); }
 .pagination, .formActions { display: flex; justify-content: flex-end; align-items: center; gap: var(--aari-space-4); padding: var(--aari-space-5); }
@@ -45,6 +48,7 @@
   .table td, .table td:first-child { display: grid; grid-template-columns: 8rem minmax(0, 1fr); gap: var(--aari-space-2); border: 0; padding: var(--aari-space-2) 0; }
   .table td::before { content: attr(data-label); font-size: var(--aari-font-size-sm); color: var(--aari-color-muted); }
   .table td:first-child > span, .table td > small { grid-column: 2; }
+  .table .actionsCell { grid-template-columns: minmax(0, 1fr); padding-top: var(--aari-space-4); }
 }
 @media (max-width: 480px) {
   .panelHeading { align-items: flex-start; flex-direction: column; }

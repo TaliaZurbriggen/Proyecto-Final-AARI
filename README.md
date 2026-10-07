@@ -93,9 +93,11 @@ ante un error se retiran los contadores anteriores y no se inventan ceros.
 No agrega migraciones, variables de entorno ni dependencias. Reutiliza el
 esquema existente hasta `23_notificaciones_actor_responsable.sql`; una base
 sin esas tablas devuelve un error de resumen no disponible.
-Por acuerdo del equipo, **Revisar casos** queda deshabilitado hasta integrar
-HU13 en `main`; su conexión y recorrido integrado siguen pendientes antes
-del cierre de HU31. No incorpora gráficos ni indicadores predictivos (HU26).
+**Revisar casos** abre `/escalados`, ya integrado desde HU13. Al volver al
+Home se consulta nuevamente el resumen: clasificar reduce los pendientes,
+pero no cierra la reparación ni retira el reclamo de los activos. El enlace
+sigue disponible si no hay pendientes o falla el resumen. No incorpora
+gráficos ni indicadores predictivos (HU26).
 Decisiones, comandos, resultados y límites:
 [`docs/hu31_home_administrador.md`](docs/hu31_home_administrador.md).
 
@@ -151,6 +153,9 @@ Administradores y operadores activos revisan la cola de clasificación desde
 `/escalados` y `/operador/escalados`, respectivamente. Incluye búsqueda,
 paginación, propiedad, fechas y motivo de revisión, con los casos más antiguos
 primero. El detalle conserva descripción, fotos privadas e historial.
+Cada caso ofrece **Resolver clasificación** como acción visible; abre el detalle
+sin guardar una decisión y conserva búsqueda y página al volver. En móvil
+se presenta dentro de la tarjeta. El número también sigue siendo un enlace.
 Detalle y fotos sólo admiten reclamos con pertenencia actual o histórica a la
 cola, o con una decisión manual registrada. Conocer un UUID no permite consultar
 un reclamo nunca escalado; en ese caso la API devuelve `404`.
@@ -815,25 +820,34 @@ entorno compartido en la nube.
   La extracción de cláusulas pertenece a HU30.
 - **HU10 / AARI-116 finalizada:** PR #25 mergeado; HU y subtareas listas en Jira.
   Infraestructura reutilizable para las notificaciones posteriores del Sprint.
-- **HU31 / AARI-332 en implementación:** Home operativo y navegación responsive
-  validados en `codex/AARI-332-home-administrador`, desde `main` en `80afb67`.
-  Incluye filtros de listados aprobados durante la revisión. Backend completo:
-  **429 passed / 41 skipped**; frontend: **191 passed**; PostgreSQL local:
-  **2 passed**; lint, build y revisión visual aprobados. Sin pruebas externas
-  ni consumo de cuota. Pendientes: conexión de HU13 tras su merge, revisión y PR.
-  Se registraron **2h reales** en sus subtareas, sin modificar la estimación original.
+- **HU31 / AARI-332 implementada, pendiente de revisión e integración:** Home operativo y navegación responsive
+  en `codex/AARI-332-home-administrador`, actualizada mediante rebase sobre
+  `main` `69d0ec6` el 07/10. Conserva los filtros de listados y conecta
+  **Revisar casos** con HU13. Backend completo, incluido PostgreSQL local:
+  **808 passed / 37 skipped**; frontend revalidado tras el ajuste de acceso a
+  escalados: **238 passed**; lint/build aprobados.
+  Recorrido de clasificación, teclado y revisión responsive entre 320 y 1440 px
+  aprobados con datos ficticios. Pruebas automatizadas sin APIs externas ni
+  consumo de cuota. Se añadió **Resolver clasificación** al listado con
+  autorización. En una comprobación externa separada y autorizada, se verificó
+  la lectura de una foto privada existente tras corregir la configuración del
+  proceso local, sin alterar datos o permisos.
+  Continuación validada y publicación autorizada el 07/10 para revisión del PR;
+  no se autorizó merge ni cierre. Se registró **1h 15m adicional** en sus
+  subtareas: **3h 15m acumuladas**, sin duplicar el tiempo en la HU padre ni
+  modificar la estimación original.
   Evidencia en [`docs/hu31_home_administrador.md`](docs/hu31_home_administrador.md).
 - **HU12 / AARI-135 finalizada:** PR #26 mergeado en `main`; HU y subtareas
   listas en Jira, con **50 minutos reales** registrados. Evidencia en
   [`docs/hu12_notificacion_actor_responsable.md`](docs/hu12_notificacion_actor_responsable.md).
-- **HU13 / AARI-147 en curso:** implementación en
-  `codex/AARI-147-resolucion-escalados`, actualizada con `main` `439ee3c`. La HU y las
-  nueve subtareas están En curso. Cola de revisión, decisión manual sin LLM,
+- **HU13 / AARI-147 finalizada:** PR #29 aprobado y mergeado el 07/10
+  (`69d0ec6`). HU y nueve subtareas verificadas listas en Jira, con **2 h 15 min**
+  registrados en total. Cola de revisión, decisión manual sin LLM,
   auditoría y continuidad de HU12 probadas localmente. Migración 26 aplicada
   con autorización en Supabase el 05/10/2026; **9 pruebas reales aprobadas**,
-  con datos sintéticos y rollback, sin Gemini ni correos. Pendientes: revisión
-  funcional del equipo y nueva revisión del PR #29; publicación de la rama
-  autorizada el 05/10/2026, con **1 h 10 min** registrados en subtareas. La documentación está en
+  con datos sintéticos y rollback, sin Gemini ni correos. La entrega inicial
+  fue autorizada el 05/10/2026, con **1 h 10 min** en subtareas, incluidos en
+  el total final, no adicionales. La documentación está en
   [`docs/hu13_resolucion_escalados.md`](docs/hu13_resolucion_escalados.md);
   Notion no permitió agregarla por el límite de bloques gratuitos.
   Correcciones aprobadas del PR #29 implementadas localmente el 07/10: acceso
@@ -843,8 +857,8 @@ entorno compartido en la nube.
   de navegación escritorio/móvil con teclado aprobados. Incremental de
   destinatarios aplicada con autorización en Supabase el 07/10; **9 pruebas
   reales HU13 aprobadas** con rollback y limpieza comprobada. La 26 y su registro
-  permanecen intactos. Publicación de las correcciones autorizada el 07/10;
-  nueva revisión y merge del PR #29 pendientes.
+  permanecen intactos. Correcciones publicadas y aprobadas por Tobías antes
+  del merge autorizado; no quedaron cambios adicionales solicitados.
   [Detalle de la revisión](docs/hu13_correcciones_pr29_2026-10-07.md).
 - **HU11 / AARI-125 finalizada:** historial por propiedad con filtros,
   páginas de 20 y detalle con transiciones. Administración consulta todos los
@@ -857,12 +871,14 @@ entorno compartido en la nube.
   subtareas verificadas listas el 07/10/2026, con **1 h 15 min** registrados.
   Flujo, decisiones y comandos en
   [`docs/hu11_historial_reclamos.md`](docs/hu11_historial_reclamos.md).
-- **Pendientes verificados el 07/10/2026:** HU13/AARI-147 continúa en curso
-  con PR #29 abierto; HU30/AARI-319 está mergeada y finalizada. HU31/AARI-332 está en curso,
-  con rama subida y PR pendiente; su acceso a escalados espera integrar HU13.
+- **Pendientes verificados el 07/10/2026:** HU13/AARI-147 y HU30/AARI-319
+  están mergeadas y finalizadas. HU31/AARI-332 sigue en curso: conexión con
+  HU13 y revalidación completas, entrega autorizada para revisión del PR.
   El despliegue conjunto AARI-338 sigue por hacer.
   El Sprint permanece activo; no se considera cerrado por su fecha prevista.
-- **HU14 / AARI-157 entregada para revisión:** desarrollo de
+- **HU14 / AARI-157 integrada en main:** PR #30 mergeado (`37b179d`). La HU
+  todavía figura En curso en Jira; no se cerró durante la continuación de HU31.
+  Registro de entrega y validaciones anteriores al merge: desarrollo de
   reportes, entrega con tres intentos, panel privado, configuración y notas.
   Deriva solo después de aceptación SMTP registrada; fallos visibles sin
   informar éxito falso. Backend 385 pruebas aprobadas/26 omitidas, frontend
@@ -880,13 +896,14 @@ entorno compartido en la nube.
   recepción. Combinación temporal HU13/HU14/HU31: 527 pruebas backend
   aprobadas/35 omitidas, 214 frontend, lint/build, flujo manual y 16 controles
   API/SQL aprobados. Ajustes y pruebas únicamente en la copia aislada:
-  todavía falta trasladar/revalidar la integración definitiva, sin modificar
-  las ramas de Talía. El botón interno de revisión del Home sigue pendiente
-  de habilitación en HU31; la navegación combinada sí fue probada.
+  en esa etapa faltaba trasladar/revalidar la integración definitiva, sin modificar
+  las ramas de Talía. La continuación de HU31 documentada arriba completa
+  ahora la conexión del Home sobre las historias integradas en main.
   [PR #30](https://github.com/TaliaZurbriggen/Proyecto-Final-AARI/pull/30)
-  publicado desde main, sin historias ajenas, con revisión solicitada a Talía.
-  Las doce subtareas están listas; la HU principal sigue En curso hasta revisión
-  e integración. Commit de implementación `734386b`. Detalles en
+  fue publicado desde main, sin historias ajenas, con revisión solicitada a Talía.
+  Las doce subtareas se registraron listas al entregar; el cierre de la HU en
+  Jira continúa pendiente aunque el código ya está integrado. Tiempo agregado
+  verificado al continuar HU31: **1 h 40 min**. Commit de implementación `734386b`. Detalles en
   [`docs/hu14_derivacion_expensas.md`](docs/hu14_derivacion_expensas.md) y
   [guía de integración](docs/hu14_integracion_hu13_hu31.md).
 - **Seguimiento:** los story points conservan las estimaciones académicas

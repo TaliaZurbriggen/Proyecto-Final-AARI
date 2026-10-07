@@ -7,6 +7,7 @@ from sqlalchemy import text
 from sqlalchemy.orm import sessionmaker
 
 from app.db.admin_home import SqlAlchemyAdminHomeRepository
+from app.db.escalados import SqlAlchemyEscalatedClaimsRepository
 from tests.test_responsible_actor_postgres import local_engine
 
 
@@ -84,6 +85,12 @@ def test_postgres_summary_is_fresh_private_and_does_not_multiply_relations(local
     assert summary.proveedores.model_dump() == {"total": 3, "activos": 2}
     assert summary.operadores.model_dump() == {"total": 2, "activos": 1}
     assert summary.reclamos.model_dump() == {"activos": 7, "pendientes_clasificacion": 2}
+    # El contador coincide con el total de HU13, no con el tamaño de una página.
+    queue = SqlAlchemyEscalatedClaimsRepository(sessionmaker(bind=local_engine))
+    queued = queue.list(page=2, page_size=1)
+    assert summary.reclamos.pendientes_clasificacion == queued.total == 2
+    assert len(queued.items) == 1
+    assert queued.items[0].id in claim_ids[1:3]
     with local_engine.begin() as connection:
         connection.execute(text("""
             UPDATE reclamos SET tipo_gasto='ordinario', origen_clasificacion='operador'
@@ -93,3 +100,4 @@ def test_postgres_summary_is_fresh_private_and_does_not_multiply_relations(local
                            {"id": claim_ids[0]})
     updated = repo.get_summary()
     assert updated.reclamos.model_dump() == {"activos": 6, "pendientes_clasificacion": 1}
+    assert updated.reclamos.pendientes_clasificacion == queue.list().total == 1

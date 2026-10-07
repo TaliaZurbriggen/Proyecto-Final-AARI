@@ -4,6 +4,7 @@ import { Building2, ClipboardList, ContactRound, FileText, History, KeyRound, Re
 import { PageContainer, PageHeading } from '../../../components/layout/index.js'
 import { AlertMessage, Button, EmptyState, LoadingState, StatusBadge } from '../../../components/ui/index.js'
 import { getAdminSummary } from '../api/homeApi.js'
+import buttonStyles from '../../../components/ui/Button.module.css'
 import styles from './AdminHomePage.module.css'
 
 const modules = [
@@ -76,9 +77,10 @@ function AdminHomePage() {
           <strong className={styles.number}>{count(pending)}</strong>
           <p>{pending === 0 ? 'No hay casos que requieran clasificación manual.'
             : 'La inmobiliaria debe revisar y decidir el tipo de gasto.'}</p>
-          {/* HU13 no está en main: no publicar un enlace a una ruta inexistente. */}
-          <Button disabled className={styles.reviewButton}>Revisar casos</Button>
-          <small>Este acceso se habilitará cuando se integre HU13.</small>
+          <Link to="/escalados"
+            className={`${buttonStyles.button} ${buttonStyles.primary} ${buttonStyles.md} ${styles.reviewButton}`}>
+            Revisar casos
+          </Link>
         </article>
       </section>
       <section aria-labelledby="home-modules-title" aria-busy={loading}>
