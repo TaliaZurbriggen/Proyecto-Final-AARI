@@ -90,3 +90,28 @@ def test_gitattributes_covers_all_manifest_frozen_paths():
             checked.add(item["path"])
             assert f"{item['path']} text eol=lf" in attributes.splitlines()
     assert PROMPT in checked and OCR in checked
+
+
+@pytest.mark.skipif(shutil.which("git") is None, reason="Requiere Git local; no accede a red.")
+def test_historical_json_crlf_passes_diff_check_but_trailing_spaces_fail(tmp_path):
+    git(tmp_path, "init", "--quiet")
+    git(tmp_path, "config", "core.autocrlf", "false")
+    (tmp_path / ".gitattributes").write_bytes((PROJECT / ".gitattributes").read_bytes())
+    evidence = tmp_path / EVIDENCE
+    evidence.parent.mkdir(parents=True, exist_ok=True)
+    original = b'{\r\n  "state": "completed"\r\n}\r\n'
+    evidence.write_bytes(original)
+    # La prueba mide el JSON, no el EOL del archivo de atributos del equipo.
+    git(tmp_path, "add", EVIDENCE)
+
+    git(tmp_path, "diff", "--cached", "--check")
+    assert git(tmp_path, "show", ":" + EVIDENCE) == original
+
+    evidence.write_bytes(b'{\r\n  "state": "completed"  \r\n}\r\n')
+    git(tmp_path, "add", EVIDENCE)
+    result = subprocess.run(
+        ["git", "-C", str(tmp_path), "diff", "--cached", "--check"],
+        capture_output=True,
+    )
+    assert result.returncode != 0
+    assert b"trailing whitespace" in result.stdout

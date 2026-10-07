@@ -1,6 +1,8 @@
 # Entradas textuales congeladas de HU30: mismos bytes en Windows y Linux.
 # No normalizar globalmente la evidencia histórica ni recalcular manifiestos.
 docs/evaluaciones/hu30/** -text
+# CRLF histórico no es whitespace sobrante; sí controlar espacios y líneas vacías.
+docs/evaluaciones/hu30/**/*.json whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
 backend/app/schemas/clausulas_contrato.py text eol=lf
 backend/app/services/contract_clause_evidence.py text eol=lf
 backend/app/services/contract_clause_llm.py text eol=lf

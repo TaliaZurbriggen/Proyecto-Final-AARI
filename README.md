@@ -731,9 +731,12 @@ entorno compartido en la nube.
   trabajo activo. Conserva hashes reproducibles en Windows y cierre explícito
   de recursos OCR. Tobías aprobó el PR #28 el 07/10/2026; se actualiza sobre
   `main` con HU14 preservando evidencia congelada y revisión humana obligatoria.
+  Validación final del 07/10, incluido PostgreSQL local: **643 pruebas backend
+  aprobadas, 28 omitidas; 134 frontend**, lint/build y formato correctos.
   El cierre queda condicionado al merge y las pruebas de integración finales.
   Ver [alcance y resultados actuales de HU30](docs/evaluaciones/hu30/flujo_asistido_2026-10-05.md)
   y [regresiones del PR #28](docs/evaluaciones/hu30/correcciones_pr28_2026-10-05.md).
+  [Actualización final del PR #28](docs/evaluaciones/hu30/cierre_pr28_2026-10-07.md).
 - **HU29 / AARI-318 finalizada:** PR #24 mergeado; HU y subtareas listas en Jira.
   La extracción de cláusulas pertenece a HU30.
 - **HU10 / AARI-116 finalizada:** PR #25 mergeado; HU y subtareas listas en Jira.
