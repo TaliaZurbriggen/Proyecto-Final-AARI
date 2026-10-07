@@ -54,12 +54,16 @@ def local_engine():
                     );
                 """)
                 for number in (1, 2, 3, 4, 6, 17, 18, 19, 21, 22, 23):
-                    migration = next(MIGRATIONS.glob(f"{number:02d}_*.sql"))
+                    migration = (MIGRATIONS / "23_notificaciones_actor_responsable.sql"
+                                 if number == 23 else next(MIGRATIONS.glob(f"{number:02d}_*.sql")))
                     sql = migration.read_text(encoding="utf-8")
                     if number == 4:
                         # No cargar contactos reales del seed histórico.
                         sql = sql.split("-- Seed de parámetros")[0]
                     cursor.execute(sql)
+                # HU14 especializa expensas; archivo explícito, no glob por número.
+                cursor.execute((MIGRATIONS / "20261007133447_hu14_derivacion_expensas.sql").read_text(encoding="utf-8"))
+                cursor.execute((MIGRATIONS / "20261007150410_hu14_indice_fk_derivacion_expensas.sql").read_text(encoding="utf-8"))
                 cursor.execute("""
                     INSERT INTO configuracion_sistema (clave, valor) VALUES
                         ('correo_contacto_inmobiliaria', 'agency@example.com'),

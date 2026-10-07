@@ -2,6 +2,44 @@
 
 Scripts SQL para crear y actualizar el esquema de Supabase.
 
+## HU14 — Migración aplicada al entorno compartido de desarrollo
+
+`20261007133447_hu14_derivacion_expensas.sql` es una migración aditiva generada
+con versión única por Supabase CLI 2.120.0. Requiere
+`23_notificaciones_actor_responsable.sql`; las versiones 24/25 de HU30 y 26 de
+HU13 se reservan sin renombrar archivos históricos. Antes de aplicar, contrastar
+el orden de archivos completos con el historial de la base, especialmente los
+dos archivos `23_*` de las ramas en integración.
+
+Agrega el snapshot privado del reporte, FK de notificación/reclamo, evento de
+correo de expensa e índices; protege notas y configuración con RLS/revocaciones.
+No clasifica casos, no cambia estados ni encola correos retroactivos. La
+restricción de notas conserva filas históricas y valida las escrituras nuevas.
+
+**07/10/2026: aplicada con autorización al Supabase compartido AARI de
+desarrollo**, historial `20261007143153_hu14_derivacion_expensas`. La versión
+local generada por CLI sigue siendo `20261007133447`; conservar ambos registros
+sin renombrar ni volver a ejecutar por integrante o pull. Tabla, restricciones,
+índices, RLS, permisos y lecturas reales de FastAPI verificados. Sin datos de
+prueba, cambios de estado ni correos. Los conteos previos se conservaron.
+El aviso de índice compuesto en la FK de reportes quedó corregido mediante
+la incremental autorizada siguiente, sin editar esta migración ya aplicada.
+Detalles, comandos y evidencia en `docs/hu14_derivacion_expensas.md` desde la raíz.
+
+### HU14 — Índice compuesto incremental
+
+`20261007150410_hu14_indice_fk_derivacion_expensas.sql`, generado por Supabase
+CLI 2.120.0, se aplica **después** de
+`20261007133447_hu14_derivacion_expensas.sql`. Agrega únicamente un índice B-tree
+no único sobre `(notificacion_id, reclamo_id)` en la tabla de reportes. Conserva
+FK, unicidad previa, RLS, permisos y datos; límites de bloqueo/ejecución 5s/30s.
+
+**Aplicada con autorización el 07/10/2026** al Supabase AARI de desarrollo,
+historial `20261007150923_hu14_indice_fk_derivacion_expensas`. No repetir por
+integrante o pull ni modificar la migración principal para incluir este cambio.
+Índice válido/listo verificado, aviso de esa FK eliminado de los asesores,
+conteos y seguridad sin cambios. Backend final: 385 aprobadas/26 omitidas.
+
 ## Instalación nueva
 
 Ejecutar desde el SQL Editor, en este orden:

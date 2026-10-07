@@ -635,22 +635,56 @@ entorno compartido en la nube.
 - **Tobías:** AARI-116, AARI-125, AARI-135 y AARI-157, más su participación en
   el despliegue.
 - **Trabajo conjunto:** AARI-338, despliegue del entorno compartido.
-- **HU29 / AARI-318 en implementación:** módulo contractual y pruebas locales
-  incorporados en su rama; migración instalada y Storage real validado.
-  Pendientes: revisión funcional y merge. La extracción de cláusulas pertenece a HU30.
+- **HU29 / AARI-318 finalizada:** PR #24 mergeado; HU y subtareas listas en Jira.
+  La extracción de cláusulas pertenece a HU30.
+- **HU10 / AARI-116 finalizada:** PR #25 mergeado; HU y subtareas listas en Jira.
+  Infraestructura reutilizable para las notificaciones posteriores del Sprint.
 - **HU12 / AARI-135 finalizada:** PR #26 mergeado en `main`; HU y subtareas
   listas en Jira, con **50 minutos reales** registrados. Evidencia en
   [`docs/hu12_notificacion_actor_responsable.md`](docs/hu12_notificacion_actor_responsable.md).
-- **HU11 / AARI-125 en implementación:** historial por propiedad con filtros,
+- **HU11 / AARI-125 finalizada:** historial por propiedad con filtros,
   páginas de 20 y detalle con transiciones. Administración consulta todos los
   reclamos; el inquilino únicamente los propios. Acceso desde la ficha de
   propiedad y desde Mis reclamos. No requiere migración ni cambios de `.env`.
   PostgreSQL 17.11 local y recorrido funcional real de administración/inquilino
   aprobados: backend 355 pruebas aprobadas/26 omitidas; frontend 110 pruebas,
   lint y build correctos. [PR #27](https://github.com/TaliaZurbriggen/Proyecto-Final-AARI/pull/27)
-  publicado para revisión; HU y subtareas en curso, 40 minutos registrados.
+  aprobado por Talía y mergeado el 05/10/2026 (`80afb67`). HU y sus nueve
+  subtareas verificadas listas el 07/10/2026, con **1 h 15 min** registrados.
   Flujo, decisiones y comandos en
   [`docs/hu11_historial_reclamos.md`](docs/hu11_historial_reclamos.md).
+- **Pendientes verificados el 07/10/2026:** HU13/AARI-147 y HU30/AARI-319
+  continúan en curso con PR #29 y #28 abiertos. HU31/AARI-332 está en curso,
+  con rama subida y PR pendiente; su acceso a escalados espera integrar HU13.
+  El despliegue conjunto AARI-338 sigue por hacer.
+  El Sprint permanece activo; no se considera cerrado por su fecha prevista.
+- **HU14 / AARI-157 entregada para revisión:** desarrollo de
+  reportes, entrega con tres intentos, panel privado, configuración y notas.
+  Deriva solo después de aceptación SMTP registrada; fallos visibles sin
+  informar éxito falso. Backend 385 pruebas aprobadas/26 omitidas, frontend
+  122, lint/build y recorrido local de administración/operador/inquilino
+  aprobados. Migración **aplicada con autorización al Supabase AARI de desarrollo
+  el 07/10/2026**, con permisos y lecturas reales de FastAPI verificados, sin
+  cambiar datos ni enviar correos. Índice compuesto incremental aplicado con
+  autorización y aviso de esa FK corregido. Publicación de commit/PR autorizada;
+  validación final de la rama real: **387 backend aprobadas/26 omitidas**, 122
+  frontend, lint/build correctos. Tiempo real
+  confirmado y registrado hasta ahora: **1 h 20 min** en AARI-157.
+  Recorrido posterior al índice aprobado en escritorio/móvil y por los tres
+  roles; SMTP simulado, permisos por API y retiro del entorno QA verificados.
+  Un único reporte SMTP real de prueba fue aceptado y el usuario confirmó
+  recepción. Combinación temporal HU13/HU14/HU31: 527 pruebas backend
+  aprobadas/35 omitidas, 214 frontend, lint/build, flujo manual y 16 controles
+  API/SQL aprobados. Ajustes y pruebas únicamente en la copia aislada:
+  todavía falta trasladar/revalidar la integración definitiva, sin modificar
+  las ramas de Talía. El botón interno de revisión del Home sigue pendiente
+  de habilitación en HU31; la navegación combinada sí fue probada.
+  [PR #30](https://github.com/TaliaZurbriggen/Proyecto-Final-AARI/pull/30)
+  publicado desde main, sin historias ajenas, con revisión solicitada a Talía.
+  Las doce subtareas están listas; la HU principal sigue En curso hasta revisión
+  e integración. Commit de implementación `734386b`. Detalles en
+  [`docs/hu14_derivacion_expensas.md`](docs/hu14_derivacion_expensas.md) y
+  [guía de integración](docs/hu14_integracion_hu13_hu31.md).
 - **Seguimiento:** los story points conservan las estimaciones académicas
   originales; Time Tracking contiene las 39 HH reestimadas y los worklogs
   registrarán el tiempo real.

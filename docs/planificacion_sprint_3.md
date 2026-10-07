@@ -12,6 +12,64 @@ de firma manual; la firma queda en el documento. Se mantiene la estimación.
 Decisiones, ejecución y pendientes en
 [`hu29_gestion_contratos.md`](hu29_gestion_contratos.md).
 
+## Seguimiento verificado — 07/10/2026
+
+La fecha prevista de cierre es el 07/10/2026, pero el Sprint sigue activo en
+Jira y mantiene trabajo pendiente. No se cerró el Sprint ni se alteró su alcance.
+
+| Elemento | Estado verificado | Entrega |
+| --- | --- | --- |
+| HU29 / AARI-318 | HU y subtareas listas | PR #24 mergeado. |
+| HU10 / AARI-116 | HU y subtareas listas | PR #25 mergeado. |
+| HU12 / AARI-135 | HU y subtareas listas | PR #26 mergeado. |
+| HU11 / AARI-125 | HU y nueve subtareas listas el 07/10 | PR #27 aprobado y mergeado el 05/10 (`80afb67`); 1 h 15 min registrados. |
+| HU30 / AARI-319 | En curso, Talía | PR #28 abierto; correcciones subidas, pendiente nueva revisión. |
+| HU13 / AARI-147 | En curso, Talía | PR #29 abierto, pendiente revisión. |
+| HU31 / AARI-332 | En curso, Talía | Rama subida; PR pendiente. Integración del acceso a escalados después de HU13. |
+| HU14 / AARI-157 | Desarrollo entregado; HU En curso, doce subtareas listas | PR #30 abierto con revisión solicitada a Talía. Implementación y migraciones principal/de índice validadas; revisión e integración pendientes. |
+| Despliegue / AARI-338 | Por hacer, conjunto | Pendiente integración del incremento y definición del servicio. |
+
+El cierre de HU11 fue autorizado; no se agregaron worklogs ni se modificaron
+estados del trabajo pendiente de Talía. `main` local se sincronizó mediante
+fast-forward al merge `80afb67`. Detalle del cierre y pruebas en
+[`hu11_historial_reclamos.md`](hu11_historial_reclamos.md).
+
+La siguiente historia individual es HU14, con sus **5 HH planificadas**. Sus
+dependencias base (HU10 y HU12) están integradas, por lo que la implementación
+puede prepararse en paralelo al trabajo de Talía. La persona responsable aprobó
+el 07/10 las decisiones de estado de envío, privacidad de notas e integración.
+HU y doce subtareas se verificaron En curso. La migración se aplicó al Supabase
+AARI de desarrollo el 07/10 con permisos y lecturas de FastAPI verificados, sin
+datos de prueba ni correos. La incremental de índice compuesto también fue
+autorizada, aplicada y verificada: el aviso de esa FK desapareció de los asesores.
+La revalidación funcional posterior al índice pasó con administración, operación
+e inquilino en escritorio/móvil y con permisos por API; SMTP fue simulado y el
+entorno local descartable se retiró al terminar, sin datos compartidos de prueba.
+Evidencia local, validación compartida y pendientes en
+[`hu14_derivacion_expensas.md`](hu14_derivacion_expensas.md); no hay nuevos
+commit o PR al momento de esa validación inicial. El usuario confirmó y se registraron
+**1 h 20 min** en AARI-157 el 07/10 (worklog 10268, una única entrada).
+Se validó después un único reporte SMTP real con datos ficticios y el usuario
+confirmó su recepción. La combinación temporal con HU13/HU31 pasó 527 pruebas
+backend (35 omitidas), 214 frontend, lint/build, flujo manual en navegador y
+16 verificaciones API/SQL. Ajustes de integración y expectativa de prueba de
+HU13 solo en la copia; no se modificaron ramas reales ni se publicó un PR.
+HU13 sigue con PR #29 abierto y HU31 En curso. La integración definitiva y la
+activación del botón interno de revisión del Home siguen pendientes de esas
+historias. Después, la persona responsable autorizó completar la entrega y
+publicar HU14 para revisión. Validación final de la rama real: 387 backend
+aprobadas/26 omitidas, 122 frontend, lint/build correctos. El PR de HU14 incluye
+solo su desarrollo desde el main vigente y una guía de integración; no incorpora
+las historias pendientes de Talía ni implica revisión/merge aprobados.
+
+**Entrega publicada el 07/10:** commit de implementación `734386b` en
+`codex/AARI-157-derivacion-expensas` y
+[PR #30](https://github.com/TaliaZurbriggen/Proyecto-Final-AARI/pull/30)
+abierto, no borrador, con Talía solicitada como revisora. AARI-158 a AARI-169
+verificadas listas; AARI-157 conserva En curso hasta revisión/integración.
+El tiempo registrado sigue en 1 h 20 min, sin nuevas entradas. Notion continúa
+bloqueado por el límite de bloques; ejecución y decisiones quedan en el repo.
+
 ## Punto de partida
 
 Durante el Sprint 2 se completaron ocho historias de usuario y se registraron **22 h 20 min** de trabajo. El alcance quedó terminado casi dos semanas antes del cierre previsto. La estimación original de 190 HH no representó la duración real de las implementaciones, por lo que el equipo acordó reestimar el Sprint 3 utilizando:

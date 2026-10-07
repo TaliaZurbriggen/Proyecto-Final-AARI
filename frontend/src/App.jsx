@@ -33,6 +33,9 @@ import { destinationForUser } from './features/auth/routing.js'
 import ContractsListPage from './features/contratos/pages/ContractsListPage.jsx'
 import ContractFormPage from './features/contratos/pages/ContractFormPage.jsx'
 import ContractDetailPage from './features/contratos/pages/ContractDetailPage.jsx'
+import ExpenseLayout from './features/expensas/ExpenseLayout.jsx'
+import ExpensesListPage from './features/expensas/ExpensesListPage.jsx'
+import ExpenseDetailPage from './features/expensas/ExpenseDetailPage.jsx'
 
 function SessionHomeRedirect() {
   const { user } = useAuth()
@@ -49,6 +52,12 @@ function App() {
         </Route>
         <Route element={<ProtectedRoute />}>
           <Route index element={<SessionHomeRedirect />} />
+        </Route>
+        <Route element={<ProtectedRoute allowedRoles={['administrador', 'operador']} />}>
+          <Route element={<ExpenseLayout />}>
+            <Route path="expensas" element={<ExpensesListPage />} />
+            <Route path="expensas/:reclamoId" element={<ExpenseDetailPage />} />
+          </Route>
         </Route>
         <Route element={<ProtectedRoute allowedRoles={['administrador']} />}>
           <Route element={<AdminLayout />}>
