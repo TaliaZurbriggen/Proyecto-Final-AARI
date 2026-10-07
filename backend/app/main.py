@@ -11,6 +11,7 @@ from app.api.auth import require_admin, router as auth_router
 from app.api.configuracion import router as agency_configuration_router
 from app.api.expensas import router as expenses_router
 from app.api.contratos import get_contract_clause_service, router as contratos_router
+from app.api.escalados import router as escalados_router
 from app.services.contract_errors import ContractError
 from app.api.inquilinos import property_router as property_tenant_router
 from app.api.inquilinos import router as inquilinos_router
@@ -93,6 +94,8 @@ app.include_router(propietarios_router, dependencies=admin_dependencies)
 app.include_router(inquilinos_router, dependencies=admin_dependencies)
 app.include_router(proveedores_router, dependencies=admin_dependencies)
 app.include_router(specialties_router, dependencies=admin_dependencies)
+# La ruta estática /reclamos/escalados debe preceder al UUID del portal inquilino.
+app.include_router(escalados_router)
 app.include_router(reclamos_router)
 app.include_router(contratos_router)
 

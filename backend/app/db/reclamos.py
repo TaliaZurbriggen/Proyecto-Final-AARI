@@ -32,6 +32,15 @@ from app.services.classification_service import (
     PersistedClassification,
     ensure_classification_allowed,
 )
+from app.schemas.escalados import ManualClassificationResponse
+from app.services.escalated_claims_service import (
+    EscalatedClaimNotFoundError,
+    ManualClassificationConflictError,
+    ManualClassificationPermissionError,
+    ManualDecisionContext,
+    PersistedManualClassification,
+    ensure_manual_classification_allowed,
+)
 from app.services.claims_creation_service import (
     ActiveClaimExistsError,
     PersistedClaim,
@@ -827,6 +836,19 @@ class SqlAlchemyClaimsRepository:
         result: AgentClassificationResult,
         contract_context: list[dict[str, object]] | None = None,
     ) -> PersistedClassification:
+        return self._persist_classification(reclamo_id, result, contract_context=contract_context)
+
+    def resolve_manual(
+        self, reclamo_id: UUID, result: AgentClassificationResult,
+        decision: ManualDecisionContext,
+    ) -> PersistedManualClassification:
+        return self._persist_classification(reclamo_id, result, decision=decision)
+
+    def _persist_classification(
+        self, reclamo_id: UUID, result: AgentClassificationResult,
+        *, decision: ManualDecisionContext | None = None,
+        contract_context: list[dict[str, object]] | None = None,
+    ) -> PersistedClassification | PersistedManualClassification:
         estado = (
             "Escalado"
             if result.debe_escalar
@@ -841,13 +863,30 @@ class SqlAlchemyClaimsRepository:
             "motivo_escalado": result.motivo_escalado,
             "reclamo_id": str(reclamo_id),
             "contract_context": json.dumps(contract_context or [], ensure_ascii=False),
+            "origen": decision.role if decision else "agente",
+            "manual": decision is not None,
         }
         with self.session_factory.begin() as session:
+            # Orden usuario -> reclamo compatible con la baja de operadores.
+            actor = None
+            if decision:
+                actor = session.execute(text("""
+                    SELECT id, rol::text AS rol, COALESCE(nombre_completo, email) AS nombre
+                    FROM usuarios WHERE id = :id AND activo AND NOT primer_ingreso
+                      AND rol in ('operador', 'administrador')
+                    FOR SHARE
+                """), {"id": str(decision.user_id)}).mappings().one_or_none()
+                if actor is None or actor["rol"] != decision.role:
+                    raise ManualClassificationPermissionError
             context = session.execute(
                 text(
                     """
                     SELECT r.id, r.numero, r.descripcion, r.estado,
                            r.clasificado_en, r.creado_en, r.urgencia::text AS urgencia,
+                           r.updated_at,
+                           r.tipo_gasto::text AS tipo_gasto_anterior,
+                           r.confianza_clasificacion, r.fundamento_clasificacion,
+                           r.motivo_escalado, r.origen_clasificacion,
                            i.nombre_completo AS inquilino_nombre,
                            i.email AS inquilino_email,
                            i.telefono AS inquilino_telefono,
@@ -883,6 +922,8 @@ class SqlAlchemyClaimsRepository:
                 {"reclamo_id": str(reclamo_id)},
             ).mappings().one_or_none()
             if context is None:
+                if decision:
+                    raise EscalatedClaimNotFoundError
                 raise RuntimeError(
                     "El reclamo desapareció antes de persistir su clasificación."
                 )
@@ -896,14 +937,28 @@ class SqlAlchemyClaimsRepository:
                 ),
                 {"reclamo_id": str(reclamo_id)},
             ).scalar_one()
-            ensure_classification_allowed(
-                estado=context["estado"],
-                clasificado=context["clasificado_en"] is not None or has_responsible,
-            )
+            if decision:
+                ensure_manual_classification_allowed(
+                    estado=context["estado"], tipo_gasto=context["tipo_gasto_anterior"],
+                    has_responsible=has_responsible, origen=context["origen_clasificacion"],
+                )
+                if context["updated_at"] != decision.expected_updated_at:
+                    raise ManualClassificationConflictError(
+                        "El reclamo cambió mientras lo revisabas. Actualizá la pantalla."
+                    )
+            else:
+                ensure_classification_allowed(
+                    estado=context["estado"],
+                    clasificado=context["clasificado_en"] is not None or has_responsible,
+                )
 
             session.execute(
-                text("SELECT set_config('app.origen_reclamo', 'agente', true)")
+                text("SELECT set_config('app.origen_reclamo', :origen, true)"),
+                {"origen": params["origen"]},
             )
+            if decision:
+                session.execute(text("SELECT set_config('app.usuario_reclamo', :id, true)"),
+                                {"id": str(decision.user_id)})
             omit_tenant_update = (
                 not result.debe_escalar
                 and result.actor_responsable in {"inquilino", "inmobiliaria"}
@@ -924,8 +979,10 @@ class SqlAlchemyClaimsRepository:
                         confianza_clasificacion = :confianza,
                         fundamento_clasificacion = :fundamento,
                         motivo_escalado = :motivo_escalado,
-                        origen_clasificacion = 'agente',
-                        contexto_contractual_clasificacion = CAST(:contract_context AS jsonb),
+                        origen_clasificacion = :origen,
+                        contexto_contractual_clasificacion = CASE WHEN :manual
+                            THEN contexto_contractual_clasificacion
+                            ELSE CAST(:contract_context AS jsonb) END,
                         clasificado_en = CURRENT_TIMESTAMP
                     WHERE id = :reclamo_id
                     RETURNING id, estado, tipo_gasto::text AS tipo_gasto,
@@ -955,6 +1012,34 @@ class SqlAlchemyClaimsRepository:
                     ),
                     {"reclamo_id": str(reclamo_id), "estado": estado},
                 ).scalar_one_or_none()
+                if decision:
+                    # Snapshot explícito: no serializar todos los datos del reclamo.
+                    previous = {
+                        "estado": context["estado"],
+                        "tipo_gasto": context["tipo_gasto_anterior"],
+                        "confianza": float(context["confianza_clasificacion"])
+                        if context["confianza_clasificacion"] is not None else None,
+                        "fundamento": context["fundamento_clasificacion"],
+                        "motivo_escalado": context["motivo_escalado"],
+                        "origen": context["origen_clasificacion"],
+                        "clasificado_en": context["clasificado_en"].isoformat()
+                        if context["clasificado_en"] is not None else None,
+                        "updated_at": context["updated_at"].isoformat(),
+                    }
+                    session.execute(text("""
+                        INSERT INTO reclamo_decisiones_clasificacion (
+                            reclamo_id, historial_estado_id, usuario_id, usuario_nombre,
+                            rol, tipo_gasto, fundamento, resultado_anterior
+                        ) VALUES (
+                            :reclamo_id, :history_id, :user_id, :name, :role,
+                            CAST(:expense AS tipo_gasto_reclamo), :reason, CAST(:previous AS jsonb)
+                        )
+                    """), {
+                        "reclamo_id": str(reclamo_id), "history_id": str(history_id),
+                        "user_id": str(decision.user_id), "name": actor["nombre"],
+                        "role": decision.role, "expense": result.tipo_gasto,
+                        "reason": result.fundamento, "previous": json.dumps(previous),
+                    })
                 actor_name, recipient, channel = self._responsible_contact(
                     context,
                     actor=result.actor_responsable,
@@ -1013,7 +1098,8 @@ class SqlAlchemyClaimsRepository:
                         piso=context["piso"], numero=context["propiedad_numero"],
                     )
                     notification_id = enqueue_expense_report(
-                        session, expense_report(report_context, result, report_property), recipient,
+                        session, expense_report(report_context, result, report_property,
+                                                origin=params["origen"]), recipient,
                     )
                 elif recipient and channel:
                     data = ResponsibleNotificationData(
@@ -1063,6 +1149,14 @@ class SqlAlchemyClaimsRepository:
                     ).mappings().one()
                     notification_id = UUID(str(notification_row["id"]))
 
+        if decision:
+            return PersistedManualClassification(
+                response=ManualClassificationResponse(
+                    reclamo_id=row["id"], estado=row["estado"], tipo_gasto=row["tipo_gasto"],
+                    actor_responsable=result.actor_responsable, origen=decision.role,
+                    decidido_en=row["clasificado_en"],
+                ), notification_id=notification_id,
+            )
         return PersistedClassification(
             response=ClaimClassificationResponse(
                 reclamo_id=row["id"],

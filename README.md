@@ -112,6 +112,46 @@ Requiere las migraciones de clasificación y notificaciones hasta
 migraciones. Decisiones y pruebas:
 [`docs/hu12_notificacion_actor_responsable.md`](docs/hu12_notificacion_actor_responsable.md).
 
+### Resolución humana de casos escalados (HU13)
+
+Administradores y operadores activos revisan la cola de clasificación desde
+`/escalados` y `/operador/escalados`, respectivamente. Incluye búsqueda,
+paginación, propiedad, fechas y motivo de revisión, con los casos más antiguos
+primero. El detalle conserva descripción, fotos privadas e historial.
+Detalle y fotos sólo admiten reclamos con pertenencia actual o histórica a la
+cola, o con una decisión manual registrada. Conocer un UUID no permite consultar
+un reclamo nunca escalado; en ese caso la API devuelve `404`.
+
+La persona selecciona ordinario, extraordinario o expensa y escribe un
+fundamento obligatorio, sin clasificación preseleccionada. La entrada manual
+de LangGraph reutiliza el nodo `determinar_actor_responsable`, **sin consultar
+Gemini**, y continúa con las notificaciones y plazos de HU12. Las expensas
+utilizan el reporte de HU14, con origen humano y sin confianza de LLM; sólo se
+derivan después de registrar la entrega. Resolver el
+escalado no significa cerrar la reparación.
+
+`POST /reclamos/{id}/resolver-escalado` guarda decisión, auditoría, transición
+y solicitud del responsable en una transacción. Una versión desactualizada,
+una decisión duplicada o un caso que avanzó devuelve `409`; no reemplaza la
+gestión existente. La confianza humana queda nula y el resultado anterior del
+modelo se conserva por separado.
+
+Requiere `backend/migrations/26_resolucion_escalados.sql`, **aplicada con
+autorización en Supabase el 05/10/2026**, con registro
+`20261005191504_hu13_resolucion_escalados`. No repetirla: el verificador de HU13
+comprueba tabla, índices, trigger, RLS y permisos. La numeración 24/25 pertenece
+a HU30; no renombrar scripts históricos. No hay nuevas variables ni dependencias.
+La incremental `20261007224000_hu13_destinatario_habilitado.sql` excluye del
+destinatario a cuentas pendientes de primer ingreso. **Aplicada con autorización
+en Supabase el 07/10/2026**, registro `20261007224000_hu13_destinatario_habilitado`.
+Las **9 pruebas reales HU13** volvieron a aprobar con datos ficticios y rollback,
+sin Gemini, SMTP ni Storage reales. No reaplicar la 26 ni la incremental.
+El comprobador contrasta objetos, función e historial antes de aceptar la
+instalación; ante diferencias se detiene y no repara el registro automáticamente.
+
+Alcance, decisiones y pruebas:
+[`docs/hu13_resolucion_escalados.md`](docs/hu13_resolucion_escalados.md).
+
 ### Gestión de contratos de alquiler (HU29)
 
 La inmobiliaria administra los contratos desde `/contratos` o desde la ficha
@@ -709,7 +749,7 @@ entorno compartido en la nube.
 - **Tobías:** AARI-116, AARI-125, AARI-135 y AARI-157, más su participación en
   el despliegue.
 - **Trabajo conjunto:** AARI-338, despliegue del entorno compartido.
-- **HU30 / AARI-319 aprobada para integración:** extracción local/OCR, análisis
+- **HU30 / AARI-319 finalizada:** extracción local/OCR, análisis
   asistido, respaldo literal sin IA, revisión humana e integración del contexto
   contractual implementados en su rama. Las migraciones 23, 24 y 25 están
   aplicadas; las suites locales, PostgreSQL y OCR están aprobados. V3 fue evaluada en cuatro modelos
@@ -733,7 +773,8 @@ entorno compartido en la nube.
   `main` con HU14 preservando evidencia congelada y revisión humana obligatoria.
   Validación final del 07/10, incluido PostgreSQL local: **643 pruebas backend
   aprobadas, 28 omitidas; 134 frontend**, lint/build y formato correctos.
-  El cierre queda condicionado al merge y las pruebas de integración finales.
+  PR #28 mergeado el 07/10/2026 (`439ee3c`); HU y sus seis subtareas verificadas
+  listas en Jira. Se conserva la revisión humana obligatoria.
   Ver [alcance y resultados actuales de HU30](docs/evaluaciones/hu30/flujo_asistido_2026-10-05.md)
   y [regresiones del PR #28](docs/evaluaciones/hu30/correcciones_pr28_2026-10-05.md).
   [Actualización final del PR #28](docs/evaluaciones/hu30/cierre_pr28_2026-10-07.md).
@@ -744,6 +785,26 @@ entorno compartido en la nube.
 - **HU12 / AARI-135 finalizada:** PR #26 mergeado en `main`; HU y subtareas
   listas en Jira, con **50 minutos reales** registrados. Evidencia en
   [`docs/hu12_notificacion_actor_responsable.md`](docs/hu12_notificacion_actor_responsable.md).
+- **HU13 / AARI-147 en curso:** implementación en
+  `codex/AARI-147-resolucion-escalados`, actualizada con `main` `439ee3c`. La HU y las
+  nueve subtareas están En curso. Cola de revisión, decisión manual sin LLM,
+  auditoría y continuidad de HU12 probadas localmente. Migración 26 aplicada
+  con autorización en Supabase el 05/10/2026; **9 pruebas reales aprobadas**,
+  con datos sintéticos y rollback, sin Gemini ni correos. Pendientes: revisión
+  funcional del equipo y nueva revisión del PR #29; publicación de la rama
+  autorizada el 05/10/2026, con **1 h 10 min** registrados en subtareas. La documentación está en
+  [`docs/hu13_resolucion_escalados.md`](docs/hu13_resolucion_escalados.md);
+  Notion no permitió agregarla por el límite de bloques gratuitos.
+  Correcciones aprobadas del PR #29 implementadas localmente el 07/10: acceso
+  restringido a la cola, alertas sólo a personal habilitado y comprobador
+  consistente con el historial. Integración con HU30/HU14 conservada. Validación:
+  **713 backend aprobadas/37 omitidas, 151 frontend**, lint/build y 8 controles
+  de navegación escritorio/móvil con teclado aprobados. Incremental de
+  destinatarios aplicada con autorización en Supabase el 07/10; **9 pruebas
+  reales HU13 aprobadas** con rollback y limpieza comprobada. La 26 y su registro
+  permanecen intactos. Publicación de las correcciones autorizada el 07/10;
+  nueva revisión y merge del PR #29 pendientes.
+  [Detalle de la revisión](docs/hu13_correcciones_pr29_2026-10-07.md).
 - **HU11 / AARI-125 finalizada:** historial por propiedad con filtros,
   páginas de 20 y detalle con transiciones. Administración consulta todos los
   reclamos; el inquilino únicamente los propios. Acceso desde la ficha de
@@ -755,8 +816,8 @@ entorno compartido en la nube.
   subtareas verificadas listas el 07/10/2026, con **1 h 15 min** registrados.
   Flujo, decisiones y comandos en
   [`docs/hu11_historial_reclamos.md`](docs/hu11_historial_reclamos.md).
-- **Pendientes verificados el 07/10/2026:** HU13/AARI-147 y HU30/AARI-319
-  continúan en curso con PR #29 y #28 abiertos. HU31/AARI-332 está en curso,
+- **Pendientes verificados el 07/10/2026:** HU13/AARI-147 continúa en curso
+  con PR #29 abierto; HU30/AARI-319 está mergeada y finalizada. HU31/AARI-332 está en curso,
   con rama subida y PR pendiente; su acceso a escalados espera integrar HU13.
   El despliegue conjunto AARI-338 sigue por hacer.
   El Sprint permanece activo; no se considera cerrado por su fecha prevista.

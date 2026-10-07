@@ -3,6 +3,7 @@ import { AppHeader } from '../components/layout/index.js'
 import { useAuth } from '../features/auth/authContext.js'
 
 const navigationItems = [
+  { href: '/escalados', label: 'Casos escalados' },
   { href: '/propietarios', label: 'Propietarios' },
   { href: '/propiedades', label: 'Propiedades' },
   { href: '/inquilinos', label: 'Inquilinos' },
@@ -17,6 +18,7 @@ function AdminLayout() {
   const location = useLocation()
   const navigate = useNavigate()
   const isProperties = location.pathname.startsWith('/propiedades')
+  const isEscalated = location.pathname.startsWith('/escalados')
   const isTenants = location.pathname.startsWith('/inquilinos')
   const isProviders = location.pathname.startsWith('/proveedores')
   const isOperators = location.pathname.startsWith('/operadores')
@@ -24,6 +26,8 @@ function AdminLayout() {
   const isExpenses = location.pathname.startsWith('/expensas')
   const activeModule = isExpenses
     ? { href: '/expensas', label: 'Expensas', placeholder: '' }
+    : isEscalated
+    ? { href: '/escalados', label: 'Casos escalados', placeholder: 'Buscar caso escalado' }
     : isContracts
     ? { href: '/contratos', label: 'Contratos', placeholder: 'Buscar inmueble o participante' }
     : isOperators
@@ -78,7 +82,7 @@ function AdminLayout() {
         profileRole="Administración"
         searchPlaceholder={activeModule.placeholder}
         searchValue={searchValue}
-        showSearch={!isExpenses}
+        showSearch={!isExpenses && !isEscalated}
       />
       <Outlet />
     </>

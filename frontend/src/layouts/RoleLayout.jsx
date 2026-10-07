@@ -24,9 +24,14 @@ function RoleLayout() {
   if (['inquilino', 'propietario'].includes(user?.rol)) {
     items.push({ href: `${homePath}/contratos`, label: 'Mis contratos' })
   }
-  if (user?.rol === 'operador') items.push({ href: '/expensas', label: 'Expensas' })
+  if (user?.rol === 'operador') {
+    items.push({ href: '/operador/escalados', label: 'Casos escalados' })
+    items.push({ href: '/expensas', label: 'Expensas' })
+  }
   const activeItem = location.pathname.startsWith('/expensas')
     ? 'Expensas'
+    : location.pathname.startsWith('/operador/escalados')
+    ? 'Casos escalados'
     : location.pathname.includes('/contratos')
     ? 'Mis contratos'
     : location.pathname === '/inquilino/reclamos/nuevo'
