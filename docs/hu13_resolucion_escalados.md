@@ -24,8 +24,9 @@ aproximadamente según el esfuerzo de cada actividad, sin duplicarlos en la HU:
 Jira confirmó **4200 segundos acumulados** en AARI-147 y ningún worklog directo
 en la HU padre. La HU y sus subtareas siguen En curso.
 La publicación mediante commit y push fue autorizada el 05/10/2026. Talía
-creará el PR para revisión de Tobías. La historia no se marca como terminada
-ni se fusiona a `main` en esta entrega.
+creó el PR #29 para revisión de Tobías. El 07/10/2026 autorizó publicar las
+correcciones posteriores al rebase y a la validación real en Supabase. La
+historia no se marca como terminada ni se fusiona a `main` en esta entrega.
 
 La inmobiliaria puede revisar y clasificar los reclamos `Escalado` o
 `Clasificación pendiente` sin tipo de gasto ni solicitud de responsable.
@@ -113,10 +114,12 @@ La migración 26 agrega un trigger al historial. Encola un aviso por entrada a
 transición entre esos dos estados no es otra entrada y no repite el aviso.
 La clave de idempotencia incorpora reclamo y evento de entrada.
 
-Se mantiene la política de HU12: operador asignado si está activo, luego otro
-operador activo y finalmente administrador activo, con orden determinista.
+Se mantiene el orden de HU12: operador asignado, luego otro operador y finalmente
+administrador, con orden determinista. La corrección incremental del PR #29
+requiere que la cuenta esté activa y haya completado el primer ingreso; está
+probada localmente y aplicada con autorización en Supabase el 07/10/2026.
 No se cambia la asignación ni se envía a todas las cuentas. Si no hay personal
-activo no se inventa un destinatario: el caso permanece consultable en la cola
+habilitado no se inventa un destinatario: el caso permanece consultable en la cola
 y no se crea un correo sin destino. No hay backfill de avisos históricos.
 Se reutilizan outbox, worker y reintentos; no se envía correo desde PostgreSQL.
 
@@ -148,11 +151,21 @@ a `anon`/`authenticated`, índices y función/trigger con `search_path` vacío.
 No cambia migraciones históricas ni datos existentes. Requiere las de HU10/HU12
 hasta `23_notificaciones_actor_responsable.sql`.
 
-Los números 24/25 están reservados por HU30. Al integrarla habrá dos archivos
+Los números 24/25 pertenecen a HU30. Al integrarla quedan dos archivos
 con prefijo 23; hay que respetar nombres completos e historial del entorno,
 sin renumerar scripts ya aplicados. HU13 no depende de tablas contractuales.
-Al actualizar esta rama con HU30 se deben conservar el contexto contractual y
-las protecciones de HU12 junto con el nuevo camino manual.
+El rebase del 07/10/2026 integra HU30 y HU14 desde `main` `439ee3c`, conservando
+el contexto contractual, las protecciones de HU12 y el camino manual. La nueva
+incremental de destinatarios no altera la 26 aplicada ni su registro.
+Correcciones y pruebas actuales en [revisión del PR #29](hu13_correcciones_pr29_2026-10-07.md).
+
+La incremental `20261007224000_hu13_destinatario_habilitado.sql` se aplicó con
+autorización el **07/10/2026** en Supabase AARI de desarrollo, con registro
+`20261007224000_hu13_destinatario_habilitado`. Se verificaron objetos, función,
+seguridad e historial; el registro original de la 26 permaneció intacto. No
+repetir ninguna migración al actualizar la rama. El QA real posterior volvió
+a aprobar **9 pruebas**, con datos ficticios y rollback verificado, sin Gemini,
+SMTP ni Storage. Esta pasada también comprueba la continuidad de expensas de HU14.
 
 **Aplicada con autorización en Supabase AARI de desarrollo el 05/10/2026
 (Argentina)**, registro `20261005191504_hu13_resolucion_escalados`. Se comprobaron
@@ -282,10 +295,9 @@ HU13. Esta sección conserva la decisión aprobada hasta poder publicarla en Not
 
 1. Revisión funcional del equipo en el entorno real; fotos reales/Storage
    y SMTP quedan fuera de las validaciones efectuadas.
-2. Revisar e integrar cambios nuevos de `main`, especialmente HU30 si se
-   mergea antes; conservar contrato de HU12 y contexto contractual.
-3. Crear y revisar el PR (publicación de la rama autorizada el 05/10/2026).
+2. Nueva revisión del PR #29 y autorización del merge; la publicación de las
+   correcciones fue autorizada el 07/10/2026.
    Mantener HU/subtareas En curso hasta el cierre acordado; registrar tiempo
    real solo cuando se indique.
-4. Publicar esta decisión y la evidencia en Notion cuando el espacio permita
+3. Publicar esta decisión y la evidencia en Notion cuando el espacio permita
    nuevos bloques, sin afirmar que ya están sincronizados.

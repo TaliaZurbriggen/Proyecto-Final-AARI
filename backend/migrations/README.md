@@ -77,6 +77,9 @@ La instalación nueva debe aplicar además, en orden:
 11. `24_evidencia_clausulas_contractuales.sql` — evidencia por página y
     propuestas rechazadas.
 12. `25_extraccion_asistida_literal.sql` — origen e historial de extracción asistida.
+13. `26_resolucion_escalados.sql` — cola y auditoría de clasificación manual.
+14. `20261007224000_hu13_destinatario_habilitado.sql` — sólo después de 26;
+    excluye cuentas pendientes de primer ingreso del aviso de cola.
 
 Las dos migraciones con prefijo `23_` corresponden a historias independientes
 y ambas ya fueron aplicadas en desarrollo. Se identifican por el nombre completo
@@ -148,6 +151,9 @@ Aplicar únicamente las migraciones pendientes y respetar este orden:
     después de `23_clausulas_contractuales.sql`.
 21. `25_extraccion_asistida_literal.sql` — origen e historial del análisis
     asistido/literal. Aplicar después de `24_evidencia_clausulas_contractuales.sql`.
+22. `26_resolucion_escalados.sql` — resolución manual y avisos de cola.
+23. `20261007224000_hu13_destinatario_habilitado.sql` — después de 26;
+    no reemplaza ni reaplica la migración histórica.
 
 ## HU30: migración 24
 
@@ -218,6 +224,39 @@ las pruebas sintéticas HU13 con rollback. Los dos últimos requieren autorizaci
 expresa; no habilitan Gemini, SMTP ni Storage reales. Se puede indicar
 `--env-file` sin imprimir su contenido. Comandos, resultados y pendientes en
 `docs/hu13_resolucion_escalados.md`.
+
+## HU13: corrección incremental de destinatario — aplicada en Supabase
+
+`20261007224000_hu13_destinatario_habilitado.sql` requiere la 26 y redefine
+únicamente `notificar_clasificacion_pendiente()`: conserva el destinatario
+determinista y agrega `AND NOT primer_ingreso`. Sin cuentas habilitadas, el
+reclamo permanece en la cola pero no se encola un correo sin destinatario.
+No cambia asignaciones, RLS, tablas, reclamos ni alertas históricas. Conserva
+`SECURITY INVOKER`, `search_path` vacío y permisos revocados. No ejecuta SMTP.
+
+**Aplicada con autorización el 07/10/2026 en Supabase AARI de desarrollo**,
+registro `20261007224000_hu13_destinatario_habilitado`. La comprobación previa
+confirmó que la 26 estaba instalada de forma coherente: sólo se aplicó la
+incremental. La 26 y su registro `20261005191504_hu13_resolucion_escalados`
+permanecen intactos. Objetos, función, RLS, permisos e historial verificados;
+**9 pruebas reales HU13 aprobadas**, con datos ficticios, rollback y limpieza
+comprobada por sus IDs. No se consumió la secuencia de reclamos ni se llamó
+a Gemini, SMTP o Storage. No repetir ninguna de las dos migraciones al hacer pull.
+
+El script `check_escalados_postgres.py` comprueba objetos y registro antes de
+decidir: una instalación vieja coherente muestra la incremental como pendiente;
+una nueva aplica ambas en la misma transacción; una segunda ejecución no las
+repite. Registra la incremental con versión única `20261007224000` y nombre
+`hu13_destinatario_habilitado`. Si hay objetos sin historial, historial sin
+objetos o desacuerdo en la función corregida, se detiene sin reparaciones
+automáticas. Un fallo de registro revierte el cambio de función. El modo
+`test` requiere ambas migraciones verificadas y continúa usando datos ficticios
+con rollback, sin Gemini, SMTP ni Storage.
+
+El orden de HU14 sigue documentado al comienzo y es independiente de esta
+corrección, después de `23_notificaciones_actor_responsable.sql`. No ordenar
+todos los scripts únicamente por su prefijo numérico.
+Evidencia: `docs/hu13_correcciones_pr29_2026-10-07.md` desde la raíz.
 
 ## HU12: preparación de la migración 23
 

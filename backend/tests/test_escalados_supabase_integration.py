@@ -141,8 +141,8 @@ def test_real_manual_graph_audit_actor_outbox_and_rollback(synthetic_case, role,
         SELECT actor_tipo FROM reclamo_responsables WHERE reclamo_id = :id
     """), {"id": claim_id}).scalar_one() == actor
     assert connection.execute(text("""
-        SELECT count(*) FROM notificaciones WHERE reclamo_id = :id AND tipo_evento = 'responsable_inicial'
-    """), {"id": claim_id}).scalar_one() == 1
+        SELECT count(*) FROM notificaciones WHERE reclamo_id = :id AND tipo_evento = :event
+    """), {"id": claim_id, "event": "expensa_reporte" if expense == "expensa" else "responsable_inicial"}).scalar_one() == 1
     with pytest.raises(ManualClassificationConflictError):
         service.resolve(claim_id, request, users[role])
     assert queries.get(claim_id).model_dump() == after.model_dump()

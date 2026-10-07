@@ -31,6 +31,14 @@ PENDING = """
     AND COALESCE(r.origen_clasificacion, '') NOT IN ('operador', 'administrador')
     AND NOT EXISTS (SELECT 1 FROM reclamo_responsables rr WHERE rr.reclamo_id = r.id)
 """
+QUEUE_MEMBER = """
+    (r.estado IN ('Escalado', 'Clasificación pendiente')
+     OR EXISTS (SELECT 1 FROM reclamo_historial_estados h
+                WHERE h.reclamo_id = r.id
+                  AND h.estado_nuevo IN ('Escalado', 'Clasificación pendiente'))
+     OR EXISTS (SELECT 1 FROM reclamo_decisiones_clasificacion d
+                WHERE d.reclamo_id = r.id))
+"""
 
 
 def claim_item(row):
@@ -71,7 +79,8 @@ class SqlAlchemyEscalatedClaimsRepository:
 
     def get(self, claim_id: UUID) -> EscalatedClaimDetail:
         with self.session_factory() as session:
-            row = session.execute(text("SELECT " + CLAIM_COLUMNS + SOURCE + " WHERE r.id = :id"),
+            row = session.execute(text("SELECT " + CLAIM_COLUMNS + SOURCE
+                                       + " WHERE r.id = :id AND " + QUEUE_MEMBER),
                                   {"id": str(claim_id)}).mappings().one_or_none()
             if row is None:
                 raise EscalatedClaimNotFoundError
@@ -102,9 +111,11 @@ class SqlAlchemyEscalatedClaimsRepository:
     def photo(self, claim_id: UUID, photo_id: UUID):
         with self.session_factory() as session:
             row = session.execute(text("""
-                SELECT url, formato FROM reclamo_fotos
-                WHERE id = :photo_id AND reclamo_id = :claim_id
-            """), {"photo_id": str(photo_id), "claim_id": str(claim_id)}).mappings().one_or_none()
+                SELECT f.url, f.formato FROM reclamo_fotos f
+                JOIN reclamos r ON r.id = f.reclamo_id
+                WHERE f.id = :photo_id AND r.id = :claim_id AND
+            """ + QUEUE_MEMBER),
+                {"photo_id": str(photo_id), "claim_id": str(claim_id)}).mappings().one_or_none()
         if row is None:
             raise EscalatedClaimNotFoundError
         return row

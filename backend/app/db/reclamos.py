@@ -3,7 +3,6 @@
 import json
 
 from collections.abc import Mapping
-import json
 from typing import Any
 from uuid import UUID, uuid4
 
@@ -1099,7 +1098,8 @@ class SqlAlchemyClaimsRepository:
                         piso=context["piso"], numero=context["propiedad_numero"],
                     )
                     notification_id = enqueue_expense_report(
-                        session, expense_report(report_context, result, report_property), recipient,
+                        session, expense_report(report_context, result, report_property,
+                                                origin=params["origen"]), recipient,
                     )
                 elif recipient and channel:
                     data = ResponsibleNotificationData(

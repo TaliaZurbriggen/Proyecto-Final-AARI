@@ -18,6 +18,9 @@ from sqlalchemy.engine import make_url
 ROOT = Path(__file__).resolve().parents[1]
 MIGRATION = ROOT / "migrations" / "26_resolucion_escalados.sql"
 NAME = "hu13_resolucion_escalados"
+RECIPIENT_MIGRATION = ROOT / "migrations" / "20261007224000_hu13_destinatario_habilitado.sql"
+RECIPIENT_NAME = "hu13_destinatario_habilitado"
+RECIPIENT_VERSION = "20261007224000"
 
 
 def configure(env_file):
@@ -75,38 +78,81 @@ def verify(connection):
     """)).scalar_one() == "O"
 
 
-def apply(db):
-    body = MIGRATION.read_text(encoding="utf-8")
+def registered(connection, name):
+    count = connection.execute(text("""
+        SELECT count(*) FROM supabase_migrations.schema_migrations WHERE name = :name
+    """), {"name": name}).scalar_one()
+    if count > 1:
+        raise RuntimeError("Historial duplicado: requiere revisión; no se modifica.")
+    return count == 1
+
+
+def recipient_filter_installed(connection):
+    source = connection.execute(text("""
+        SELECT prosrc FROM pg_proc
+        WHERE oid = 'public.notificar_clasificacion_pendiente()'::regprocedure
+    """)).scalar_one()
+    return "where activo and not primer_ingreso and rol in" in " ".join(source.lower().split())
+
+
+def verify_recipient_filter(connection):
+    if not recipient_filter_installed(connection):
+        raise RuntimeError("La función no coincide con la corrección registrada de destinatarios.")
+
+
+def installation_state(connection):
+    objects = installed_objects(connection)
+    base = registered(connection, NAME)
+    recipient = registered(connection, RECIPIENT_NAME)
+    if any(objects.values()) and not all(objects.values()):
+        raise RuntimeError("Instalación parcial: requiere revisión antes de aplicar.")
+    if all(objects.values()) != base or (recipient and not base):
+        raise RuntimeError("El historial y los objetos no coinciden; no se modifica el historial.")
+    if base:
+        verify(connection)
+        if recipient != recipient_filter_installed(connection):
+            raise RuntimeError("La corrección de destinatarios y su historial no coinciden; no se reparan automáticamente.")
+    if recipient:
+        verify_recipient_filter(connection)
+    return base, recipient
+
+
+def migration_body(path):
+    body = path.read_text(encoding="utf-8")
     body = re.sub(r"(?im)^\s*begin;\s*$", "", body, count=1)
-    body = re.sub(r"(?im)^\s*commit;\s*$", "", body, count=1)
+    return re.sub(r"(?im)^\s*commit;\s*$", "", body, count=1)
+
+
+def execute_migration(connection, body, name, version):
+    cursor = connection.connection.cursor()
+    try:
+        # Sin parámetros DBAPI: conservar los %s literales de pg_catalog.format.
+        cursor.execute(body)
+    finally:
+        cursor.close()
+    verify(connection)
+    if name == RECIPIENT_NAME:
+        verify_recipient_filter(connection)
+    connection.execute(text("""
+        INSERT INTO supabase_migrations.schema_migrations (version, name, statements)
+        VALUES (:version, :name, :statements)
+    """), {"version": version, "name": name, "statements": [body]})
+
+
+def apply(db):
     with db.begin() as connection:
         connection.execute(text("SELECT pg_advisory_xact_lock(hashtext('aari:hu13:26'))"))
-        objects = installed_objects(connection)
-        if all(objects.values()):
-            verify(connection)
-            print("Migración 26 ya instalada y verificada; no se repite.")
-            return
-        if any(objects.values()):
-            raise RuntimeError("Instalación parcial: requiere revisión antes de aplicar.")
-        if connection.execute(text("""
-            SELECT EXISTS (SELECT 1 FROM supabase_migrations.schema_migrations WHERE name = :name)
-        """), {"name": NAME}).scalar_one():
-            raise RuntimeError("El historial y los objetos no coinciden; no se modifica el historial.")
-        cursor = connection.connection.cursor()
-        try:
-            # Sin parámetros DBAPI: conservar los %s literales de pg_catalog.format.
-            cursor.execute(body)
-        finally:
-            cursor.close()
-        verify(connection)
-        version = connection.execute(text("""
-            SELECT to_char(clock_timestamp() AT TIME ZONE 'UTC', 'YYYYMMDDHH24MISS')
-        """)).scalar_one()
-        connection.execute(text("""
-            INSERT INTO supabase_migrations.schema_migrations (version, name, statements)
-            VALUES (:version, :name, :statements)
-        """), {"version": version, "name": NAME, "statements": [body]})
-    print(f"Migración 26 aplicada y registrada: {version}_{NAME}.")
+        base, recipient = installation_state(connection)
+        if not base:
+            version = connection.execute(text("""
+                SELECT to_char(clock_timestamp() AT TIME ZONE 'UTC', 'YYYYMMDDHH24MISS')
+            """)).scalar_one()
+            execute_migration(connection, migration_body(MIGRATION), NAME, version)
+        if not recipient:
+            execute_migration(connection, migration_body(RECIPIENT_MIGRATION),
+                              RECIPIENT_NAME, RECIPIENT_VERSION)
+        installation_state(connection)
+    print("HU13 y corrección de destinatarios instaladas y registradas; no se repiten las ya aplicadas.")
 
 
 def main():
@@ -119,17 +165,18 @@ def main():
         db = configure(args.env_file)
         with db.connect() as connection:
             assert connection.execute(text("SELECT to_regclass('public.reclamo_responsables') IS NOT NULL")).scalar_one()
-            objects = installed_objects(connection)
+            base, recipient = installation_state(connection)
             print("Conexión Supabase y dependencia HU12: OK.")
-            print("Migración HU13:", "instalada" if all(objects.values()) else "pendiente o incompleta")
-            if all(objects.values()):
-                verify(connection)
+            print("Migración HU13:", "instalada" if base else "pendiente")
+            print("Corrección de destinatarios:", "instalada" if recipient else "pendiente")
+            if base:
                 print("Auditoría, índices, trigger, RLS y permisos: OK.")
         if args.mode == "apply":
             apply(db)
         elif args.mode == "test":
             with db.connect() as connection:
-                verify(connection)
+                if installation_state(connection) != (True, True):
+                    raise RuntimeError("Las dos migraciones HU13 deben estar aplicadas antes de probar.")
             os.environ["RUN_HU13_SUPABASE_INTEGRATION"] = "1"
             sys.path.insert(0, str(ROOT))
             import pytest
