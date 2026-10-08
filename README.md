@@ -253,6 +253,11 @@ oficial y salida JSON validada localmente, con una petición HTTP por intento.
 El ensayo público respondió HTTP 200, pero **no alcanzó los umbrales de calidad
 automática del corpus**. Esto no se presenta como interpretación autónoma validada.
 
+`backend/requirements.txt` fija `google-genai==2.14.0`, además de
+`langchain-google-genai==4.3.2`, para reproducir el SDK registrado en los
+diagnósticos históricos. No regenerar sus resultados para adaptar una instalación
+distinta. [Corrección de reproducibilidad del 08/10](docs/hu30_reproducibilidad_sdk_2026-10-08.md).
+
 Para OCR local se requieren `pypdfium2`, `pytesseract` y el motor Tesseract con
 idioma español. Docker lo instala automáticamente. En Windows, instalar
 Tesseract por separado, comprobar que `spa` aparezca en `tesseract --list-langs`
@@ -787,7 +792,7 @@ entorno compartido en la nube.
 - **Tobías:** AARI-116, AARI-125, AARI-135 y AARI-157, más su participación en
   el despliegue.
 - **Trabajo conjunto:** AARI-338, despliegue del entorno compartido.
-- **HU30 / AARI-319 finalizada:** extracción local/OCR, análisis
+- **HU30 / AARI-319 reabierta En curso el 08/10 por reproducibilidad del SDK:** extracción local/OCR, análisis
   asistido, respaldo literal sin IA, revisión humana e integración del contexto
   contractual implementados en su rama. Las migraciones 23, 24 y 25 están
   aplicadas; las suites locales, PostgreSQL y OCR están aprobados. V3 fue evaluada en cuatro modelos
@@ -812,7 +817,13 @@ entorno compartido en la nube.
   Validación final del 07/10, incluido PostgreSQL local: **643 pruebas backend
   aprobadas, 28 omitidas; 134 frontend**, lint/build y formato correctos.
   PR #28 mergeado el 07/10/2026 (`439ee3c`); HU y sus seis subtareas verificadas
-  listas en Jira. Se conserva la revisión humana obligatoria.
+  listas en Jira en ese cierre. El hallazgo posterior requiere fijar
+  `google-genai==2.14.0`; la HU se reabrió con autorización hasta integrar la
+  corrección en el PR #31, en la misma rama de HU31 por pedido de Talía.
+  Entorno Windows limpio desde requirements: **14 pruebas focalizadas y 810
+  backend aprobadas, 37 omitidas**, con PostgreSQL local y sin APIs externas;
+  `pip check` sin conflictos. Las subtareas anteriores y sus horas no se
+  modifican. Se conserva la revisión humana obligatoria.
   Ver [alcance y resultados actuales de HU30](docs/evaluaciones/hu30/flujo_asistido_2026-10-05.md)
   y [regresiones del PR #28](docs/evaluaciones/hu30/correcciones_pr28_2026-10-05.md).
   [Actualización final del PR #28](docs/evaluaciones/hu30/cierre_pr28_2026-10-07.md).
@@ -871,8 +882,9 @@ entorno compartido en la nube.
   subtareas verificadas listas el 07/10/2026, con **1 h 15 min** registrados.
   Flujo, decisiones y comandos en
   [`docs/hu11_historial_reclamos.md`](docs/hu11_historial_reclamos.md).
-- **Pendientes verificados el 07/10/2026:** HU13/AARI-147 y HU30/AARI-319
-  están mergeadas y finalizadas. HU31/AARI-332 sigue en curso: conexión con
+- **Pendientes actualizados el 08/10/2026:** HU13/AARI-147 está mergeada y
+  finalizada; HU30/AARI-319 se reabrió por la corrección de reproducibilidad,
+  sin deshacer el merge funcional. HU31/AARI-332 sigue en curso: conexión con
   HU13 y revalidación completas, entrega autorizada para revisión del PR.
   El despliegue conjunto AARI-338 sigue por hacer.
   El Sprint permanece activo; no se considera cerrado por su fecha prevista.
