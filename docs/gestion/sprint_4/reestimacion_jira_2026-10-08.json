@@ -1,0 +1,823 @@
+{
+  "fecha": "2026-10-08",
+  "estado": "cargada_y_verificada",
+  "fuente": "Jira AARI; lectura posterior de Time Tracking y agregados de HU",
+  "autorizacion": "El equipo autorizó cargar toda la reestimación: nueve HU, 28 HH sin despliegue.",
+  "unidad": "horas hombre (HH)",
+  "total_hh": 28,
+  "total_minutos": 1680,
+  "total_subtareas": 81,
+  "story_points_originales_preservados": 246,
+  "campo_reestimacion": "timetracking.originalEstimateSeconds",
+  "campo_restante": "timetracking.remainingEstimateSeconds",
+  "estimacion_duplicada_en_padres": false,
+  "reuniones_incluidas": false,
+  "tareas_excluidas": [
+    "AARI-338"
+  ],
+  "sprint_iniciado": false,
+  "criterios": "Desarrollo, integración, pruebas, revisión/correcciones y documentación. Se ponderó el trabajo de cada subtarea y la reutilización existente; no se aplicó una regla de tres a los puntos originales.",
+  "validaciones": {
+    "estimado_y_restante_coinciden": true,
+    "agregados_por_hu_coinciden": true,
+    "story_points_conservados": true,
+    "estados_conservados": true,
+    "sprints_conservados": true,
+    "worklogs_creados": 0,
+    "comentarios_hu_publicados": 9
+  },
+  "historias": [
+    {
+      "hu": "HU15",
+      "jira": "AARI-170",
+      "estimacion_hh": 3,
+      "subtareas": [
+        {
+          "jira": "AARI-171",
+          "titulo": "Algoritmo de selección de candidatos: filtrar proveedores por especialidad requerida + zona de la propiedad + estado activo",
+          "story_points_originales": 5,
+          "estimacion_anterior_time_tracking_segundos": null,
+          "estimacion_minutos": 35,
+          "estimacion_segundos": 2100,
+          "restante_segundos": 2100
+        },
+        {
+          "jira": "AARI-172",
+          "titulo": "Endpoint GET /reclamos/{id}/proveedores-candidatos que devuelve el listado de candidatos",
+          "story_points_originales": 3,
+          "estimacion_anterior_time_tracking_segundos": null,
+          "estimacion_minutos": 20,
+          "estimacion_segundos": 1200,
+          "restante_segundos": 1200
+        },
+        {
+          "jira": "AARI-173",
+          "titulo": "Lógica de sin disponibilidad: si no hay candidatos, cambiar estado a Pendiente de asignación y notificar al operador",
+          "story_points_originales": 4,
+          "estimacion_anterior_time_tracking_segundos": null,
+          "estimacion_minutos": 20,
+          "estimacion_segundos": 1200,
+          "restante_segundos": 1200
+        },
+        {
+          "jira": "AARI-174",
+          "titulo": "Vista del operador para reclamos en estado Pendiente de asignación con información del faltante",
+          "story_points_originales": 4,
+          "estimacion_anterior_time_tracking_segundos": null,
+          "estimacion_minutos": 25,
+          "estimacion_segundos": 1500,
+          "restante_segundos": 1500
+        },
+        {
+          "jira": "AARI-175",
+          "titulo": "Actualización del estado del reclamo tras la búsqueda de candidatos",
+          "story_points_originales": 1,
+          "estimacion_anterior_time_tracking_segundos": null,
+          "estimacion_minutos": 10,
+          "estimacion_segundos": 600,
+          "restante_segundos": 600
+        },
+        {
+          "jira": "AARI-176",
+          "titulo": "Registro del resultado de la búsqueda en el historial del reclamo (candidatos encontrados o ausencia, timestamp)",
+          "story_points_originales": 1,
+          "estimacion_anterior_time_tracking_segundos": null,
+          "estimacion_minutos": 10,
+          "estimacion_segundos": 600,
+          "restante_segundos": 600
+        },
+        {
+          "jira": "AARI-177",
+          "titulo": "Tests del algoritmo de selección (candidatos disponibles, ningún candidato, candidatos de la zona incorrecta)",
+          "story_points_originales": 5,
+          "estimacion_anterior_time_tracking_segundos": null,
+          "estimacion_minutos": 30,
+          "estimacion_segundos": 1800,
+          "restante_segundos": 1800
+        },
+        {
+          "jira": "AARI-178",
+          "titulo": "Integración con el módulo de proveedores",
+          "story_points_originales": 2,
+          "estimacion_anterior_time_tracking_segundos": null,
+          "estimacion_minutos": 15,
+          "estimacion_segundos": 900,
+          "restante_segundos": 900
+        },
+        {
+          "jira": "AARI-179",
+          "titulo": "QA del flujo completo de búsqueda de candidatos",
+          "story_points_originales": 2,
+          "estimacion_anterior_time_tracking_segundos": null,
+          "estimacion_minutos": 15,
+          "estimacion_segundos": 900,
+          "restante_segundos": 900
+        }
+      ]
+    },
+    {
+      "hu": "HU16",
+      "jira": "AARI-180",
+      "estimacion_hh": 3,
+      "subtareas": [
+        {
+          "jira": "AARI-181",
+          "titulo": "Notificación al propietario con descripción del reclamo, propiedad afectada, clasificación y enlace a la vista de decisión",
+          "story_points_originales": 3,
+          "estimacion_anterior_time_tracking_segundos": null,
+          "estimacion_minutos": 15,
+          "estimacion_segundos": 900,
+          "restante_segundos": 900
+        },
+        {
+          "jira": "AARI-182",
+          "titulo": "Vista de decisión en React: detalle del reclamo y dos acciones exclusivas (Autorizar / Rechazar)",
+          "story_points_originales": 5,
+          "estimacion_anterior_time_tracking_segundos": null,
+          "estimacion_minutos": 30,
+          "estimacion_segundos": 1800,
+          "restante_segundos": 1800
+        },
+        {
+          "jira": "AARI-183",
+          "titulo": "Endpoint POST /reclamos/{id}/autorizar y POST /reclamos/{id}/rechazar",
+          "story_points_originales": 2,
+          "estimacion_anterior_time_tracking_segundos": null,
+          "estimacion_minutos": 25,
+          "estimacion_segundos": 1500,
+          "restante_segundos": 1500
+        },
+        {
+          "jira": "AARI-184",
+          "titulo": "Lógica de autorización: estado pasa a Autorizado, el flujo continúa automáticamente hacia HU-17",
+          "story_points_originales": 2,
+          "estimacion_anterior_time_tracking_segundos": null,
+          "estimacion_minutos": 15,
+          "estimacion_segundos": 900,
+          "restante_segundos": 900
+        },
+        {
+          "jira": "AARI-185",
+          "titulo": "Lógica de rechazo: estado pasa a Rechazado por propietario, el ciclo se cierra, el inquilino es notificado",
+          "story_points_originales": 2,
+          "estimacion_anterior_time_tracking_segundos": null,
+          "estimacion_minutos": 15,
+          "estimacion_segundos": 900,
+          "restante_segundos": 900
+        },
+        {
+          "jira": "AARI-186",
+          "titulo": "Notificación al inquilino y al operador del resultado de la decisión",
+          "story_points_originales": 2,
+          "estimacion_anterior_time_tracking_segundos": null,
+          "estimacion_minutos": 10,
+          "estimacion_segundos": 600,
+          "restante_segundos": 600
+        },
+        {
+          "jira": "AARI-187",
+          "titulo": "Job de recordatorio a las 48h sin respuesta",
+          "story_points_originales": 2,
+          "estimacion_anterior_time_tracking_segundos": null,
+          "estimacion_minutos": 15,
+          "estimacion_segundos": 900,
+          "restante_segundos": 900
+        },
+        {
+          "jira": "AARI-188",
+          "titulo": "Job de escalado a las 72h sin respuesta: estado Pendiente de autorización - vencido, notificación al operador",
+          "story_points_originales": 2,
+          "estimacion_anterior_time_tracking_segundos": null,
+          "estimacion_minutos": 15,
+          "estimacion_segundos": 900,
+          "restante_segundos": 900
+        },
+        {
+          "jira": "AARI-189",
+          "titulo": "Registro de la decisión en el historial del reclamo (nombre del propietario, timestamp)",
+          "story_points_originales": 1,
+          "estimacion_anterior_time_tracking_segundos": null,
+          "estimacion_minutos": 10,
+          "estimacion_segundos": 600,
+          "restante_segundos": 600
+        },
+        {
+          "jira": "AARI-190",
+          "titulo": "Tests de las dos ramas (autorizar y rechazar) y del flujo de timeout",
+          "story_points_originales": 4,
+          "estimacion_anterior_time_tracking_segundos": null,
+          "estimacion_minutos": 30,
+          "estimacion_segundos": 1800,
+          "restante_segundos": 1800
+        }
+      ]
+    },
+    {
+      "hu": "HU17",
+      "jira": "AARI-191",
+      "estimacion_hh": 2,
+      "subtareas": [
+        {
+          "jira": "AARI-192",
+          "titulo": "Vista de selección en React con dos opciones claramente diferenciadas: proveedor fidelizado o proveedor propio",
+          "story_points_originales": 4,
+          "estimacion_anterior_time_tracking_segundos": null,
+          "estimacion_minutos": 25,
+          "estimacion_segundos": 1500,
+          "restante_segundos": 1500
+        },
+        {
+          "jira": "AARI-193",
+          "titulo": "Endpoint POST /reclamos/{id}/tipo-proveedor que registra la elección y enruta el flujo",
+          "story_points_originales": 2,
+          "estimacion_anterior_time_tracking_segundos": null,
+          "estimacion_minutos": 25,
+          "estimacion_segundos": 1500,
+          "restante_segundos": 1500
+        },
+        {
+          "jira": "AARI-194",
+          "titulo": "Nodo de decisión en el grafo de LangGraph: si fidelizado → HU-19, si propio → HU18",
+          "story_points_originales": 3,
+          "estimacion_anterior_time_tracking_segundos": null,
+          "estimacion_minutos": 20,
+          "estimacion_segundos": 1200,
+          "restante_segundos": 1200
+        },
+        {
+          "jira": "AARI-195",
+          "titulo": "Job de recordatorio a las 48h sin respuesta",
+          "story_points_originales": 2,
+          "estimacion_anterior_time_tracking_segundos": null,
+          "estimacion_minutos": 10,
+          "estimacion_segundos": 600,
+          "restante_segundos": 600
+        },
+        {
+          "jira": "AARI-196",
+          "titulo": "Job de escalado a las 72h sin respuesta: estado Pendiente de respuesta - vencido, notificación al operador",
+          "story_points_originales": 2,
+          "estimacion_anterior_time_tracking_segundos": null,
+          "estimacion_minutos": 10,
+          "estimacion_segundos": 600,
+          "restante_segundos": 600
+        },
+        {
+          "jira": "AARI-197",
+          "titulo": "Registro de la elección en el reclamo con timestamp",
+          "story_points_originales": 1,
+          "estimacion_anterior_time_tracking_segundos": null,
+          "estimacion_minutos": 5,
+          "estimacion_segundos": 300,
+          "restante_segundos": 300
+        },
+        {
+          "jira": "AARI-198",
+          "titulo": "Tests de ambas ramas del flujo y del timeout",
+          "story_points_originales": 3,
+          "estimacion_anterior_time_tracking_segundos": null,
+          "estimacion_minutos": 25,
+          "estimacion_segundos": 1500,
+          "restante_segundos": 1500
+        }
+      ]
+    },
+    {
+      "hu": "HU18",
+      "jira": "AARI-199",
+      "estimacion_hh": 2,
+      "subtareas": [
+        {
+          "jira": "AARI-200",
+          "titulo": "Formulario en React con dos campos: nombre completo y teléfono del proveedor externo",
+          "story_points_originales": 3,
+          "estimacion_anterior_time_tracking_segundos": null,
+          "estimacion_minutos": 30,
+          "estimacion_segundos": 1800,
+          "restante_segundos": 1800
+        },
+        {
+          "jira": "AARI-201",
+          "titulo": "Validación de teléfono: numérico, entre 8 y 15 dígitos, con mensaje de error descriptivo",
+          "story_points_originales": 1,
+          "estimacion_anterior_time_tracking_segundos": null,
+          "estimacion_minutos": 15,
+          "estimacion_segundos": 900,
+          "restante_segundos": 900
+        },
+        {
+          "jira": "AARI-202",
+          "titulo": "Endpoint POST /reclamos/{id}/proveedor-externo que persiste los datos en el historial de la propiedad asociados al reclamo",
+          "story_points_originales": 2,
+          "estimacion_anterior_time_tracking_segundos": null,
+          "estimacion_minutos": 30,
+          "estimacion_segundos": 1800,
+          "restante_segundos": 1800
+        },
+        {
+          "jira": "AARI-203",
+          "titulo": "Actualización del estado del reclamo a Derivado a proveedor externo",
+          "story_points_originales": 1,
+          "estimacion_anterior_time_tracking_segundos": null,
+          "estimacion_minutos": 10,
+          "estimacion_segundos": 600,
+          "restante_segundos": 600
+        },
+        {
+          "jira": "AARI-204",
+          "titulo": "Los datos del proveedor externo quedan visibles en el detalle del reclamo para el administrador",
+          "story_points_originales": 1,
+          "estimacion_anterior_time_tracking_segundos": null,
+          "estimacion_minutos": 10,
+          "estimacion_segundos": 600,
+          "restante_segundos": 600
+        },
+        {
+          "jira": "AARI-205",
+          "titulo": "Tests (datos completos, teléfono con formato inválido, campos vacíos)",
+          "story_points_originales": 2,
+          "estimacion_anterior_time_tracking_segundos": null,
+          "estimacion_minutos": 25,
+          "estimacion_segundos": 1500,
+          "restante_segundos": 1500
+        }
+      ]
+    },
+    {
+      "hu": "HU19",
+      "jira": "AARI-206",
+      "estimacion_hh": 5,
+      "subtareas": [
+        {
+          "jira": "AARI-207",
+          "titulo": "Recuperación de los proveedores candidatos identificados",
+          "story_points_originales": 1,
+          "estimacion_anterior_time_tracking_segundos": null,
+          "estimacion_minutos": 10,
+          "estimacion_segundos": 600,
+          "restante_segundos": 600
+        },
+        {
+          "jira": "AARI-208",
+          "titulo": "Configuración de WhatsApp Business API: autenticación, envío de mensajes outbound",
+          "story_points_originales": 6,
+          "estimacion_anterior_time_tracking_segundos": null,
+          "estimacion_minutos": 50,
+          "estimacion_segundos": 3000,
+          "restante_segundos": 3000
+        },
+        {
+          "jira": "AARI-209",
+          "titulo": "Template del mensaje de solicitud de presupuesto (descripción del problema, dirección, plazo de respuesta de 24h)",
+          "story_points_originales": 2,
+          "estimacion_anterior_time_tracking_segundos": null,
+          "estimacion_minutos": 10,
+          "estimacion_segundos": 600,
+          "restante_segundos": 600
+        },
+        {
+          "jira": "AARI-210",
+          "titulo": "Envío del mensaje a cada candidato y registro de los envíos realizados",
+          "story_points_originales": 2,
+          "estimacion_anterior_time_tracking_segundos": null,
+          "estimacion_minutos": 20,
+          "estimacion_segundos": 1200,
+          "restante_segundos": 1200
+        },
+        {
+          "jira": "AARI-211",
+          "titulo": "Configuración del webhook para capturar respuestas de los proveedores",
+          "story_points_originales": 5,
+          "estimacion_anterior_time_tracking_segundos": null,
+          "estimacion_minutos": 40,
+          "estimacion_segundos": 2400,
+          "restante_segundos": 2400
+        },
+        {
+          "jira": "AARI-212",
+          "titulo": "Modelo de datos: tabla presupuestos (FK reclamo, FK proveedor, monto, descripción, timestamp)",
+          "story_points_originales": 2,
+          "estimacion_anterior_time_tracking_segundos": null,
+          "estimacion_minutos": 15,
+          "estimacion_segundos": 900,
+          "restante_segundos": 900
+        },
+        {
+          "jira": "AARI-213",
+          "titulo": "Parsing y persistencia de cada presupuesto recibido",
+          "story_points_originales": 3,
+          "estimacion_anterior_time_tracking_segundos": null,
+          "estimacion_minutos": 35,
+          "estimacion_segundos": 2100,
+          "restante_segundos": 2100
+        },
+        {
+          "jira": "AARI-214",
+          "titulo": "Job de timeout a las 24h: si venció el plazo, avanzar con los presupuestos recibidos aunque sean parciales",
+          "story_points_originales": 2,
+          "estimacion_anterior_time_tracking_segundos": null,
+          "estimacion_minutos": 20,
+          "estimacion_segundos": 1200,
+          "restante_segundos": 1200
+        },
+        {
+          "jira": "AARI-215",
+          "titulo": "Lógica de sin presupuestos: si venció el plazo y no se recibió ninguno, estado Sin presupuestos recibidos y notificación al operador",
+          "story_points_originales": 2,
+          "estimacion_anterior_time_tracking_segundos": null,
+          "estimacion_minutos": 15,
+          "estimacion_segundos": 900,
+          "restante_segundos": 900
+        },
+        {
+          "jira": "AARI-216",
+          "titulo": "Notificación al actor responsable cuando hay al menos un presupuesto disponible para revisar",
+          "story_points_originales": 2,
+          "estimacion_anterior_time_tracking_segundos": null,
+          "estimacion_minutos": 10,
+          "estimacion_segundos": 600,
+          "restante_segundos": 600
+        },
+        {
+          "jira": "AARI-217",
+          "titulo": "Mock de WhatsApp API para entornos de prueba que simula envío y recepción de mensajes",
+          "story_points_originales": 3,
+          "estimacion_anterior_time_tracking_segundos": null,
+          "estimacion_minutos": 20,
+          "estimacion_segundos": 1200,
+          "restante_segundos": 1200
+        },
+        {
+          "jira": "AARI-218",
+          "titulo": "Tests con el mock (envío exitoso, timeout sin respuesta, ningún presupuesto recibido)",
+          "story_points_originales": 5,
+          "estimacion_anterior_time_tracking_segundos": null,
+          "estimacion_minutos": 35,
+          "estimacion_segundos": 2100,
+          "restante_segundos": 2100
+        },
+        {
+          "jira": "AARI-219",
+          "titulo": "QA del flujo completo de solicitud y recepción",
+          "story_points_originales": 3,
+          "estimacion_anterior_time_tracking_segundos": null,
+          "estimacion_minutos": 20,
+          "estimacion_segundos": 1200,
+          "restante_segundos": 1200
+        }
+      ]
+    },
+    {
+      "hu": "HU20",
+      "jira": "AARI-220",
+      "estimacion_hh": 3,
+      "subtareas": [
+        {
+          "jira": "AARI-221",
+          "titulo": "Endpoint GET /reclamos/{id}/presupuestos que devuelve los presupuestos disponibles ordenados por monto ascendente",
+          "story_points_originales": 2,
+          "estimacion_anterior_time_tracking_segundos": null,
+          "estimacion_minutos": 20,
+          "estimacion_segundos": 1200,
+          "restante_segundos": 1200
+        },
+        {
+          "jira": "AARI-222",
+          "titulo": "Vista comparativa de presupuestos en React: nombre del proveedor, especialidades, zona, monto y descripción del trabajo",
+          "story_points_originales": 6,
+          "estimacion_anterior_time_tracking_segundos": null,
+          "estimacion_minutos": 35,
+          "estimacion_segundos": 2100,
+          "restante_segundos": 2100
+        },
+        {
+          "jira": "AARI-223",
+          "titulo": "Opción visible y diferenciada en la misma vista: No me convence ninguno, quiero cargar un proveedor propio",
+          "story_points_originales": 2,
+          "estimacion_anterior_time_tracking_segundos": null,
+          "estimacion_minutos": 15,
+          "estimacion_segundos": 900,
+          "restante_segundos": 900
+        },
+        {
+          "jira": "AARI-224",
+          "titulo": "Pantalla de confirmación con resumen de la elección antes de confirmar",
+          "story_points_originales": 2,
+          "estimacion_anterior_time_tracking_segundos": null,
+          "estimacion_minutos": 20,
+          "estimacion_segundos": 1200,
+          "restante_segundos": 1200
+        },
+        {
+          "jira": "AARI-225",
+          "titulo": "Endpoint POST /reclamos/{id}/seleccionar-presupuesto que persiste la elección y notifica al proveedor seleccionado por WhatsApp",
+          "story_points_originales": 3,
+          "estimacion_anterior_time_tracking_segundos": null,
+          "estimacion_minutos": 40,
+          "estimacion_segundos": 2400,
+          "restante_segundos": 2400
+        },
+        {
+          "jira": "AARI-226",
+          "titulo": "Actualización del estado del reclamo a Proveedor seleccionado",
+          "story_points_originales": 1,
+          "estimacion_anterior_time_tracking_segundos": null,
+          "estimacion_minutos": 10,
+          "estimacion_segundos": 600,
+          "restante_segundos": 600
+        },
+        {
+          "jira": "AARI-227",
+          "titulo": "Registro de la selección en el reclamo: ID del presupuesto elegido, monto y timestamp",
+          "story_points_originales": 1,
+          "estimacion_anterior_time_tracking_segundos": null,
+          "estimacion_minutos": 10,
+          "estimacion_segundos": 600,
+          "restante_segundos": 600
+        },
+        {
+          "jira": "AARI-228",
+          "titulo": "Tests (selección exitosa, opción de proveedor externo, sin presupuestos disponibles)",
+          "story_points_originales": 3,
+          "estimacion_anterior_time_tracking_segundos": null,
+          "estimacion_minutos": 30,
+          "estimacion_segundos": 1800,
+          "restante_segundos": 1800
+        }
+      ]
+    },
+    {
+      "hu": "HU21",
+      "jira": "AARI-229",
+      "estimacion_hh": 4,
+      "subtareas": [
+        {
+          "jira": "AARI-230",
+          "titulo": "Diseño del grafo completo de LangGraph: todos los nodos, transiciones y puntos de bifurcación del flujo de reclamo",
+          "story_points_originales": 8,
+          "estimacion_anterior_time_tracking_segundos": null,
+          "estimacion_minutos": 30,
+          "estimacion_segundos": 1800,
+          "restante_segundos": 1800
+        },
+        {
+          "jira": "AARI-231",
+          "titulo": "Implementación de estado persistente por sesión con checkpointing en base de datos (un registro de estado por reclamo activo)",
+          "story_points_originales": 6,
+          "estimacion_anterior_time_tracking_segundos": null,
+          "estimacion_minutos": 50,
+          "estimacion_segundos": 3000,
+          "restante_segundos": 3000
+        },
+        {
+          "jira": "AARI-232",
+          "titulo": "Lógica de contexto entre turnos: el agente accede al estado guardado al retomar una conversación",
+          "story_points_originales": 6,
+          "estimacion_anterior_time_tracking_segundos": null,
+          "estimacion_minutos": 25,
+          "estimacion_segundos": 1500,
+          "restante_segundos": 1500
+        },
+        {
+          "jira": "AARI-233",
+          "titulo": "Integración del estado del grafo con el campo de estado de la tabla reclamos",
+          "story_points_originales": 5,
+          "estimacion_anterior_time_tracking_segundos": null,
+          "estimacion_minutos": 20,
+          "estimacion_segundos": 1200,
+          "restante_segundos": 1200
+        },
+        {
+          "jira": "AARI-234",
+          "titulo": "Lógica de expiración de sesión: si transcurren 72h sin actividad, cambiar estado a Sesión expirada y notificar al operador",
+          "story_points_originales": 4,
+          "estimacion_anterior_time_tracking_segundos": null,
+          "estimacion_minutos": 20,
+          "estimacion_segundos": 1200,
+          "restante_segundos": 1200
+        },
+        {
+          "jira": "AARI-235",
+          "titulo": "Tests de escenarios multi-turno: mínimo 5 escenarios completos incluyendo bifurcaciones (cancelación, reelección de proveedor)",
+          "story_points_originales": 8,
+          "estimacion_anterior_time_tracking_segundos": null,
+          "estimacion_minutos": 40,
+          "estimacion_segundos": 2400,
+          "restante_segundos": 2400
+        },
+        {
+          "jira": "AARI-236",
+          "titulo": "Integración end-to-end del grafo con todos los módulos anteriores",
+          "story_points_originales": 8,
+          "estimacion_anterior_time_tracking_segundos": null,
+          "estimacion_minutos": 35,
+          "estimacion_segundos": 2100,
+          "restante_segundos": 2100
+        },
+        {
+          "jira": "AARI-237",
+          "titulo": "Debugging y ajustes de estado tras la integración",
+          "story_points_originales": 7,
+          "estimacion_anterior_time_tracking_segundos": null,
+          "estimacion_minutos": 20,
+          "estimacion_segundos": 1200,
+          "restante_segundos": 1200
+        }
+      ]
+    },
+    {
+      "hu": "HU23",
+      "jira": "AARI-250",
+      "estimacion_hh": 4,
+      "subtareas": [
+        {
+          "jira": "AARI-251",
+          "titulo": "Nodo del grafo de LangGraph que solicita disponibilidad al inquilino: días (mínimo 3 opciones), franja horaria y urgencia",
+          "story_points_originales": 5,
+          "estimacion_anterior_time_tracking_segundos": null,
+          "estimacion_minutos": 30,
+          "estimacion_segundos": 1800,
+          "restante_segundos": 1800
+        },
+        {
+          "jira": "AARI-252",
+          "titulo": "Envío de las opciones de disponibilidad al proveedor por WhatsApp",
+          "story_points_originales": 3,
+          "estimacion_anterior_time_tracking_segundos": null,
+          "estimacion_minutos": 20,
+          "estimacion_segundos": 1200,
+          "restante_segundos": 1200
+        },
+        {
+          "jira": "AARI-253",
+          "titulo": "Webhook para capturar la confirmación del proveedor (fecha y horario elegidos)",
+          "story_points_originales": 4,
+          "estimacion_anterior_time_tracking_segundos": null,
+          "estimacion_minutos": 30,
+          "estimacion_segundos": 1800,
+          "restante_segundos": 1800
+        },
+        {
+          "jira": "AARI-254",
+          "titulo": "Notificación de confirmación a inquilino y proveedor con datos de la visita (fecha, horario, dirección)",
+          "story_points_originales": 3,
+          "estimacion_anterior_time_tracking_segundos": null,
+          "estimacion_minutos": 15,
+          "estimacion_segundos": 900,
+          "restante_segundos": 900
+        },
+        {
+          "jira": "AARI-255",
+          "titulo": "Actualización del estado del reclamo a Visita programada con fecha y horario persistidos",
+          "story_points_originales": 1,
+          "estimacion_anterior_time_tracking_segundos": null,
+          "estimacion_minutos": 15,
+          "estimacion_segundos": 900,
+          "restante_segundos": 900
+        },
+        {
+          "jira": "AARI-256",
+          "titulo": "Job programado para recordatorio al inquilino y al proveedor 24h antes de la visita",
+          "story_points_originales": 2,
+          "estimacion_anterior_time_tracking_segundos": null,
+          "estimacion_minutos": 15,
+          "estimacion_segundos": 900,
+          "restante_segundos": 900
+        },
+        {
+          "jira": "AARI-257",
+          "titulo": "Job programado para recordatorio 2h antes de la visita",
+          "story_points_originales": 2,
+          "estimacion_anterior_time_tracking_segundos": null,
+          "estimacion_minutos": 10,
+          "estimacion_segundos": 600,
+          "restante_segundos": 600
+        },
+        {
+          "jira": "AARI-258",
+          "titulo": "Lógica de no acuerdo: si el proveedor no confirma en 24h, notificar al actor responsable y ofrecer elegir otro proveedor o reiniciar la solicitud",
+          "story_points_originales": 3,
+          "estimacion_anterior_time_tracking_segundos": null,
+          "estimacion_minutos": 25,
+          "estimacion_segundos": 1500,
+          "restante_segundos": 1500
+        },
+        {
+          "jira": "AARI-259",
+          "titulo": "Integración del nodo de coordinación en el grafo de LangGraph",
+          "story_points_originales": 4,
+          "estimacion_anterior_time_tracking_segundos": null,
+          "estimacion_minutos": 25,
+          "estimacion_segundos": 1500,
+          "restante_segundos": 1500
+        },
+        {
+          "jira": "AARI-260",
+          "titulo": "Tests del flujo completo (acuerdo exitoso, proveedor no confirma en plazo)",
+          "story_points_originales": 4,
+          "estimacion_anterior_time_tracking_segundos": null,
+          "estimacion_minutos": 35,
+          "estimacion_segundos": 2100,
+          "restante_segundos": 2100
+        },
+        {
+          "jira": "AARI-261",
+          "titulo": "QA",
+          "story_points_originales": 2,
+          "estimacion_anterior_time_tracking_segundos": null,
+          "estimacion_minutos": 20,
+          "estimacion_segundos": 1200,
+          "restante_segundos": 1200
+        }
+      ]
+    },
+    {
+      "hu": "HU24",
+      "jira": "AARI-262",
+      "estimacion_hh": 2,
+      "subtareas": [
+        {
+          "jira": "AARI-263",
+          "titulo": "Identificación de los puntos del flujo donde la cancelación está habilitada",
+          "story_points_originales": 2,
+          "estimacion_anterior_time_tracking_segundos": null,
+          "estimacion_minutos": 10,
+          "estimacion_segundos": 600,
+          "restante_segundos": 600
+        },
+        {
+          "jira": "AARI-264",
+          "titulo": "Nodo de cancelación en el grafo de LangGraph accesible desde cada punto habilitado",
+          "story_points_originales": 4,
+          "estimacion_anterior_time_tracking_segundos": null,
+          "estimacion_minutos": 20,
+          "estimacion_segundos": 1200,
+          "restante_segundos": 1200
+        },
+        {
+          "jira": "AARI-265",
+          "titulo": "Pantalla de confirmación en React: ¿Confirmás que querés cancelar y elegir otro proveedor? con opciones Sí / No",
+          "story_points_originales": 2,
+          "estimacion_anterior_time_tracking_segundos": null,
+          "estimacion_minutos": 15,
+          "estimacion_segundos": 900,
+          "restante_segundos": 900
+        },
+        {
+          "jira": "AARI-266",
+          "titulo": "Lógica de retroceso al nodo de selección de tipo de proveedor conservando todos los datos del reclamo",
+          "story_points_originales": 4,
+          "estimacion_anterior_time_tracking_segundos": null,
+          "estimacion_minutos": 20,
+          "estimacion_segundos": 1200,
+          "restante_segundos": 1200
+        },
+        {
+          "jira": "AARI-267",
+          "titulo": "Notificación al proveedor descartado por WhatsApp indicando que el proceso fue cancelado",
+          "story_points_originales": 2,
+          "estimacion_anterior_time_tracking_segundos": null,
+          "estimacion_minutos": 10,
+          "estimacion_segundos": 600,
+          "restante_segundos": 600
+        },
+        {
+          "jira": "AARI-268",
+          "titulo": "Registro del intento cancelado en el historial: proveedor involucrado, etapa en que se canceló y timestamp",
+          "story_points_originales": 2,
+          "estimacion_anterior_time_tracking_segundos": null,
+          "estimacion_minutos": 10,
+          "estimacion_segundos": 600,
+          "restante_segundos": 600
+        },
+        {
+          "jira": "AARI-269",
+          "titulo": "Alerta automática al operador si el reclamo acumula 3 o más cancelaciones",
+          "story_points_originales": 2,
+          "estimacion_anterior_time_tracking_segundos": null,
+          "estimacion_minutos": 10,
+          "estimacion_segundos": 600,
+          "restante_segundos": 600
+        },
+        {
+          "jira": "AARI-270",
+          "titulo": "Tests de cancelación en cada punto habilitado del flujo",
+          "story_points_originales": 4,
+          "estimacion_anterior_time_tracking_segundos": null,
+          "estimacion_minutos": 15,
+          "estimacion_segundos": 900,
+          "restante_segundos": 900
+        },
+        {
+          "jira": "AARI-271",
+          "titulo": "Test de borde: intento de cancelación en estado Visita programada (debe ser bloqueado)",
+          "story_points_originales": 2,
+          "estimacion_anterior_time_tracking_segundos": null,
+          "estimacion_minutos": 10,
+          "estimacion_segundos": 600,
+          "restante_segundos": 600
+        }
+      ]
+    }
+  ]
+}

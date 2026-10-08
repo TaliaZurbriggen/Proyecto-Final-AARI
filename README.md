@@ -783,12 +783,22 @@ Con Docker Compose podés levantar el backend y el frontend juntos, ya conectado
 
 ## Estado del proyecto
 
-**Sprint 3 — En curso (09/09/2026 al 07/10/2026)**
+**Sprint 3 — Cerrado en Jira el 08/10/2026**
 
-El Sprint compromete **39 HH** y consolida el flujo posterior al alta de un
+El período previsto fue del **09/09/2026 al 07/10/2026**. El Sprint comprometió
+**39 HH** y consolidó el flujo posterior al alta de un
 reclamo: contratos y cláusulas, actualizaciones de estado, notificaciones,
-resolución de escalados, derivación de expensas, Home administrativo y un
-entorno compartido en la nube.
+resolución de escalados, derivación de expensas y Home administrativo.
+Las **ocho HU están listas e integradas**. El entorno compartido en la nube
+**AARI-338 sigue pendiente en el Product Backlog**: el Sprint Goal se cumplió
+parcialmente. La fecha prevista y las fechas reales de cierre se conservan.
+
+Tiempo registrado de implementación: **22 h 25 min**. Reuniones informadas
+por separado: planning de 2 horas entre ambos (**4 HH**) y review/retrospectiva
+conjuntas de 1 hora entre ambos (**2 HH**). Esfuerzo total informado: **28 h 25 min**;
+las reuniones no se cargaron en Jira durante esta actualización.
+[Review, retrospectiva y gráficos del Sprint 3](docs/gestion/sprint_3/review_retrospectiva.md)
+(borrador para consenso del equipo).
 
 - **Sprint 2 finalizado:** ocho historias completadas y 22 h 20 min registradas.
 - **Talía:** AARI-318, AARI-319, AARI-147 y AARI-332, más su participación en
@@ -796,7 +806,7 @@ entorno compartido en la nube.
 - **Tobías:** AARI-116, AARI-125, AARI-135 y AARI-157, más su participación en
   el despliegue.
 - **Trabajo conjunto:** AARI-338, despliegue del entorno compartido.
-- **HU30 / AARI-319 reabierta En curso el 08/10 por reproducibilidad del SDK:** extracción local/OCR, análisis
+- **HU30 / AARI-319 finalizada, incluido el hotfix de reproducibilidad:** extracción local/OCR, análisis
   asistido, respaldo literal sin IA, revisión humana e integración del contexto
   contractual implementados en su rama. Las migraciones 23, 24 y 25 están
   aplicadas; las suites locales, PostgreSQL y OCR están aprobados. V3 fue evaluada en cuatro modelos
@@ -821,9 +831,11 @@ entorno compartido en la nube.
   Validación final del 07/10, incluido PostgreSQL local: **643 pruebas backend
   aprobadas, 28 omitidas; 134 frontend**, lint/build y formato correctos.
   PR #28 mergeado el 07/10/2026 (`439ee3c`); HU y sus seis subtareas verificadas
-  listas en Jira en ese cierre. El hallazgo posterior requiere fijar
+  listas en Jira en ese cierre. El hallazgo posterior requirió fijar
   `google-genai==2.14.0`; la HU se reabrió con autorización hasta integrar la
   corrección en el PR #31, en la misma rama de HU31 por pedido de Talía.
+  PR #31 aprobado y mergeado el 08/10 (`40d9c86`); HU y seis subtareas
+  nuevamente listas, con **8 h 25 min** totales registrados.
   Entorno Windows limpio desde requirements: **14 pruebas focalizadas y 810
   backend aprobadas, 37 omitidas**, con PostgreSQL local y sin APIs externas;
   `pip check` sin conflictos. Las subtareas anteriores y sus horas no se
@@ -835,7 +847,9 @@ entorno compartido en la nube.
   La extracción de cláusulas pertenece a HU30.
 - **HU10 / AARI-116 finalizada:** PR #25 mergeado; HU y subtareas listas en Jira.
   Infraestructura reutilizable para las notificaciones posteriores del Sprint.
-- **HU31 / AARI-332 implementada, pendiente de revisión e integración:** Home operativo y navegación responsive
+- **HU31 / AARI-332 finalizada:** PR #31 aprobado y mergeado el 08/10
+  (`40d9c86`); HU y cinco subtareas listas, con **3 h 45 min** registrados.
+  Home operativo y navegación responsive
   en `codex/AARI-332-home-administrador`, actualizada mediante rebase sobre
   `main` `69d0ec6` el 07/10. Conserva los filtros de listados y conecta
   **Revisar casos** con HU13. Backend completo, incluido PostgreSQL local:
@@ -847,14 +861,16 @@ entorno compartido en la nube.
   autorización. En una comprobación externa separada y autorizada, se verificó
   la lectura de una foto privada existente tras corregir la configuración del
   proceso local, sin alterar datos o permisos.
-  Continuación validada y publicación autorizada el 07/10 para revisión del PR;
-  no se autorizó merge ni cierre. Se registró **1h 15m adicional** en sus
-  subtareas: **3h 15m acumuladas**, sin duplicar el tiempo en la HU padre ni
+  La continuación se validó y publicó el 07/10 para revisión del PR;
+  el merge y cierre se autorizaron después. Se registró **1h 15m adicional** en sus
+  subtareas: **3h 15m acumuladas en esa etapa**, sin duplicar el tiempo en la HU padre ni
   modificar la estimación original.
   Corrección de revisión del 08/10: retorno desde los detalles reales sin perder
   filtros, búsqueda ni página. Frontend completo: **316 passed**; lint/build
   aprobados y 9 recorridos locales en escritorio/móvil, sin APIs externas.
-  Commit/push de esta corrección autorizados el 08/10; pendiente de nueva revisión del PR #31.
+  Commit/push de esta corrección autorizados el 08/10; incorporada al PR #31
+  antes de su aprobación y merge. El registro posterior de 30 min deja el total
+  final en **3 h 45 min**.
   [Detalle de la corrección](docs/hu31_filtros_listados.md#corrección-de-retorno-desde-detalle--08102026).
   Evidencia en [`docs/hu31_home_administrador.md`](docs/hu31_home_administrador.md).
 - **HU12 / AARI-135 finalizada:** PR #26 mergeado en `main`; HU y subtareas
@@ -891,14 +907,12 @@ entorno compartido en la nube.
   subtareas verificadas listas el 07/10/2026, con **1 h 15 min** registrados.
   Flujo, decisiones y comandos en
   [`docs/hu11_historial_reclamos.md`](docs/hu11_historial_reclamos.md).
-- **Pendientes actualizados el 08/10/2026:** HU13/AARI-147 está mergeada y
-  finalizada; HU30/AARI-319 se reabrió por la corrección de reproducibilidad,
-  sin deshacer el merge funcional. HU31/AARI-332 sigue en curso: conexión con
-  HU13 y revalidación completas, entrega autorizada para revisión del PR.
-  El despliegue conjunto AARI-338 sigue por hacer.
-  El Sprint permanece activo; no se considera cerrado por su fecha prevista.
-- **HU14 / AARI-157 integrada en main:** PR #30 mergeado (`37b179d`). La HU
-  todavía figura En curso en Jira; no se cerró durante la continuación de HU31.
+- **Cierre verificado el 08/10/2026:** las ocho HU están listas. Jira registra
+  el cierre del Sprint a las **18:14, hora argentina**. AARI-338 y sus cinco
+  subtareas siguen Por hacer, sin sprint activo/futuro. No se los presenta como
+  trabajo completado ni se altera la estimación histórica de 4 HH.
+- **HU14 / AARI-157 finalizada e integrada en main:** PR #30 mergeado
+  (`37b179d`); HU y doce subtareas listas. Tiempo final registrado: **1 h 40 min**.
   Registro de entrega y validaciones anteriores al merge: desarrollo de
   reportes, entrega con tres intentos, panel privado, configuración y notas.
   Deriva solo después de aceptación SMTP registrada; fallos visibles sin
@@ -910,7 +924,7 @@ entorno compartido en la nube.
   autorización y aviso de esa FK corregido. Publicación de commit/PR autorizada;
   validación final de la rama real: **387 backend aprobadas/26 omitidas**, 122
   frontend, lint/build correctos. Tiempo real
-  confirmado y registrado hasta ahora: **1 h 20 min** en AARI-157.
+  confirmado y registrado en la entrega inicial: **1 h 20 min** en AARI-157.
   Recorrido posterior al índice aprobado en escritorio/móvil y por los tres
   roles; SMTP simulado, permisos por API y retiro del entorno QA verificados.
   Un único reporte SMTP real de prueba fue aceptado y el usuario confirmó
@@ -922,14 +936,37 @@ entorno compartido en la nube.
   ahora la conexión del Home sobre las historias integradas en main.
   [PR #30](https://github.com/TaliaZurbriggen/Proyecto-Final-AARI/pull/30)
   fue publicado desde main, sin historias ajenas, con revisión solicitada a Talía.
-  Las doce subtareas se registraron listas al entregar; el cierre de la HU en
-  Jira continúa pendiente aunque el código ya está integrado. Tiempo agregado
+  Las doce subtareas se registraron listas al entregar; la HU quedó lista
+  posteriormente, el 08/10. Tiempo agregado
   verificado al continuar HU31: **1 h 40 min**. Commit de implementación `734386b`. Detalles en
   [`docs/hu14_derivacion_expensas.md`](docs/hu14_derivacion_expensas.md) y
   [guía de integración](docs/hu14_integracion_hu13_hu31.md).
 - **Seguimiento:** los story points conservan las estimaciones académicas
   originales; Time Tracking contiene las 39 HH reestimadas y los worklogs
-  registrarán el tiempo real.
+  registran el tiempo real, sin duplicar padres y subtareas.
 
 El alcance, la secuencia, las dependencias y el criterio de estimación están
 documentados en [`docs/planificacion_sprint_3.md`](docs/planificacion_sprint_3.md).
+
+**Sprint 4 — Activo:** planning completada y período configurado en Jira
+del **09/10/2026 al 06/11/2026**, sin modificar su inicio. Nueve HU de coordinación
+con proveedores, aprobadas y cargadas en Jira
+por **46 HH de implementación**, con reuniones aparte, tras sumar 2 HH a cada
+historia sobre la primera carga de 28 HH. El nuevo total supera en 16 HH la
+capacidad orientativa inicial de 30 HH; el compromiso final es 46 HH.
+Se distribuyó el tiempo en las 81 subtareas, sin duplicarlo
+en las HU padre y conservando los story points originales. AARI-338 (4 HH)
+quedó fuera de esta carga y permanece pendiente. Se prioriza la coordinación del
+agente con proveedores hasta **Visita programada**, no reparación Resuelta.
+Sprint iniciado por Talía y estado activo verificado. Las nueve HU y sus 81
+subtareas están asignadas: **Talía 22 HH** (HU15, HU18, HU19, HU23) y **Tobías
+24 HH** (HU16, HU17, HU20, HU21, HU24). Permanecen Por hacer hasta iniciar
+cada implementación aprobada.
+La planning duró **2 horas entre ambos = 4 HH del equipo**, registradas una
+sola vez en [AARI-344](https://taliazurbriggen.atlassian.net/browse/AARI-344), lista.
+Se contabilizan aparte de las 46 HH; review/retrospectiva aún no realizadas.
+Acta completa en Jira y en el proyecto; publicación completa en Notion pendiente
+por el límite de bloques gratuitos, sin borrar contenido ni cambiar el plan.
+El estado del Hub de Notion sí se actualizó y verificó con el resumen del Sprint.
+Alcance, dependencias, fotografía inicial, desglose verificado y riesgos
+en [`docs/planificacion_sprint_4_propuesta.md`](docs/planificacion_sprint_4_propuesta.md).
