@@ -2,6 +2,7 @@
 
 from typing import Protocol
 from uuid import UUID
+from app.schemas.list_filters import TenantsListFilters
 
 from app.services.access_service import AccessInvitationService
 from app.schemas.inquilinos import (
@@ -40,7 +41,8 @@ class InquilinosRepository(Protocol):
     def create(self, data: dict[str, object]) -> dict[str, object]: ...
 
     def list(
-        self, *, page: int, page_size: int, search: str | None
+        self, *, page: int, page_size: int, search: str | None,
+        filters: TenantsListFilters | None = None,
     ) -> tuple[list[dict[str, object]], int]: ...
 
     def get_detail(self, inquilino_id: UUID) -> dict[str, object] | None: ...
@@ -94,13 +96,16 @@ class InquilinosService:
         return self.get_detail(inquilino_id)
 
     def list(
-        self, *, page: int, page_size: int, search: str | None
+        self, *, page: int, page_size: int, search: str | None,
+        filters: TenantsListFilters | None = None,
     ) -> InquilinosPage:
         normalized_search = search.strip() if search and search.strip() else None
+        filter_args = {"filters": filters} if filters and filters.has_values() else {}
         items, total = self.repository.list(
             page=page,
             page_size=page_size,
             search=normalized_search,
+            **filter_args,
         )
         return InquilinosPage.build(
             items=items,

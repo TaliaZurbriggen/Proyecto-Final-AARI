@@ -1,12 +1,8 @@
 import { apiRequest } from '../../../services/apiClient.js'
+import { listQuery } from '../../../services/listQuery.js'
 
-export function listInquilinos({ page = 1, pageSize = 10, search = '', signal }) {
-  const params = new URLSearchParams({
-    page: String(page),
-    page_size: String(pageSize),
-  })
-  if (search.trim()) params.set('search', search.trim())
-  return apiRequest(`/inquilinos?${params.toString()}`, { signal })
+export function listInquilinos({ page = 1, pageSize = 10, search = '', filters, signal }) {
+  return apiRequest(`/inquilinos?${listQuery({ page, pageSize, search, filters })}`, { signal })
 }
 
 export function getInquilino(inquilinoId, { signal } = {}) {

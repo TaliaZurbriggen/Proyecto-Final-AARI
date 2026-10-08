@@ -1,6 +1,9 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { Building2, Eye, Pencil, Plus, Trash2, Users } from 'lucide-react'
-import { Link, useLocation, useSearchParams } from 'react-router'
+import { Link, useLocation } from 'react-router'
+import ListFilterPanel from '../../../components/ui/ListFilterPanel.jsx'
+import { useListFilters } from '../../../hooks/useListFilters.js'
+import { detailUrlWithListReturn } from '../../../services/listNavigation.js'
 import { PageContainer, PageHeading } from '../../../components/layout/index.js'
 import {
   AlertMessage,
@@ -17,12 +20,14 @@ import {
 import styles from './Propietarios.module.css'
 
 const PAGE_SIZE = 10
+const FILTER_FIELDS = [{ name: 'con_inmuebles', label: 'Inmuebles asociados', options: [
+  { value: 'true', label: 'Con inmuebles' }, { value: 'false', label: 'Sin inmuebles' },
+] }]
 
 function PropietariosListPage() {
-  const [searchParams, setSearchParams] = useSearchParams()
   const location = useLocation()
-  const page = Math.max(Number(searchParams.get('page')) || 1, 1)
-  const search = searchParams.get('search') ?? ''
+  const { page, search, filters, panelKey, queryKey, hasFilters, applyFilters, clearFilters, goToPage, normalizePage } = useListFilters(FILTER_FIELDS)
+  const requestSequence = useRef(0)
   const [data, setData] = useState(null)
   const [error, setError] = useState('')
   const [notice, setNotice] = useState(location.state?.notice ?? '')
@@ -30,33 +35,30 @@ function PropietariosListPage() {
   const [ownerToDelete, setOwnerToDelete] = useState(null)
   const [isDeleting, setIsDeleting] = useState(false)
 
-  const queryKey = `${page}:${search}`
   const loadOwners = useCallback((signal) => {
-    return listPropietarios({ page, pageSize: PAGE_SIZE, search, signal })
+    const requestId = ++requestSequence.current
+    return listPropietarios({ page, pageSize: PAGE_SIZE, search, filters, signal })
       .then((result) => {
+        if (signal?.aborted || requestId !== requestSequence.current) return
+        if (normalizePage(result.total_pages)) return
         setData(result)
         setError('')
-        setLoadedQuery(`${page}:${search}`)
+        setLoadedQuery(queryKey)
       })
       .catch((requestError) => {
-        if (requestError.name !== 'AbortError') {
+        if (!signal?.aborted && requestId === requestSequence.current && requestError.name !== 'AbortError') {
+          setData(null)
           setError(requestError.message)
-          setLoadedQuery(`${page}:${search}`)
+          setLoadedQuery(queryKey)
         }
       })
-  }, [page, search])
+  }, [page, search, filters, queryKey, normalizePage])
 
   useEffect(() => {
     const controller = new AbortController()
     loadOwners(controller.signal)
     return () => controller.abort()
   }, [loadOwners])
-
-  const goToPage = (nextPage) => {
-    const params = new URLSearchParams(searchParams)
-    params.set('page', String(nextPage))
-    setSearchParams(params)
-  }
 
   const handleDelete = async () => {
     if (!ownerToDelete) return
@@ -95,8 +97,13 @@ function PropietariosListPage() {
 
       <div className={styles.feedbackStack}>
         {notice ? <AlertMessage tone="success">{notice}</AlertMessage> : null}
-        {error ? <AlertMessage>{error}</AlertMessage> : null}
+        {!isLoading && error ? <AlertMessage>{error}</AlertMessage> : null}
       </div>
+
+      <ListFilterPanel key={panelKey} title="Filtros de propietarios" fields={FILTER_FIELDS}
+        search={search} searchLabel="Buscar propietario" searchPlaceholder="Nombre, DNI o email"
+        values={filters} hasSearch={Boolean(search)} onApply={applyFilters} onClear={clearFilters}
+        description="Buscá por nombre, DNI o email y combiná la búsqueda con los inmuebles asociados." />
 
       {isLoading ? (
         <LoadingState label="Cargando propietarios" lines={6} />
@@ -105,12 +112,12 @@ function PropietariosListPage() {
       {hasNoResults ? (
         <EmptyState
           action={
-            search ? (
+            hasFilters ? (
               <Button
-                onClick={() => setSearchParams({})}
+                onClick={clearFilters}
                 variant="secondary"
               >
-                Limpiar búsqueda
+                Limpiar búsqueda y filtros
               </Button>
             ) : (
               <Link className={styles.primaryLink} to="/propietarios/nuevo">
@@ -120,12 +127,12 @@ function PropietariosListPage() {
             )
           }
           description={
-            search
-              ? `No hay coincidencias para “${search}”. Probá con otro nombre, DNI o email.`
+            hasFilters
+              ? 'No hay propietarios que cumplan todos los criterios. Probá modificarlos o limpiarlos.'
               : 'Registrá un propietario para comenzar a asociar sus inmuebles.'
           }
           icon={Users}
-          title={search ? 'Sin resultados' : 'Todavía no hay propietarios'}
+          title={hasFilters ? 'Sin resultados' : 'Todavía no hay propietarios'}
         />
       ) : null}
 
@@ -134,9 +141,9 @@ function PropietariosListPage() {
           <div className={styles.listSummary}>
             <div>
               <h2 id="owners-list-title">
-                {search ? 'Resultados de la búsqueda' : 'Propietarios registrados'}
+                {hasFilters ? 'Resultados de la búsqueda' : 'Propietarios registrados'}
               </h2>
-              <p>{data.total} registros en total</p>
+              <p>{data.total} {hasFilters ? 'coincidencias' : 'registros en total'}</p>
             </div>
           </div>
 
@@ -155,7 +162,7 @@ function PropietariosListPage() {
                 {owners.map((owner) => (
                   <tr key={owner.id}>
                     <td data-label="Nombre">
-                      <Link className={styles.ownerLink} to={`/propietarios/${owner.id}`}>
+                      <Link className={styles.ownerLink} to={detailUrlWithListReturn(`/propietarios/${owner.id}`, location)}>
                         {owner.nombre_completo}
                       </Link>
                     </td>
@@ -175,7 +182,7 @@ function PropietariosListPage() {
                       <Link
                         aria-label={`Ver detalle de ${owner.nombre_completo}`}
                         className={styles.iconLink}
-                        to={`/propietarios/${owner.id}`}
+                        to={detailUrlWithListReturn(`/propietarios/${owner.id}`, location)}
                       >
                         <Eye aria-hidden="true" />
                       </Link>
@@ -212,7 +219,7 @@ function PropietariosListPage() {
               </Button>
               <span>Página {page} de {data.total_pages}</span>
               <Button
-                disabled={page === data.total_pages}
+                disabled={page >= data.total_pages}
                 onClick={() => goToPage(page + 1)}
                 size="sm"
                 variant="secondary"

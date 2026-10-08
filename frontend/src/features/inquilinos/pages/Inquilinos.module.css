@@ -466,6 +466,10 @@
     padding-inline: var(--aari-space-4);
   }
 
+  .pagination button {
+    min-height: var(--aari-control-height-md);
+  }
+
   .propertyCard {
     grid-template-columns: auto 1fr;
   }

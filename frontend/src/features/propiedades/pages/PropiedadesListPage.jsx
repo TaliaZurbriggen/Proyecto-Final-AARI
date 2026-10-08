@@ -1,6 +1,10 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { Building2, Eye, Pencil, Plus, Trash2 } from 'lucide-react'
-import { Link, useLocation, useSearchParams } from 'react-router'
+import { Link, useLocation } from 'react-router'
+import ListFilterPanel from '../../../components/ui/ListFilterPanel.jsx'
+import { useListFilters } from '../../../hooks/useListFilters.js'
+import { detailUrlWithListReturn } from '../../../services/listNavigation.js'
+import { PROPERTY_FILTER_FIELDS } from '../listFilters.js'
 import { PageContainer, PageHeading } from '../../../components/layout/index.js'
 import {
   AlertMessage,
@@ -37,10 +41,9 @@ function unitSummary(property) {
 }
 
 function PropiedadesListPage() {
-  const [searchParams, setSearchParams] = useSearchParams()
   const location = useLocation()
-  const page = Math.max(Number(searchParams.get('page')) || 1, 1)
-  const search = searchParams.get('search') ?? ''
+  const { page, search, filters, panelKey, queryKey, hasFilters, applyFilters, clearFilters, goToPage, normalizePage } = useListFilters(PROPERTY_FILTER_FIELDS)
+  const requestSequence = useRef(0)
   const [data, setData] = useState(null)
   const [error, setError] = useState('')
   const [notice, setNotice] = useState(location.state?.notice ?? '')
@@ -48,22 +51,26 @@ function PropiedadesListPage() {
   const [propertyToDelete, setPropertyToDelete] = useState(null)
   const [isDeleting, setIsDeleting] = useState(false)
 
-  const queryKey = `${page}:${search}`
   const loadProperties = useCallback(
-    (signal) =>
-      listPropiedades({ page, pageSize: PAGE_SIZE, search, signal })
+    (signal) => {
+      const requestId = ++requestSequence.current
+      return listPropiedades({ page, pageSize: PAGE_SIZE, search, filters, signal })
         .then((result) => {
+          if (signal?.aborted || requestId !== requestSequence.current) return
+          if (normalizePage(result.total_pages)) return
           setData(result)
           setError('')
-          setLoadedQuery(`${page}:${search}`)
+          setLoadedQuery(queryKey)
         })
         .catch((requestError) => {
-          if (requestError.name !== 'AbortError') {
+          if (!signal?.aborted && requestId === requestSequence.current && requestError.name !== 'AbortError') {
+            setData(null)
             setError(requestError.message)
-            setLoadedQuery(`${page}:${search}`)
+            setLoadedQuery(queryKey)
           }
-        }),
-    [page, search],
+        })
+    },
+    [page, search, filters, queryKey, normalizePage],
   )
 
   useEffect(() => {
@@ -71,12 +78,6 @@ function PropiedadesListPage() {
     loadProperties(controller.signal)
     return () => controller.abort()
   }, [loadProperties])
-
-  const goToPage = (nextPage) => {
-    const params = new URLSearchParams(searchParams)
-    params.set('page', String(nextPage))
-    setSearchParams(params)
-  }
 
   const requestDelete = (property) => {
     setNotice('')
@@ -130,17 +131,22 @@ function PropiedadesListPage() {
 
       <div className={styles.feedbackStack}>
         {notice ? <AlertMessage tone="success">{notice}</AlertMessage> : null}
-        {error ? <AlertMessage>{error}</AlertMessage> : null}
+        {!isLoading && error ? <AlertMessage>{error}</AlertMessage> : null}
       </div>
+
+      <ListFilterPanel key={panelKey} title="Filtros de propiedades" fields={PROPERTY_FILTER_FIELDS}
+        search={search}
+        values={filters} hasSearch={Boolean(search)} onApply={applyFilters} onClear={clearFilters}
+        description="Combiná tipo, ubicación, propietario y ocupación. Localidad y barrio: nombre completo, sin distinguir mayúsculas." />
 
       {isLoading ? <LoadingState label="Cargando propiedades" lines={6} /> : null}
 
       {hasNoResults ? (
         <EmptyState
           action={
-            search ? (
-              <Button onClick={() => setSearchParams({})} variant="secondary">
-                Limpiar búsqueda
+            hasFilters ? (
+              <Button onClick={clearFilters} variant="secondary">
+                Limpiar búsqueda y filtros
               </Button>
             ) : (
               <Link className={styles.primaryLink} to="/propiedades/nueva">
@@ -150,23 +156,23 @@ function PropiedadesListPage() {
             )
           }
           description={
-            search
-              ? `No hay coincidencias para “${search}”. Probá con otra dirección o ubicación.`
+            hasFilters
+              ? 'No hay propiedades que cumplan todos los criterios. Probá modificarlos o limpiarlos.'
               : 'Registrá una propiedad para comenzar a asociar inquilinos y reclamos.'
           }
           icon={Building2}
-          title={search ? 'Sin resultados' : 'Todavía no hay propiedades'}
+          title={hasFilters ? 'Sin resultados' : 'Todavía no hay propiedades'}
         />
       ) : null}
 
-      {!isLoading && properties.length ? (
+      {!isLoading && !error && properties.length ? (
         <section className={styles.listPanel} aria-labelledby="properties-list-title">
           <div className={styles.listSummary}>
             <div>
               <h2 id="properties-list-title">
-                {search ? 'Resultados de la búsqueda' : 'Propiedades registradas'}
+                {hasFilters ? 'Resultados de la búsqueda' : 'Propiedades registradas'}
               </h2>
-              <p>{data.total} registros en total</p>
+              <p>{data.total} {hasFilters ? 'coincidencias' : 'registros en total'}</p>
             </div>
           </div>
 
@@ -185,7 +191,7 @@ function PropiedadesListPage() {
                 {properties.map((property) => (
                   <tr key={property.id}>
                     <td data-label="Dirección">
-                      <Link className={styles.propertyLink} to={`/propiedades/${property.id}`}>
+                      <Link className={styles.propertyLink} to={detailUrlWithListReturn(`/propiedades/${property.id}`, location)}>
                         {property.direccion}
                       </Link>
                       {property.tipo === 'departamento' && unitSummary(property) ? (
@@ -217,7 +223,7 @@ function PropiedadesListPage() {
                       <Link
                         aria-label={`Ver ${property.direccion}`}
                         className={styles.iconLink}
-                        to={`/propiedades/${property.id}`}
+                        to={detailUrlWithListReturn(`/propiedades/${property.id}`, location)}
                       >
                         <Eye aria-hidden="true" />
                       </Link>
@@ -254,7 +260,7 @@ function PropiedadesListPage() {
               </Button>
               <span>Página {page} de {data.total_pages}</span>
               <Button
-                disabled={page === data.total_pages}
+                disabled={page >= data.total_pages}
                 onClick={() => goToPage(page + 1)}
                 size="sm"
                 variant="secondary"

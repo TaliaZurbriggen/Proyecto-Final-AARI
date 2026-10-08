@@ -12,6 +12,7 @@ from app.db.access import (
     sync_pending_access_account,
 )
 from app.db.database import SessionLocal
+from app.schemas.list_filters import OwnersListFilters
 from app.services.propietarios_service import (
     DuplicatePropietarioValueError,
     PropietarioHasPropertiesError,
@@ -81,20 +82,27 @@ class SqlAlchemyPropietariosRepository:
         return {**record, "usuario_id": user_id}
 
     def list(
-        self, *, page: int, page_size: int, search: str | None
+        self, *, page: int, page_size: int, search: str | None,
+        filters: OwnersListFilters | None = None,
     ) -> tuple[list[dict[str, object]], int]:
-        where_clause = ""
+        conditions = []
         params: dict[str, object] = {
             "limit": page_size,
             "offset": (page - 1) * page_size,
         }
         if search:
-            where_clause = """
-                WHERE lower(pr.nombre_completo) LIKE :search
+            conditions.append("""(
+                   lower(pr.nombre_completo) LIKE :search
                    OR pr.dni LIKE :search
                    OR lower(pr.email) LIKE :search
-            """
+            )""")
             params["search"] = f"%{search.lower()}%"
+        if filters and filters.con_inmuebles is not None:
+            existence = "EXISTS" if filters.con_inmuebles else "NOT EXISTS"
+            conditions.append(f"""{existence} (
+                SELECT 1 FROM propiedades owned WHERE owned.propietario_id = pr.id
+            )""")
+        where_clause = "WHERE " + " AND ".join(conditions) if conditions else ""
 
         count_statement = text(
             f"SELECT COUNT(*) FROM propietarios pr {where_clause}"

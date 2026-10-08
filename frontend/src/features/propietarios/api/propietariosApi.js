@@ -1,12 +1,8 @@
 import { apiRequest } from '../../../services/apiClient.js'
+import { listQuery } from '../../../services/listQuery.js'
 
-export function listPropietarios({ page = 1, pageSize = 10, search = '', signal }) {
-  const params = new URLSearchParams({
-    page: String(page),
-    page_size: String(pageSize),
-  })
-  if (search.trim()) params.set('search', search.trim())
-  return apiRequest(`/propietarios?${params.toString()}`, { signal })
+export function listPropietarios({ page = 1, pageSize = 10, search = '', filters, signal }) {
+  return apiRequest(`/propietarios?${listQuery({ page, pageSize, search, filters })}`, { signal })
 }
 
 export function getPropietario(propietarioId, { signal } = {}) {

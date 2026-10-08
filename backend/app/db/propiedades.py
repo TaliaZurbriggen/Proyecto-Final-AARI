@@ -7,6 +7,7 @@ from sqlalchemy.exc import IntegrityError
 from app.services.contract_errors import preserve_contract_history
 
 from app.db.database import SessionLocal
+from app.schemas.list_filters import PropertiesListFilters
 from app.services.propiedades_service import (
     DuplicatePropertyAddressError,
     PropertyHasActiveTenantError,
@@ -96,22 +97,43 @@ class SqlAlchemyPropiedadesRepository:
         return record
 
     def list(
-        self, *, page: int, page_size: int, search: str | None
+        self, *, page: int, page_size: int, search: str | None,
+        filters: PropertiesListFilters | None = None,
     ) -> tuple[list[dict[str, object]], int]:
-        where_clause = ""
+        conditions = []
         params: dict[str, object] = {
             "limit": page_size,
             "offset": (page - 1) * page_size,
         }
         if search:
-            where_clause = """
-                WHERE lower(p.direccion) LIKE :search
+            conditions.append("""(
+                   lower(p.direccion) LIKE :search
                    OR lower(p.provincia) LIKE :search
                    OR lower(p.localidad) LIKE :search
                    OR lower(COALESCE(p.barrio, '')) LIKE :search
                    OR lower(pr.nombre_completo) LIKE :search
-            """
+            )""")
             params["search"] = f"%{search.lower()}%"
+
+        values = filters.model_dump(mode="json", exclude_none=True) if filters else {}
+        for field in ("tipo", "provincia", "localidad", "barrio"):
+            if field in values:
+                conditions.append(f"lower(CAST(p.{field} AS TEXT)) = :filter_{field}")
+                params[f"filter_{field}"] = values[field].lower()
+        if "propietario" in values:
+            # Comodines literales; los datos siempre se envían como parámetros.
+            owner = values["propietario"].lower().replace("!", "!!").replace("%", "!%").replace("_", "!_")
+            conditions.append("""(lower(pr.nombre_completo) LIKE :filter_owner ESCAPE '!'
+                OR pr.dni LIKE :filter_owner ESCAPE '!'
+                OR lower(pr.email) LIKE :filter_owner ESCAPE '!')""")
+            params["filter_owner"] = f"%{owner}%"
+        if "tiene_inquilino_activo" in values:
+            existence = "EXISTS" if values["tiene_inquilino_activo"] else "NOT EXISTS"
+            conditions.append(f"""{existence} (
+                SELECT 1 FROM inquilinos occupied
+                WHERE occupied.propiedad_id = p.id AND occupied.estado = 'activo'
+            )""")
+        where_clause = "WHERE " + " AND ".join(conditions) if conditions else ""
 
         count_statement = text(
             f"""

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { ArrowLeft, Building2, Mail, MapPin, Pencil, Phone, Trash2 } from 'lucide-react'
 import { Link, useLocation, useNavigate, useParams } from 'react-router'
 import { PageContainer, PageHeading } from '../../../components/layout/index.js'
+import { getSafeListReturnUrl } from '../../../services/listNavigation.js'
 import AccessDeliveryPanel from '../../access/components/AccessDeliveryPanel.jsx'
 import {
   AlertMessage,
@@ -28,6 +29,13 @@ function PropietarioDetailPage() {
   const [isDeleteOpen, setIsDeleteOpen] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
   const [isRetryingAccess, setIsRetryingAccess] = useState(false)
+  const returnUrl = getSafeListReturnUrl('/propietarios', location.search)
+  const backLink = (
+    <Link className={styles.backLink} to={returnUrl}>
+      <ArrowLeft aria-hidden="true" />
+      Volver al listado
+    </Link>
+  )
 
   useEffect(() => {
     const controller = new AbortController()
@@ -54,7 +62,7 @@ function PropietarioDetailPage() {
     setIsDeleting(true)
     try {
       await deletePropietario(propietarioId)
-      navigate('/propietarios', {
+      navigate(returnUrl, {
         replace: true,
         state: { notice: 'El propietario se eliminó correctamente.' },
       })
@@ -87,6 +95,7 @@ function PropietarioDetailPage() {
   if (isLoading) {
     return (
       <PageContainer>
+        {backLink}
         <LoadingState label="Cargando detalle del propietario" lines={6} />
       </PageContainer>
     )
@@ -95,6 +104,7 @@ function PropietarioDetailPage() {
   if (!owner) {
     return (
       <PageContainer>
+        {backLink}
         <AlertMessage>{error || 'No encontramos el propietario solicitado.'}</AlertMessage>
       </PageContainer>
     )
@@ -102,10 +112,7 @@ function PropietarioDetailPage() {
 
   return (
     <PageContainer>
-      <Link className={styles.backLink} to="/propietarios">
-        <ArrowLeft aria-hidden="true" />
-        Volver al listado
-      </Link>
+      {backLink}
       <PageHeading
         action={
           <Link className={styles.primaryLink} to={`/propietarios/${owner.id}/editar`}>

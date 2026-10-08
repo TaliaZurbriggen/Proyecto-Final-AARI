@@ -8,6 +8,7 @@ import { escalationReason } from '../escalados.js'
 import { formatClaimDate, formatClaimNumber, claimStatusTone } from '../presentation.js'
 import { claimPropertyLabel } from '../validation.js'
 import { useHistoryResource } from '../useHistoryResource.js'
+import buttonStyles from '../../../components/ui/Button.module.css'
 import styles from './Escalados.module.css'
 
 function EscalatedClaimsPage({ operatorView = false }) {
@@ -46,7 +47,7 @@ function EscalatedClaimsPage({ operatorView = false }) {
           <div className={styles.panelHeading}><h2>Pendientes de revisión</h2><span>{data.total} {data.total === 1 ? 'caso' : 'casos'}</span></div>
           {data.items.length ? <div className={styles.tableRegion}><table className={styles.table}>
             <caption className="aari-sr-only">Casos pendientes, del más antiguo al más reciente</caption>
-            <thead><tr><th>Número y estado</th><th>Reclamo y propiedad</th><th>Ingresado</th><th>Escalado</th><th>Motivo de revisión</th></tr></thead>
+            <thead><tr><th>Número y estado</th><th>Reclamo y propiedad</th><th>Ingresado</th><th>Escalado</th><th>Motivo de revisión</th><th>Acciones</th></tr></thead>
             <tbody>{data.items.map((claim) => <tr key={claim.id}>
               <td data-label="Número y estado"><Link aria-label={`Revisar reclamo ${formatClaimNumber(claim.numero)}`}
                 to={`${base}/${claim.id}?${query}`} className={styles.claimLink}>{formatClaimNumber(claim.numero)}</Link>
@@ -55,6 +56,13 @@ function EscalatedClaimsPage({ operatorView = false }) {
               <td data-label="Ingresado">{formatClaimDate(claim.creado_en, { short: true })}</td>
               <td data-label="Escalado">{claim.escalado_en ? formatClaimDate(claim.escalado_en, { short: true }) : 'Sin escalado previo'}</td>
               <td data-label="Motivo de revisión">{escalationReason(claim.motivo_escalado)}</td>
+              <td data-label="Acciones" className={styles.actionsCell}>
+                <Link to={`${base}/${claim.id}?${query}`}
+                  aria-label={`Resolver clasificación del reclamo ${formatClaimNumber(claim.numero)}`}
+                  className={`${buttonStyles.button} ${buttonStyles.primary} ${buttonStyles.md} ${styles.resolveLink}`}>
+                  Resolver clasificación
+                </Link>
+              </td>
             </tr>)}</tbody>
           </table></div> : <EmptyState icon={ClipboardList} title={search ? 'Sin coincidencias' : 'No hay casos en esta página'}
             description={search ? 'Probá con otra búsqueda.' : 'Los reclamos que necesiten clasificación manual aparecerán acá.'}

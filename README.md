@@ -52,7 +52,7 @@ Proyecto-Final-AARI/
 │   ├── public/                  # Recursos estáticos
 │   ├── src/
 │   │   ├── components/          # UI y layouts reutilizables
-│   │   ├── features/            # Auth, personas, inmuebles, proveedores, operadores, reclamos y contratos
+│   │   ├── features/            # Auth, inicio, personas, inmuebles, proveedores, operadores, reclamos y contratos
 │   │   ├── pages/               # Pantallas generales de la aplicación
 │   │   └── styles/              # Tokens y estilos globales
 │   ├── AGENTS.md                # Reglas específicas del frontend
@@ -73,6 +73,45 @@ La identidad visual de AARI está centralizada para que los agentes y el equipo 
 - `frontend/src/pages/DesignSystemPreview.jsx`: vista ejecutable para revisar la dirección visual y los estados principales.
 
 La referencia aprobada se conserva dentro de la skill. Si una historia necesita apartarse de esa dirección, la decisión debe acordarse antes de implementarla.
+
+### Inicio del administrador (HU31)
+
+Después de iniciar sesión, el administrador accede a `/inicio`. El Home
+operativo consulta `GET /admin/resumen`: reclamos activos, pendientes de
+clasificación y totales de propietarios, propiedades, inquilinos, proveedores
+y operadores. Proveedores y operadores distinguen total registrado y activos.
+Los pendientes forman parte de los reclamos activos; no son cantidades que
+deban sumarse. La hora de consulta se muestra en horario argentino.
+
+Los accesos permiten abrir los módulos, contratos y el historial de reclamos
+por propiedad. La navegación administrativa usa tarjetas compactas en
+escritorio y un menú desplegable en móvil, manteniendo una única cabecera.
+Los demás roles conservan sus portales y el primer ingreso sigue exigiendo el
+cambio de contraseña. Se carga al entrar y se refresca con **Actualizar**;
+ante un error se retiran los contadores anteriores y no se inventan ceros.
+
+No agrega migraciones, variables de entorno ni dependencias. Reutiliza el
+esquema existente hasta `23_notificaciones_actor_responsable.sql`; una base
+sin esas tablas devuelve un error de resumen no disponible.
+**Revisar casos** abre `/escalados`, ya integrado desde HU13. Al volver al
+Home se consulta nuevamente el resumen: clasificar reduce los pendientes,
+pero no cierra la reparación ni retira el reclamo de los activos. El enlace
+sigue disponible si no hay pendientes o falla el resumen. No incorpora
+gráficos ni indicadores predictivos (HU26).
+Decisiones, comandos, resultados y límites:
+[`docs/hu31_home_administrador.md`](docs/hu31_home_administrador.md).
+
+Durante la revisión se aprobó incorporar filtros combinables en propiedades,
+propietarios e inquilinos en esta misma rama. En los dos listados de personas
+hay búsqueda visible por nombre/DNI/email, sincronizada con la cabecera.
+Filtros, búsqueda y total se aplican antes de paginar; se conservan al cambiar
+de página y vuelve a la primera al aplicar o limpiar. Una última página que
+desaparece tras eliminar registros se recupera automáticamente.
+Los enlaces al detalle conservan la URL del listado mediante `returnTo`, y
+«Volver al listado» restaura búsqueda, filtros y página incluso tras recargar
+o abrir otra pestaña. Un acceso directo sin retorno válido vuelve al listado
+del mismo módulo; nunca se aceptan destinos externos.
+Detalle: [`docs/hu31_filtros_listados.md`](docs/hu31_filtros_listados.md).
 
 ### Agente de clasificación
 
@@ -118,6 +157,9 @@ Administradores y operadores activos revisan la cola de clasificación desde
 `/escalados` y `/operador/escalados`, respectivamente. Incluye búsqueda,
 paginación, propiedad, fechas y motivo de revisión, con los casos más antiguos
 primero. El detalle conserva descripción, fotos privadas e historial.
+Cada caso ofrece **Resolver clasificación** como acción visible; abre el detalle
+sin guardar una decisión y conserva búsqueda y página al volver. En móvil
+se presenta dentro de la tarjeta. El número también sigue siendo un enlace.
 Detalle y fotos sólo admiten reclamos con pertenencia actual o histórica a la
 cola, o con una decisión manual registrada. Conocer un UUID no permite consultar
 un reclamo nunca escalado; en ese caso la API devuelve `404`.
@@ -214,6 +256,11 @@ La ruta externa actual utiliza `CONTRACT_CLAUSE_MODEL=gemini-3.5-flash-lite`, SD
 oficial y salida JSON validada localmente, con una petición HTTP por intento.
 El ensayo público respondió HTTP 200, pero **no alcanzó los umbrales de calidad
 automática del corpus**. Esto no se presenta como interpretación autónoma validada.
+
+`backend/requirements.txt` fija `google-genai==2.14.0`, además de
+`langchain-google-genai==4.3.2`, para reproducir el SDK registrado en los
+diagnósticos históricos. No regenerar sus resultados para adaptar una instalación
+distinta. [Corrección de reproducibilidad del 08/10](docs/hu30_reproducibilidad_sdk_2026-10-08.md).
 
 Para OCR local se requieren `pypdfium2`, `pytesseract` y el motor Tesseract con
 idioma español. Docker lo instala automáticamente. En Windows, instalar
@@ -749,7 +796,7 @@ entorno compartido en la nube.
 - **Tobías:** AARI-116, AARI-125, AARI-135 y AARI-157, más su participación en
   el despliegue.
 - **Trabajo conjunto:** AARI-338, despliegue del entorno compartido.
-- **HU30 / AARI-319 finalizada:** extracción local/OCR, análisis
+- **HU30 / AARI-319 reabierta En curso el 08/10 por reproducibilidad del SDK:** extracción local/OCR, análisis
   asistido, respaldo literal sin IA, revisión humana e integración del contexto
   contractual implementados en su rama. Las migraciones 23, 24 y 25 están
   aplicadas; las suites locales, PostgreSQL y OCR están aprobados. V3 fue evaluada en cuatro modelos
@@ -774,7 +821,13 @@ entorno compartido en la nube.
   Validación final del 07/10, incluido PostgreSQL local: **643 pruebas backend
   aprobadas, 28 omitidas; 134 frontend**, lint/build y formato correctos.
   PR #28 mergeado el 07/10/2026 (`439ee3c`); HU y sus seis subtareas verificadas
-  listas en Jira. Se conserva la revisión humana obligatoria.
+  listas en Jira en ese cierre. El hallazgo posterior requiere fijar
+  `google-genai==2.14.0`; la HU se reabrió con autorización hasta integrar la
+  corrección en el PR #31, en la misma rama de HU31 por pedido de Talía.
+  Entorno Windows limpio desde requirements: **14 pruebas focalizadas y 810
+  backend aprobadas, 37 omitidas**, con PostgreSQL local y sin APIs externas;
+  `pip check` sin conflictos. Las subtareas anteriores y sus horas no se
+  modifican. Se conserva la revisión humana obligatoria.
   Ver [alcance y resultados actuales de HU30](docs/evaluaciones/hu30/flujo_asistido_2026-10-05.md)
   y [regresiones del PR #28](docs/evaluaciones/hu30/correcciones_pr28_2026-10-05.md).
   [Actualización final del PR #28](docs/evaluaciones/hu30/cierre_pr28_2026-10-07.md).
@@ -782,17 +835,39 @@ entorno compartido en la nube.
   La extracción de cláusulas pertenece a HU30.
 - **HU10 / AARI-116 finalizada:** PR #25 mergeado; HU y subtareas listas en Jira.
   Infraestructura reutilizable para las notificaciones posteriores del Sprint.
+- **HU31 / AARI-332 implementada, pendiente de revisión e integración:** Home operativo y navegación responsive
+  en `codex/AARI-332-home-administrador`, actualizada mediante rebase sobre
+  `main` `69d0ec6` el 07/10. Conserva los filtros de listados y conecta
+  **Revisar casos** con HU13. Backend completo, incluido PostgreSQL local:
+  **808 passed / 37 skipped**; frontend revalidado tras el ajuste de acceso a
+  escalados: **238 passed**; lint/build aprobados.
+  Recorrido de clasificación, teclado y revisión responsive entre 320 y 1440 px
+  aprobados con datos ficticios. Pruebas automatizadas sin APIs externas ni
+  consumo de cuota. Se añadió **Resolver clasificación** al listado con
+  autorización. En una comprobación externa separada y autorizada, se verificó
+  la lectura de una foto privada existente tras corregir la configuración del
+  proceso local, sin alterar datos o permisos.
+  Continuación validada y publicación autorizada el 07/10 para revisión del PR;
+  no se autorizó merge ni cierre. Se registró **1h 15m adicional** en sus
+  subtareas: **3h 15m acumuladas**, sin duplicar el tiempo en la HU padre ni
+  modificar la estimación original.
+  Corrección de revisión del 08/10: retorno desde los detalles reales sin perder
+  filtros, búsqueda ni página. Frontend completo: **316 passed**; lint/build
+  aprobados y 9 recorridos locales en escritorio/móvil, sin APIs externas.
+  Commit/push de esta corrección autorizados el 08/10; pendiente de nueva revisión del PR #31.
+  [Detalle de la corrección](docs/hu31_filtros_listados.md#corrección-de-retorno-desde-detalle--08102026).
+  Evidencia en [`docs/hu31_home_administrador.md`](docs/hu31_home_administrador.md).
 - **HU12 / AARI-135 finalizada:** PR #26 mergeado en `main`; HU y subtareas
   listas en Jira, con **50 minutos reales** registrados. Evidencia en
   [`docs/hu12_notificacion_actor_responsable.md`](docs/hu12_notificacion_actor_responsable.md).
-- **HU13 / AARI-147 en curso:** implementación en
-  `codex/AARI-147-resolucion-escalados`, actualizada con `main` `439ee3c`. La HU y las
-  nueve subtareas están En curso. Cola de revisión, decisión manual sin LLM,
+- **HU13 / AARI-147 finalizada:** PR #29 aprobado y mergeado el 07/10
+  (`69d0ec6`). HU y nueve subtareas verificadas listas en Jira, con **2 h 15 min**
+  registrados en total. Cola de revisión, decisión manual sin LLM,
   auditoría y continuidad de HU12 probadas localmente. Migración 26 aplicada
   con autorización en Supabase el 05/10/2026; **9 pruebas reales aprobadas**,
-  con datos sintéticos y rollback, sin Gemini ni correos. Pendientes: revisión
-  funcional del equipo y nueva revisión del PR #29; publicación de la rama
-  autorizada el 05/10/2026, con **1 h 10 min** registrados en subtareas. La documentación está en
+  con datos sintéticos y rollback, sin Gemini ni correos. La entrega inicial
+  fue autorizada el 05/10/2026, con **1 h 10 min** en subtareas, incluidos en
+  el total final, no adicionales. La documentación está en
   [`docs/hu13_resolucion_escalados.md`](docs/hu13_resolucion_escalados.md);
   Notion no permitió agregarla por el límite de bloques gratuitos.
   Correcciones aprobadas del PR #29 implementadas localmente el 07/10: acceso
@@ -802,8 +877,8 @@ entorno compartido en la nube.
   de navegación escritorio/móvil con teclado aprobados. Incremental de
   destinatarios aplicada con autorización en Supabase el 07/10; **9 pruebas
   reales HU13 aprobadas** con rollback y limpieza comprobada. La 26 y su registro
-  permanecen intactos. Publicación de las correcciones autorizada el 07/10;
-  nueva revisión y merge del PR #29 pendientes.
+  permanecen intactos. Correcciones publicadas y aprobadas por Tobías antes
+  del merge autorizado; no quedaron cambios adicionales solicitados.
   [Detalle de la revisión](docs/hu13_correcciones_pr29_2026-10-07.md).
 - **HU11 / AARI-125 finalizada:** historial por propiedad con filtros,
   páginas de 20 y detalle con transiciones. Administración consulta todos los
@@ -816,12 +891,15 @@ entorno compartido en la nube.
   subtareas verificadas listas el 07/10/2026, con **1 h 15 min** registrados.
   Flujo, decisiones y comandos en
   [`docs/hu11_historial_reclamos.md`](docs/hu11_historial_reclamos.md).
-- **Pendientes verificados el 07/10/2026:** HU13/AARI-147 continúa en curso
-  con PR #29 abierto; HU30/AARI-319 está mergeada y finalizada. HU31/AARI-332 está en curso,
-  con rama subida y PR pendiente; su acceso a escalados espera integrar HU13.
+- **Pendientes actualizados el 08/10/2026:** HU13/AARI-147 está mergeada y
+  finalizada; HU30/AARI-319 se reabrió por la corrección de reproducibilidad,
+  sin deshacer el merge funcional. HU31/AARI-332 sigue en curso: conexión con
+  HU13 y revalidación completas, entrega autorizada para revisión del PR.
   El despliegue conjunto AARI-338 sigue por hacer.
   El Sprint permanece activo; no se considera cerrado por su fecha prevista.
-- **HU14 / AARI-157 entregada para revisión:** desarrollo de
+- **HU14 / AARI-157 integrada en main:** PR #30 mergeado (`37b179d`). La HU
+  todavía figura En curso en Jira; no se cerró durante la continuación de HU31.
+  Registro de entrega y validaciones anteriores al merge: desarrollo de
   reportes, entrega con tres intentos, panel privado, configuración y notas.
   Deriva solo después de aceptación SMTP registrada; fallos visibles sin
   informar éxito falso. Backend 385 pruebas aprobadas/26 omitidas, frontend
@@ -839,13 +917,14 @@ entorno compartido en la nube.
   recepción. Combinación temporal HU13/HU14/HU31: 527 pruebas backend
   aprobadas/35 omitidas, 214 frontend, lint/build, flujo manual y 16 controles
   API/SQL aprobados. Ajustes y pruebas únicamente en la copia aislada:
-  todavía falta trasladar/revalidar la integración definitiva, sin modificar
-  las ramas de Talía. El botón interno de revisión del Home sigue pendiente
-  de habilitación en HU31; la navegación combinada sí fue probada.
+  en esa etapa faltaba trasladar/revalidar la integración definitiva, sin modificar
+  las ramas de Talía. La continuación de HU31 documentada arriba completa
+  ahora la conexión del Home sobre las historias integradas en main.
   [PR #30](https://github.com/TaliaZurbriggen/Proyecto-Final-AARI/pull/30)
-  publicado desde main, sin historias ajenas, con revisión solicitada a Talía.
-  Las doce subtareas están listas; la HU principal sigue En curso hasta revisión
-  e integración. Commit de implementación `734386b`. Detalles en
+  fue publicado desde main, sin historias ajenas, con revisión solicitada a Talía.
+  Las doce subtareas se registraron listas al entregar; el cierre de la HU en
+  Jira continúa pendiente aunque el código ya está integrado. Tiempo agregado
+  verificado al continuar HU31: **1 h 40 min**. Commit de implementación `734386b`. Detalles en
   [`docs/hu14_derivacion_expensas.md`](docs/hu14_derivacion_expensas.md) y
   [guía de integración](docs/hu14_integracion_hu13_hu31.md).
 - **Seguimiento:** los story points conservan las estimaciones académicas

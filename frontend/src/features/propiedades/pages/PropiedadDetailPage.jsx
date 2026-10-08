@@ -10,6 +10,7 @@ import {
 } from 'lucide-react'
 import { Link, useLocation, useNavigate, useParams } from 'react-router'
 import { PageContainer, PageHeading } from '../../../components/layout/index.js'
+import { getSafeListReturnUrl } from '../../../services/listNavigation.js'
 import {
   AlertMessage,
   Button,
@@ -54,6 +55,13 @@ function PropiedadDetailPage() {
   const [isDeleteOpen, setIsDeleteOpen] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
   const [contractCount, setContractCount] = useState(0)
+  const returnUrl = getSafeListReturnUrl('/propiedades', location.search)
+  const backLink = (
+    <Link className={styles.backLink} to={returnUrl}>
+      <ArrowLeft aria-hidden="true" />
+      Volver al listado
+    </Link>
+  )
 
   useEffect(() => {
     const controller = new AbortController()
@@ -86,7 +94,7 @@ function PropiedadDetailPage() {
     setIsDeleting(true)
     try {
       await deletePropiedad(propiedadId)
-      navigate('/propiedades', {
+      navigate(returnUrl, {
         replace: true,
         state: { notice: 'La propiedad se eliminó correctamente.' },
       })
@@ -101,6 +109,7 @@ function PropiedadDetailPage() {
   if (isLoading) {
     return (
       <PageContainer>
+        {backLink}
         <LoadingState label="Cargando detalle de la propiedad" lines={6} />
       </PageContainer>
     )
@@ -109,6 +118,7 @@ function PropiedadDetailPage() {
   if (!property) {
     return (
       <PageContainer>
+        {backLink}
         <AlertMessage>{error || 'No encontramos la propiedad solicitada.'}</AlertMessage>
       </PageContainer>
     )
@@ -124,10 +134,7 @@ function PropiedadDetailPage() {
 
   return (
     <PageContainer>
-      <Link className={styles.backLink} to="/propiedades">
-        <ArrowLeft aria-hidden="true" />
-        Volver al listado
-      </Link>
+      {backLink}
       <PageHeading
         action={
           <Link className={styles.primaryLink} to={`/propiedades/${property.id}/editar`}>

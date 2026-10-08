@@ -12,6 +12,7 @@ from app.db.access import (
     sync_pending_access_account,
 )
 from app.db.database import SessionLocal
+from app.schemas.list_filters import TenantsListFilters
 from app.services.inquilinos_service import (
     InquilinoDuplicateDniError,
     InquilinoDuplicateEmailError,
@@ -177,22 +178,32 @@ class SqlAlchemyInquilinosRepository:
         return {**record, "usuario_id": user_id}
 
     def list(
-        self, *, page: int, page_size: int, search: str | None
+        self, *, page: int, page_size: int, search: str | None,
+        filters: TenantsListFilters | None = None,
     ) -> tuple[list[dict[str, object]], int]:
-        where_clause = ""
+        conditions = []
         params: dict[str, object] = {
             "limit": page_size,
             "offset": (page - 1) * page_size,
         }
         if search:
-            where_clause = """
-                WHERE lower(i.nombre_completo) LIKE :search
+            conditions.append("""(
+                   lower(i.nombre_completo) LIKE :search
                    OR i.dni LIKE :search
                    OR lower(i.email) LIKE :search
                    OR lower(COALESCE(p.direccion, '')) LIKE :search
                    OR lower(COALESCE(p.localidad, '')) LIKE :search
-            """
+            )""")
             params["search"] = f"%{search.lower()}%"
+        values = filters.model_dump(mode="json", exclude_none=True) if filters else {}
+        for field in ("provincia", "localidad"):
+            if field in values:
+                conditions.append(f"lower(p.{field}) = :filter_{field}")
+                params[f"filter_{field}"] = values[field].lower()
+        if "estado" in values:
+            conditions.append("i.estado = :filter_state")
+            params["filter_state"] = values["estado"]
+        where_clause = "WHERE " + " AND ".join(conditions) if conditions else ""
 
         count_statement = text(
             f"""

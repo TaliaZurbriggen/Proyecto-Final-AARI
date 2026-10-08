@@ -6,6 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 
 from app.db.access import SqlAlchemyAccessRepository
 from app.db.propietarios import SqlAlchemyPropietariosRepository
+from app.schemas.list_filters import OwnersListFilters
 from app.schemas.propietarios import (
     PropietarioCreate,
     PropietarioDetailResponse,
@@ -72,9 +73,10 @@ def list_propietarios(
     page: int = Query(default=1, ge=1),
     page_size: int = Query(default=10, ge=1, le=100),
     search: str | None = Query(default=None, max_length=120),
+    filters: OwnersListFilters = Depends(),
     service: PropietariosService = Depends(get_propietarios_service),
 ) -> PropietariosPage:
-    return service.list(page=page, page_size=page_size, search=search)
+    return service.list(page=page, page_size=page_size, search=search, filters=filters)
 
 
 @router.get("/{propietario_id}", response_model=PropietarioDetailResponse)

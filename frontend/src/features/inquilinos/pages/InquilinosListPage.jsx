@@ -1,6 +1,10 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { Eye, Pencil, Plus, Trash2, UserRound } from 'lucide-react'
-import { Link, useLocation, useSearchParams } from 'react-router'
+import { Link, useLocation } from 'react-router'
+import ListFilterPanel from '../../../components/ui/ListFilterPanel.jsx'
+import { useListFilters } from '../../../hooks/useListFilters.js'
+import { detailUrlWithListReturn } from '../../../services/listNavigation.js'
+import { LOCATION_FILTER_FIELDS } from '../../propiedades/listFilters.js'
 import { PageContainer, PageHeading } from '../../../components/layout/index.js'
 import {
   AlertMessage,
@@ -15,6 +19,13 @@ import { deleteInquilino, listInquilinos } from '../api/inquilinosApi.js'
 import styles from './Inquilinos.module.css'
 
 const PAGE_SIZE = 10
+const FILTER_FIELDS = [
+  { name: 'estado', label: 'Asignación de propiedad', options: [
+    { value: 'activo', label: 'Con propiedad asignada' },
+    { value: 'sin_propiedad_asignada', label: 'Sin propiedad asignada' },
+  ] },
+  ...LOCATION_FILTER_FIELDS,
+]
 
 function propertySummary(property) {
   if (!property) return 'Sin propiedad asignada'
@@ -28,10 +39,9 @@ function propertySummary(property) {
 }
 
 function InquilinosListPage() {
-  const [searchParams, setSearchParams] = useSearchParams()
   const location = useLocation()
-  const page = Math.max(Number(searchParams.get('page')) || 1, 1)
-  const search = searchParams.get('search') ?? ''
+  const { page, search, filters, panelKey, queryKey, hasFilters, applyFilters, clearFilters, goToPage, normalizePage } = useListFilters(FILTER_FIELDS)
+  const requestSequence = useRef(0)
   const [data, setData] = useState(null)
   const [error, setError] = useState('')
   const [notice, setNotice] = useState(location.state?.notice ?? '')
@@ -39,22 +49,26 @@ function InquilinosListPage() {
   const [tenantToDelete, setTenantToDelete] = useState(null)
   const [isDeleting, setIsDeleting] = useState(false)
 
-  const queryKey = `${page}:${search}`
   const loadTenants = useCallback(
-    (signal) =>
-      listInquilinos({ page, pageSize: PAGE_SIZE, search, signal })
+    (signal) => {
+      const requestId = ++requestSequence.current
+      return listInquilinos({ page, pageSize: PAGE_SIZE, search, filters, signal })
         .then((result) => {
+          if (signal?.aborted || requestId !== requestSequence.current) return
+          if (normalizePage(result.total_pages)) return
           setData(result)
           setError('')
-          setLoadedQuery(`${page}:${search}`)
+          setLoadedQuery(queryKey)
         })
         .catch((requestError) => {
-          if (requestError.name !== 'AbortError') {
+          if (!signal?.aborted && requestId === requestSequence.current && requestError.name !== 'AbortError') {
+            setData(null)
             setError(requestError.message)
-            setLoadedQuery(`${page}:${search}`)
+            setLoadedQuery(queryKey)
           }
-        }),
-    [page, search],
+        })
+    },
+    [page, search, filters, queryKey, normalizePage],
   )
 
   useEffect(() => {
@@ -62,12 +76,6 @@ function InquilinosListPage() {
     loadTenants(controller.signal)
     return () => controller.abort()
   }, [loadTenants])
-
-  const goToPage = (nextPage) => {
-    const params = new URLSearchParams(searchParams)
-    params.set('page', String(nextPage))
-    setSearchParams(params)
-  }
 
   const requestDelete = (tenant) => {
     setNotice('')
@@ -117,17 +125,22 @@ function InquilinosListPage() {
 
       <div className={styles.feedbackStack}>
         {notice ? <AlertMessage tone="success">{notice}</AlertMessage> : null}
-        {error ? <AlertMessage>{error}</AlertMessage> : null}
+        {!isLoading && error ? <AlertMessage>{error}</AlertMessage> : null}
       </div>
+
+      <ListFilterPanel key={panelKey} title="Filtros de inquilinos" fields={FILTER_FIELDS}
+        search={search} searchLabel="Buscar inquilino" searchPlaceholder="Nombre, DNI, email o propiedad"
+        values={filters} hasSearch={Boolean(search)} onApply={applyFilters} onClear={clearFilters}
+        description="La ubicación corresponde a la propiedad actual, no al domicilio personal. Localidad: nombre completo, sin distinguir mayúsculas. Sin propiedad y con ubicación no tendrá coincidencias." />
 
       {isLoading ? <LoadingState label="Cargando inquilinos" lines={6} /> : null}
 
       {hasNoResults ? (
         <EmptyState
           action={
-            search ? (
-              <Button onClick={() => setSearchParams({})} variant="secondary">
-                Limpiar búsqueda
+            hasFilters ? (
+              <Button onClick={clearFilters} variant="secondary">
+                Limpiar búsqueda y filtros
               </Button>
             ) : (
               <Link className={styles.primaryLink} to="/inquilinos/nuevo">
@@ -137,23 +150,23 @@ function InquilinosListPage() {
             )
           }
           description={
-            search
-              ? `No hay coincidencias para “${search}”. Probá con otro nombre, DNI o propiedad.`
+            hasFilters
+              ? 'No hay inquilinos que cumplan todos los criterios. Probá modificarlos o limpiarlos.'
               : 'Registrá un inquilino y asignalo a una propiedad disponible.'
           }
           icon={UserRound}
-          title={search ? 'Sin resultados' : 'Todavía no hay inquilinos'}
+          title={hasFilters ? 'Sin resultados' : 'Todavía no hay inquilinos'}
         />
       ) : null}
 
-      {!isLoading && tenants.length ? (
+      {!isLoading && !error && tenants.length ? (
         <section className={styles.listPanel} aria-labelledby="tenants-list-title">
           <div className={styles.listSummary}>
             <div>
               <h2 id="tenants-list-title">
-                {search ? 'Resultados de la búsqueda' : 'Inquilinos registrados'}
+                {hasFilters ? 'Resultados de la búsqueda' : 'Inquilinos registrados'}
               </h2>
-              <p>{data.total} registros en total</p>
+              <p>{data.total} {hasFilters ? 'coincidencias' : 'registros en total'}</p>
             </div>
           </div>
 
@@ -172,7 +185,7 @@ function InquilinosListPage() {
                 {tenants.map((tenant) => (
                   <tr key={tenant.id}>
                     <td data-label="Inquilino">
-                      <Link className={styles.tenantLink} to={`/inquilinos/${tenant.id}`}>
+                      <Link className={styles.tenantLink} to={detailUrlWithListReturn(`/inquilinos/${tenant.id}`, location)}>
                         {tenant.nombre_completo}
                       </Link>
                       <small className={styles.secondaryCopy}>DNI {tenant.dni}</small>
@@ -202,7 +215,7 @@ function InquilinosListPage() {
                       <Link
                         aria-label={`Ver ${tenant.nombre_completo}`}
                         className={styles.iconLink}
-                        to={`/inquilinos/${tenant.id}`}
+                        to={detailUrlWithListReturn(`/inquilinos/${tenant.id}`, location)}
                       >
                         <Eye aria-hidden="true" />
                       </Link>
@@ -239,7 +252,7 @@ function InquilinosListPage() {
               </Button>
               <span>Página {page} de {data.total_pages}</span>
               <Button
-                disabled={page === data.total_pages}
+                disabled={page >= data.total_pages}
                 onClick={() => goToPage(page + 1)}
                 size="sm"
                 variant="secondary"

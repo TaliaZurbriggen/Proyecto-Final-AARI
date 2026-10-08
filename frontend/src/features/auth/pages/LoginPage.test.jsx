@@ -22,7 +22,7 @@ function renderLogin() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/cambiar-contrasena" element={<h1>Cambio obligatorio</h1>} />
           <Route path="/propietario" element={<h1>Portal propietario</h1>} />
-          <Route path="/propietarios" element={<h1>Panel administrativo</h1>} />
+          <Route path="/inicio" element={<h1>Panel administrativo</h1>} />
         </Routes>
       </AuthProvider>
     </MemoryRouter>,

@@ -6,6 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 
 from app.db.access import SqlAlchemyAccessRepository
 from app.db.inquilinos import SqlAlchemyInquilinosRepository
+from app.schemas.list_filters import TenantsListFilters
 from app.schemas.inquilinos import (
     InquilinoCreate,
     InquilinoResponse,
@@ -108,9 +109,10 @@ def list_inquilinos(
     page: int = Query(default=1, ge=1),
     page_size: int = Query(default=10, ge=1, le=100),
     search: str | None = Query(default=None, max_length=200),
+    filters: TenantsListFilters = Depends(),
     service: InquilinosService = Depends(get_inquilinos_service),
 ) -> InquilinosPage:
-    return service.list(page=page, page_size=page_size, search=search)
+    return service.list(page=page, page_size=page_size, search=search, filters=filters)
 
 
 @router.get("/{inquilino_id}", response_model=InquilinoResponse)

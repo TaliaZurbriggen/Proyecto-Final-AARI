@@ -11,6 +11,7 @@ import {
 } from 'lucide-react'
 import { Link, useLocation, useNavigate, useParams } from 'react-router'
 import { PageContainer, PageHeading } from '../../../components/layout/index.js'
+import { getSafeListReturnUrl } from '../../../services/listNavigation.js'
 import AccessDeliveryPanel from '../../access/components/AccessDeliveryPanel.jsx'
 import ContractPanel from '../../contratos/components/ContractPanel.jsx'
 import {
@@ -48,6 +49,13 @@ function InquilinoDetailPage() {
   const [isBusy, setIsBusy] = useState(false)
   const [isRetryingAccess, setIsRetryingAccess] = useState(false)
   const [contractCount, setContractCount] = useState(0)
+  const returnUrl = getSafeListReturnUrl('/inquilinos', location.search)
+  const backLink = (
+    <Link className={styles.backLink} to={returnUrl}>
+      <ArrowLeft aria-hidden="true" />
+      Volver al listado
+    </Link>
+  )
 
   const loadTenant = useCallback(
     (signal) =>
@@ -80,7 +88,7 @@ function InquilinoDetailPage() {
     try {
       if (dialogAction === 'delete') {
         await deleteInquilino(inquilinoId)
-        navigate('/inquilinos', {
+        navigate(returnUrl, {
           replace: true,
           state: { notice: 'El inquilino se eliminó correctamente.' },
         })
@@ -120,6 +128,7 @@ function InquilinoDetailPage() {
   if (isLoading) {
     return (
       <PageContainer>
+        {backLink}
         <LoadingState label="Cargando detalle del inquilino" lines={6} />
       </PageContainer>
     )
@@ -128,6 +137,7 @@ function InquilinoDetailPage() {
   if (!tenant) {
     return (
       <PageContainer>
+        {backLink}
         <AlertMessage>{error || 'No encontramos el inquilino solicitado.'}</AlertMessage>
       </PageContainer>
     )
@@ -138,10 +148,7 @@ function InquilinoDetailPage() {
 
   return (
     <PageContainer>
-      <Link className={styles.backLink} to="/inquilinos">
-        <ArrowLeft aria-hidden="true" />
-        Volver al listado
-      </Link>
+      {backLink}
       <PageHeading
         action={
           <Link className={styles.primaryLink} to={`/inquilinos/${tenant.id}/editar`}>
