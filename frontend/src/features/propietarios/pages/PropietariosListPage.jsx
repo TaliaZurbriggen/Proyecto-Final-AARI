@@ -3,6 +3,7 @@ import { Building2, Eye, Pencil, Plus, Trash2, Users } from 'lucide-react'
 import { Link, useLocation } from 'react-router'
 import ListFilterPanel from '../../../components/ui/ListFilterPanel.jsx'
 import { useListFilters } from '../../../hooks/useListFilters.js'
+import { detailUrlWithListReturn } from '../../../services/listNavigation.js'
 import { PageContainer, PageHeading } from '../../../components/layout/index.js'
 import {
   AlertMessage,
@@ -161,7 +162,7 @@ function PropietariosListPage() {
                 {owners.map((owner) => (
                   <tr key={owner.id}>
                     <td data-label="Nombre">
-                      <Link className={styles.ownerLink} to={`/propietarios/${owner.id}`}>
+                      <Link className={styles.ownerLink} to={detailUrlWithListReturn(`/propietarios/${owner.id}`, location)}>
                         {owner.nombre_completo}
                       </Link>
                     </td>
@@ -181,7 +182,7 @@ function PropietariosListPage() {
                       <Link
                         aria-label={`Ver detalle de ${owner.nombre_completo}`}
                         className={styles.iconLink}
-                        to={`/propietarios/${owner.id}`}
+                        to={detailUrlWithListReturn(`/propietarios/${owner.id}`, location)}
                       >
                         <Eye aria-hidden="true" />
                       </Link>

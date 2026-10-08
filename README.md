@@ -107,6 +107,10 @@ hay búsqueda visible por nombre/DNI/email, sincronizada con la cabecera.
 Filtros, búsqueda y total se aplican antes de paginar; se conservan al cambiar
 de página y vuelve a la primera al aplicar o limpiar. Una última página que
 desaparece tras eliminar registros se recupera automáticamente.
+Los enlaces al detalle conservan la URL del listado mediante `returnTo`, y
+«Volver al listado» restaura búsqueda, filtros y página incluso tras recargar
+o abrir otra pestaña. Un acceso directo sin retorno válido vuelve al listado
+del mismo módulo; nunca se aceptan destinos externos.
 Detalle: [`docs/hu31_filtros_listados.md`](docs/hu31_filtros_listados.md).
 
 ### Agente de clasificación
@@ -847,6 +851,11 @@ entorno compartido en la nube.
   no se autorizó merge ni cierre. Se registró **1h 15m adicional** en sus
   subtareas: **3h 15m acumuladas**, sin duplicar el tiempo en la HU padre ni
   modificar la estimación original.
+  Corrección de revisión del 08/10: retorno desde los detalles reales sin perder
+  filtros, búsqueda ni página. Frontend completo: **316 passed**; lint/build
+  aprobados y 9 recorridos locales en escritorio/móvil, sin APIs externas.
+  Commit/push de esta corrección autorizados el 08/10; pendiente de nueva revisión del PR #31.
+  [Detalle de la corrección](docs/hu31_filtros_listados.md#corrección-de-retorno-desde-detalle--08102026).
   Evidencia en [`docs/hu31_home_administrador.md`](docs/hu31_home_administrador.md).
 - **HU12 / AARI-135 finalizada:** PR #26 mergeado en `main`; HU y subtareas
   listas en Jira, con **50 minutos reales** registrados. Evidencia en

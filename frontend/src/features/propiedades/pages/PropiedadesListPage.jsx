@@ -3,6 +3,7 @@ import { Building2, Eye, Pencil, Plus, Trash2 } from 'lucide-react'
 import { Link, useLocation } from 'react-router'
 import ListFilterPanel from '../../../components/ui/ListFilterPanel.jsx'
 import { useListFilters } from '../../../hooks/useListFilters.js'
+import { detailUrlWithListReturn } from '../../../services/listNavigation.js'
 import { PROPERTY_FILTER_FIELDS } from '../listFilters.js'
 import { PageContainer, PageHeading } from '../../../components/layout/index.js'
 import {
@@ -190,7 +191,7 @@ function PropiedadesListPage() {
                 {properties.map((property) => (
                   <tr key={property.id}>
                     <td data-label="Dirección">
-                      <Link className={styles.propertyLink} to={`/propiedades/${property.id}`}>
+                      <Link className={styles.propertyLink} to={detailUrlWithListReturn(`/propiedades/${property.id}`, location)}>
                         {property.direccion}
                       </Link>
                       {property.tipo === 'departamento' && unitSummary(property) ? (
@@ -222,7 +223,7 @@ function PropiedadesListPage() {
                       <Link
                         aria-label={`Ver ${property.direccion}`}
                         className={styles.iconLink}
-                        to={`/propiedades/${property.id}`}
+                        to={detailUrlWithListReturn(`/propiedades/${property.id}`, location)}
                       >
                         <Eye aria-hidden="true" />
                       </Link>

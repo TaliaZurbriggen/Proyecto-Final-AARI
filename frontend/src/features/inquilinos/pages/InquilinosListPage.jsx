@@ -3,6 +3,7 @@ import { Eye, Pencil, Plus, Trash2, UserRound } from 'lucide-react'
 import { Link, useLocation } from 'react-router'
 import ListFilterPanel from '../../../components/ui/ListFilterPanel.jsx'
 import { useListFilters } from '../../../hooks/useListFilters.js'
+import { detailUrlWithListReturn } from '../../../services/listNavigation.js'
 import { LOCATION_FILTER_FIELDS } from '../../propiedades/listFilters.js'
 import { PageContainer, PageHeading } from '../../../components/layout/index.js'
 import {
@@ -184,7 +185,7 @@ function InquilinosListPage() {
                 {tenants.map((tenant) => (
                   <tr key={tenant.id}>
                     <td data-label="Inquilino">
-                      <Link className={styles.tenantLink} to={`/inquilinos/${tenant.id}`}>
+                      <Link className={styles.tenantLink} to={detailUrlWithListReturn(`/inquilinos/${tenant.id}`, location)}>
                         {tenant.nombre_completo}
                       </Link>
                       <small className={styles.secondaryCopy}>DNI {tenant.dni}</small>
@@ -214,7 +215,7 @@ function InquilinosListPage() {
                       <Link
                         aria-label={`Ver ${tenant.nombre_completo}`}
                         className={styles.iconLink}
-                        to={`/inquilinos/${tenant.id}`}
+                        to={detailUrlWithListReturn(`/inquilinos/${tenant.id}`, location)}
                       >
                         <Eye aria-hidden="true" />
                       </Link>

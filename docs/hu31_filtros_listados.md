@@ -4,7 +4,8 @@
 
 **Rama:** `codex/AARI-332-home-administrador`
 
-**Estado:** implementación validada; commit y push autorizados el 05/10/2026.
+**Estado:** entrega inicial publicada con autorización; corrección de revisión
+del 08/10/2026 validada, commit/push autorizados y nueva revisión pendiente.
 
 ## Contexto y alcance aprobado
 
@@ -152,3 +153,93 @@ La revisión final repitió **808 backend aprobadas / 37 omitidas**,
 Se registraron **1h 15m adicionales**: la HU acumula **3h 15m**, solo en sus
 subtareas. Registro y worklogs en el informe del Home. Quedan revisión y PR;
 no se autoriza todavía el merge ni el cierre de HU31.
+
+## Corrección de retorno desde detalle — 08/10/2026
+
+### Hallazgo y decisión aprobada
+
+La revisión del PR #31 detectó que los enlaces reales «Volver al listado»
+apuntaban a la raíz del módulo y perdían búsqueda, filtros y página. La prueba
+anterior sustituyó el detalle por una pantalla simulada que volvía mediante
+el historial (`navigate(-1)`); por eso sus resultados históricos no verificaban
+el enlace real. Se conserva esa evidencia histórica y se explicita su límite.
+
+La propuesta aprobada conserva el contexto en un parámetro `returnTo` de la
+URL del detalle, codificado con `URLSearchParams`. No se depende del historial
+del navegador, de almacenamiento local ni únicamente del estado de React:
+el enlace sigue siendo útil al recargar o abrirlo en otra pestaña.
+
+El retorno se valida contra el listado exacto del mismo módulo y su query.
+Destinos externos, otros módulos, fragmentos, barras invertidas, caracteres
+de control o parámetros `returnTo` duplicados se rechazan. Si falta un retorno
+válido, se vuelve a `/propietarios`, `/propiedades` o `/inquilinos`, según la
+pantalla. Los caracteres de la búsqueda no se decodifican dos veces.
+
+### Implementación
+
+- `frontend/src/services/listNavigation.js`: construcción del enlace al detalle
+  y resolución del retorno seguro, compartidas por los tres módulos.
+- Los listados de propietarios, propiedades e inquilinos añaden el contexto
+  tanto al enlace de nombre/dirección como a la acción de ver detalle.
+- Los tres detalles usan ese destino en «Volver al listado», también durante
+  la carga o si el registro no existe. La eliminación desde el detalle vuelve
+  al mismo contexto, manteniendo el aviso de éxito y la recuperación de una
+  última página que haya desaparecido.
+- `frontend/src/features/adminListFilters.test.jsx` utiliza los componentes
+  reales de listado y detalle, con APIs simuladas; se eliminó el detalle falso.
+- `frontend/src/services/listNavigation.test.js` cubre codificación y rechazo
+  de destinos no válidos.
+
+Se mantuvieron los enlaces, estilos, componentes y comportamiento responsive
+existentes siguiendo la skill `aari-frontend`. No cambian CSS, backend,
+dependencias, migraciones ni configuración. No se amplía el alcance a los
+formularios de alta/edición ni a enlaces entre módulos distintos.
+
+### Validaciones y resultados
+
+Antes de corregir las pantallas se ejecutaron las nuevas pruebas que abren el
+detalle real: **6 fallaron** como se esperaba, reproduciendo el hallazgo en
+ambos enlaces de los tres módulos. Después de la corrección:
+
+| Validación | Resultado |
+|---|---|
+| `node node_modules/vitest/vitest.mjs run src/features/adminListFilters.test.jsx src/services/listNavigation.test.js --maxWorkers=1 --reporter=dot` | **129 passed**: 75 pruebas de listados/detalles y 54 de retorno seguro. |
+| `node node_modules/vitest/vitest.mjs run --maxWorkers=2 --reporter=dot` | **316 passed**, 35 archivos, sin fallos. |
+| `node node_modules/eslint/bin/eslint.js .` | Aprobado. |
+| `node node_modules/vite/bin/vite.js build` | Aprobado. |
+| Chrome aislado, datos ficticios, 1440/390/320 px | **9 recorridos aprobados**, los tres módulos en cada ancho. |
+| `git diff --check` y revisión del diff | Sin errores de formato; sin claves ni datos personales añadidos. |
+
+Los comandos frontend se ejecutan desde `frontend/`, usando Node disponible
+en Windows. Son las entradas CLI equivalentes a los scripts del proyecto.
+La suite completa se ejecutó después del último ajuste del helper.
+
+Las pruebas comprueban búsqueda, filtros y página tanto al volver como al
+acceder directamente mediante la URL del detalle; incluyen caracteres
+especiales, retorno ausente/inválido, error 404 y recuperación de la última
+página tras una eliminación o un cambio de total mientras se ve el detalle.
+
+En Chrome se verificaron navegación por teclado, foco visible, enlace real de
+retorno, recarga, pestaña nueva sin historial, fallback seguro, criterios
+enviados a la API simulada y ausencia de desborde horizontal. Se verificó que
+la fuente Inter se cargara correctamente y que no hubiera errores HTTP ni
+JavaScript. Capturas y script local: `backend/artifacts/hu31/`, ignorado por Git.
+La prueba visual se ejecutó en un servidor temporal aislado, sin alterar los
+procesos de la app del usuario.
+
+### Límites y estado de entrega
+
+No se repitieron las pruebas backend porque esta corrección no lo modifica.
+No se consultó Supabase, Gemini, Storage ni SMTP; las APIs del navegador fueron
+simuladas. No se instalaron paquetes.
+
+La corrección permanece en la rama existente de HU31, sin rebase ni cambios
+en trabajo ajeno. Después de validar el resultado, la persona responsable
+autorizó el commit/push el 08/10. La publicación se registra mediante un
+comentario en AARI-332 con rama, commit y validaciones, según `AGENTS.md`.
+No se autorizó el merge, el cierre de la HU ni nuevos registros de tiempo.
+El PR #31 requiere una nueva revisión antes de aprobarse o integrarse.
+
+Notion continúa pendiente por el límite gratuito de bloques (HTTP 403
+`block_limit_reached` registrado previamente). No se declara sincronizada allí
+esta corrección; la documentación queda preservada en el repositorio.
