@@ -1,0 +1,1023 @@
+{
+  "fecha_acta": "2026-10-08",
+  "fecha_verificacion": "2026-10-08",
+  "sprint": {
+    "id": 73,
+    "nombre": "Sprint 4",
+    "estado_verificado": "active",
+    "iniciado_por": "Talía",
+    "inicio_configurado": "2026-10-09T03:00:00.000Z",
+    "fin_configurado": "2026-11-06T03:00:00.000Z",
+    "zona_horaria": "America/Buenos_Aires",
+    "objetivo_acta": "Reclamo clasificado a proveedor seleccionado y visita programada, con autorización, contexto y auditoría.",
+    "objetivo_campo_sprint": "",
+    "nota_objetivo": "El objetivo se documentó en el acta AARI-344; el campo objetivo del Sprint permanece vacío. No hay herramienta disponible para editarlo ni Chrome conectado."
+  },
+  "alcance": {
+    "historias": 9,
+    "subtareas": 81,
+    "implementacion_hh": 46,
+    "estimacion_inicial_sustituida_hh": 28,
+    "incremento_total_hh": 18,
+    "capacidad_orientativa_inicial_hh": 30,
+    "story_points_originales": 246,
+    "unidad_story_points": "1 punto = 1 HH de la estimación académica original; no equivale a la reestimación vigente.",
+    "fuente_estimacion_vigente": "Time Tracking de las 81 subtareas, sin duplicar los padres.",
+    "fuera_sprint": [
+      "AARI-338",
+      "HU22 / AARI-238",
+      "HU25 / AARI-272",
+      "HU26",
+      "HU27",
+      "HU28"
+    ]
+  },
+  "reparto": {
+    "Talia": {
+      "hu": [
+        "HU15",
+        "HU18",
+        "HU19",
+        "HU23"
+      ],
+      "hh": 22
+    },
+    "Tobias": {
+      "hu": [
+        "HU16",
+        "HU17",
+        "HU20",
+        "HU21",
+        "HU24"
+      ],
+      "hh": 24
+    }
+  },
+  "ceremonias": {
+    "planning": {
+      "jira": "AARI-344",
+      "estado": "Listo",
+      "duracion_reunion_horas": 2,
+      "participantes": [
+        "Talía",
+        "Tobías"
+      ],
+      "estimacion_hh": 4,
+      "real_hh": 4,
+      "restante_hh": 0,
+      "numero_worklogs": 1,
+      "nota": "Un worklog consolidado de 4 HH del equipo, no 4 horas individuales de la autora. No replicado en HU/subtareas."
+    },
+    "review_retrospectiva": {
+      "real_hh": 0,
+      "realizadas": false,
+      "reserva_orientativa_hh": 2,
+      "reserva_confirmada": false
+    }
+  },
+  "totales": {
+    "implementacion_comprometida_mas_planning_real_hh": 50,
+    "real_registrado_hh": 4,
+    "total_orientativo_con_review_retrospectiva_hh": 52,
+    "nota": "50 y 52 HH no son horas ya trabajadas."
+  },
+  "historias": [
+    {
+      "jira": "AARI-170",
+      "hu": "HU15",
+      "resumen": "HU15 — Como agente, quiero asignar el reclamo al proveedor disponible con la especialidad requerida.",
+      "responsable": "Talía",
+      "estado": "Por hacer",
+      "estimacion_hh": 5,
+      "estimacion_directa_padre": null,
+      "trabajo_real_segundos": 0,
+      "subtareas": [
+        {
+          "jira": "AARI-171",
+          "resumen": "Algoritmo de selección de candidatos: filtrar proveedores por especialidad requerida + zona de la propiedad + estado activo",
+          "responsable": "Talía",
+          "estado": "Por hacer",
+          "story_points_originales": 5,
+          "estimacion_segundos": 3900,
+          "restante_segundos": 3900,
+          "trabajo_real_segundos": 0
+        },
+        {
+          "jira": "AARI-172",
+          "resumen": "Endpoint GET /reclamos/{id}/proveedores-candidatos que devuelve el listado de candidatos",
+          "responsable": "Talía",
+          "estado": "Por hacer",
+          "story_points_originales": 3,
+          "estimacion_segundos": 3000,
+          "restante_segundos": 3000,
+          "trabajo_real_segundos": 0
+        },
+        {
+          "jira": "AARI-173",
+          "resumen": "Lógica de sin disponibilidad: si no hay candidatos, cambiar estado a Pendiente de asignación y notificar al operador",
+          "responsable": "Talía",
+          "estado": "Por hacer",
+          "story_points_originales": 4,
+          "estimacion_segundos": 1200,
+          "restante_segundos": 1200,
+          "trabajo_real_segundos": 0
+        },
+        {
+          "jira": "AARI-174",
+          "resumen": "Vista del operador para reclamos en estado Pendiente de asignación con información del faltante",
+          "responsable": "Talía",
+          "estado": "Por hacer",
+          "story_points_originales": 4,
+          "estimacion_segundos": 1500,
+          "restante_segundos": 1500,
+          "trabajo_real_segundos": 0
+        },
+        {
+          "jira": "AARI-175",
+          "resumen": "Actualización del estado del reclamo tras la búsqueda de candidatos",
+          "responsable": "Talía",
+          "estado": "Por hacer",
+          "story_points_originales": 1,
+          "estimacion_segundos": 600,
+          "restante_segundos": 600,
+          "trabajo_real_segundos": 0
+        },
+        {
+          "jira": "AARI-176",
+          "resumen": "Registro del resultado de la búsqueda en el historial del reclamo (candidatos encontrados o ausencia, timestamp)",
+          "responsable": "Talía",
+          "estado": "Por hacer",
+          "story_points_originales": 1,
+          "estimacion_segundos": 600,
+          "restante_segundos": 600,
+          "trabajo_real_segundos": 0
+        },
+        {
+          "jira": "AARI-177",
+          "resumen": "Tests del algoritmo de selección (candidatos disponibles, ningún candidato, candidatos de la zona incorrecta)",
+          "responsable": "Talía",
+          "estado": "Por hacer",
+          "story_points_originales": 5,
+          "estimacion_segundos": 3600,
+          "restante_segundos": 3600,
+          "trabajo_real_segundos": 0
+        },
+        {
+          "jira": "AARI-178",
+          "resumen": "Integración con el módulo de proveedores",
+          "responsable": "Talía",
+          "estado": "Por hacer",
+          "story_points_originales": 2,
+          "estimacion_segundos": 900,
+          "restante_segundos": 900,
+          "trabajo_real_segundos": 0
+        },
+        {
+          "jira": "AARI-179",
+          "resumen": "QA del flujo completo de búsqueda de candidatos",
+          "responsable": "Talía",
+          "estado": "Por hacer",
+          "story_points_originales": 2,
+          "estimacion_segundos": 2700,
+          "restante_segundos": 2700,
+          "trabajo_real_segundos": 0
+        }
+      ]
+    },
+    {
+      "jira": "AARI-180",
+      "hu": "HU16",
+      "resumen": "HU16 — Como propietario, quiero recibir una notificación y poder autorizar o rechazar un gasto extraordinario.",
+      "responsable": "Tobías",
+      "estado": "Por hacer",
+      "estimacion_hh": 5,
+      "estimacion_directa_padre": null,
+      "trabajo_real_segundos": 0,
+      "subtareas": [
+        {
+          "jira": "AARI-181",
+          "resumen": "Notificación al propietario con descripción del reclamo, propiedad afectada, clasificación y enlace a la vista de decisión",
+          "responsable": "Tobías",
+          "estado": "Por hacer",
+          "story_points_originales": 3,
+          "estimacion_segundos": 900,
+          "restante_segundos": 900,
+          "trabajo_real_segundos": 0
+        },
+        {
+          "jira": "AARI-182",
+          "resumen": "Vista de decisión en React: detalle del reclamo y dos acciones exclusivas (Autorizar / Rechazar)",
+          "responsable": "Tobías",
+          "estado": "Por hacer",
+          "story_points_originales": 5,
+          "estimacion_segundos": 3600,
+          "restante_segundos": 3600,
+          "trabajo_real_segundos": 0
+        },
+        {
+          "jira": "AARI-183",
+          "resumen": "Endpoint POST /reclamos/{id}/autorizar y POST /reclamos/{id}/rechazar",
+          "responsable": "Tobías",
+          "estado": "Por hacer",
+          "story_points_originales": 2,
+          "estimacion_segundos": 3300,
+          "restante_segundos": 3300,
+          "trabajo_real_segundos": 0
+        },
+        {
+          "jira": "AARI-184",
+          "resumen": "Lógica de autorización: estado pasa a Autorizado, el flujo continúa automáticamente hacia HU-17",
+          "responsable": "Tobías",
+          "estado": "Por hacer",
+          "story_points_originales": 2,
+          "estimacion_segundos": 900,
+          "restante_segundos": 900,
+          "trabajo_real_segundos": 0
+        },
+        {
+          "jira": "AARI-185",
+          "resumen": "Lógica de rechazo: estado pasa a Rechazado por propietario, el ciclo se cierra, el inquilino es notificado",
+          "responsable": "Tobías",
+          "estado": "Por hacer",
+          "story_points_originales": 2,
+          "estimacion_segundos": 900,
+          "restante_segundos": 900,
+          "trabajo_real_segundos": 0
+        },
+        {
+          "jira": "AARI-186",
+          "resumen": "Notificación al inquilino y al operador del resultado de la decisión",
+          "responsable": "Tobías",
+          "estado": "Por hacer",
+          "story_points_originales": 2,
+          "estimacion_segundos": 600,
+          "restante_segundos": 600,
+          "trabajo_real_segundos": 0
+        },
+        {
+          "jira": "AARI-187",
+          "resumen": "Job de recordatorio a las 48h sin respuesta",
+          "responsable": "Tobías",
+          "estado": "Por hacer",
+          "story_points_originales": 2,
+          "estimacion_segundos": 900,
+          "restante_segundos": 900,
+          "trabajo_real_segundos": 0
+        },
+        {
+          "jira": "AARI-188",
+          "resumen": "Job de escalado a las 72h sin respuesta: estado Pendiente de autorización - vencido, notificación al operador",
+          "responsable": "Tobías",
+          "estado": "Por hacer",
+          "story_points_originales": 2,
+          "estimacion_segundos": 2700,
+          "restante_segundos": 2700,
+          "trabajo_real_segundos": 0
+        },
+        {
+          "jira": "AARI-189",
+          "resumen": "Registro de la decisión en el historial del reclamo (nombre del propietario, timestamp)",
+          "responsable": "Tobías",
+          "estado": "Por hacer",
+          "story_points_originales": 1,
+          "estimacion_segundos": 600,
+          "restante_segundos": 600,
+          "trabajo_real_segundos": 0
+        },
+        {
+          "jira": "AARI-190",
+          "resumen": "Tests de las dos ramas (autorizar y rechazar) y del flujo de timeout",
+          "responsable": "Tobías",
+          "estado": "Por hacer",
+          "story_points_originales": 4,
+          "estimacion_segundos": 3600,
+          "restante_segundos": 3600,
+          "trabajo_real_segundos": 0
+        }
+      ]
+    },
+    {
+      "jira": "AARI-191",
+      "hu": "HU17",
+      "resumen": "HU17 — Como actor responsable, quiero elegir entre un proveedor fidelizado o uno propio.",
+      "responsable": "Tobías",
+      "estado": "Por hacer",
+      "estimacion_hh": 4,
+      "estimacion_directa_padre": null,
+      "trabajo_real_segundos": 0,
+      "subtareas": [
+        {
+          "jira": "AARI-192",
+          "resumen": "Vista de selección en React con dos opciones claramente diferenciadas: proveedor fidelizado o proveedor propio",
+          "responsable": "Tobías",
+          "estado": "Por hacer",
+          "story_points_originales": 4,
+          "estimacion_segundos": 3300,
+          "restante_segundos": 3300,
+          "trabajo_real_segundos": 0
+        },
+        {
+          "jira": "AARI-193",
+          "resumen": "Endpoint POST /reclamos/{id}/tipo-proveedor que registra la elección y enruta el flujo",
+          "responsable": "Tobías",
+          "estado": "Por hacer",
+          "story_points_originales": 2,
+          "estimacion_segundos": 3300,
+          "restante_segundos": 3300,
+          "trabajo_real_segundos": 0
+        },
+        {
+          "jira": "AARI-194",
+          "resumen": "Nodo de decisión en el grafo de LangGraph: si fidelizado → HU-19, si propio → HU18",
+          "responsable": "Tobías",
+          "estado": "Por hacer",
+          "story_points_originales": 3,
+          "estimacion_segundos": 3000,
+          "restante_segundos": 3000,
+          "trabajo_real_segundos": 0
+        },
+        {
+          "jira": "AARI-195",
+          "resumen": "Job de recordatorio a las 48h sin respuesta",
+          "responsable": "Tobías",
+          "estado": "Por hacer",
+          "story_points_originales": 2,
+          "estimacion_segundos": 600,
+          "restante_segundos": 600,
+          "trabajo_real_segundos": 0
+        },
+        {
+          "jira": "AARI-196",
+          "resumen": "Job de escalado a las 72h sin respuesta: estado Pendiente de respuesta - vencido, notificación al operador",
+          "responsable": "Tobías",
+          "estado": "Por hacer",
+          "story_points_originales": 2,
+          "estimacion_segundos": 600,
+          "restante_segundos": 600,
+          "trabajo_real_segundos": 0
+        },
+        {
+          "jira": "AARI-197",
+          "resumen": "Registro de la elección en el reclamo con timestamp",
+          "responsable": "Tobías",
+          "estado": "Por hacer",
+          "story_points_originales": 1,
+          "estimacion_segundos": 300,
+          "restante_segundos": 300,
+          "trabajo_real_segundos": 0
+        },
+        {
+          "jira": "AARI-198",
+          "resumen": "Tests de ambas ramas del flujo y del timeout",
+          "responsable": "Tobías",
+          "estado": "Por hacer",
+          "story_points_originales": 3,
+          "estimacion_segundos": 3300,
+          "restante_segundos": 3300,
+          "trabajo_real_segundos": 0
+        }
+      ]
+    },
+    {
+      "jira": "AARI-199",
+      "hu": "HU18",
+      "resumen": "HU18 — Como actor responsable, quiero registrar un proveedor externo cuando no deseo usar uno fidelizado.",
+      "responsable": "Talía",
+      "estado": "Por hacer",
+      "estimacion_hh": 4,
+      "estimacion_directa_padre": null,
+      "trabajo_real_segundos": 0,
+      "subtareas": [
+        {
+          "jira": "AARI-200",
+          "resumen": "Formulario en React con dos campos: nombre completo y teléfono del proveedor externo",
+          "responsable": "Talía",
+          "estado": "Por hacer",
+          "story_points_originales": 3,
+          "estimacion_segundos": 3600,
+          "restante_segundos": 3600,
+          "trabajo_real_segundos": 0
+        },
+        {
+          "jira": "AARI-201",
+          "resumen": "Validación de teléfono: numérico, entre 8 y 15 dígitos, con mensaje de error descriptivo",
+          "responsable": "Talía",
+          "estado": "Por hacer",
+          "story_points_originales": 1,
+          "estimacion_segundos": 2700,
+          "restante_segundos": 2700,
+          "trabajo_real_segundos": 0
+        },
+        {
+          "jira": "AARI-202",
+          "resumen": "Endpoint POST /reclamos/{id}/proveedor-externo que persiste los datos en el historial de la propiedad asociados al reclamo",
+          "responsable": "Talía",
+          "estado": "Por hacer",
+          "story_points_originales": 2,
+          "estimacion_segundos": 3600,
+          "restante_segundos": 3600,
+          "trabajo_real_segundos": 0
+        },
+        {
+          "jira": "AARI-203",
+          "resumen": "Actualización del estado del reclamo a Derivado a proveedor externo",
+          "responsable": "Talía",
+          "estado": "Por hacer",
+          "story_points_originales": 1,
+          "estimacion_segundos": 600,
+          "restante_segundos": 600,
+          "trabajo_real_segundos": 0
+        },
+        {
+          "jira": "AARI-204",
+          "resumen": "Los datos del proveedor externo quedan visibles en el detalle del reclamo para el administrador",
+          "responsable": "Talía",
+          "estado": "Por hacer",
+          "story_points_originales": 1,
+          "estimacion_segundos": 600,
+          "restante_segundos": 600,
+          "trabajo_real_segundos": 0
+        },
+        {
+          "jira": "AARI-205",
+          "resumen": "Tests (datos completos, teléfono con formato inválido, campos vacíos)",
+          "responsable": "Talía",
+          "estado": "Por hacer",
+          "story_points_originales": 2,
+          "estimacion_segundos": 3300,
+          "restante_segundos": 3300,
+          "trabajo_real_segundos": 0
+        }
+      ]
+    },
+    {
+      "jira": "AARI-206",
+      "hu": "HU19",
+      "resumen": "HU19 — Como agente, quiero solicitar presupuestos a los proveedores fidelizados candidatos por WhatsApp.",
+      "responsable": "Talía",
+      "estado": "Por hacer",
+      "estimacion_hh": 7,
+      "estimacion_directa_padre": null,
+      "trabajo_real_segundos": 0,
+      "subtareas": [
+        {
+          "jira": "AARI-207",
+          "resumen": "Recuperación de los proveedores candidatos identificados",
+          "responsable": "Talía",
+          "estado": "Por hacer",
+          "story_points_originales": 1,
+          "estimacion_segundos": 600,
+          "restante_segundos": 600,
+          "trabajo_real_segundos": 0
+        },
+        {
+          "jira": "AARI-208",
+          "resumen": "Configuración de WhatsApp Business API: autenticación, envío de mensajes outbound",
+          "responsable": "Talía",
+          "estado": "Por hacer",
+          "story_points_originales": 6,
+          "estimacion_segundos": 4800,
+          "restante_segundos": 4800,
+          "trabajo_real_segundos": 0
+        },
+        {
+          "jira": "AARI-209",
+          "resumen": "Template del mensaje de solicitud de presupuesto (descripción del problema, dirección, plazo de respuesta de 24h)",
+          "responsable": "Talía",
+          "estado": "Por hacer",
+          "story_points_originales": 2,
+          "estimacion_segundos": 600,
+          "restante_segundos": 600,
+          "trabajo_real_segundos": 0
+        },
+        {
+          "jira": "AARI-210",
+          "resumen": "Envío del mensaje a cada candidato y registro de los envíos realizados",
+          "responsable": "Talía",
+          "estado": "Por hacer",
+          "story_points_originales": 2,
+          "estimacion_segundos": 1200,
+          "restante_segundos": 1200,
+          "trabajo_real_segundos": 0
+        },
+        {
+          "jira": "AARI-211",
+          "resumen": "Configuración del webhook para capturar respuestas de los proveedores",
+          "responsable": "Talía",
+          "estado": "Por hacer",
+          "story_points_originales": 5,
+          "estimacion_segundos": 4200,
+          "restante_segundos": 4200,
+          "trabajo_real_segundos": 0
+        },
+        {
+          "jira": "AARI-212",
+          "resumen": "Modelo de datos: tabla presupuestos (FK reclamo, FK proveedor, monto, descripción, timestamp)",
+          "responsable": "Talía",
+          "estado": "Por hacer",
+          "story_points_originales": 2,
+          "estimacion_segundos": 900,
+          "restante_segundos": 900,
+          "trabajo_real_segundos": 0
+        },
+        {
+          "jira": "AARI-213",
+          "resumen": "Parsing y persistencia de cada presupuesto recibido",
+          "responsable": "Talía",
+          "estado": "Por hacer",
+          "story_points_originales": 3,
+          "estimacion_segundos": 3900,
+          "restante_segundos": 3900,
+          "trabajo_real_segundos": 0
+        },
+        {
+          "jira": "AARI-214",
+          "resumen": "Job de timeout a las 24h: si venció el plazo, avanzar con los presupuestos recibidos aunque sean parciales",
+          "responsable": "Talía",
+          "estado": "Por hacer",
+          "story_points_originales": 2,
+          "estimacion_segundos": 1200,
+          "restante_segundos": 1200,
+          "trabajo_real_segundos": 0
+        },
+        {
+          "jira": "AARI-215",
+          "resumen": "Lógica de sin presupuestos: si venció el plazo y no se recibió ninguno, estado Sin presupuestos recibidos y notificación al operador",
+          "responsable": "Talía",
+          "estado": "Por hacer",
+          "story_points_originales": 2,
+          "estimacion_segundos": 900,
+          "restante_segundos": 900,
+          "trabajo_real_segundos": 0
+        },
+        {
+          "jira": "AARI-216",
+          "resumen": "Notificación al actor responsable cuando hay al menos un presupuesto disponible para revisar",
+          "responsable": "Talía",
+          "estado": "Por hacer",
+          "story_points_originales": 2,
+          "estimacion_segundos": 600,
+          "restante_segundos": 600,
+          "trabajo_real_segundos": 0
+        },
+        {
+          "jira": "AARI-217",
+          "resumen": "Mock de WhatsApp API para entornos de prueba que simula envío y recepción de mensajes",
+          "responsable": "Talía",
+          "estado": "Por hacer",
+          "story_points_originales": 3,
+          "estimacion_segundos": 1200,
+          "restante_segundos": 1200,
+          "trabajo_real_segundos": 0
+        },
+        {
+          "jira": "AARI-218",
+          "resumen": "Tests con el mock (envío exitoso, timeout sin respuesta, ningún presupuesto recibido)",
+          "responsable": "Talía",
+          "estado": "Por hacer",
+          "story_points_originales": 5,
+          "estimacion_segundos": 3900,
+          "restante_segundos": 3900,
+          "trabajo_real_segundos": 0
+        },
+        {
+          "jira": "AARI-219",
+          "resumen": "QA del flujo completo de solicitud y recepción",
+          "responsable": "Talía",
+          "estado": "Por hacer",
+          "story_points_originales": 3,
+          "estimacion_segundos": 1200,
+          "restante_segundos": 1200,
+          "trabajo_real_segundos": 0
+        }
+      ]
+    },
+    {
+      "jira": "AARI-220",
+      "hu": "HU20",
+      "resumen": "HU20 — Como actor responsable, quiero visualizar y seleccionar entre los presupuestos recibidos.",
+      "responsable": "Tobías",
+      "estado": "Por hacer",
+      "estimacion_hh": 5,
+      "estimacion_directa_padre": null,
+      "trabajo_real_segundos": 0,
+      "subtareas": [
+        {
+          "jira": "AARI-221",
+          "resumen": "Endpoint GET /reclamos/{id}/presupuestos que devuelve los presupuestos disponibles ordenados por monto ascendente",
+          "responsable": "Tobías",
+          "estado": "Por hacer",
+          "story_points_originales": 2,
+          "estimacion_segundos": 1200,
+          "restante_segundos": 1200,
+          "trabajo_real_segundos": 0
+        },
+        {
+          "jira": "AARI-222",
+          "resumen": "Vista comparativa de presupuestos en React: nombre del proveedor, especialidades, zona, monto y descripción del trabajo",
+          "responsable": "Tobías",
+          "estado": "Por hacer",
+          "story_points_originales": 6,
+          "estimacion_segundos": 3900,
+          "restante_segundos": 3900,
+          "trabajo_real_segundos": 0
+        },
+        {
+          "jira": "AARI-223",
+          "resumen": "Opción visible y diferenciada en la misma vista: No me convence ninguno, quiero cargar un proveedor propio",
+          "responsable": "Tobías",
+          "estado": "Por hacer",
+          "story_points_originales": 2,
+          "estimacion_segundos": 900,
+          "restante_segundos": 900,
+          "trabajo_real_segundos": 0
+        },
+        {
+          "jira": "AARI-224",
+          "resumen": "Pantalla de confirmación con resumen de la elección antes de confirmar",
+          "responsable": "Tobías",
+          "estado": "Por hacer",
+          "story_points_originales": 2,
+          "estimacion_segundos": 3000,
+          "restante_segundos": 3000,
+          "trabajo_real_segundos": 0
+        },
+        {
+          "jira": "AARI-225",
+          "resumen": "Endpoint POST /reclamos/{id}/seleccionar-presupuesto que persiste la elección y notifica al proveedor seleccionado por WhatsApp",
+          "responsable": "Tobías",
+          "estado": "Por hacer",
+          "story_points_originales": 3,
+          "estimacion_segundos": 4200,
+          "restante_segundos": 4200,
+          "trabajo_real_segundos": 0
+        },
+        {
+          "jira": "AARI-226",
+          "resumen": "Actualización del estado del reclamo a Proveedor seleccionado",
+          "responsable": "Tobías",
+          "estado": "Por hacer",
+          "story_points_originales": 1,
+          "estimacion_segundos": 600,
+          "restante_segundos": 600,
+          "trabajo_real_segundos": 0
+        },
+        {
+          "jira": "AARI-227",
+          "resumen": "Registro de la selección en el reclamo: ID del presupuesto elegido, monto y timestamp",
+          "responsable": "Tobías",
+          "estado": "Por hacer",
+          "story_points_originales": 1,
+          "estimacion_segundos": 600,
+          "restante_segundos": 600,
+          "trabajo_real_segundos": 0
+        },
+        {
+          "jira": "AARI-228",
+          "resumen": "Tests (selección exitosa, opción de proveedor externo, sin presupuestos disponibles)",
+          "responsable": "Tobías",
+          "estado": "Por hacer",
+          "story_points_originales": 3,
+          "estimacion_segundos": 3600,
+          "restante_segundos": 3600,
+          "trabajo_real_segundos": 0
+        }
+      ]
+    },
+    {
+      "jira": "AARI-229",
+      "hu": "HU21",
+      "resumen": "HU21 — Como agente, quiero mantener el contexto de la conversación para gestionar reclamos con múltiples intercambios.",
+      "responsable": "Tobías",
+      "estado": "Por hacer",
+      "estimacion_hh": 6,
+      "estimacion_directa_padre": null,
+      "trabajo_real_segundos": 0,
+      "subtareas": [
+        {
+          "jira": "AARI-230",
+          "resumen": "Diseño del grafo completo de LangGraph: todos los nodos, transiciones y puntos de bifurcación del flujo de reclamo",
+          "responsable": "Tobías",
+          "estado": "Por hacer",
+          "story_points_originales": 8,
+          "estimacion_segundos": 1800,
+          "restante_segundos": 1800,
+          "trabajo_real_segundos": 0
+        },
+        {
+          "jira": "AARI-231",
+          "resumen": "Implementación de estado persistente por sesión con checkpointing en base de datos (un registro de estado por reclamo activo)",
+          "responsable": "Tobías",
+          "estado": "Por hacer",
+          "story_points_originales": 6,
+          "estimacion_segundos": 4800,
+          "restante_segundos": 4800,
+          "trabajo_real_segundos": 0
+        },
+        {
+          "jira": "AARI-232",
+          "resumen": "Lógica de contexto entre turnos: el agente accede al estado guardado al retomar una conversación",
+          "responsable": "Tobías",
+          "estado": "Por hacer",
+          "story_points_originales": 6,
+          "estimacion_segundos": 3300,
+          "restante_segundos": 3300,
+          "trabajo_real_segundos": 0
+        },
+        {
+          "jira": "AARI-233",
+          "resumen": "Integración del estado del grafo con el campo de estado de la tabla reclamos",
+          "responsable": "Tobías",
+          "estado": "Por hacer",
+          "story_points_originales": 5,
+          "estimacion_segundos": 1200,
+          "restante_segundos": 1200,
+          "trabajo_real_segundos": 0
+        },
+        {
+          "jira": "AARI-234",
+          "resumen": "Lógica de expiración de sesión: si transcurren 72h sin actividad, cambiar estado a Sesión expirada y notificar al operador",
+          "responsable": "Tobías",
+          "estado": "Por hacer",
+          "story_points_originales": 4,
+          "estimacion_segundos": 1200,
+          "restante_segundos": 1200,
+          "trabajo_real_segundos": 0
+        },
+        {
+          "jira": "AARI-235",
+          "resumen": "Tests de escenarios multi-turno: mínimo 5 escenarios completos incluyendo bifurcaciones (cancelación, reelección de proveedor)",
+          "responsable": "Tobías",
+          "estado": "Por hacer",
+          "story_points_originales": 8,
+          "estimacion_segundos": 4200,
+          "restante_segundos": 4200,
+          "trabajo_real_segundos": 0
+        },
+        {
+          "jira": "AARI-236",
+          "resumen": "Integración end-to-end del grafo con todos los módulos anteriores",
+          "responsable": "Tobías",
+          "estado": "Por hacer",
+          "story_points_originales": 8,
+          "estimacion_segundos": 3900,
+          "restante_segundos": 3900,
+          "trabajo_real_segundos": 0
+        },
+        {
+          "jira": "AARI-237",
+          "resumen": "Debugging y ajustes de estado tras la integración",
+          "responsable": "Tobías",
+          "estado": "Por hacer",
+          "story_points_originales": 7,
+          "estimacion_segundos": 1200,
+          "restante_segundos": 1200,
+          "trabajo_real_segundos": 0
+        }
+      ]
+    },
+    {
+      "jira": "AARI-250",
+      "hu": "HU23",
+      "resumen": "HU23 — Como agente, quiero coordinar la visita entre el proveedor seleccionado y el inquilino.",
+      "responsable": "Talía",
+      "estado": "Por hacer",
+      "estimacion_hh": 6,
+      "estimacion_directa_padre": null,
+      "trabajo_real_segundos": 0,
+      "subtareas": [
+        {
+          "jira": "AARI-251",
+          "resumen": "Nodo del grafo de LangGraph que solicita disponibilidad al inquilino: días (mínimo 3 opciones), franja horaria y urgencia",
+          "responsable": "Talía",
+          "estado": "Por hacer",
+          "story_points_originales": 5,
+          "estimacion_segundos": 3600,
+          "restante_segundos": 3600,
+          "trabajo_real_segundos": 0
+        },
+        {
+          "jira": "AARI-252",
+          "resumen": "Envío de las opciones de disponibilidad al proveedor por WhatsApp",
+          "responsable": "Talía",
+          "estado": "Por hacer",
+          "story_points_originales": 3,
+          "estimacion_segundos": 1200,
+          "restante_segundos": 1200,
+          "trabajo_real_segundos": 0
+        },
+        {
+          "jira": "AARI-253",
+          "resumen": "Webhook para capturar la confirmación del proveedor (fecha y horario elegidos)",
+          "responsable": "Talía",
+          "estado": "Por hacer",
+          "story_points_originales": 4,
+          "estimacion_segundos": 3600,
+          "restante_segundos": 3600,
+          "trabajo_real_segundos": 0
+        },
+        {
+          "jira": "AARI-254",
+          "resumen": "Notificación de confirmación a inquilino y proveedor con datos de la visita (fecha, horario, dirección)",
+          "responsable": "Talía",
+          "estado": "Por hacer",
+          "story_points_originales": 3,
+          "estimacion_segundos": 900,
+          "restante_segundos": 900,
+          "trabajo_real_segundos": 0
+        },
+        {
+          "jira": "AARI-255",
+          "resumen": "Actualización del estado del reclamo a Visita programada con fecha y horario persistidos",
+          "responsable": "Talía",
+          "estado": "Por hacer",
+          "story_points_originales": 1,
+          "estimacion_segundos": 900,
+          "restante_segundos": 900,
+          "trabajo_real_segundos": 0
+        },
+        {
+          "jira": "AARI-256",
+          "resumen": "Job programado para recordatorio al inquilino y al proveedor 24h antes de la visita",
+          "responsable": "Talía",
+          "estado": "Por hacer",
+          "story_points_originales": 2,
+          "estimacion_segundos": 900,
+          "restante_segundos": 900,
+          "trabajo_real_segundos": 0
+        },
+        {
+          "jira": "AARI-257",
+          "resumen": "Job programado para recordatorio 2h antes de la visita",
+          "responsable": "Talía",
+          "estado": "Por hacer",
+          "story_points_originales": 2,
+          "estimacion_segundos": 600,
+          "restante_segundos": 600,
+          "trabajo_real_segundos": 0
+        },
+        {
+          "jira": "AARI-258",
+          "resumen": "Lógica de no acuerdo: si el proveedor no confirma en 24h, notificar al actor responsable y ofrecer elegir otro proveedor o reiniciar la solicitud",
+          "responsable": "Talía",
+          "estado": "Por hacer",
+          "story_points_originales": 3,
+          "estimacion_segundos": 1500,
+          "restante_segundos": 1500,
+          "trabajo_real_segundos": 0
+        },
+        {
+          "jira": "AARI-259",
+          "resumen": "Integración del nodo de coordinación en el grafo de LangGraph",
+          "responsable": "Talía",
+          "estado": "Por hacer",
+          "story_points_originales": 4,
+          "estimacion_segundos": 1500,
+          "restante_segundos": 1500,
+          "trabajo_real_segundos": 0
+        },
+        {
+          "jira": "AARI-260",
+          "resumen": "Tests del flujo completo (acuerdo exitoso, proveedor no confirma en plazo)",
+          "responsable": "Talía",
+          "estado": "Por hacer",
+          "story_points_originales": 4,
+          "estimacion_segundos": 3900,
+          "restante_segundos": 3900,
+          "trabajo_real_segundos": 0
+        },
+        {
+          "jira": "AARI-261",
+          "resumen": "QA",
+          "responsable": "Talía",
+          "estado": "Por hacer",
+          "story_points_originales": 2,
+          "estimacion_segundos": 3000,
+          "restante_segundos": 3000,
+          "trabajo_real_segundos": 0
+        }
+      ]
+    },
+    {
+      "jira": "AARI-262",
+      "hu": "HU24",
+      "resumen": "HU24 — Como actor responsable, quiero cancelar el proceso de coordinación y volver a elegir proveedor.",
+      "responsable": "Tobías",
+      "estado": "Por hacer",
+      "estimacion_hh": 4,
+      "estimacion_directa_padre": null,
+      "trabajo_real_segundos": 0,
+      "subtareas": [
+        {
+          "jira": "AARI-263",
+          "resumen": "Identificación de los puntos del flujo donde la cancelación está habilitada",
+          "responsable": "Tobías",
+          "estado": "Por hacer",
+          "story_points_originales": 2,
+          "estimacion_segundos": 600,
+          "restante_segundos": 600,
+          "trabajo_real_segundos": 0
+        },
+        {
+          "jira": "AARI-264",
+          "resumen": "Nodo de cancelación en el grafo de LangGraph accesible desde cada punto habilitado",
+          "responsable": "Tobías",
+          "estado": "Por hacer",
+          "story_points_originales": 4,
+          "estimacion_segundos": 3000,
+          "restante_segundos": 3000,
+          "trabajo_real_segundos": 0
+        },
+        {
+          "jira": "AARI-265",
+          "resumen": "Pantalla de confirmación en React: ¿Confirmás que querés cancelar y elegir otro proveedor? con opciones Sí / No",
+          "responsable": "Tobías",
+          "estado": "Por hacer",
+          "story_points_originales": 2,
+          "estimacion_segundos": 900,
+          "restante_segundos": 900,
+          "trabajo_real_segundos": 0
+        },
+        {
+          "jira": "AARI-266",
+          "resumen": "Lógica de retroceso al nodo de selección de tipo de proveedor conservando todos los datos del reclamo",
+          "responsable": "Tobías",
+          "estado": "Por hacer",
+          "story_points_originales": 4,
+          "estimacion_segundos": 3000,
+          "restante_segundos": 3000,
+          "trabajo_real_segundos": 0
+        },
+        {
+          "jira": "AARI-267",
+          "resumen": "Notificación al proveedor descartado por WhatsApp indicando que el proceso fue cancelado",
+          "responsable": "Tobías",
+          "estado": "Por hacer",
+          "story_points_originales": 2,
+          "estimacion_segundos": 600,
+          "restante_segundos": 600,
+          "trabajo_real_segundos": 0
+        },
+        {
+          "jira": "AARI-268",
+          "resumen": "Registro del intento cancelado en el historial: proveedor involucrado, etapa en que se canceló y timestamp",
+          "responsable": "Tobías",
+          "estado": "Por hacer",
+          "story_points_originales": 2,
+          "estimacion_segundos": 600,
+          "restante_segundos": 600,
+          "trabajo_real_segundos": 0
+        },
+        {
+          "jira": "AARI-269",
+          "resumen": "Alerta automática al operador si el reclamo acumula 3 o más cancelaciones",
+          "responsable": "Tobías",
+          "estado": "Por hacer",
+          "story_points_originales": 2,
+          "estimacion_segundos": 600,
+          "restante_segundos": 600,
+          "trabajo_real_segundos": 0
+        },
+        {
+          "jira": "AARI-270",
+          "resumen": "Tests de cancelación en cada punto habilitado del flujo",
+          "responsable": "Tobías",
+          "estado": "Por hacer",
+          "story_points_originales": 4,
+          "estimacion_segundos": 2700,
+          "restante_segundos": 2700,
+          "trabajo_real_segundos": 0
+        },
+        {
+          "jira": "AARI-271",
+          "resumen": "Test de borde: intento de cancelación en estado Visita programada (debe ser bloqueado)",
+          "responsable": "Tobías",
+          "estado": "Por hacer",
+          "story_points_originales": 2,
+          "estimacion_segundos": 2400,
+          "restante_segundos": 2400,
+          "trabajo_real_segundos": 0
+        }
+      ]
+    }
+  ],
+  "documentacion": {
+    "rama_local": "codex/sprint-3-cierre-sprint-4",
+    "acta_jira": "https://taliazurbriggen.atlassian.net/browse/AARI-344",
+    "acta_proyecto": "docs/planificacion_sprint_4_propuesta.md",
+    "notion_hub": "https://app.notion.com/p/3a0f9f68a0c180cfa9d8ef06ef7da616",
+    "notion_hub_actualizado_y_verificado": true,
+    "notion_acta_completa_publicada": false,
+    "notion_bloqueo": "Límite de bloques gratuitos; no se borró contenido ni se contrató un plan.",
+    "commit_push_realizados": false
+  },
+  "validaciones": {
+    "jira_estado_activo": true,
+    "jira_reparto_nueve_hu_y_81_subtareas": true,
+    "estimaciones_y_restantes_46_hh": true,
+    "story_points_preservados_246": true,
+    "planning_4hh_unico_worklog": true,
+    "implementacion_sin_iniciar": true,
+    "llamadas_gemini_supabase_whatsapp_smtp": 0
+  }
+}

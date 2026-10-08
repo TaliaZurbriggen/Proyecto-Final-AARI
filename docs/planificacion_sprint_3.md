@@ -3,7 +3,41 @@
 **Fecha de preparación:** 08/09/2026  
 **Participantes:** Talía Zurbriggen y Tobías Gasparotto  
 **Duración:** 4 semanas, del 09/09/2026 al 07/10/2026  
-**Estado:** Sprint configurado y activo en Jira; alcance y reestimación acordados.
+**Estado actual:** cerrado en Jira el 08/10/2026 a las 18:14, hora argentina.
+La fecha prevista de finalización sigue siendo el 07/10/2026. Se preservan
+las estimaciones y el registro histórico de planificación/ejecución.
+
+## Cierre verificado — 08/10/2026
+
+Las ocho HU comprometidas están listas y sus cambios están integrados en
+`main`. El PR #31 se aprobó y mergeó el 08/10 (`40d9c86`), cerrando HU31 y
+el hotfix de reproducibilidad de HU30. HU14 también quedó lista en Jira.
+AARI-338 y sus cinco subtareas siguen Por hacer, sin sprint activo/futuro,
+y vuelven al Product Backlog conservando las 4 HH de estimación histórica.
+El Sprint Goal se cumplió parcialmente porque falta el entorno compartido.
+
+| Medida de cierre | Resultado |
+| --- | ---: |
+| Estimación original preservada | 145 HH |
+| Reestimación al comienzo del Sprint | 39 HH |
+| Alcance terminado | 35 HH; ocho HU |
+| Alcance pendiente | 4 HH; AARI-338 |
+| Implementación registrada en Jira | 22 h 25 min |
+| Planning informada: 2 horas de reunión entre ambos | 4 HH |
+| Review y retrospectiva conjuntas: 1 hora de reunión entre ambos | 2 HH |
+| Esfuerzo total informado | 28 h 25 min |
+
+Los tiempos de reuniones se informan por separado; no se generaron worklogs
+durante esta actualización. No se modificaron cierres ni eventos para atribuir
+al 07/10 trabajo que Jira registra el 08/10. La review y retrospectiva se
+conservan como borrador para consenso, con gráficos reconstruidos de los
+datos de Jira, no capturas de sus reportes nativos:
+[`Review, retrospectiva y evidencia`](gestion/sprint_3/review_retrospectiva.md).
+
+**Registro histórico:** las secciones fechadas que siguen describen el estado
+observado en cada etapa; no sustituyen el cierre verificado anterior. El
+alcance original y la reestimación de este Sprint no se reescriben con la
+información conocida después de la ejecución.
 
 **Seguimiento HU29 (12–13/09/2026):** comenzó su implementación en una rama
 desde main. La inmobiliaria administra los PDF; inquilino y propietario solo

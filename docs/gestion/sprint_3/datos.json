@@ -1,0 +1,255 @@
+{
+  "sprintId": 39,
+  "boardId": 3,
+  "name": "Sprint 3",
+  "timezone": "America/Buenos_Aires",
+  "plannedStart": "2026-09-09T19:20:00-03:00",
+  "plannedEnd": "2026-10-07T19:20:00-03:00",
+  "closedAt": "2026-10-08T18:14:50.275-03:00",
+  "rows": [
+    {
+      "key": "AARI-116",
+      "summary": "HU10 — Como inquilino, quiero recibir actualizaciones del estado de mi reclamo para saber cómo avanza.",
+      "status": "Listo",
+      "estimateSeconds": 18000,
+      "actualSeconds": 6000,
+      "aggregateSeconds": 6000,
+      "originalHH": 23,
+      "estimateHH": 5,
+      "actualHH": 1.6666666666666667,
+      "hu": "HU10"
+    },
+    {
+      "key": "AARI-125",
+      "summary": "HU11 — Como administrador, quiero ver el historial de reclamos de una propiedad para tener trazabilidad.",
+      "status": "Listo",
+      "estimateSeconds": 10800,
+      "actualSeconds": 4500,
+      "aggregateSeconds": 4500,
+      "originalHH": 26,
+      "estimateHH": 3,
+      "actualHH": 1.25,
+      "hu": "HU11"
+    },
+    {
+      "key": "AARI-135",
+      "summary": "HU12 — Como agente, quiero notificar al actor responsable tras la clasificación del reclamo para que decida cómo proceder.",
+      "status": "Listo",
+      "estimateSeconds": 18000,
+      "actualSeconds": 3000,
+      "aggregateSeconds": 3000,
+      "originalHH": 25,
+      "estimateHH": 5,
+      "actualHH": 0.8333333333333334,
+      "hu": "HU12"
+    },
+    {
+      "key": "AARI-147",
+      "summary": "HU13 — Como operador de la inmobiliaria, quiero visualizar y resolver los casos escalados por el agente.",
+      "status": "Listo",
+      "estimateSeconds": 18000,
+      "actualSeconds": 8100,
+      "aggregateSeconds": 8100,
+      "originalHH": 26,
+      "estimateHH": 5,
+      "actualHH": 2.25,
+      "hu": "HU13"
+    },
+    {
+      "key": "AARI-157",
+      "summary": "HU14 — Como agente, quiero notificar a la inmobiliaria cuando un reclamo es clasificado como expensa para que evalúe cómo proceder.",
+      "status": "Listo",
+      "estimateSeconds": 18000,
+      "actualSeconds": 6000,
+      "aggregateSeconds": 6000,
+      "originalHH": 30,
+      "estimateHH": 5,
+      "actualHH": 1.6666666666666667,
+      "hu": "HU14"
+    },
+    {
+      "key": "AARI-318",
+      "summary": "HU29 — Gestión de contratos de alquiler",
+      "status": "Listo",
+      "estimateSeconds": 10800,
+      "actualSeconds": 9300,
+      "aggregateSeconds": 9300,
+      "originalHH": 3,
+      "estimateHH": 3,
+      "actualHH": 2.5833333333333335,
+      "hu": "HU29"
+    },
+    {
+      "key": "AARI-319",
+      "summary": "HU30 — Extracción automática y revisión de cláusulas contractuales",
+      "status": "Listo",
+      "estimateSeconds": 18000,
+      "actualSeconds": 30300,
+      "aggregateSeconds": 30300,
+      "originalHH": 4,
+      "estimateHH": 5,
+      "actualHH": 8.416666666666666,
+      "hu": "HU30"
+    },
+    {
+      "key": "AARI-332",
+      "summary": "HU31 — Como administrador, quiero contar con una pantalla de inicio que resuma el estado operativo del sistema y permita acceder rápidamente a sus módulos.",
+      "status": "Listo",
+      "estimateSeconds": 14400,
+      "actualSeconds": 13500,
+      "aggregateSeconds": 13500,
+      "originalHH": 4,
+      "estimateHH": 4,
+      "actualHH": 3.75,
+      "hu": "HU31"
+    },
+    {
+      "key": "AARI-338",
+      "summary": "Desplegar un entorno compartido de AARI en la nube",
+      "status": "Por hacer",
+      "estimateSeconds": 14400,
+      "actualSeconds": 0,
+      "aggregateSeconds": 0,
+      "originalHH": 4,
+      "estimateHH": 4,
+      "actualHH": 0,
+      "hu": "Despliegue"
+    }
+  ],
+  "events": [
+    {
+      "date": "2026-09-09T19:20:00-03:00",
+      "done": 0,
+      "remaining": 39
+    },
+    {
+      "date": "2026-09-13T20:05:44.172-0300",
+      "key": "AARI-318",
+      "from": "En curso",
+      "to": "Listo",
+      "hh": 3,
+      "done": 3,
+      "remaining": 36
+    },
+    {
+      "date": "2026-09-15T16:10:23.269-0300",
+      "key": "AARI-116",
+      "from": "En curso",
+      "to": "Listo",
+      "hh": 5,
+      "done": 8,
+      "remaining": 31
+    },
+    {
+      "date": "2026-10-02T19:31:13.578-0300",
+      "key": "AARI-135",
+      "from": "En curso",
+      "to": "Listo",
+      "hh": 5,
+      "done": 13,
+      "remaining": 26
+    },
+    {
+      "date": "2026-10-07T10:00:33.988-0300",
+      "key": "AARI-125",
+      "from": "En curso",
+      "to": "Listo",
+      "hh": 3,
+      "done": 16,
+      "remaining": 23
+    },
+    {
+      "date": "2026-10-07T17:51:20.568-0300",
+      "key": "AARI-319",
+      "from": "En curso",
+      "to": "Listo",
+      "hh": 5,
+      "done": 21,
+      "remaining": 18
+    },
+    {
+      "date": "2026-10-07T19:15:48.421-0300",
+      "key": "AARI-147",
+      "from": "En curso",
+      "to": "Listo",
+      "hh": 5,
+      "done": 26,
+      "remaining": 13
+    },
+    {
+      "date": "2026-10-08T08:55:14.728-0300",
+      "key": "AARI-157",
+      "from": "En curso",
+      "to": "Listo",
+      "hh": 5,
+      "done": 31,
+      "remaining": 8
+    },
+    {
+      "date": "2026-10-08T09:00:19.090-0300",
+      "key": "AARI-319",
+      "from": "Listo",
+      "to": "En curso",
+      "hh": 5,
+      "done": 26,
+      "remaining": 13
+    },
+    {
+      "date": "2026-10-08T15:41:37.527-0300",
+      "key": "AARI-332",
+      "from": "En curso",
+      "to": "Listo",
+      "hh": 4,
+      "done": 30,
+      "remaining": 9
+    },
+    {
+      "date": "2026-10-08T15:41:40.269-0300",
+      "key": "AARI-319",
+      "from": "En curso",
+      "to": "Listo",
+      "hh": 5,
+      "done": 35,
+      "remaining": 4
+    },
+    {
+      "date": "2026-10-08T18:14:50.275-03:00",
+      "done": 35,
+      "remaining": 4
+    }
+  ],
+  "planning": {
+    "meetingHours": 2,
+    "participants": 2,
+    "personHours": 4,
+    "source": "Confirmación del usuario en esta conversación; no encontrada como worklog de planning en Jira"
+  },
+  "reviewAndRetrospective": {
+    "meetingHours": 1,
+    "participants": 2,
+    "personHours": 2,
+    "source": "Tiempo conjunto informado por el usuario en esta conversación; no se registraron worklogs en Jira durante esta actualización"
+  },
+  "totalInformedSeconds": 102300,
+  "worklogDays": {
+    "2026-09-14": 2700,
+    "2026-09-15": 600,
+    "2026-10-04": 4500,
+    "2026-09-20": 2400,
+    "2026-10-02": 600,
+    "2026-10-07": 14400,
+    "2026-09-13": 10500,
+    "2026-10-05": 21300,
+    "2026-09-12": 2700,
+    "2026-09-21": 8400,
+    "2026-09-22": 5400,
+    "2026-09-24": 5400,
+    "2026-10-08": 1800
+  },
+  "limitations": [
+    "No son capturas ni exportaciones del gráfico nativo de Jira: curvas reconstruidas del historial de estados completo de los nueve elementos, con pesos de la reestimación inicial de las subtareas.",
+    "Los puntos originales de planificación proceden de docs/planificacion_sprint_3.md: 145 HH; Story point estimate está vacío en los padres consultados.",
+    "El alcance reconstruido conserva 39 HH durante todo el sprint; AARI-338 se representa pendiente al cierre, no como alcance eliminado durante la ejecución.",
+    "Tiempo real: worklogs de padres y subtareas sumados una vez; no se suma el agregado de nuevo. Planning, review y retrospectiva se incorporan aparte como tiempos informados, sin generar worklogs en Jira."
+  ]
+}
