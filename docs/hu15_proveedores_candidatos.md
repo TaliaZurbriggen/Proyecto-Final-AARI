@@ -1,7 +1,9 @@
 # HU15 / AARI-170 — Proveedores candidatos
 
-Estado: HU En curso en Jira. Implementación validada; publicación y creación
-del PR autorizadas por Talía el 11/10/2026. Pendiente de revisión y merge.
+Estado: HU En curso en Jira. Entrega publicada el 11/10/2026 en
+[PR #33](https://github.com/TaliaZurbriggen/Proyecto-Final-AARI/pull/33),
+pendiente de revisión de Tobías y merge. Commit funcional `5c9916e` en
+`codex/AARI-170-proveedores-candidatos`; publicación autorizada por Talía.
 Propuesta inicial aprobada el 09/10/2026 y alcance automático corregido/aprobado
 el 11/10/2026. Rama `codex/AARI-170-proveedores-candidatos`,
 desde `main` `fb3a496`. Estimación vigente: 5 HH, sin reestimación. Se registraron
@@ -411,8 +413,8 @@ ni precisión general del modelo ante descripciones nuevas.
 
 ## Pendientes antes de cerrar la HU
 
-1. Publicar el commit/PR autorizados y obtener revisión de Tobías antes del
-   merge. La autorización de publicar no autoriza fusionar ni cerrar Jira.
+1. Obtener revisión de Tobías para el PR #33 antes del merge. La entrega está
+   publicada; no se fusionó ni se cerró la HU o sus subtareas en Jira.
 2. Para el uso automático habitual, habilitar el worker y, si se autoriza el
    tratamiento de descripciones reales, su permiso externo en el servidor. La
    migración y pruebas están completas; ambos permisos siguen apagados por defecto.
