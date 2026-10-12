@@ -13,6 +13,7 @@ from app.api.configuracion import router as agency_configuration_router
 from app.api.expensas import router as expenses_router
 from app.api.contratos import get_contract_clause_service, router as contratos_router
 from app.api.escalados import router as escalados_router
+from app.api.provider_candidates import router as candidates_router
 from app.services.contract_errors import ContractError
 from app.api.inquilinos import property_router as property_tenant_router
 from app.api.inquilinos import router as inquilinos_router
@@ -27,6 +28,8 @@ from app.api.reclamos import router as reclamos_router
 from app.db.database import engine
 from app.services.claim_notifications import run_notification_worker
 from app.services.contract_clause_service import run_contract_analysis_worker
+from app.db.provider_candidates_jobs import SqlAlchemyProviderCandidatesJobs
+from app.services.provider_candidates_worker import ProviderCandidatesWorker, run_provider_candidates_worker
 
 
 def _notification_worker_enabled() -> bool:
@@ -37,6 +40,12 @@ def _notification_worker_enabled() -> bool:
 def _contract_worker_enabled() -> bool:
     configured = os.getenv("CONTRACT_ANALYSIS_WORKER_ENABLED", "true").lower()
     return configured not in {"0", "false", "no"} and "PYTEST_CURRENT_TEST" not in os.environ
+
+
+def _provider_worker_enabled() -> bool:
+    # Desplegar la migración incremental antes de activar. La consulta externa
+    # tiene un permiso separado; ninguna prueba activa cuota por importar app.
+    return os.getenv("PROVIDER_CANDIDATES_WORKER_ENABLED", "false").lower() in {"1", "true", "yes"} and "PYTEST_CURRENT_TEST" not in os.environ
 
 
 @asynccontextmanager
@@ -53,6 +62,10 @@ async def lifespan(_: FastAPI):
         workers.append(asyncio.create_task(
             run_contract_analysis_worker(get_contract_clause_service(), stop_event)
         ))
+    if _provider_worker_enabled():
+        workers.append(asyncio.create_task(run_provider_candidates_worker(
+            ProviderCandidatesWorker(SqlAlchemyProviderCandidatesJobs()), stop_event,
+        )))
     if not workers:
         yield
         return
@@ -98,6 +111,7 @@ app.include_router(proveedores_router, dependencies=admin_dependencies)
 app.include_router(specialties_router, dependencies=admin_dependencies)
 # La ruta estática /reclamos/escalados debe preceder al UUID del portal inquilino.
 app.include_router(escalados_router)
+app.include_router(candidates_router)
 app.include_router(reclamos_router)
 app.include_router(contratos_router)
 

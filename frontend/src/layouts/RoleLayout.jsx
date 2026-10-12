@@ -26,12 +26,15 @@ function RoleLayout() {
   }
   if (user?.rol === 'operador') {
     items.push({ href: '/operador/escalados', label: 'Casos escalados' })
+    items.push({ href: '/operador/pendientes-asignacion', label: 'Candidatos' })
     items.push({ href: '/expensas', label: 'Expensas' })
   }
   const activeItem = location.pathname.startsWith('/expensas')
     ? 'Expensas'
     : location.pathname.startsWith('/operador/escalados')
     ? 'Casos escalados'
+    : location.pathname.startsWith('/operador/pendientes-asignacion')
+    ? 'Candidatos'
     : location.pathname.includes('/contratos')
     ? 'Mis contratos'
     : location.pathname === '/inquilino/reclamos/nuevo'

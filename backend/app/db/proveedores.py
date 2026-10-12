@@ -20,6 +20,48 @@ class SqlAlchemyProveedoresRepository:
         self.session_factory = session_factory
 
     @staticmethod
+    def candidate_ids(session, *, specialty_id, provincia, localidad, barrio):
+        """HU15: coincidencia exacta, diferente de la búsqueda libre del padrón.
+
+        Un EXISTS único mantiene provincia/localidad/barrio en la misma
+        cobertura y evita duplicados por barrios o coberturas múltiples.
+        Sin barrio sólo es elegible una cobertura de toda la localidad.
+        """
+        return session.execute(text("""
+            SELECT p.id FROM proveedores p
+            WHERE p.activo AND EXISTS (
+                SELECT 1 FROM proveedor_especialidades pe
+                WHERE pe.proveedor_id = p.id AND pe.especialidad_id = :specialty
+            ) AND EXISTS (
+                SELECT 1 FROM proveedor_coberturas c
+                WHERE c.proveedor_id = p.id
+                  AND lower(trim(c.provincia)) = lower(:province)
+                  AND lower(trim(c.localidad)) = lower(:city)
+                  AND (c.cubre_toda_localidad OR (
+                    :area IS NOT NULL AND EXISTS (
+                        SELECT 1 FROM proveedor_cobertura_barrios cb
+                        WHERE cb.cobertura_id = c.id
+                          AND lower(trim(cb.barrio)) = lower(:area)
+                    )
+                  ))
+            )
+            ORDER BY lower(p.nombre_razon_social), p.id
+        """), {"specialty": str(specialty_id), "province": provincia,
+               "city": localidad, "area": barrio}).scalars().all()
+
+    @classmethod
+    def candidate_records(cls, session, ids):
+        if not ids:
+            return []
+        rows = session.execute(
+            text(cls._base_select() + " WHERE p.id IN :ids")
+            .bindparams(bindparam("ids", expanding=True)),
+            {"ids": [str(value) for value in ids]},
+        ).mappings().all()
+        hydrated = {str(row["id"]): row for row in cls._hydrate_relations(session, rows)}
+        return [hydrated[str(value)] for value in ids]
+
+    @staticmethod
     def _translate_integrity_error(error: IntegrityError) -> None:
         diagnostic = getattr(error.orig, "diag", None)
         constraint = getattr(diagnostic, "constraint_name", "") or ""
