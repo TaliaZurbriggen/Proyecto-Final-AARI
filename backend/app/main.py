@@ -8,6 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
 
 from app.api.auth import require_admin, router as auth_router
+from app.api.coordination import get_coordination_service, router as coordination_router
 from app.api.admin_home import router as admin_home_router
 from app.api.configuracion import router as agency_configuration_router
 from app.api.expensas import router as expenses_router
@@ -27,6 +28,7 @@ from app.api.reclamos import router as reclamos_router
 from app.db.database import engine
 from app.services.claim_notifications import run_notification_worker
 from app.services.contract_clause_service import run_contract_analysis_worker
+from app.services.coordination_service import run_coordination_worker
 
 
 def _notification_worker_enabled() -> bool:
@@ -39,12 +41,22 @@ def _contract_worker_enabled() -> bool:
     return configured not in {"0", "false", "no"} and "PYTEST_CURRENT_TEST" not in os.environ
 
 
+def _coordination_worker_enabled() -> bool:
+    return (os.getenv("COORDINATION_WORKER_ENABLED", "false").lower() in {"1", "true", "yes"}
+            and "PYTEST_CURRENT_TEST" not in os.environ)
+
+
 @asynccontextmanager
 async def lifespan(_: FastAPI):
     """Mantiene activa la bandeja de salida sin bloquear las peticiones."""
 
     workers = []
     stop_event = asyncio.Event()
+    # HU21 no procesa sesiones históricas sin habilitación explícita.
+    if _coordination_worker_enabled():
+        workers.append(asyncio.create_task(
+            run_coordination_worker(get_coordination_service(), stop_event)
+        ))
     if _notification_worker_enabled():
         workers.append(asyncio.create_task(
             run_notification_worker(get_claim_notification_service(), stop_event)
@@ -98,6 +110,7 @@ app.include_router(proveedores_router, dependencies=admin_dependencies)
 app.include_router(specialties_router, dependencies=admin_dependencies)
 # La ruta estática /reclamos/escalados debe preceder al UUID del portal inquilino.
 app.include_router(escalados_router)
+app.include_router(coordination_router)
 app.include_router(reclamos_router)
 app.include_router(contratos_router)
 

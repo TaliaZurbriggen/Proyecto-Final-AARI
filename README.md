@@ -783,6 +783,41 @@ Con Docker Compose podés levantar el backend y el frontend juntos, ya conectado
 
 ## Estado del proyecto
 
+### HU21 — Base de contexto persistente (Sprint 4)
+
+Implementación local aprobada el 11/10/2026 en
+`codex/AARI-229-contexto-persistente`, desde main `fb3a496`.
+Reutiliza sesiones por reclamo y agrega checkpoints oficiales de LangGraph
+en PostgreSQL privado, reanudación con permisos/versión/intento, deduplicación,
+recuperación tras reinicio y vencimiento general de 72 horas. Conserva los
+plazos específicos, visitas programadas, decisiones humanas y expensas.
+El grafo proyecta decisiones confirmadas; no autoriza ni selecciona por el actor.
+
+Nueva variable opcional de backend: `COORDINATION_WORKER_ENABLED=false`,
+apagada por defecto. Reinstalar `backend/requirements.txt` para incorporar
+las dependencias fijadas de checkpoints/psycopg3. No hay nuevas claves ni
+cambios en el `.env` real. La migración incremental
+`20261011222710_hu21_contexto_persistente.sql` se valida primero con
+`scripts/check_coordination_postgres.py --mode check`; no se ejecuta al
+arrancar ni al hacer pull. **Aplicada con autorización al Supabase AARI de
+desarrollo el 11/10/2026**, historial `20261011222710`.
+Esquema, permisos, restricciones y lectura nativa de PostgresSaver verificados.
+Datos existentes preservados; no repetirla por integrante o al hacer pull.
+Worker todavía apagado; sin sesiones permanentes ni mensajes enviados.
+QA autorizado del 14/10/2026: **12 casos aprobados** de escritura, recuperación,
+permisos, idempotencia y vencimientos en Supabase con registros ficticios y
+rollback obligatorio. Comparación independiente: 38 tablas y numeración
+preservadas; cero sesiones/checkpoints/eventos de prueba remanentes.
+La identidad HTTP se simuló; la recuperación compartida fue con repositorio y
+grafo nuevos en la misma transacción, no un reinicio real del servidor.
+
+HU21 sigue **En curso**: la integración end-to-end de decisiones, presupuestos,
+visitas y cancelación requiere las HU posteriores. Los cinco recorridos
+multi-turno iniciales usan adaptadores simulados; no acreditan esa integración
+real. Sin commit/push/PR ni horas registradas en esta etapa.
+Arquitectura, API, validaciones y pendientes en
+[HU21 — contexto persistente](docs/hu21_contexto_persistente.md).
+
 **Sprint 3 — Cerrado en Jira el 08/10/2026**
 
 El período previsto fue del **09/09/2026 al 07/10/2026**. El Sprint comprometió
