@@ -40,6 +40,33 @@ integrante o pull ni modificar la migración principal para incluir este cambio.
 Índice válido/listo verificado, aviso de esa FK eliminado de los asesores,
 conteos y seguridad sin cambios. Backend final: 385 aprobadas/26 omitidas.
 
+## HU15 — Auditoría de búsqueda de proveedores (aplicada en desarrollo)
+
+`20261009120000_hu15_proveedores_candidatos.sql` es aditiva y se aplica después
+del esquema integrado del Sprint 3: administración/coberturas, reclamos,
+especialidades, responsables y outbox de notificaciones. No renombrar los
+archivos históricos ni repetir esta migración por integrante o pull.
+
+Crea `reclamo_busquedas_proveedores`, sus FK, controles de resultado/origen,
+unicidad por reclamo e intento e índices de historial/cola. Habilita RLS y
+revoca permisos de public/anon/authenticated; no habilita acceso del Data API.
+La versión usa timestamp único conforme al convenio de migraciones vigente.
+No convierte ni clasifica reclamos, no genera búsquedas retroactivas y no
+envía correos. La transacción limita bloqueos a 5 s y sentencias a 30 s.
+
+**11/10/2026: aplicada con autorización al Supabase compartido de desarrollo**,
+historial `20261009120000_hu15_proveedores_candidatos`. Antes de aplicar se
+verificaron las dependencias y la ausencia de instalación parcial. Tabla,
+cinco índices válidos/listos, cuatro FK, unicidad, siete CHECK, RLS, ausencia
+de políticas/permisos públicos y conservación de los conteos de las trece
+tablas existentes verificados. No repetir por integrante o pull.
+
+El script `backend/scripts/check_provider_candidates_postgres.py` ofrece los
+modos `check`, `apply` y `test`. Los dos últimos requieren autorización
+explícita; `test` usa únicamente sus registros sintéticos y rollback, no los
+fixtures destructivos de PostgreSQL local. No envía correos ni llama a Gemini.
+Ver `docs/hu15_proveedores_candidatos.md`.
+
 ## Instalación nueva
 
 Ejecutar desde el SQL Editor, en este orden:
@@ -552,6 +579,33 @@ permisos y el conteo anterior; ejecutar las pruebas PostgreSQL autorizadas de
 reapertura válida/inválida, historial y ambos órdenes de concurrencia con la
 baja. No confundir los controles de texto locales con pruebas SQL reales.
 Detalles y resultados en `docs/hu7_validacion_supabase.md`.
+
+## HU15 — Búsqueda automática incremental (aplicada en Supabase)
+
+`20261011160000_hu15_busqueda_automatica.sql` se aplica después de
+`20261009120000_hu15_proveedores_candidatos.sql`. La base ya está aplicada;
+no editar ni repetir esa migración. La nueva crea `reclamo_tareas_proveedores`
+con huella de entrada, ID durable, reserva/renovación, estado y motivo,
+origen de especialidad y versiones del modelo/prompt. Incluye RLS y revocación
+de permisos públicos, sin políticas para anon/authenticated. No cambia estados,
+autorizaciones ni datos de reclamos existentes al aplicarse.
+
+**Aplicada con autorización el 11/10/2026 en Supabase de desarrollo**, registrada
+como `20261011160000_hu15_busqueda_automatica`. Los conteos de las trece tablas
+previas y de la auditoría base se preservaron. RLS activo, sin políticas públicas
+ni permisos anon/authenticated; FK, unicidad, CHECK e índice verificados.
+No repetir al hacer pull. En otra base requiere autorización e historial.
+El worker descubre reclamos abiertos una vez activado. Una reserva vencida pide
+revisión, no vuelve a llamar al modelo automáticamente. La habilitación externa
+es independiente (`PROVIDER_SPECIALTY_EXTERNAL_ENABLED`), apagada por defecto.
+Las pruebas locales crean bases descartables. El comprobador adicional
+`scripts/check_provider_candidates_automatic.py --env-file <ruta-al-env-local>
+--mode test` requiere autorización: aprobó **14 pruebas** en Supabase con
+registros ficticios y rollback verificado. El alcance interno de QA limita el
+worker a un único reclamo propio; no procesa reclamos existentes ni llama a
+Gemini, SMTP o Storage. `--mode check` sólo inspecciona y `--mode apply` aplica
+una única vez, conservando la migración base. Ambos workers HU15/permisos
+externos siguen apagados por defecto; habilitarlos es una decisión explícita.
 
 ## HU30: migración aditiva 25 — extracción asistida y respaldo literal
 

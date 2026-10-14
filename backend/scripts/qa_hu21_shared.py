@@ -341,7 +341,9 @@ def main():
         # El engine importado por FastAPI queda ficticio. Sólo el repositorio prestado usa AARI.
         os.environ["DATABASE_URL"]="sqlite://"
         for variable in ("NOTIFICATION_WORKER_ENABLED","CONTRACT_ANALYSIS_WORKER_ENABLED",
-                         "COORDINATION_WORKER_ENABLED","LANGSMITH_TRACING","LANGCHAIN_TRACING_V2"):
+                         "COORDINATION_WORKER_ENABLED","PROVIDER_CANDIDATES_WORKER_ENABLED",
+                         "PROVIDER_SPECIALTY_EXTERNAL_ENABLED","LANGSMITH_TRACING",
+                         "LANGCHAIN_TRACING_V2"):
             os.environ[variable]="false"
         kwargs=dict(host=url.host,port=url.port or 5432,dbname=url.database,user=url.username,
                     password=url.password,row_factory=dict_row,prepare_threshold=None,

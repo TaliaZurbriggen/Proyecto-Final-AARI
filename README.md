@@ -74,6 +74,46 @@ La identidad visual de AARI está centralizada para que los agentes y el equipo 
 
 La referencia aprobada se conserva dentro de la skill. Si una historia necesita apartarse de esa dirección, la decisión debe acordarse antes de implementarla.
 
+### Proveedores candidatos para un reclamo (HU15)
+
+El acceso **Candidatos** abre `/pendientes-asignacion` (administrador) o
+`/operador/pendientes-asignacion` (operador). Incluye búsqueda, paginación,
+especialidad requerida, candidatos e historial auditable. No selecciona un
+proveedor, reserva horarios ni envía WhatsApp.
+
+La búsqueda preliminar puede partir de **Recibido**, sin gasto clasificado,
+responsable definido ni autorización: obtener candidatos no contrata ni asigna
+a nadie y no cambia el estado del reclamo. El agente reutiliza la especialidad
+registrada; si falta, un grafo separado puede identificarla con Gemini y el
+catálogo. Una respuesta ambigua, inválida o fallida queda para revisión. El
+personal puede corregir la especialidad sin modificar el clasificador de gastos.
+Se incluyen proveedores activos con especialidad y cobertura geográfica exactas;
+sin barrio informado, sólo coberturas de toda la localidad.
+
+GET sólo consulta; POST registra especialidad, criterios, candidatos y resultado
+en una transacción, con control de versión e idempotencia. Los faltantes generan
+un aviso deduplicado en la bandeja de salida existente, no un envío inmediato.
+Requiere `20261009120000_hu15_proveedores_candidatos.sql`, **aplicada con
+autorización el 11/10/2026 en Supabase de desarrollo** y registrada con esa
+misma versión. No repetirla al hacer pull. La automatización agrega
+`20261011160000_hu15_busqueda_automatica.sql`, **aplicada y registrada con
+autorización el 11/10/2026 en Supabase de desarrollo**. No repetirla al hacer pull.
+Para habilitar la ejecución automática, configurar
+`PROVIDER_CANDIDATES_WORKER_ENABLED=true`. Descubre reclamos abiertos cada
+15 segundos y reserva un trabajo por vez, con renovación y resultado auditable.
+No necesita HU16/HU17 para calcular candidatos. Para identificar especialidades
+con llamadas reales también se requiere `PROVIDER_SPECIALTY_EXTERNAL_ENABLED=true`
+y autorización explícita del uso de los datos. Ambos permisos están desactivados
+por defecto; sin permiso externo se reutilizan especialidades registradas o se
+pide revisión, sin consumir cuota. `PROVIDER_SPECIALTY_MODEL` es opcional y
+reutiliza `GEMINI_MODEL` si está vacío. No agrega dependencias.
+Presupuestos, elección y coordinación posterior mantienen sus autorizaciones.
+Pruebas de volumen locales verificaron 1.200 y 12.000 proveedores ficticios,
+paginación completa y ocho workers sin duplicar el intento; no contactan a
+proveedores ni consumen APIs externas.
+Decisiones, pruebas y límites de validación:
+[`docs/hu15_proveedores_candidatos.md`](docs/hu15_proveedores_candidatos.md).
+
 ### Inicio del administrador (HU31)
 
 Después de iniciar sesión, el administrador accede a `/inicio`. El Home
@@ -814,7 +854,8 @@ grafo nuevos en la misma transacción, no un reinicio real del servidor.
 HU21 sigue **En curso**: la integración end-to-end de decisiones, presupuestos,
 visitas y cancelación requiere las HU posteriores. Los cinco recorridos
 multi-turno iniciales usan adaptadores simulados; no acreditan esa integración
-real. Sin commit/push/PR ni horas registradas en esta etapa.
+real. Publicación de la base autorizada el 14/10/2026 para revisión de Talía;
+sin cierre de la HU ni horas registradas en esta etapa.
 Arquitectura, API, validaciones y pendientes en
 [HU21 — contexto persistente](docs/hu21_contexto_persistente.md).
 
@@ -995,8 +1036,9 @@ quedó fuera de esta carga y permanece pendiente. Se prioriza la coordinación d
 agente con proveedores hasta **Visita programada**, no reparación Resuelta.
 Sprint iniciado por Talía y estado activo verificado. Las nueve HU y sus 81
 subtareas están asignadas: **Talía 22 HH** (HU15, HU18, HU19, HU23) y **Tobías
-24 HH** (HU16, HU17, HU20, HU21, HU24). Permanecen Por hacer hasta iniciar
-cada implementación aprobada.
+24 HH** (HU16, HU17, HU20, HU21, HU24). HU15 / AARI-170 está **En curso** desde
+el 09/10, con implementación aprobada en `codex/AARI-170-proveedores-candidatos`.
+Las demás permanecen Por hacer hasta iniciar cada implementación aprobada.
 La planning duró **2 horas entre ambos = 4 HH del equipo**, registradas una
 sola vez en [AARI-344](https://taliazurbriggen.atlassian.net/browse/AARI-344), lista.
 Se contabilizan aparte de las 46 HH; review/retrospectiva aún no realizadas.

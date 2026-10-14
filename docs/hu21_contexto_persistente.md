@@ -4,7 +4,8 @@
 
 Propuesta aprobada el 11/10/2026. Rama `codex/AARI-229-contexto-persistente`
 desde main `fb3a496`. Base implementada localmente; **HU21 sigue En curso**.
-No hay commit, push ni PR autorizados todavía. No se registró tiempo trabajado.
+Commit, push y PR de esta base autorizados el 14/10/2026, para revisión de Talía;
+no se autorizaron merge ni cierre de HU21. No se registró tiempo trabajado.
 La previsión de Jira es 6 HH, independiente del tiempo real que confirme el usuario.
 
 Esta entrega conserva el contexto de un reclamo **ya clasificado** y permite
@@ -263,6 +264,48 @@ numeración sin `nextval/setval`. `pip check` sin conflictos. Es una pasada
 focalizada posterior: no se suma a las 856 pruebas de la base ni se presenta
 como otra suite completa. No hubo cambios productivos por este QA.
 
+## Preparación de publicación — 14/10/2026
+
+Commit funcional `ecd09ed`. Antes del push se incorporó el main publicado
+`02479b9` (merge de HU15 / PR #33) en esta rama, sin modificar la copia principal.
+El único conflicto de contenido fue `app/main.py`: se conservaron las rutas,
+imports y workers de HU15 y se añadieron los de HU21. El diff contra main se
+limita a los 20 archivos de esta base; el frontend y los archivos propios de
+HU15 quedan idénticos a main. Se conservaron también los finales de línea de
+los contenidos ajenos para evitar modificaciones sólo de formato.
+
+El runner compartido ahora desactiva explícitamente también el worker y el
+permiso de modelo de HU15, además de los de HU21/correo/contratos. No se volvió
+a ejecutar el QA en Supabase ni se reaplicó la migración para publicar.
+
+Validaciones después de integrar main, con workers y servicios externos apagados:
+
+```powershell
+python -m pytest -q -p no:cacheprovider tests/test_coordination_shared_qa.py tests/test_coordination_migration_runner.py tests/test_coordination.py tests/test_provider_candidates.py tests/test_provider_candidates_agent.py
+python -m pytest -q -p no:cacheprovider --tb=short --ignore=tests/test_provider_candidates_volume_postgres.py
+python -m pip check
+git diff origin/main --check
+```
+
+- Focalizadas HU21/HU15: **107 passed**, 1,35 s.
+- Suite backend salvo volumen de HU15: **972 passed / 51 skipped**, 298,32 s,
+  con PostgreSQL 17.11 local incluido. Las 18 advertencias son las preexistentes
+  del adaptador datetime de SQLite. No se suman las focalizadas a ese total.
+- No se repitió la suite de volumen de HU15 ni el frontend, que no cambian
+  respecto de main. Las omitidas de servicios externos no se presentan como
+  validadas. La pasada inicial con un rol local incorrecto se interrumpió;
+  tras verificar el rol `aari_test`, la repetición completa aprobó sin cambios
+  de código para resolver ese error de configuración.
+- `pip check` sin conflictos. Diff y formato correctos; revisión de patrones de
+  secretos en los 20 archivos, sin coincidencias. Sin `.env` real, documentos
+  personales ni artefactos de QA en la entrega.
+- Cero bases `aari_pr26_<uuid>` remanentes; PostgreSQL local detenido al terminar.
+
+Las guías de Supabase/PostgreSQL orientaron la revisión de RLS, permisos privados
+y bloqueos; la publicación no cambia esas decisiones ni activa procesos en la nube.
+Publicar esta base no completa HU21: sigue pendiente la revisión y la integración
+end-to-end indicada a continuación.
+
 ## Validación y pendientes
 
 Pruebas nuevas: grafo real con módulos simulados, contrato HTTP sin sesión,
@@ -318,8 +361,8 @@ No cerrar HU21 sólo por completar esta base. Pendientes:
    sin usar callbacks genéricos ni autoridad del cliente.
 2. Ampliar los escenarios multi-turno con esas implementaciones reales y
    verificar los vencimientos específicos y recuperación end-to-end.
-3. Autorización de commit/push/PR tras la revisión del diff y confirmación de
-   horas reales. La migración y el QA compartido ya están validados.
+3. Revisión de Talía y confirmación de horas reales. La publicación de la base
+   está autorizada; la migración y el QA compartido ya están validados.
 
 Antes de usarla en producción también se debe acordar la retención de
 checkpoints/eventos; esta base no borra evidencia histórica automáticamente.

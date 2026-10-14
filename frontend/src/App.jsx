@@ -31,6 +31,8 @@ import PropertyClaimsHistoryPage from './features/reclamos/pages/PropertyClaimsH
 import PropertyClaimDetailPage from './features/reclamos/pages/PropertyClaimDetailPage.jsx'
 import EscalatedClaimsPage from './features/reclamos/pages/EscalatedClaimsPage.jsx'
 import EscalatedClaimDetailPage from './features/reclamos/pages/EscalatedClaimDetailPage.jsx'
+import PendingAssignmentPage from './features/reclamos/pages/PendingAssignmentPage.jsx'
+import ProviderCandidatesPage from './features/reclamos/pages/ProviderCandidatesPage.jsx'
 import { useAuth } from './features/auth/authContext.js'
 import { destinationForUser } from './features/auth/routing.js'
 import ContractsListPage from './features/contratos/pages/ContractsListPage.jsx'
@@ -67,6 +69,8 @@ function App() {
             <Route path="inicio" element={<AdminHomePage />} />
             <Route path="escalados" element={<EscalatedClaimsPage />} />
             <Route path="escalados/:reclamoId" element={<EscalatedClaimDetailPage />} />
+            <Route path="pendientes-asignacion" element={<PendingAssignmentPage />} />
+            <Route path="pendientes-asignacion/:reclamoId" element={<ProviderCandidatesPage />} />
             <Route path="contratos" element={<ContractsListPage />} />
             <Route path="contratos/nuevo" element={<ContractFormPage />} />
             <Route path="contratos/:contractId" element={<ContractDetailPage />} />
@@ -155,6 +159,8 @@ function App() {
             <Route path="operador" element={<RoleHomePage />} />
             <Route path="operador/escalados" element={<EscalatedClaimsPage operatorView />} />
             <Route path="operador/escalados/:reclamoId" element={<EscalatedClaimDetailPage operatorView />} />
+            <Route path="operador/pendientes-asignacion" element={<PendingAssignmentPage operatorView />} />
+            <Route path="operador/pendientes-asignacion/:reclamoId" element={<ProviderCandidatesPage operatorView />} />
           </Route>
         </Route>
         <Route path="design-system" element={<DesignSystemPreview />} />

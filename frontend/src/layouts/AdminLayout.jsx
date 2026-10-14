@@ -5,6 +5,7 @@ import { useAuth } from '../features/auth/authContext.js'
 const navigationItems = [
   { href: '/inicio', label: 'Inicio' },
   { href: '/escalados', label: 'Casos escalados' },
+  { href: '/pendientes-asignacion', label: 'Candidatos' },
   { href: '/propietarios', label: 'Propietarios' },
   { href: '/propiedades', label: 'Propiedades' },
   { href: '/inquilinos', label: 'Inquilinos' },
@@ -20,6 +21,7 @@ function AdminLayout() {
   const navigate = useNavigate()
   const isProperties = location.pathname.startsWith('/propiedades')
   const isEscalated = location.pathname.startsWith('/escalados')
+  const isAssignment = location.pathname.startsWith('/pendientes-asignacion')
   const isTenants = location.pathname.startsWith('/inquilinos')
   const isProviders = location.pathname.startsWith('/proveedores')
   const isOperators = location.pathname.startsWith('/operadores')
@@ -32,6 +34,8 @@ function AdminLayout() {
     ? { href: '/expensas', label: 'Expensas', placeholder: '' }
     : isEscalated
     ? { href: '/escalados', label: 'Casos escalados', placeholder: 'Buscar caso escalado' }
+    : isAssignment
+    ? { href: '/pendientes-asignacion', label: 'Candidatos' }
     : isContracts
     ? { href: '/contratos', label: 'Contratos', placeholder: 'Buscar inmueble o participante' }
     : isOperators
@@ -92,7 +96,7 @@ function AdminLayout() {
         profileRole="Administración"
         searchPlaceholder={activeModule.placeholder}
         searchValue={searchValue}
-        showSearch={!isHome && !isExpenses && !isEscalated}
+        showSearch={!isHome && !isExpenses && !isEscalated && !isAssignment}
         showNotifications={!isHome}
       />
       <Outlet />
