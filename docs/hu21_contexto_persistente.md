@@ -306,6 +306,61 @@ y bloqueos; la publicación no cambia esas decisiones ni activa procesos en la n
 Publicar esta base no completa HU21: sigue pendiente la revisión y la integración
 end-to-end indicada a continuación.
 
+## Corrección de revisión P2 — 15/10/2026
+
+Observación de Talía en [PR #34](https://github.com/TaliaZurbriggen/Proyecto-Final-AARI/pull/34#pullrequestreview-5526811489):
+una sesión antigua vacía (`estado_grafo={}`, versión 0) podía entrar al lote de
+vencimientos. La validación del snapshot fallaba y revertía toda la transacción,
+incluidos vencimientos válidos ya procesados. Se aprobó la corrección y su
+commit/push en el mismo PR; no se autorizó merge ni cierre de HU21.
+
+El selector de `expire_due()` ahora exige contexto no vacío y versión positiva
+**antes de LIMIT**, para que las filas sin inicializar no ocupen el lote.
+Tras bloquear la sesión se comprueban nuevamente esos requisitos, su condición
+activa y su antigüedad. El snapshot se valida antes de modificar el reclamo.
+Se conserva el orden de bloqueos y el filtro de sesión activa del índice parcial
+existente, siguiendo las guías de Supabase/PostgreSQL, sin cambiar índices,
+permisos ni la atomicidad del lote.
+
+Las filas legadas se conservan intactas: no se borran, no se rellenan con un
+contexto inventado ni se inicializan desde el worker. `resume()` sigue siendo
+la acción que inicializa una sesión con versión 1 y actividad actualizada.
+No se cambió la migración aplicada ni se requiere una nueva; tampoco hay
+dependencias, configuración, frontend o modificaciones en HU15.
+
+Se agregó una regresión PostgreSQL con dos unidades e inquilinos ficticios
+distintos, respetando la restricción de un reclamo activo por unidad. Ocho
+variantes combinan Autorizado/Clasificado, límites 1/20 y sesión vacía antes o
+después de la válida. Verifican vencimiento de la válida, repetición sin
+duplicar el aviso pendiente, preservación completa del reclamo/sesión vacíos,
+cero checkpoints/eventos para la vacía y su posterior inicialización normal.
+
+La primera preparación de datos intentó compartir unidad/inquilino y falló
+por la restricción de unicidad: no se contabiliza como reproducción del bug.
+Corregido sólo el fixture, la prueba previa al arreglo falló exactamente con
+`ValidationError` al validar `{}` en `expire_due()`. Tras el cambio, las ocho
+variantes aprobaron: **8 passed / 25 deselected**, 63,94 s. Son pruebas locales,
+no validaciones nuevas de Supabase ni de entrega SMTP.
+
+Comandos desde `backend/`, con PostgreSQL local dedicado y servicios externos
+desactivados:
+
+```powershell
+python -m pytest -q -x -p no:cacheprovider --tb=short tests/test_coordination_postgres.py -k mixed_batch
+python -m pytest -q -x -p no:cacheprovider --tb=short --ignore=tests/test_provider_candidates_volume_postgres.py
+python -m pip check
+git diff --check
+```
+
+Regresión backend posterior: **980 passed / 51 skipped**, 793,8 s,
+con PostgreSQL 17.11 local. Las 18 advertencias SQLite son preexistentes.
+No se repitió volumen de HU15 ni frontend; las omitidas externas no se presentan
+como validadas. `pip check` sin conflictos.
+Al terminar no quedaron bases ficticias y se detuvo PostgreSQL local de QA.
+Las focalizadas no se suman a la pasada general. El worker de coordinación,
+correo y llamadas externas permanecen apagados; no se ejecutó el QA compartido
+ni se registraron horas de trabajo adicionales.
+
 ## Validación y pendientes
 
 Pruebas nuevas: grafo real con módulos simulados, contrato HTTP sin sesión,

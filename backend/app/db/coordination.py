@@ -211,19 +211,25 @@ class PostgresCoordinationRepository:
                 SELECT r.id FROM public.reclamos r
                 JOIN public.sesiones_agente s ON s.reclamo_id=r.id
                 WHERE s.estado_sesion='activa' AND s.ultima_actividad <= %s
+                  AND s.version > 0 AND s.estado_grafo <> '{}'::jsonb
                   AND r.estado IN ('Clasificado','Autorizado')
                 ORDER BY s.ultima_actividad, r.id
                 LIMIT %s FOR UPDATE OF r SKIP LOCKED
             """, (now-timedelta(hours=72), max(1, min(limit, 100)))).fetchall()
             for candidate in candidates:
                 claim = self._claim(conn, candidate["id"])
-                domain = self._domain(claim)
                 session = self._session(conn, claim["id"])
-                if (not session or session["ultima_actividad"] > now-timedelta(hours=72)
-                        or domain.tipo_gasto == "expensa"
+                # Las filas legadas vacías se inicializan sólo mediante resume().
+                if (not session or not session["estado_grafo"] or session["version"] <= 0
+                        or session["estado_sesion"] != "activa"
+                        or session["ultima_actividad"] > now-timedelta(hours=72)):
+                    continue
+                domain = self._domain(claim)
+                if (domain.tipo_gasto == "expensa"
                         or domain.vencimiento_especifico is not None
                         or stage_for(domain) not in EXPIRABLE_STAGES):
                     continue
+                snapshot = CoordinationSnapshot.model_validate(session["estado_grafo"])
                 operator = conn.execute("""
                     SELECT id, rol, email FROM public.usuarios
                     WHERE activo AND NOT primer_ingreso
@@ -239,7 +245,6 @@ class PostgresCoordinationRepository:
                 conn.execute("UPDATE public.reclamos SET estado='Sesión expirada' WHERE id=%s",
                              (claim["id"],))
                 expired = domain.model_copy(update={"estado": "Sesión expirada"})
-                snapshot = CoordinationSnapshot.model_validate(session["estado_grafo"])
                 snapshot = snapshot.model_copy(update={
                     "version": session["version"]+1, "dominio": expired, "etapa": "expirada",
                 })

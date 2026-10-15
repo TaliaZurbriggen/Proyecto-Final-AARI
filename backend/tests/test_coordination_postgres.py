@@ -180,6 +180,75 @@ def test_expiration_updates_domain_checkpoint_and_unique_outbox(coordination_cas
     assert alerts[0]["estado_envio"] == "pendiente"
 
 
+@pytest.mark.parametrize("state", ["Autorizado", "Clasificado"])
+@pytest.mark.parametrize("batch_limit", [1, 20])
+@pytest.mark.parametrize("empty_older", [True, False])
+def test_expiration_mixed_batch_preserves_empty_legacy_session(
+    coordination_case, claim_case, state, batch_limit, empty_older,
+):
+    db, repo, claim_id, user, connect, now = coordination_case
+    _, claims, _ = claim_case
+    with db.begin() as conn:
+        empty_property = conn.execute(text("""
+            INSERT INTO propiedades (direccion, provincia, localidad, tipo, propietario_id)
+            SELECT 'Unidad ficticia de lote mixto HU21.',
+                   p.provincia, p.localidad, p.tipo, p.propietario_id
+            FROM propiedades p JOIN reclamos r ON r.propiedad_id=p.id
+            WHERE r.id=:id RETURNING id
+        """), {"id": claim_id}).scalar_one()
+        empty_tenant = conn.execute(text("""
+            INSERT INTO inquilinos
+                (nombre_completo, dni, email, telefono, propiedad_id)
+            VALUES ('Inquilino Sintetico Dos', '10000003', 'mixed@example.com',
+                    '00000000', :property) RETURNING id
+        """), {"property": empty_property}).scalar_one()
+        empty_claim = conn.execute(text("""
+            INSERT INTO reclamos (descripcion, urgencia, inquilino_id, propiedad_id)
+            VALUES ('Reclamo ficticio con contexto anterior vacío.',
+                    'media', :tenant, :property) RETURNING id
+        """), {"tenant": empty_tenant, "property": empty_property}).scalar_one()
+    claims.persist_classification(empty_claim, classification("ordinario"))
+    with db.begin() as conn:
+        conn.execute(text("UPDATE reclamos SET estado=:state WHERE id IN (:valid, :empty)"),
+                     {"state": state, "valid": claim_id, "empty": empty_claim})
+        # También probar la vacía al final: antes revertía lo ya procesado.
+        activity = now - timedelta(days=1) if empty_older else now + timedelta(minutes=30)
+        empty_session = conn.execute(text("""
+            INSERT INTO sesiones_agente (reclamo_id, ultima_actividad)
+            VALUES (:id, :activity) RETURNING *
+        """), {"id": empty_claim, "activity": activity}).mappings().one()
+    first = initial(repo, claim_id, user)
+    empty_domain = snapshot(db, empty_claim)
+    later = PostgresCoordinationRepository(connect, clock=lambda: now + timedelta(hours=73))
+
+    assert later.expire_due(limit=batch_limit) == 1
+    assert later.expire_due(limit=batch_limit) == 0
+    loaded = later.get(claim_id, user)
+    assert loaded.contexto.etapa == "expirada"
+    assert loaded.contexto.version == first.contexto.version + 1
+    assert snapshot(db, empty_claim) == empty_domain
+    with db.connect() as conn:
+        preserved = conn.execute(text("""
+            SELECT * FROM sesiones_agente WHERE reclamo_id=:id
+        """), {"id": empty_claim}).mappings().one()
+        assert preserved == empty_session
+        assert preserved["estado_grafo"] == {} and preserved["version"] == 0
+        assert conn.execute(text("""
+            SELECT count(*) FROM aari_coordinacion.checkpoints WHERE thread_id=:thread
+        """), {"thread": str(empty_claim)}).scalar_one() == 0
+        assert conn.execute(text("""
+            SELECT count(*) FROM aari_coordinacion.eventos WHERE reclamo_id=:id
+        """), {"id": empty_claim}).scalar_one() == 0
+    alerts = [item for item in snapshot(db, claim_id)["notificaciones"]
+              if (item["clave_idempotencia"] or "").startswith("hu21:")]
+    assert len(alerts) == 1 and alerts[0]["estado_envio"] == "pendiente"
+    # Se conserva el bootstrap normal: no borrar ni inicializar desde el worker.
+    initialized = initial(later, empty_claim, user)
+    assert initialized.contexto.version == 1
+    assert initialized.contexto.etapa == "esperando_eleccion_proveedor"
+    assert later.expire_due(limit=batch_limit) == 0
+
+
 @pytest.mark.parametrize("state",[
     "Visita programada","Derivado a proveedor externo","Rechazado por propietario",
     "Pendiente de respuesta del responsable","Pendiente de autorización - vencido",
