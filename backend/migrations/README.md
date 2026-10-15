@@ -643,3 +643,39 @@ activación explícita y RLS. El esquema de prueba no queda instalado.
 El resultado detallado está en
 `docs/evaluaciones/hu30/flujo_asistido_2026-10-05.md`. El éxito técnico no acredita
 la precisión semántica de las interpretaciones propuestas por Gemini.
+
+## HU21 — Contexto persistente del agente
+
+`20261011222710_hu21_contexto_persistente.sql` agrega metadatos de sesión y
+el esquema privado de PostgresSaver 3.1.2, con RLS/permisos de clientes revocados.
+No modifica migraciones anteriores ni procesa reclamos existentes.
+
+**Aplicada con autorización el 11/10/2026 en Supabase AARI de desarrollo**,
+historial `20261011222710_hu21_contexto_persistente`. No repetirla por
+integrante, cambio de rama o pull. DDL/historial atómicos; las 33 tablas
+públicas conservaron conteos y huellas. Restricciones, índices, RLS,
+permisos, preflight y lectura nativa del checkpointer verificados.
+No creó sesiones de negocio ni envió mensajes; worker apagado.
+La migración rechaza contextos anteriores no vacíos para revisarlos
+explícitamente sin sobrescribirlos.
+
+QA compartido posterior autorizado el 14/10/2026: 12 casos aprobados con
+escrituras ficticias y rollback obligatorio, sin volver a aplicar DDL.
+Las 38 tablas públicas/privadas conservaron conteos y huellas; numeración
+sin cambios y cero sesiones/checkpoints/eventos de negocio remanentes.
+No se enviaron mensajes ni se activaron workers. La recuperación con grafo
+y repositorio nuevos se probó dentro de la misma transacción, no con un
+reinicio del proceso sobre Supabase. Runner y límites en el documento HU21.
+
+Para otras bases, `scripts/check_coordination_postgres.py --mode check`
+verifica instalación y coherencia. Aplicación local explícita con
+`--mode apply`; un destino compartido requiere autorización y
+`--allow-shared`. La aplicación a AARI usa
+`scripts/apply_hu21_shared.py --authorized --env-root <raíz-local>`
+con validación de destino y preservación. El flag no sustituye la autorización
+humana. No se llama `PostgresSaver.setup()` al arrancar.
+
+Reinstalar requirements antes de usar HU21 y mantener
+`COORDINATION_WORKER_ENABLED=false` hasta acordar su activación/integración.
+Más detalles y avisos previos del proyecto en
+[documentación HU21](../../docs/hu21_contexto_persistente.md).
