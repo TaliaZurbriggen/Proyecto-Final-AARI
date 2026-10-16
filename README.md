@@ -823,6 +823,19 @@ Con Docker Compose podés levantar el backend y el frontend juntos, ya conectado
 
 ## Estado del proyecto
 
+### Sprint 4 — HU16 en implementación
+
+En la rama `codex/AARI-180-autorizacion-gasto` se incorpora el portal del
+propietario para autorizar/rechazar gastos extraordinarios, auditoría,
+notificaciones y vencimientos. Acceso desde **Autorizaciones** o
+`/propietario/reclamos`. La migración incremental fue aplicada con autorización
+al Supabase AARI de desarrollo el **16/10/2026**, historial `20261016053335`;
+no repetirla por integrante o pull. Datos/permisos anteriores preservados.
+El código se entrega para revisión de Talía; la prueba humana sigue pendiente.
+No requiere nuevas claves ni variables de `.env`; reutiliza `APP_LOGIN_URL`
+y el outbox/SMTP existentes. HU17 y la integración AARI-345 siguen pendientes.
+Detalles: [HU16 — autorización de gasto](docs/hu16_autorizacion_gasto.md).
+
 **Sprint 3 — Cerrado en Jira el 08/10/2026**
 
 El período previsto fue del **09/09/2026 al 07/10/2026**. El Sprint comprometió

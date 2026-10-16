@@ -204,7 +204,7 @@ class SqlAlchemyClaimsRepository:
             FROM reclamos
             WHERE inquilino_id = :tenant_id
               AND propiedad_id = :property_id
-              AND estado NOT IN ('Resuelto', 'Resuelto (sin confirmación)')
+              AND estado NOT IN ('Resuelto', 'Resuelto (sin confirmación)', 'Rechazado por propietario')
             LIMIT 1
             """
         )
@@ -443,6 +443,26 @@ class SqlAlchemyClaimsRepository:
         if notification_id:
             params["notification_id"] = str(notification_id)
         with self.session_factory.begin() as session:
+            # HU16: no entregar un pedido de decisión que ya venció o finalizó.
+            # Un envío que el canal ya aceptó no puede retirarse; sí se cancelan
+            # pendientes/reintentos y sus resultados tardíos no lo reactivan.
+            session.execute(text("""
+                UPDATE notificaciones n SET estado_envio='fallido',
+                    ultimo_error='Pedido de autorización finalizado; aviso obsoleto.',
+                    proximo_intento_en=NULL, bloqueado_hasta=NULL,
+                    updated_at=CURRENT_TIMESTAMP
+                WHERE n.destinatario_tipo='propietario'
+                  AND n.tipo_evento IN ('responsable_inicial','responsable_recordatorio')
+                  AND n.estado_envio IN ('pendiente','procesando')
+                  AND NOT EXISTS (
+                      SELECT 1 FROM reclamos r JOIN reclamo_responsables rr ON rr.reclamo_id=r.id
+                      WHERE r.id=n.reclamo_id AND r.tipo_gasto='extraordinario'
+                        AND r.estado='Pendiente de respuesta del responsable'
+                        AND rr.actor_tipo='propietario'
+                        AND rr.respuesta_vence_en > clock_timestamp()
+                        AND n.created_at >= rr.solicitado_en
+                  )
+            """))
             session.execute(
                 text(
                     """
@@ -589,17 +609,22 @@ class SqlAlchemyClaimsRepository:
             ).mappings().all()
 
             for row in overdue_rows:
+                overdue_state = (
+                    'Pendiente de autorización - vencido'
+                    if row['actor_tipo'] == 'propietario' and row['tipo_gasto'] == 'extraordinario'
+                    else 'Pendiente de respuesta - vencido'
+                )
                 transitioned = session.execute(
                     text(
                         """
                         UPDATE reclamos
-                        SET estado = 'Pendiente de respuesta - vencido'
+                        SET estado = :overdue_state
                         WHERE id = :reclamo_id
                           AND estado = 'Pendiente de respuesta del responsable'
                         RETURNING id
                         """
                     ),
-                    {"reclamo_id": str(row["reclamo_id"])},
+                    {"reclamo_id": str(row["reclamo_id"]), "overdue_state": overdue_state},
                 ).scalar_one_or_none()
                 if transitioned is None:
                     continue
@@ -609,12 +634,12 @@ class SqlAlchemyClaimsRepository:
                         SELECT id
                         FROM reclamo_historial_estados
                         WHERE reclamo_id = :reclamo_id
-                          AND estado_nuevo = 'Pendiente de respuesta - vencido'
+                          AND estado_nuevo = :overdue_state
                         ORDER BY timestamp DESC, id DESC
                         LIMIT 1
                         """
                     ),
-                    {"reclamo_id": str(row["reclamo_id"])},
+                    {"reclamo_id": str(row["reclamo_id"]), "overdue_state": overdue_state},
                 ).scalar_one_or_none()
                 operator = self._operator_recipient(
                     session,
@@ -633,7 +658,7 @@ class SqlAlchemyClaimsRepository:
                             ) VALUES (
                                 :reclamo_id, :recipient_type, :recipient,
                                 'email', :subject, :message,
-                                'Pendiente de respuesta - vencido', :history_id,
+                                :overdue_state, :history_id,
                                 'responsable_vencido', :idempotency_key,
                                 'pendiente', CURRENT_TIMESTAMP
                             )
@@ -644,6 +669,7 @@ class SqlAlchemyClaimsRepository:
                         ),
                         {
                             "reclamo_id": str(row["reclamo_id"]),
+                            "overdue_state": overdue_state,
                             "recipient_type": operator["rol"],
                             "recipient": operator["email"],
                             "subject": overdue_operator_subject(int(row["numero"])),
@@ -1104,6 +1130,7 @@ class SqlAlchemyClaimsRepository:
                 elif recipient and channel:
                     data = ResponsibleNotificationData(
                         claim_number=int(context["numero"]),
+                        claim_id=reclamo_id,
                         actor=result.actor_responsable,
                         actor_name=actor_name,
                         expense_type=result.tipo_gasto,
@@ -1222,6 +1249,7 @@ class SqlAlchemyClaimsRepository:
             actor_name = "equipo de la inmobiliaria"
         return ResponsibleNotificationData(
             claim_number=int(row["numero"]),
+            claim_id=UUID(str(row.get("reclamo_id", row.get("id")))),
             actor=actor,
             actor_name=actor_name,
             expense_type=str(row["tipo_gasto"]),
