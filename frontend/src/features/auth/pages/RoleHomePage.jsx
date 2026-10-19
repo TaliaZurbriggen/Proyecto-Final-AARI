@@ -74,6 +74,8 @@ function RoleHomePage() {
                 Crear reclamo
               </Link>
             </div>
+          ) : user?.rol === 'propietario' ? (
+            <Link className={styles.cardAction} to="/propietario/reclamos">Revisar autorizaciones de gastos</Link>
           ) : (
             <span>Próximamente</span>
           )}

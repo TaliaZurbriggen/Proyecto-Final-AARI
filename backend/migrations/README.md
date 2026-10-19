@@ -2,6 +2,24 @@
 
 Scripts SQL para crear y actualizar el esquema de Supabase.
 
+## HU16 — Autorización de gasto (aplicada en desarrollo)
+
+`20261015212745_hu16_autorizacion_gasto.sql` fue generado con Supabase CLI
+2.81.3 y se validó en PostgreSQL local. Agrega la auditoría privada de
+autorización/rechazo con RLS, revocaciones, FK e idempotencia. Ajusta el índice
+de reclamos activos para excluir el rechazo terminal, sin borrar historial.
+Requiere el esquema integrado de main, responsables HU12 y outbox HU10/HU14.
+El circuito de autorización no requiere la migración de HU21 del PR #34.
+**16/10/2026: aplicada con autorización al Supabase AARI compartido de desarrollo**,
+historial `20261016053335_hu16_autorizacion_gasto`, asignado por el conector.
+No renombrar el archivo local ni repetir por integrante o pull. Preflight,
+guardas atómicas, RLS/permisos, FK, restricciones e índices verificados; las 38
+tablas anteriores conservaron conteos/huellas, seguridad y numeración. Tabla
+nueva vacía, sin decisiones, cambios de estado ni mensajes. Límites 5s/30s.
+Asesores sin advertencias nuevas ni FK nuevas sin índice; avisos informativos
+de tabla privada sin políticas e índices todavía sin uso documentados.
+Flujo, pruebas, comandos y límites en `docs/hu16_autorizacion_gasto.md`.
+
 ## HU14 — Migración aplicada al entorno compartido de desarrollo
 
 `20261007133447_hu14_derivacion_expensas.sql` es una migración aditiva generada

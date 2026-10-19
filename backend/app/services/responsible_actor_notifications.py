@@ -1,6 +1,9 @@
 """Plantillas puras para avisar al responsable de un reclamo clasificado."""
 
 from dataclasses import dataclass
+import os
+from urllib.parse import urlsplit, urlunsplit
+from uuid import UUID
 
 from app.agents.classification.state import ActorResponsable, TipoGasto
 
@@ -13,6 +16,14 @@ class ResponsibleNotificationData:
     expense_type: TipoGasto
     description: str
     property_label: str
+    claim_id: UUID | None = None
+
+
+def authorization_url(claim_id: UUID) -> str:
+    """Enlace autenticado sin tokens ni identificadores de cuenta."""
+    parsed = urlsplit(os.getenv("APP_LOGIN_URL", "http://localhost:5173/login"))
+    return urlunsplit((parsed.scheme, parsed.netloc,
+                      f"/propietario/reclamos/{claim_id}/autorizar", "", ""))
 
 
 def initial_subject(data: ResponsibleNotificationData) -> str:
@@ -44,6 +55,8 @@ def initial_message(data: ResponsibleNotificationData) -> str:
             f"Descripción: {data.description}",
             "",
             "El reclamo quedó pendiente de la respuesta del responsable.",
+            *([f"Ingresá con tu cuenta para decidir: {authorization_url(data.claim_id)}"]
+              if data.actor == "propietario" and data.claim_id is not None else []),
         ]
     )
 
@@ -77,6 +90,8 @@ def overdue_operator_message(
             f"El reclamo AARI #{claim_number:06d} agotó el plazo de respuesta.",
             f"Responsable esperado: {actor}.",
             f"Unidad: {property_label}",
-            "El estado cambió a Pendiente de respuesta - vencido y requiere intervención.",
+            ("El estado cambió a Pendiente de autorización - vencido y requiere intervención."
+             if actor == "propietario" else
+             "El estado cambió a Pendiente de respuesta - vencido y requiere intervención."),
         ]
     )

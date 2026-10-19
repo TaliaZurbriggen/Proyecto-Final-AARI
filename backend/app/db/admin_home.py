@@ -18,7 +18,7 @@ SUMMARY_QUERY = text("""
     ), claims AS (
         SELECT
             COUNT(*) FILTER (
-                WHERE r.estado NOT IN ('Resuelto', 'Resuelto (sin confirmación)')
+                WHERE r.estado NOT IN ('Resuelto', 'Resuelto (sin confirmación)', 'Rechazado por propietario')
             ) AS activos,
             COUNT(*) FILTER (
                 WHERE r.estado IN ('Escalado', 'Clasificación pendiente')
