@@ -39,7 +39,8 @@ def decision_result(row, *, repeated=False):
         reclamo_id=row["reclamo_id"], decision=row["decision"], estado=row["estado"],
         decidido_en=row["decidido_en"], propietario_nombre=row["propietario_nombre"],
         repetida=repeated,
-        siguiente_paso="eleccion_proveedor_pendiente" if row["decision"] == "autorizar" else "cerrado",
+        siguiente_paso="eleccion_proveedor" if row["decision"] == "autorizar" else "cerrado",
+        siguiente_url=f"/propietario/reclamos/{row['reclamo_id']}/tipo-proveedor" if row["decision"] == "autorizar" else None,
     )
 
 

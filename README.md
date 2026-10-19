@@ -823,7 +823,25 @@ Con Docker Compose podés levantar el backend y el frontend juntos, ya conectado
 
 ## Estado del proyecto
 
-### Sprint 4 — HU16 en implementación
+### Sprint 4 — HU17 y conexión desde HU16 (validación local)
+
+En `codex/AARI-191-eleccion-proveedor`, dependiente del PR #35 (HU16), se
+incorpora la elección **fidelizado/propio** del actor responsable. Autorizar un
+gasto extraordinario abre automáticamente la elección del propietario; el
+inquilino accede desde el detalle de su reclamo ordinario. Plazos propios 48/72 h,
+auditoría, reintentos seguros y avisos por el worker existente. Elegir propio
+queda pendiente de datos (HU18), no derivado; fidelizado queda pendiente de
+presupuestos (HU19). Estas HU y la integración AARI-345 no se dan por realizadas.
+Migración `20261018235315_hu17_eleccion_proveedor.sql` aplicada con autorización
+al Supabase AARI de desarrollo el **18/10/2026 (Argentina)**, historial remoto
+`20261019003825` (19/10 UTC). No renombrar ni repetir por integrante/pull/merge.
+Conteos, seguridad y numeración anteriores conservados; nueva tabla vacía,
+índices y funciones verificados. No se activaron workers ni envíos: acordar por
+separado su reactivación. Sin dependencias, claves ni campos nuevos en `.env`.
+Publicación autorizada, pendiente de revisión de Talía y merge.
+[Alcance, pruebas y despliegue HU17](docs/hu17_eleccion_proveedor.md).
+
+### Sprint 4 — Base HU16 en revisión
 
 En la rama `codex/AARI-180-autorizacion-gasto` se incorpora el portal del
 propietario para autorizar/rechazar gastos extraordinarios, auditoría,
@@ -833,7 +851,9 @@ al Supabase AARI de desarrollo el **16/10/2026**, historial `20261016053335`;
 no repetirla por integrante o pull. Datos/permisos anteriores preservados.
 El código se entrega para revisión de Talía; la prueba humana sigue pendiente.
 No requiere nuevas claves ni variables de `.env`; reutiliza `APP_LOGIN_URL`
-y el outbox/SMTP existentes. HU17 y la integración AARI-345 siguen pendientes.
+y el outbox/SMTP existentes. Su conexión con HU17 está en la rama dependiente
+descrita arriba; el PR #35 por sí solo conserva el alcance anterior.
+La integración AARI-345 sigue pendiente.
 Detalles: [HU16 — autorización de gasto](docs/hu16_autorizacion_gasto.md).
 
 **Sprint 3 — Cerrado en Jira el 08/10/2026**

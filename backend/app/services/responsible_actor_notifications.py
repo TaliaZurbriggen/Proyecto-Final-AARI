@@ -26,6 +26,11 @@ def authorization_url(claim_id: UUID) -> str:
                       f"/propietario/reclamos/{claim_id}/autorizar", "", ""))
 
 
+def provider_choice_url(claim_id: UUID, actor: str) -> str:
+    parsed = urlsplit(os.getenv("APP_LOGIN_URL", "http://localhost:5173/login"))
+    return urlunsplit((parsed.scheme, parsed.netloc, f"/{actor}/reclamos/{claim_id}/tipo-proveedor", "", ""))
+
+
 def initial_subject(data: ResponsibleNotificationData) -> str:
     return f"AARI - Acción requerida en reclamo #{data.claim_number:06d}"
 
@@ -57,6 +62,8 @@ def initial_message(data: ResponsibleNotificationData) -> str:
             "El reclamo quedó pendiente de la respuesta del responsable.",
             *([f"Ingresá con tu cuenta para decidir: {authorization_url(data.claim_id)}"]
               if data.actor == "propietario" and data.claim_id is not None else []),
+            *([f"Elegí cómo continuar con tu cuenta: {provider_choice_url(data.claim_id, data.actor)}"]
+              if data.actor == "inquilino" and data.claim_id is not None else []),
         ]
     )
 

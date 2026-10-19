@@ -74,8 +74,12 @@ def test_migration_defaults_to_email_and_keeps_whatsapp_explicit() -> None:
 
 def test_migration_supports_every_declared_claim_status() -> None:
     statuses = get_args(EstadoReclamo)
+    # Los estados nuevos se incorporan por migraciones incrementales: no editar
+    # HU10 ya aplicada para agregar una opción de HU17.
+    increment = (MIGRATION_PATH.parent / "20261018235315_hu17_eleccion_proveedor.sql").read_text(encoding="utf-8").lower()
+    current_sql = SQL_LOWER + increment
 
     for status in statuses:
-        assert f"'{status.lower()}'" in SQL_LOWER
+        assert f"'{status.lower()}'" in current_sql
     for status in set(statuses) - {"Recibido"}:
-        assert f"when '{status.lower()}' then" in SQL_LOWER
+        assert f"when '{status.lower()}' then" in current_sql
