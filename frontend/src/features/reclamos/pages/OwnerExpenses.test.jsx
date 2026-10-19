@@ -16,14 +16,16 @@ const claim = {
 }
 const saved = (decision) => ({ reclamo_id: claim.id, decision,
   estado: decision === 'autorizar' ? 'Autorizado' : 'Rechazado por propietario',
-  propietario_nombre: 'Titular Sintetico', decidido_en: '2026-10-15T11:00:00Z' })
+  propietario_nombre: 'Titular Sintetico', decidido_en: '2026-10-15T11:00:00Z',
+  siguiente_paso: decision === 'autorizar' ? 'eleccion_proveedor' : 'cerrado' })
 const json = (body, status = 200) => new Response(JSON.stringify(body), {
   status, headers: { 'Content-Type': 'application/json' },
 })
 function show(detail = true) {
   render(<MemoryRouter initialEntries={[detail ? `/propietario/reclamos/${claim.id}/autorizar` : '/propietario/reclamos']}>
     <Routes><Route path="/propietario/reclamos/:reclamoId/autorizar" element={<OwnerExpenseDecisionPage />} />
-      <Route path="/propietario/reclamos" element={<OwnerExpensesPage />} /></Routes>
+      <Route path="/propietario/reclamos" element={<OwnerExpensesPage />} />
+      <Route path="/propietario/reclamos/:reclamoId/tipo-proveedor" element={<h1>Elección de proveedor abierta automáticamente</h1>} /></Routes>
   </MemoryRouter>)
 }
 afterEach(() => vi.restoreAllMocks())
@@ -39,14 +41,14 @@ describe('HU16 decisiones del propietario', () => {
     expect(screen.getByRole('button', { name: 'Rechazar intervención' })).toBeEnabled()
   })
 
-  it('registra autorización sin afirmar entrega SMTP o implementación de HU17', async () => {
+  it('registra autorización y continúa automáticamente a HU17 sin afirmar entrega SMTP', async () => {
     const user = userEvent.setup()
     const post = saved('autorizar')
     const fetch = vi.spyOn(globalThis, 'fetch').mockImplementation((_url, options) => Promise.resolve(
       json(options?.method === 'POST' ? post : claim)))
     show()
     await user.click(await screen.findByRole('button', { name: 'Autorizar intervención' }))
-    expect(await screen.findByText(/todavía pendiente de HU17/)).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: 'Elección de proveedor abierta automáticamente' })).toBeInTheDocument()
     const call = fetch.mock.calls.find(([, options]) => options?.method === 'POST')
     expect(call[0]).toContain(`/reclamos/${claim.id}/autorizar`)
     expect(JSON.parse(call[1].body)).toEqual({ request_id: expect.any(String), expected_updated_at: claim.updated_at })
@@ -81,7 +83,7 @@ describe('HU16 decisiones del propietario', () => {
     expect(await screen.findByText(/No pudimos conectarnos/)).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Rechazar intervención' })).toBeDisabled()
     await user.click(screen.getByRole('button', { name: 'Autorizar intervención' }))
-    await screen.findByText(/todavía pendiente de HU17/)
+    await screen.findByRole('heading', { name: 'Elección de proveedor abierta automáticamente' })
     const calls = fetch.mock.calls.filter(([, options]) => options?.method === 'POST')
     expect(calls).toHaveLength(2)
     expect(calls[0][1].body).toEqual(calls[1][1].body)
@@ -97,7 +99,7 @@ describe('HU16 decisiones del propietario', () => {
     expect(screen.getByRole('button', { name: 'Guardando…' })).toBeDisabled()
     expect(screen.getByRole('button', { name: 'Rechazar intervención' })).toBeDisabled()
     await act(async () => finish(json(saved('autorizar'))))
-    await screen.findByText(/todavía pendiente de HU17/)
+    await screen.findByRole('heading', { name: 'Elección de proveedor abierta automáticamente' })
   })
 
   it('actualiza un conflicto y no permite decidir sobre un plazo vencido', async () => {

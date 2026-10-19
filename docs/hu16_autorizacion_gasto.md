@@ -204,3 +204,11 @@ Verificación previa a publicación del 16/10/2026, sin cambios productivos:
 - Publicación autorizada para revisión de Talía; merge y cierre pendientes.
 - HU17 y la integración end-to-end AARI-345 conservan su alcance pendiente.
 - Registrar tiempo real únicamente cuando la persona responsable lo confirme.
+## Nota de integración HU17 (18/10/2026)
+
+La rama dependiente `codex/AARI-191-eleccion-proveedor` implementa la
+continuación automática autorización → elección, la etapa persistida con plazos
+nuevos y pruebas de integración. Esta ampliación y su migración se documentan en
+[HU17](hu17_eleccion_proveedor.md). El contenido siguiente describe la entrega
+base HU16 del PR #35; no implica que dicho PR ya incluya los cambios de HU17.
+No cerrar AARI-184 ni declarar fusionadas ambas historias antes de su revisión.

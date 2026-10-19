@@ -12,6 +12,9 @@ from sqlalchemy.exc import IntegrityError
 from app.db.clausulas_contrato import SqlAlchemyContractClausesRepository
 from app.db.database import SessionLocal
 from app.db.expensas import enqueue_expense_report
+from app.db.provider_choice_jobs import (
+    cancel_obsolete_choice_notices, choices_available, enqueue_choice_followups,
+)
 from app.services.expense_notifications import agency_email, expense_report
 from app.schemas.reclamos import (
     AgentClassificationResult,
@@ -135,7 +138,7 @@ class SqlAlchemyClaimsRepository:
             """
             SELECT r.id, r.numero AS reclamo_numero, r.descripcion,
                    r.urgencia::text AS urgencia,
-                   r.estado, r.creado_en, r.updated_at,
+                   r.estado, r.creado_en, r.updated_at, r.tipo_gasto::text AS tipo_gasto,
                    p.id AS propiedad_id, p.direccion, p.provincia, p.localidad,
                    p.barrio, p.tipo::text AS propiedad_tipo, p.piso,
                    p.numero AS propiedad_numero
@@ -172,6 +175,7 @@ class SqlAlchemyClaimsRepository:
         summary = self._tenant_claim_from_row(row)
         return TenantClaimDetail(
             **summary.model_dump(),
+            tipo_gasto=row["tipo_gasto"],
             historial=[ClaimHistoryItem.model_validate(item) for item in history_rows],
         )
 
@@ -446,6 +450,8 @@ class SqlAlchemyClaimsRepository:
             # HU16: no entregar un pedido de decisión que ya venció o finalizó.
             # Un envío que el canal ya aceptó no puede retirarse; sí se cancelan
             # pendientes/reintentos y sus resultados tardíos no lo reactivan.
+            if choices_available(session):
+                cancel_obsolete_choice_notices(session)
             session.execute(text("""
                 UPDATE notificaciones n SET estado_envio='fallido',
                     ultimo_error='Pedido de autorización finalizado; aviso obsoleto.',
@@ -567,6 +573,13 @@ class SqlAlchemyClaimsRepository:
         batch_limit = max(1, min(limit, 50))
         enqueued = 0
         with self.session_factory.begin() as session:
+            legacy_scope = ""
+            if choices_available(session):
+                enqueued += enqueue_choice_followups(session, limit=batch_limit,
+                                                     operator_recipient=self._operator_recipient)
+                # Un único dueño de los plazos por etapa: no duplicar el job HU12.
+                legacy_scope = """AND NOT EXISTS (SELECT 1 FROM reclamo_elecciones_proveedor ep
+                    WHERE ep.reclamo_id=r.id AND ep.solicitud_responsable_en=rr.solicitado_en)"""
             session.execute(
                 text("SELECT set_config('app.origen_reclamo', 'sistema', true)")
             )
@@ -579,7 +592,7 @@ class SqlAlchemyClaimsRepository:
 
             overdue_rows = session.execute(
                 text(
-                    """
+                    f"""
                     SELECT rr.reclamo_id, rr.actor_tipo,
                            rr.destinatario_contacto, rr.canal,
                            r.numero, r.descripcion,
@@ -598,6 +611,7 @@ class SqlAlchemyClaimsRepository:
                     JOIN propietarios pr ON pr.id = p.propietario_id
                     WHERE r.estado = 'Pendiente de respuesta del responsable'
                       AND rr.actor_tipo <> 'inmobiliaria'
+                      {legacy_scope}
                       AND rr.escalado_en IS NULL
                       AND rr.respuesta_vence_en <= CURRENT_TIMESTAMP
                     ORDER BY rr.respuesta_vence_en, rr.reclamo_id
@@ -701,7 +715,7 @@ class SqlAlchemyClaimsRepository:
 
             reminder_rows = session.execute(
                 text(
-                    """
+                    f"""
                     SELECT rr.reclamo_id, rr.actor_tipo,
                            rr.destinatario_contacto, rr.canal,
                            r.numero, r.descripcion,
@@ -719,6 +733,7 @@ class SqlAlchemyClaimsRepository:
                     JOIN propietarios pr ON pr.id = p.propietario_id
                     WHERE r.estado = 'Pendiente de respuesta del responsable'
                       AND rr.actor_tipo <> 'inmobiliaria'
+                      {legacy_scope}
                       AND rr.recordatorio_generado_en IS NULL
                       AND rr.recordatorio_programado_en <= CURRENT_TIMESTAMP
                       AND rr.respuesta_vence_en > CURRENT_TIMESTAMP

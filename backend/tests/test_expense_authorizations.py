@@ -52,7 +52,7 @@ class FakeRepository:
         return dict(reclamo_id=claim, decision=decision,
                     estado="Autorizado" if decision == "autorizar" else "Rechazado por propietario",
                     decidido_en=NOW, propietario_nombre="Titular Sintetico",
-                    siguiente_paso="eleccion_proveedor_pendiente" if decision == "autorizar" else "cerrado")
+                    siguiente_paso="eleccion_proveedor" if decision == "autorizar" else "cerrado")
 
     def get(self, *args):
         raise ExpenseAuthorizationNotFound

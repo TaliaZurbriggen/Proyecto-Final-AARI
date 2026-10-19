@@ -24,6 +24,7 @@ EstadoReclamo = Literal[
     "Autorizado",
     "Rechazado por propietario",
     "Pendiente de asignación",
+    "Pendiente de datos de proveedor propio",
     "Sin presupuestos recibidos",
     "Proveedor seleccionado",
     "En proceso",
@@ -102,6 +103,7 @@ class TenantClaimDetail(TenantClaimListItem):
     """Detalle de un reclamo propio con su trazabilidad cronológica."""
 
     historial: list[ClaimHistoryItem]
+    tipo_gasto: TipoGasto | None = None
 
 
 class AgentClassificationResult(BaseModel):

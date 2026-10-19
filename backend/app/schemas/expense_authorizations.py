@@ -22,7 +22,8 @@ class ExpenseDecisionResult(BaseModel):
     decidido_en: datetime
     propietario_nombre: str
     repetida: bool = False
-    siguiente_paso: Literal["eleccion_proveedor_pendiente", "cerrado"]
+    siguiente_paso: Literal["eleccion_proveedor", "cerrado"]
+    siguiente_url: str | None = None
     notificacion_estado: Literal["pendiente"] = "pendiente"
 
 

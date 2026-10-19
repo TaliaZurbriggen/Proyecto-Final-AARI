@@ -63,6 +63,11 @@ function ReclamoDetailPage() {
         </div>
         <StatusBadge tone={claimStatusTone(claim.estado)}>{claim.estado}</StatusBadge>
       </section>
+      {claim.tipo_gasto === 'ordinario' && ['Pendiente de respuesta del responsable',
+        'Pendiente de asignación', 'Pendiente de datos de proveedor propio'].includes(claim.estado) &&
+        <Link className={styles.primaryLink} to={`/inquilino/reclamos/${reclamoId}/tipo-proveedor`}>
+          {claim.estado === 'Pendiente de respuesta del responsable' ? 'Elegir tipo de proveedor' : 'Ver elección de proveedor'}
+        </Link>}
 
       <div className={styles.detailGrid}>
         <section className={styles.claimSummaryPanel} aria-labelledby="claim-detail-title">

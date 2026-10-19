@@ -1,5 +1,5 @@
 import { useCallback, useRef, useState } from 'react'
-import { Link, useParams } from 'react-router'
+import { Link, useNavigate, useParams } from 'react-router'
 import { PageContainer, PageHeading } from '../../../components/layout/index.js'
 import { AlertMessage, Button, ConfirmDialog, LoadingState, StatusBadge } from '../../../components/ui/index.js'
 import { decideOwnerExpense, getOwnerExpense } from '../api/expenseAuthorizationsApi.js'
@@ -13,6 +13,7 @@ export default function OwnerExpenseDecisionPage() {
 }
 
 function DecisionContent({ reclamoId }) {
+  const navigate = useNavigate()
   const [revision, setRevision] = useState(0)
   const [confirm, setConfirm] = useState('')
   const [busy, setBusy] = useState(false)
@@ -36,6 +37,10 @@ function DecisionContent({ reclamoId }) {
     setDecisionError('')
     try {
       const saved = await decideOwnerExpense(reclamoId, action, attempt.current.body)
+      if (saved.decision === 'autorizar' && saved.siguiente_paso === 'eleccion_proveedor') {
+        navigate(`/propietario/reclamos/${reclamoId}/tipo-proveedor`, { replace: true })
+        return
+      }
       setResult(saved)
       setConfirm('')
       setRevision((value) => value + 1)
@@ -67,7 +72,7 @@ function DecisionContent({ reclamoId }) {
         <p>Plazo para decidir: {formatClaimDate(claim.respuesta_vence_en)}</p>
         {saved ? <AlertMessage tone={saved.decision === 'autorizar' ? 'success' : 'warning'}>
           {saved.decision === 'autorizar'
-            ? 'Autorización registrada. La elección de proveedor corresponde al siguiente paso, todavía pendiente de HU17.'
+            ? 'Autorización registrada. Ya podés continuar con la elección de proveedor.'
             : 'Rechazo registrado. El ciclo de esta solicitud quedó cerrado.'}
           {' '}Se generaron los avisos correspondientes; su entrega se procesa por separado.
         </AlertMessage> : claim.puede_decidir ? <div className={styles.actions}>
@@ -76,6 +81,8 @@ function DecisionContent({ reclamoId }) {
           <Button variant="danger" disabled={busy || isLoading || Boolean(lockedAction && lockedAction !== 'rechazar')}
             onClick={() => setConfirm('rechazar')}>Rechazar intervención</Button>
         </div> : <AlertMessage tone="warning">La solicitud ya no admite decisiones. Puede haber vencido o cambiado de estado. La inmobiliaria debe revisar cómo continuar.</AlertMessage>}
+        {saved?.decision === 'autorizar' && <Link className={styles.link}
+          to={`/propietario/reclamos/${reclamoId}/tipo-proveedor`}>Continuar con la elección de proveedor</Link>}
       </section>
       <section className={styles.card} aria-labelledby="expense-history">
         <h2 id="expense-history">Historial del reclamo</h2>
