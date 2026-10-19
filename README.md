@@ -859,6 +859,14 @@ sin cierre de la HU ni horas registradas en esta etapa.
 Arquitectura, API, validaciones y pendientes en
 [HU21 — contexto persistente](docs/hu21_contexto_persistente.md).
 
+Actualización de convivencia HU17/HU21 (19/10/2026): el vencimiento específico
+de la elección vigente tiene prioridad sobre las 72 h de inactividad general.
+Su job conserva la transición y aviso de vencimiento; HU21 no los duplica.
+Regresión integrada y límites en el documento anterior. No requiere otra
+migración ni nuevas variables: `COORDINATION_WORKER_ENABLED=false` se conserva.
+Este ajuste no completa AARI-345 ni activa el worker. El cierre acotado de la
+base HU21 está registrado en Jira; su integración completa sigue pendiente.
+
 **Sprint 3 — Cerrado en Jira el 08/10/2026**
 
 El período previsto fue del **09/09/2026 al 07/10/2026**. El Sprint comprometió

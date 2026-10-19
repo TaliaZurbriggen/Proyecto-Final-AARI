@@ -361,6 +361,90 @@ Las focalizadas no se suman a la pasada general. El worker de coordinación,
 correo y llamadas externas permanecen apagados; no se ejecutó el QA compartido
 ni se registraron horas de trabajo adicionales.
 
+## Corrección de convivencia HU17/HU21 — 19/10/2026
+
+Observación P2 de Talía en el [PR #34](https://github.com/TaliaZurbriggen/Proyecto-Final-AARI/pull/34#issuecomment-6274123594),
+referenciada también en #35 y #36. La autorización de HU16 abre en HU17 una
+elección con 72 horas nuevas. HU21 sólo consultaba el plazo de HU12 cuando el
+estado era `Pendiente de respuesta del responsable`; en `Autorizado` podía usar
+la actividad antigua de la sesión y vencer anticipadamente la elección.
+
+Reproducción local con los módulos reales de #34 (`ce76b88`), #35 (`eb5e0e9`)
+y #36 (`6339c60`): inicializar coordinación 71 horas antes de autorizar, autorizar
+por el repositorio HU16 y adelantar dos horas el reloj de coordinación. La
+elección conservaba 70 horas disponibles, pero `expire_due()` devolvía 1.
+La preparación inicial no tenía al operador ficticio habilitado: sólo reveló
+que faltaba el plazo en la proyección; no se contabiliza como reproducción de
+la transición. Con el operador habilitado se confirmó el vencimiento prematuro.
+
+Decisión: **el plazo de la etapa vigente prevalece sobre la inactividad general**.
+HU21 lee la elección pendiente sólo si coincide con reclamo, pedido responsable,
+actor, tipo de gasto y estado de negocio. Expone ese plazo en el contexto sin
+cambiarlo ni renovar actividad por GET. Incluso una elección ya fuera de plazo
+se reserva al job específico de HU17: HU21 no genera otra transición ni aviso.
+Se descarta reiniciar artificialmente la sesión al autorizar o copiar el job de
+HU17, porque ocultaría la prioridad del dominio y duplicaría responsabilidades.
+
+Los reclamos protegidos se excluyen **antes de LIMIT** y se vuelve a consultar
+su dominio bajo bloqueo del reclamo. Así no ocupan el lote de otros vencimientos;
+se conserva el orden reclamo → sesión y la corrección anterior de sesiones vacías.
+La detección con `to_regclass` permite seguir usando la base HU21 sin HU17
+instalado, sin DDL, tablas ficticias ni imports productivos entre PR.
+
+Archivos: `app/db/coordination.py`, pruebas unitarias `test_coordination.py` y
+regresión `test_coordination_provider_choice_postgres.py`. Esta última requiere
+los módulos/fixtures reales de HU16/HU17: se omite explícitamente en la base
+aislada de #34 y se ejecuta al combinar los tres PR, sin presentar una omisión
+como prueba aprobada. Casos: 71+2 horas, proyección/sincronización del plazo,
+ambos órdenes de ejecución y concurrencia de jobs, transición/aviso únicos,
+segunda ejecución idempotente, lote de tamaño 1 y tres desajustes de etapa.
+
+Comandos desde `backend/`, con PostgreSQL local dedicado, todos los workers y
+permisos externos apagados y `SMTP_HOST` vacío:
+
+```powershell
+python -m pytest -q -x -p no:cacheprovider --tb=short tests/test_coordination_provider_choice_postgres.py tests/test_coordination.py
+python -m pytest -q -x -p no:cacheprovider --tb=short --ignore=tests/test_provider_candidates_volume_postgres.py
+python -m pip check
+git diff --check
+```
+
+Validaciones locales posteriores:
+
+- Focalizada conjunta: **34 aprobadas**, 24,17 s (ocho integradas y 26
+  unitarias/contrato); incluidas en la pasada general, no se suman.
+- Base aislada de #34: **74 aprobadas / una omitida**, 140,93 s. Incluye
+  PostgreSQL, recovery en proceso independiente y la regresión de sesiones
+  vacías; se omite sólo el módulo que requiere HU16/HU17 reales.
+- Frontend combinado: **350 aprobadas / 38 archivos**, 101,46 s;
+  `npm run lint` y `npm run build` correctos (build 2,99 s).
+- OpenAPI: 56 rutas, con endpoints reales de autorización, elección y
+  coordinación conservados; worker HU21 apagado. `pip check` correcto.
+- Suite backend conjunta, salvo volumen de HU15: **1068 aprobadas / 51
+  omitidas**, 481,41 s, con PostgreSQL 17.11 local. Conserva las 18 advertencias
+  SQLite preexistentes; incluye las 34 focalizadas y no se suman aparte.
+
+Las preparaciones interrumpidas por directorio temporal sin crear y por ejecutar
+la prueba de subproceso fuera de `backend/` no se contabilizan como aprobadas; se repitieron
+con el directorio creado y el cwd correcto. No se repite volumen de HU15 ni
+se presentan pruebas omitidas de canales externos como validadas.
+Conteo final: cero bases ficticias remanentes; PostgreSQL local de QA detenido.
+Diff/formato y búsqueda de patrones de secretos/contactos reales correctos.
+
+La combinación existe sólo en una rama local de QA iniciada desde main
+`02479b9`; no se fusionan PR remotos ni se incorpora HU17 en la rama HU16.
+Los conflictos de `README.md` y `backend/app/main.py` se resolvieron sólo allí,
+conservando documentación, routers de HU16/HU17/HU21 y los cuatro workers
+existentes. Al integrar de verdad hay que conservar esa unión y repetir las
+pruebas sobre el resultado final. Orden: #35 primero; luego #36 con base main y
+diff revisado. La convivencia con #34 no se acredita sólo por aprobar una base.
+
+Sin nuevas migraciones, dependencias, `.env` ni cambios productivos de frontend;
+sin Supabase, SMTP, WhatsApp o LLM reales. `COORDINATION_WORKER_ENABLED=false`
+sigue siendo el valor por defecto y no se activa. Esta corrección parcial de
+AARI-345 **no completa** los cinco recorridos end-to-end con las HU restantes,
+no reabre ni duplica el cierre acotado de AARI-229 y no agrega tiempo de trabajo.
+
 ## Validación y pendientes
 
 Pruebas nuevas: grafo real con módulos simulados, contrato HTTP sin sesión,

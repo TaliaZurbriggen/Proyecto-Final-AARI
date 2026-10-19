@@ -13,6 +13,7 @@ from app.agents.coordination.state import (
 )
 from app.api.coordination import get_coordination_service, require_participant
 from app.main import app
+from app.db.coordination import PostgresCoordinationRepository
 from app.schemas.auth import AuthenticatedUser
 from app.services.coordination_service import CoordinationError
 
@@ -72,6 +73,29 @@ def test_multi_turn_domain_adapters_keep_context(states, expense, expected):
 ])
 def test_safe_stage_projection(state,expense,expected):
     assert stage_for(domain(state,expense)) == expected
+
+
+@pytest.mark.parametrize("state,has_choice,expected", [
+    ("Autorizado", True, "choice"),
+    ("Pendiente de respuesta del responsable", True, "choice"),
+    ("Pendiente de respuesta del responsable", False, "responsible"),
+    ("Autorizado", False, None),
+    ("Clasificado", False, None),
+])
+def test_domain_prioritizes_current_choice_deadline(state, has_choice, expected):
+    value = domain(state)
+    responsible = datetime(2026, 1, 1, tzinfo=timezone.utc)
+    choice = datetime(2026, 1, 4, tzinfo=timezone.utc)
+    row = {
+        "id": value.reclamo_id, "estado": state, "tipo_gasto": value.tipo_gasto,
+        "actor_tipo": value.actor_responsable, "propiedad_id": value.propiedad_id,
+        "inquilino_id": value.inquilino_id, "propietario_id": value.propietario_id,
+        "proveedor_seleccionado_id": None, "presupuesto_seleccionado_id": None,
+        "monto_seleccionado": None, "fecha_visita": None, "cancelacion_id": None,
+        "respuesta_vence_en": responsible, "eleccion_vence_en": choice if has_choice else None,
+    }
+    result = PostgresCoordinationRepository._domain(row)
+    assert result.vencimiento_especifico == {"choice": choice, "responsible": responsible, None: None}[expected]
 
 
 def test_graph_rejects_mixing_two_claims():

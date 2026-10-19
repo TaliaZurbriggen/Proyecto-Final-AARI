@@ -20,6 +20,16 @@ from app.schemas.auth import AuthenticatedUser
 from app.services.coordination_service import CoordinationError
 
 
+# Mismo alcance de etapa que HU17: no proteger decisiones de otro pedido/actor
+# ni filas históricas. Constante SQL interna, nunca entrada del cliente.
+_CURRENT_PROVIDER_CHOICE = """ep.reclamo_id=r.id AND ep.estado='pendiente'
+    AND ep.solicitud_responsable_en=rr.solicitado_en AND ep.actor_tipo=rr.actor_tipo
+    AND ((r.tipo_gasto='ordinario' AND ep.actor_tipo='inquilino'
+          AND r.estado='Pendiente de respuesta del responsable')
+      OR (r.tipo_gasto='extraordinario' AND ep.actor_tipo='propietario'
+          AND r.estado='Autorizado'))"""
+
+
 class PostgresCoordinationRepository:
     """No hace setup/DDL al iniciar, ni toma decisiones por las otras HU."""
 
@@ -50,6 +60,13 @@ class PostgresCoordinationRepository:
                 yield conn
 
     @staticmethod
+    def _has_provider_choices(conn):
+        # HU21 sigue siendo desplegable antes de la migración/implementación HU17.
+        return conn.execute("""
+            SELECT to_regclass('public.reclamo_elecciones_proveedor') IS NOT NULL AS available
+        """).fetchone()["available"]
+
+    @staticmethod
     def _claim(conn, claim_id, user=None, *, lock=False):
         if user is not None:
             # Mismo orden que HU13: usuario -> reclamo -> sesión.
@@ -59,12 +76,17 @@ class PostgresCoordinationRepository:
             """, (user.id,)).fetchone()
             if not account or account["rol"] != user.rol:
                 raise CoordinationError("La cuenta no está habilitada.", code="forbidden", status=403)
-        row = conn.execute("""
+        choices = PostgresCoordinationRepository._has_provider_choices(conn)
+        choice_deadline = "ep.respuesta_vence_en" if choices else "NULL::timestamptz"
+        choice_join = ("LEFT JOIN public.reclamo_elecciones_proveedor ep ON "
+                       + _CURRENT_PROVIDER_CHOICE) if choices else ""
+        row = conn.execute(f"""
             SELECT r.id, r.numero, r.estado, r.tipo_gasto::text, r.propiedad_id,
                    r.inquilino_id, p.propietario_id, r.proveedor_seleccionado_id,
                    r.presupuesto_seleccionado_id, r.monto_seleccionado, r.fecha_visita,
                    r.operador_asignado_id, i.usuario_id AS tenant_user,
                    pr.usuario_id AS owner_user, rr.actor_tipo, rr.respuesta_vence_en,
+                   {choice_deadline} AS eleccion_vence_en,
                    (SELECT c.id FROM public.cancelaciones c WHERE c.reclamo_id=r.id
                     ORDER BY c.timestamp DESC, c.id DESC LIMIT 1) AS cancelacion_id
             FROM public.reclamos r
@@ -72,6 +94,7 @@ class PostgresCoordinationRepository:
             JOIN public.inquilinos i ON i.id=r.inquilino_id
             JOIN public.propietarios pr ON pr.id=p.propietario_id
             LEFT JOIN public.reclamo_responsables rr ON rr.reclamo_id=r.id
+            {choice_join}
             WHERE r.id=%s
         """ + (" FOR UPDATE OF r" if lock else ""), (claim_id,)).fetchone()
         if row is None or (user is not None and not (
@@ -94,8 +117,9 @@ class PostgresCoordinationRepository:
             presupuesto_id=row["presupuesto_seleccionado_id"],
             monto=str(row["monto_seleccionado"]) if row["monto_seleccionado"] is not None else None,
             fecha_visita=row["fecha_visita"], cancelacion_id=row["cancelacion_id"],
-            vencimiento_especifico=(row["respuesta_vence_en"]
-                                   if row["estado"] == "Pendiente de respuesta del responsable" else None),
+            vencimiento_especifico=(row.get("eleccion_vence_en")
+                                   or (row["respuesta_vence_en"]
+                                       if row["estado"] == "Pendiente de respuesta del responsable" else None)),
         )
 
     @staticmethod
@@ -206,13 +230,23 @@ class PostgresCoordinationRepository:
         now = self.clock()
         count = 0
         with self._transaction() as conn:
+            # Dejar todo vencimiento de la etapa HU17 (también si ya pasó) a su
+            # job específico. Excluir antes de LIMIT evita bloquear otros casos.
+            choice_filter = ""
+            if self._has_provider_choices(conn):
+                choice_filter = f"""AND NOT EXISTS (
+                    SELECT 1 FROM public.reclamo_elecciones_proveedor ep
+                    JOIN public.reclamo_responsables rr ON rr.reclamo_id=ep.reclamo_id
+                    WHERE {_CURRENT_PROVIDER_CHOICE}
+                )"""
             # Bloquear primero el reclamo, igual que retomar y el outbox.
-            candidates = conn.execute("""
+            candidates = conn.execute(f"""
                 SELECT r.id FROM public.reclamos r
                 JOIN public.sesiones_agente s ON s.reclamo_id=r.id
                 WHERE s.estado_sesion='activa' AND s.ultima_actividad <= %s
-                  AND s.version > 0 AND s.estado_grafo <> '{}'::jsonb
+                  AND s.version > 0 AND s.estado_grafo <> '{{}}'::jsonb
                   AND r.estado IN ('Clasificado','Autorizado')
+                  {choice_filter}
                 ORDER BY s.ultima_actividad, r.id
                 LIMIT %s FOR UPDATE OF r SKIP LOCKED
             """, (now-timedelta(hours=72), max(1, min(limit, 100)))).fetchall()
