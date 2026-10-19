@@ -8,6 +8,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
 
 from app.api.auth import require_admin, router as auth_router
+from app.api.expense_authorizations import router as authorizations_router
+from app.api.provider_choices import router as choices_router
 from app.api.coordination import get_coordination_service, router as coordination_router
 from app.api.admin_home import router as admin_home_router
 from app.api.configuracion import router as agency_configuration_router
@@ -125,6 +127,8 @@ app.include_router(specialties_router, dependencies=admin_dependencies)
 app.include_router(escalados_router)
 app.include_router(coordination_router)
 app.include_router(candidates_router)
+app.include_router(authorizations_router)
+app.include_router(choices_router)
 app.include_router(reclamos_router)
 app.include_router(contratos_router)
 

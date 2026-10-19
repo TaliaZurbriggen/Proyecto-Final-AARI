@@ -24,6 +24,9 @@ function RoleLayout() {
   if (['inquilino', 'propietario'].includes(user?.rol)) {
     items.push({ href: `${homePath}/contratos`, label: 'Mis contratos' })
   }
+  if (user?.rol === 'propietario') {
+    items.push({ href: '/propietario/reclamos', label: 'Autorizaciones' })
+  }
   if (user?.rol === 'operador') {
     items.push({ href: '/operador/escalados', label: 'Casos escalados' })
     items.push({ href: '/operador/pendientes-asignacion', label: 'Candidatos' })
@@ -35,6 +38,8 @@ function RoleLayout() {
     ? 'Casos escalados'
     : location.pathname.startsWith('/operador/pendientes-asignacion')
     ? 'Candidatos'
+    : location.pathname.startsWith('/propietario/reclamos')
+    ? 'Autorizaciones'
     : location.pathname.includes('/contratos')
     ? 'Mis contratos'
     : location.pathname === '/inquilino/reclamos/nuevo'

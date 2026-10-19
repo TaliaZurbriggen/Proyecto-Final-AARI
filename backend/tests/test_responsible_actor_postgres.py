@@ -277,7 +277,7 @@ def test_followup_selection_serializes_a_later_authorization(claim_case):
         event.remove(worker_db, "after_cursor_execute", pause_after_select)
         worker_db.dispose()
     data = snapshot(db, claim_id)
-    assert data["reclamos"][0]["estado"] == "Pendiente de respuesta - vencido"
+    assert data["reclamos"][0]["estado"] == "Pendiente de autorización - vencido"
     assert data["reclamo_responsables"][0]["escalado_en"] is not None
     assert len([n for n in data["notificaciones"] if n["tipo_evento"] == "responsable_vencido"]) == 1
     assert repo.enqueue_due_responsible_followups(limit=10) == 0

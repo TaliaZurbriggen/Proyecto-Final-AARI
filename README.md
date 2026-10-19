@@ -851,11 +851,13 @@ preservadas; cero sesiones/checkpoints/eventos de prueba remanentes.
 La identidad HTTP se simuló; la recuperación compartida fue con repositorio y
 grafo nuevos en la misma transacción, no un reinicio real del servidor.
 
-HU21 sigue **En curso**: la integración end-to-end de decisiones, presupuestos,
-visitas y cancelación requiere las HU posteriores. Los cinco recorridos
-multi-turno iniciales usan adaptadores simulados; no acreditan esa integración
-real. Publicación de la base autorizada el 14/10/2026 para revisión de Talía;
-sin cierre de la HU ni horas registradas en esta etapa.
+La base acotada HU21 / AARI-229 ya está **Listo** en Jira. La integración completa
+de decisiones, presupuestos, visitas y cancelación se sigue por separado en
+**AARI-345** y no se completa con esta entrega. Los cinco recorridos multi-turno
+iniciales usan adaptadores simulados; no acreditan esa integración real. Talía
+aprobó la base y la corrección parcial de convivencia con HU17 el 19/10/2026.
+La activación del worker sigue fuera de alcance; no se agregan horas ni cierres
+de Jira durante los merges autorizados.
 Arquitectura, API, validaciones y pendientes en
 [HU21 — contexto persistente](docs/hu21_contexto_persistente.md).
 
@@ -866,6 +868,56 @@ Regresión integrada y límites en el documento anterior. No requiere otra
 migración ni nuevas variables: `COORDINATION_WORKER_ENABLED=false` se conserva.
 Este ajuste no completa AARI-345 ni activa el worker. El cierre acotado de la
 base HU21 está registrado en Jira; su integración completa sigue pendiente.
+
+Integración de #34 con HU16/HU17 autorizada y validada el 19/10/2026, después
+de fusionar #35 (`d54cf2f`) y #36 (`cba2804`). Conflictos limitados a este README
+y al arranque, conservando todos los routers y los cuatro workers. Backend:
+`pytest -q -x -p no:cacheprovider --tb=short --ignore=tests/test_provider_candidates_volume_postgres.py`
+→ **1068 aprobadas / 51 omitidas**, 688,27 s, PostgreSQL 17.11 local y 18 avisos
+SQLite preexistentes. Frontend: `npm test -- --maxWorkers=2` → **350 aprobadas /
+38 archivos**, 206,36 s; `npm run lint` y `npm run build` correctos (4,96 s).
+La primera corrida UI paralela tuvo 344 aprobadas y seis fallos: cinco timeouts
+de 5 s y una espera DOM. Se repitió completa con dos workers sin cambiar código,
+dependencias ni límites. `pip check`, formato y OpenAPI (56 rutas) correctos.
+No se repitió volumen HU15 ni se usaron Supabase, SMTP o LLM reales. No se
+activaron workers ni se reaplicaron migraciones compartidas; tampoco se
+agregaron horas o se cerraron tareas de Jira durante la integración.
+
+### Sprint 4 — HU17 y conexión desde HU16 (integración aprobada)
+
+HU17 fue revisada por Talía y se incorporó a `main` mediante el PR #36, después
+de integrar HU16 en el PR #35. Agrega la elección **fidelizado/propio** del actor
+responsable. Autorizar un
+gasto extraordinario abre automáticamente la elección del propietario; el
+inquilino accede desde el detalle de su reclamo ordinario. Plazos propios 48/72 h,
+auditoría, reintentos seguros y avisos por el worker existente. Elegir propio
+queda pendiente de datos (HU18), no derivado; fidelizado queda pendiente de
+presupuestos (HU19). Estas HU y la integración AARI-345 no se dan por realizadas.
+Migración `20261018235315_hu17_eleccion_proveedor.sql` aplicada con autorización
+al Supabase AARI de desarrollo el **18/10/2026 (Argentina)**, historial remoto
+`20261019003825` (19/10 UTC). No renombrar ni repetir por integrante/pull/merge.
+Conteos, seguridad y numeración anteriores conservados; nueva tabla vacía,
+índices y funciones verificados. No se activaron workers ni envíos: acordar por
+separado su reactivación. Sin dependencias, claves ni campos nuevos en `.env`.
+Ambos PR aprobados por Talía y fusionados con autorización el 19/10/2026.
+HU16/HU17 y sus subtareas siguen En curso en Jira hasta confirmar tiempo real
+y autorizar su cierre; no se registraron horas durante esta integración.
+[Alcance, pruebas y despliegue HU17](docs/hu17_eleccion_proveedor.md).
+
+### Sprint 4 — HU16 revisada e integrada
+
+En la rama `codex/AARI-180-autorizacion-gasto` se incorpora el portal del
+propietario para autorizar/rechazar gastos extraordinarios, auditoría,
+notificaciones y vencimientos. Acceso desde **Autorizaciones** o
+`/propietario/reclamos`. La migración incremental fue aplicada con autorización
+al Supabase AARI de desarrollo el **16/10/2026**, historial `20261016053335`;
+no repetirla por integrante o pull. Datos/permisos anteriores preservados.
+Talía aprobó HU16 y la continuidad con HU17; PR #35 integrado antes de #36.
+No requiere nuevas claves ni variables de `.env`; reutiliza `APP_LOGIN_URL`
+y el outbox/SMTP existentes. Su conexión con HU17 queda incorporada mediante
+el PR #36 descrito arriba; el PR #35 aislado no completaba AARI-184.
+La integración AARI-345 sigue pendiente.
+Detalles: [HU16 — autorización de gasto](docs/hu16_autorizacion_gasto.md).
 
 **Sprint 3 — Cerrado en Jira el 08/10/2026**
 

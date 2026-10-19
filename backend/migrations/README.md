@@ -2,6 +2,44 @@
 
 Scripts SQL para crear y actualizar el esquema de Supabase.
 
+## HU17 — Elección de tipo de proveedor (aplicada en desarrollo)
+
+`20261018235315_hu17_eleccion_proveedor.sql`, generada con Supabase CLI 2.81.3,
+requiere HU16 y outbox HU10/HU12/HU14. Agrega etapa/auditoría privada, plazos
+48/72 h, triggers de apertura, FK e índices del outbox y el estado pendiente de
+datos de proveedor propio, sin derivación anticipada ni backfill en DDL.
+RLS y permisos revocados; funciones SECURITY INVOKER. Extiende el mensaje de
+estado con guarda, conservando la función y permisos anteriores. Límites 5s/30s.
+**Aplicada con autorización el 18/10/2026 (Argentina)** al Supabase AARI de
+desarrollo, historial remoto `20261019003825_hu17_eleccion_proveedor` (19/10 UTC).
+El archivo local conserva `20261018235315`; no renombrar ni repetir por pull,
+integrante o merge. 39 tablas anteriores/58 filas con conteos conservados;
+RLS/permisos, políticas, numeración, FK, CHECK, índices y funciones verificados.
+Nueva tabla vacía y sin avisos vinculados. Sin escrituras de negocio ni envíos.
+Control de privacidad impidió extraer huellas de contenido privado: se verifican
+conteos/metadatos, no igualdad fila por fila ni un respaldo de datos.
+Reactivar el worker es una acción separada: puede recuperar solicitudes previas
+y procesar sus plazos sin reiniciarlos. No repetir HU16 por este incremento.
+Detalles y controles en `docs/hu17_eleccion_proveedor.md` desde la raíz.
+
+## HU16 — Autorización de gasto (aplicada en desarrollo)
+
+`20261015212745_hu16_autorizacion_gasto.sql` fue generado con Supabase CLI
+2.81.3 y se validó en PostgreSQL local. Agrega la auditoría privada de
+autorización/rechazo con RLS, revocaciones, FK e idempotencia. Ajusta el índice
+de reclamos activos para excluir el rechazo terminal, sin borrar historial.
+Requiere el esquema integrado de main, responsables HU12 y outbox HU10/HU14.
+El circuito de autorización no requiere la migración de HU21 del PR #34.
+**16/10/2026: aplicada con autorización al Supabase AARI compartido de desarrollo**,
+historial `20261016053335_hu16_autorizacion_gasto`, asignado por el conector.
+No renombrar el archivo local ni repetir por integrante o pull. Preflight,
+guardas atómicas, RLS/permisos, FK, restricciones e índices verificados; las 38
+tablas anteriores conservaron conteos/huellas, seguridad y numeración. Tabla
+nueva vacía, sin decisiones, cambios de estado ni mensajes. Límites 5s/30s.
+Asesores sin advertencias nuevas ni FK nuevas sin índice; avisos informativos
+de tabla privada sin políticas e índices todavía sin uso documentados.
+Flujo, pruebas, comandos y límites en `docs/hu16_autorizacion_gasto.md`.
+
 ## HU14 — Migración aplicada al entorno compartido de desarrollo
 
 `20261007133447_hu14_derivacion_expensas.sql` es una migración aditiva generada
