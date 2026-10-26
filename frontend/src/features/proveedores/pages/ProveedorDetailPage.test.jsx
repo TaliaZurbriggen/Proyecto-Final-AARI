@@ -44,8 +44,10 @@ describe('detalle de proveedor', () => {
     const user = userEvent.setup()
     const fetchMock = vi
       .spyOn(globalThis, 'fetch')
-      .mockResolvedValueOnce(jsonResponse(provider))
-      .mockResolvedValueOnce(jsonResponse({ ...provider, activo: false }))
+      .mockImplementation(async (url, options = {}) => {
+        if (url.endsWith('/acceso')) return jsonResponse({ proveedor_id: provider.id, estado: 'sin_acceso', puede_invitar: true })
+        return jsonResponse(options.method === 'PATCH' ? { ...provider, activo: false } : provider)
+      })
     render(
       <MemoryRouter initialEntries={[`/proveedores/${provider.id}`]}>
         <Routes>
@@ -61,7 +63,7 @@ describe('detalle de proveedor', () => {
     await user.click(screen.getByRole('button', { name: 'Desactivar proveedor' }))
 
     expect(await screen.findByText(/quedó inactivo/i)).toBeInTheDocument()
-    expect(fetchMock.mock.calls[1][1].method).toBe('PATCH')
+    expect(fetchMock.mock.calls.find(([, options]) => options?.method === 'PATCH')).toBeTruthy()
     expect(screen.getByText('Inactivo')).toBeInTheDocument()
   })
 })

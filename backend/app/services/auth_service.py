@@ -79,7 +79,7 @@ class AuthService:
         if isinstance(blocked_until, datetime) and blocked_until > current_time:
             raise AccountLockedError
 
-        if not bool(record["activo"]):
+        if not self._can_access(record):
             raise InactiveAccountError
 
         if not bool(record["password_valid"]):
@@ -106,7 +106,7 @@ class AuthService:
         record = self.repository.get_by_id(user_id)
         if record is None:
             raise InvalidCredentialsError
-        if not bool(record["activo"]):
+        if not self._can_access(record):
             raise InactiveAccountError
         return AuthenticatedUser(
             id=user_id,
@@ -115,6 +115,15 @@ class AuthService:
             primer_ingreso=bool(record["primer_ingreso"]),
             perfil_id=record.get("perfil_id"),
         )
+
+    @staticmethod
+    def _can_access(record):
+        if not bool(record["activo"]):
+            return False
+        if str(record["rol"]) == "proveedor":
+            return (bool(record.get("proveedor_activo")) and record.get("perfil_id") is not None
+                    and not bool(record["primer_ingreso"]))
+        return True
 
     def change_password(
         self,

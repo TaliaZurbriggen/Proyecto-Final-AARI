@@ -2,6 +2,30 @@
 
 Scripts SQL para crear y actualizar el esquema de Supabase.
 
+## HU32 — Acceso de proveedores (aplicada en desarrollo el 26/10/2026)
+
+Orden obligatorio: `20261026180000_hu32_rol_proveedor.sql` y, en una transacción
+posterior, `20261026180100_hu32_acceso_proveedor.sql`. PostgreSQL requiere
+confirmar el enum nuevo antes de utilizarlo. No se reescriben migraciones previas.
+Agregan correo/vínculo opcionales al padrón, identidad consistente, invitaciones
+privadas por hash, vencimiento, consumo único y auditoría de envío. Proveedores
+legados preservados, sin altas de cuentas ni invitaciones automáticas.
+
+**Aplicadas con autorización en Supabase AARI el 26/10/2026**, versiones de
+historial `20261026180000` y `20261026180100`. Se verificaron RLS, ausencia de
+políticas/grants públicos en invitaciones, triggers y conteos de las 35 tablas
+anteriores. Sólo se verifican conteos/metadatos, no igualdad fila por fila.
+Cero mensajes y cero registros de negocio creados por la aplicación del DDL.
+No repetir por integrante, pull o merge. Si la segunda etapa falla, la primera
+adición del enum puede quedar confirmada: comprobar historial y retomar la
+etapa faltante, sin borrar ni renombrar objetos.
+
+Preflight de sólo lectura: `python -m scripts.apply_provider_access --env-root
+<raíz-local-con-env>`. Aplicación sólo autorizada con `--apply --authorized`.
+El script valida el destino AARI, confirma DDL/historial por etapa y no imprime
+credenciales. La publicación de esta rama no activa workers ni envía correo.
+Detalle de alcance y límites: `docs/hu32_acceso_proveedor.md` desde la raíz.
+
 ## HU17 — Elección de tipo de proveedor (aplicada en desarrollo)
 
 `20261018235315_hu17_eleccion_proveedor.sql`, generada con Supabase CLI 2.81.3,

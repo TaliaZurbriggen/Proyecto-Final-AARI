@@ -3,6 +3,7 @@ const roleHomePaths = {
   inquilino: '/inquilino',
   operador: '/operador',
   propietario: '/propietario',
+  proveedor: '/proveedor',
 }
 
 export function homePathForRole(role) {

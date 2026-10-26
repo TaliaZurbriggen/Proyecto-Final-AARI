@@ -146,6 +146,10 @@ def change_password(
     user: AuthenticatedUser = Depends(get_current_user),
     service: AuthService = Depends(get_auth_service),
 ) -> AuthResponse:
+    if user.rol == "proveedor" and len(payload.password_nueva.encode("utf-8")) > 72:
+        raise HTTPException(status_code=422, detail={
+            "code": "invalid_password_length", "message": "La contraseña admite hasta 72 bytes.",
+        })
     try:
         updated_user = service.change_password(user.id, payload)
     except InvalidCurrentPasswordError as error:

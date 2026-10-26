@@ -7,6 +7,7 @@ const roleLabels = {
   inquilino: 'Inquilino',
   operador: 'Operación',
   propietario: 'Propietario',
+  proveedor: 'Proveedor de servicios',
 }
 
 function RoleLayout() {
@@ -20,7 +21,7 @@ function RoleLayout() {
         { href: '/inquilino/reclamos', label: 'Mis reclamos' },
         { href: '/inquilino/reclamos/nuevo', label: 'Nuevo reclamo' },
       ]
-    : [{ href: homePath, label: 'Inicio' }]
+    : [{ href: homePath, label: user?.rol === 'proveedor' ? 'Mis solicitudes' : 'Inicio' }]
   if (['inquilino', 'propietario'].includes(user?.rol)) {
     items.push({ href: `${homePath}/contratos`, label: 'Mis contratos' })
   }
@@ -32,7 +33,7 @@ function RoleLayout() {
     items.push({ href: '/operador/pendientes-asignacion', label: 'Candidatos' })
     items.push({ href: '/expensas', label: 'Expensas' })
   }
-  const activeItem = location.pathname.startsWith('/expensas')
+  const activeItem = user?.rol === 'proveedor' ? 'Mis solicitudes' : location.pathname.startsWith('/expensas')
     ? 'Expensas'
     : location.pathname.startsWith('/operador/escalados')
     ? 'Casos escalados'
