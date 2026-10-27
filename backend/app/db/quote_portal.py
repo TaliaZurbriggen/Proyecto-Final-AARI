@@ -56,10 +56,16 @@ class SqlAlchemyQuotePortal(SqlAlchemyQuoteRequests):
             s.execute(text('SELECT id FROM reclamos WHERE id=:id FOR UPDATE'), {'id':str(claim_id)})
             row = self._eligible(s, claim_id)
             if row is None: return {'publicadas':0, 'motivo':'reclamo_no_habilitado'}
-            if s.execute(text('SELECT 1 FROM aari_rondas_presupuesto WHERE eleccion_id=:id'),
-                         {'id':row['eleccion_id']}).scalar_one_or_none():
-                return {'publicadas':0, 'repetida':True}
             content, digest = request_content(row)
+            previous = s.execute(text('''SELECT rp.*, EXISTS (
+                SELECT 1 FROM aari_solicitudes_presupuesto q WHERE q.ronda_id=rp.id
+                ) AS tiene_solicitudes FROM aari_rondas_presupuesto rp
+                WHERE rp.eleccion_id=:id FOR UPDATE OF rp'''),
+                {'id':row['eleccion_id']}).mappings().one_or_none()
+            if previous and not (previous['estado']=='revision' and previous['vence_en'] is None
+                    and previous['cerrada_en'] is not None and not previous['tiene_solicitudes']
+                    and previous['huella']==digest):
+                return {'publicadas':0, 'repetida':True}
             candidates = self._candidates(s, row)
             providers = []
             if candidates:
@@ -70,16 +76,27 @@ class SqlAlchemyQuotePortal(SqlAlchemyQuoteRequests):
                     .bindparams(bindparam('ids', expanding=True)), {'ids':candidates}).mappings().all()
             enabled = [p for p in providers if p['habilitado']]
             exclusions = [{'proveedor_id':str(p['id']),'motivo':'sin_acceso_activado'} for p in providers if not p['habilitado']]
+            if previous and not enabled:
+                # No escribir eventos ni avisos en cada sondeo sin novedades.
+                return {'publicadas':0, 'repetida':True}
             now = s.execute(text('SELECT clock_timestamp()')).scalar_one()
-            round_id = uuid4()
-            s.execute(text('''INSERT INTO aari_rondas_presupuesto
+            round_id = previous['id'] if previous else uuid4()
+            if previous:
+                # Primera publicación real: las exclusiones/contexto originales y
+                # el evento de revisión quedan intactos. Nunca rejuvenecer una
+                # ronda que haya tenido solicitudes, respuestas o vencimiento.
+                s.execute(text('''UPDATE aari_rondas_presupuesto SET estado='esperando',
+                    publicada_en=:now,vence_en=:now+interval '24 hours',cerrada_en=NULL
+                    WHERE id=:id'''), {'id':round_id,'now':now})
+            else:
+                s.execute(text('''INSERT INTO aari_rondas_presupuesto
                 (id,reclamo_id,eleccion_id,huella,contexto,exclusiones,estado,publicada_en,vence_en,cerrada_en)
                 VALUES (:id,:claim,:choice,:digest,CAST(:context AS jsonb),CAST(:excluded AS jsonb),
                     :state,:now,CASE WHEN :count>0 THEN :now+interval '24 hours' ELSE NULL END,
                     CASE WHEN :count=0 THEN :now ELSE NULL END)'''),
-                {'id':round_id,'claim':claim_id,'choice':row['eleccion_id'],'digest':digest,
-                 'context':json.dumps(content),'excluded':json.dumps(exclusions),'state':'esperando' if enabled else 'revision',
-                 'now':now,'count':len(enabled)})
+                    {'id':round_id,'claim':claim_id,'choice':row['eleccion_id'],'digest':digest,
+                     'context':json.dumps(content),'excluded':json.dumps(exclusions),'state':'esperando' if enabled else 'revision',
+                     'now':now,'count':len(enabled)})
             for p in enabled:
                 request_id = uuid4()
                 s.execute(text('''INSERT INTO aari_solicitudes_presupuesto
@@ -92,19 +109,41 @@ class SqlAlchemyQuotePortal(SqlAlchemyQuoteRequests):
                 s.execute(text('UPDATE aari_solicitudes_presupuesto SET aviso_id=:notice WHERE id=:id'),
                           {'notice':notice,'id':request_id})
                 self._event(s,round_id,'publicada',request_id=request_id)
-            if exclusions or not enabled:
+            if not previous and (exclusions or not enabled):
                 self._operator_notice(s,claim_id,round_id,'candidatos_sin_acceso' if exclusions else 'sin_candidatos')
                 self._event(s,round_id,'revision')
-            return {'ronda_id':round_id,'publicadas':len(enabled),'excluidas':len(exclusions)}
+            return {'ronda_id':round_id,'publicadas':len(enabled),'excluidas':len(exclusions),
+                    'recuperada':previous is not None}
 
     def discover_portal(self, limit=20):
-        with self.transaction() as s:
-            scope = ' AND r.id=:scope' if self.scope_claim_id else ''
-            ids = s.execute(text('SELECT r.id '+SOURCE+' WHERE '+ELIGIBLE+''' AND NOT EXISTS
-                (SELECT 1 FROM aari_rondas_presupuesto rp WHERE rp.eleccion_id=ep.id) '''+scope+
-                ' ORDER BY ep.decidido_en,r.id LIMIT :limit'),
-                {'scope':self.scope_claim_id,'limit':max(1,min(100,limit))}).scalars().all()
-        return sum(self.publish(i).get('publicadas',0) for i in ids)
+        limit=max(1,min(100,int(limit)))
+        cursor=None
+        publications=processed=0
+        while processed<limit:
+            with self.transaction() as s:
+                scope = ' AND r.id=:scope' if self.scope_claim_id else ''
+                after = ' AND (ep.decidido_en,r.id)>(:decided,CAST(:last AS uuid))' if cursor else ''
+                rows = s.execute(text('SELECT r.id,ep.decidido_en '+SOURCE+' WHERE '+ELIGIBLE+''' AND (
+                    NOT EXISTS (SELECT 1 FROM aari_rondas_presupuesto rp WHERE rp.eleccion_id=ep.id)
+                    OR EXISTS (SELECT 1 FROM aari_rondas_presupuesto rp
+                        WHERE rp.eleccion_id=ep.id AND rp.estado='revision' AND rp.vence_en IS NULL
+                        AND rp.cerrada_en IS NOT NULL AND NOT EXISTS (
+                            SELECT 1 FROM aari_solicitudes_presupuesto q WHERE q.ronda_id=rp.id))) '''+scope+after+
+                    ' ORDER BY ep.decidido_en,r.id LIMIT :limit'),
+                    {'scope':self.scope_claim_id,'limit':limit,
+                     'decided':cursor[0] if cursor else None,'last':str(cursor[1]) if cursor else None}).mappings().all()
+            if not rows:
+                break
+            for row in rows:
+                result=self.publish(row['id'])
+                publications+=result.get('publicadas',0)
+                processed+=not result.get('repetida',False)
+                cursor=(row['decidido_en'],row['id'])
+                if processed>=limit:
+                    break
+            # Paginación por clave: las rondas aún sin acceso no bloquean las
+            # que sí pueden recuperarse después, ni se generan avisos repetidos.
+        return publications
 
     def _current(self, s, request):
         row = self._eligible(s, request['reclamo_id'])

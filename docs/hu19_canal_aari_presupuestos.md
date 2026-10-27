@@ -22,6 +22,92 @@ HU16 cuando corresponde. No crea ni activa cuentas de forma automática. Los
 proveedores sin acceso se registran como exclusiones para revisión de la
 inmobiliaria, no como personas que ignoraron una solicitud.
 
+### Correcciones de revisión del PR #38 (27/10/2026)
+
+Talía aprobó recuperar automáticamente únicamente las rondas que **nunca
+publicaron solicitudes**. El bloqueo anterior trataba igual una publicación
+real y un intento vacío por falta de cuentas activadas. Ahora el worker vuelve
+a considerar una ronda en `revision` sin plazo y sin solicitudes, siempre que
+el reclamo, elección/autorización, participantes y huella sigan siendo válidos.
+Se recalculan compatibilidad y acceso; no se crean ni activan cuentas.
+
+La primera publicación efectiva reutiliza el identificador de la ronda, guarda
+su fecha efectiva y abre 24 h completas para las solicitudes creadas. Conserva
+la copia original del contexto, las exclusiones y los eventos de revisión;
+los eventos `publicada` marcan la recuperación en el historial. Los sondeos sin
+novedades no agregan eventos ni correos. El bloqueo del reclamo y la ronda, más
+las restricciones de unicidad existentes, impiden duplicados entre workers.
+La exploración usa paginación por clave: las rondas aún sin acceso no impiden
+recuperar otras posteriores, incluso con un lote de tamaño uno.
+
+No se reabren rondas que ya tuvieron alguna solicitud, aunque después venzan o
+queden en revisión. Tampoco se añaden automáticamente candidatos que activen su
+cuenta después de una publicación parcial. Reiniciar esas rondas sería otra
+decisión de producto; esta corrección no extiende sus plazos ni repite HU17.
+
+Los avisos a proveedores enlazados a una solicitud se revalidan al reservarse y
+otra vez inmediatamente antes de SMTP: plazo de solicitud/ronda, ausencia de
+presupuesto, contexto y elección/autorización, compatibilidad, proveedor activo,
+cuenta activada y vínculo/correo actuales. Un aviso obsoleto queda `fallido` con
+motivo explícito, sin próxima fecha de reintento ni marca de envío. Se conserva
+en la bandeja como auditoría; un resultado tardío no lo reactiva.
+
+También se verifica el número de intento y su reserva. Una comprobación válida
+renueva solamente una reserva que aún no venció; un worker con un intento viejo
+no llega al canal. Cada elemento del lote se comprueba después del anterior,
+no sólo al cargar el lote. Los avisos históricos ajenos a solicitudes HU19
+conservan su tratamiento, y el worker funciona si las tablas HU19 aún no están
+desplegadas.
+
+No se mantiene una transacción abierta durante SMTP. Por eso no se promete
+retirar un correo ya aceptado por el canal, ni atomicidad entre PostgreSQL y el
+servidor de correo ante una caída. Un cambio posterior al control final puede
+ocurrir durante la comunicación; el enlace y la confirmación del presupuesto
+siguen revalidando permisos y vigencia. Las reservas reducen duplicaciones,
+pero SMTP no ofrece una garantía de entrega exactamente una vez.
+
+No requiere migración ni nuevas dependencias. Correcciones verificadas y entrega
+autorizada para nueva revisión en el PR #38. No se usaron Supabase, SMTP ni
+Gemini reales en esta corrección, no se modificó evidencia histórica y no se
+cerraron tareas de Jira.
+
+#### Validación de las correcciones
+
+- Backend completo con PostgreSQL local: `python -m pytest -q -p no:cacheprovider
+  --tb=short` → **1461 passed, 62 skipped**, 320,93 s. Las omitidas no se cuentan
+  como aprobadas. Incluye publicación/recuperación simultáneas, reversión ante
+  falla de auditoría, activación posterior, filtros, permisos, SMTP simulado,
+  invalidación antes/después de reservar y mientras se despacha un lote,
+  reservas vencidas y resultados tardíos.
+- Tanda focalizada previa de portal/notificaciones: **132 passed**. Después se
+  sumaron dos casos (publicación parcial aún abierta y rollback de recuperación),
+  ambos incluidos y aprobados en la ejecución completa final.
+- Frontend completo: `npm test -- --pool=threads --maxWorkers=1
+  --testTimeout=20000` → **395 passed**, 40 archivos. El intento inicial con
+  procesos `forks` quedó en 393 aprobadas y un error al iniciar el worker de un
+  archivo; no se informó ese intento como una suite completa aprobada.
+- `npm run lint`, `npm run build`, `python -m compileall -q backend/app`,
+  `python -m pip check` y `git diff --check`: correctos. Sin patrones de claves
+  ni contactos personales en las líneas nuevas revisadas.
+- Persisten advertencias no bloqueantes: bundle principal de frontend >500 kB
+  y 18 avisos del adaptador de fechas SQLite de pruebas existentes.
+
+Para la ejecución general final, `AARI_TEST_POSTGRES_URL` y `DATABASE_URL`
+apuntaron al PostgreSQL descartable de loopback con el controlador `psycopg2`,
+`PYTHON_DOTENV_DISABLED=1` evitó cargar configuración real y `PGPASSWORD` se
+definió sólo en el proceso de pruebas para el hijo de checkpoints. No guardar
+su valor en código/documentación. Las integraciones externas quedaron sin
+habilitar y no se cambió ninguna dependencia o fixture ajeno a HU19.
+
+El primer intento general, con `psycopg` y sin esa variable heredada por el hijo,
+dio 1444 aprobadas, 62 omitidas y 17 fallos: 15 por configuración de expensas no
+persistida por el fixture con ese controlador (la clave no estaba presente al
+consultarla), uno por una aserción que usa `pgcode` de psycopg2 y otro por la
+conexión del subproceso. Una reproducción aislada confirmó la diferencia del
+fixture; al corregir la configuración de ejecución, las 100 pruebas de los
+módulos afectados pasaron y luego se repitió toda la suite con el resultado
+final anterior. No se omitieron esos casos para obtener el resultado aprobado.
+
 Se eligió publicar en AARI y encolar el correo en una única transacción. La
 entrega SMTP es posterior y utiliza la bandeja de salida existente con reintentos
 persistidos. No se llama a SMTP dentro de la transacción. El aviso contiene un

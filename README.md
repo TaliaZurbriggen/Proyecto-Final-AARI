@@ -83,6 +83,12 @@ El proveedor confirma importe, moneda, alcance y si es **exacto** o **mínimo**.
 Un mínimo se muestra como «Desde»: no es precio final ni máximo autorizado.
 El responsable puede consultar las respuestas; HU20 realiza la elección, no HU19.
 
+Corrección de revisión del PR #38: el worker recupera rondas que nunca publicaron
+solicitudes cuando aparece acceso activo y todo el contexto sigue vigente. Se
+conserva el historial y no se reabren rondas ya publicadas. Los correos a
+proveedores se revalidan al reservarlos y justo antes de enviarlos; los obsoletos
+quedan auditados sin reintento. No requiere otra migración ni dependencias.
+
 La nueva migración `20261027130000_hu19_canal_aari.sql` es independiente del
 intento Meta y fue **aplicada con autorización el 27/10/2026 en Supabase AARI de
 desarrollo**, con respaldo previo, ensayo con rollback, historial y RLS

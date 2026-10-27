@@ -46,6 +46,10 @@ def portal_case(choice_base,monkeypatch):
 
 def active_provider(case,n=0,**kwargs):
     pid=provider(case,phone=f'+15555551{n:03d}',**kwargs)
+    return activate_provider(case,pid,n)
+
+
+def activate_provider(case,pid,n=0):
     email=f'service{n}@example.com'
     with case.db.begin() as c:
         uid=c.execute(text("INSERT INTO usuarios(email,password_hash,rol,primer_ingreso) VALUES (:email,'unused','proveedor',false) RETURNING id"),{'email':email}).scalar_one()
@@ -206,6 +210,144 @@ def test_all_unactivated_is_review_without_starting_a_fake_deadline(portal_case)
     assert scalar(case,'SELECT vence_en FROM aari_rondas_presupuesto') is None
 
 
+@pytest.mark.parametrize('expense',['ordinario','extraordinario'])
+def test_worker_recovers_first_publication_after_account_activation_without_erasing_history(portal_case,expense):
+    case=eligible(portal_case,expense)
+    pid=provider(case)
+    first=case.portal.publish(case.claim)
+    with case.db.connect() as c:
+        initial=dict(c.execute(text('SELECT * FROM aari_rondas_presupuesto')).mappings().one())
+        events=c.execute(text('SELECT id FROM aari_presupuesto_eventos')).scalars().all()
+        notices=c.execute(text('SELECT id FROM notificaciones')).scalars().all()
+    assert first['publicadas']==0 and case.portal.discover_portal()==0
+    assert scalar(case,'SELECT count(*) FROM aari_presupuesto_eventos')==len(events)
+    assert scalar(case,'SELECT count(*) FROM notificaciones')==len(notices)
+    user=activate_provider(case,pid)
+    assert case.portal.discover_portal()==1
+    row=request(case,user)
+    assert row['puede_responder'] and (row['vence_en']-row['publicada_en']).total_seconds()==86400
+    with case.db.connect() as c:
+        current=c.execute(text('SELECT * FROM aari_rondas_presupuesto')).mappings().one()
+        assert current['id']==initial['id'] and current['exclusiones']==initial['exclusiones']
+        assert current['contexto']==initial['contexto'] and current['huella']==initial['huella']
+        assert current['cerrada_en'] is None and current['estado']=='esperando'
+        assert current['publicada_en']>initial['publicada_en']
+        assert set(events)<=set(c.execute(text('SELECT id FROM aari_presupuesto_eventos')).scalars())
+    assert case.portal.discover_portal()==0
+    assert case.portal.publish(case.claim)['repetida']
+    assert request(case,user)==row
+    assert scalar(case,'SELECT count(*) FROM aari_rondas_presupuesto')==1
+    assert scalar(case,'SELECT count(*) FROM aari_solicitudes_presupuesto')==1
+    assert scalar(case,"SELECT count(*) FROM notificaciones WHERE destinatario_tipo='proveedor'")==1
+
+
+def test_two_recovery_workers_create_only_one_request_and_notice(portal_case):
+    case=eligible(portal_case)
+    pid=provider(case)
+    case.portal.publish(case.claim)
+    activate_provider(case,pid)
+    barrier=Barrier(2)
+    def recover(_):
+        barrier.wait(timeout=5)
+        return case.portal.discover_portal(limit=1)
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        assert sum(pool.map(recover,range(2)))==1
+    assert scalar(case,'SELECT count(*) FROM aari_solicitudes_presupuesto')==1
+    assert scalar(case,"SELECT count(*) FROM aari_presupuesto_eventos WHERE tipo='publicada'")==1
+    assert scalar(case,"SELECT count(*) FROM notificaciones WHERE destinatario_tipo='proveedor'")==1
+
+
+@pytest.mark.parametrize('change',[
+    'resolved','description','coverage','specialty','inactive_provider','inactive_user',
+    'first_login','cancelled_round','withdrawn_authorization',
+])
+def test_recovery_does_not_reuse_changed_context_or_unavailable_account(portal_case,change):
+    case=eligible(portal_case,'extraordinario')
+    pid=provider(case)
+    case.portal.publish(case.claim)
+    user=activate_provider(case,pid)
+    with case.db.begin() as c:
+        if change=='resolved': c.execute(text("UPDATE reclamos SET estado='Resuelto'"))
+        elif change=='description': c.execute(text("UPDATE reclamos SET descripcion='Otra reparación sintética diferente'"))
+        elif change=='coverage': c.execute(text("UPDATE proveedor_coberturas SET localidad='Otra ciudad'"))
+        elif change=='specialty': c.execute(text('DELETE FROM proveedor_especialidades'))
+        elif change=='inactive_provider': c.execute(text('UPDATE proveedores SET activo=false'))
+        elif change=='inactive_user': c.execute(text('UPDATE usuarios SET activo=false WHERE id=:id'),{'id':user.id})
+        elif change=='first_login': c.execute(text('UPDATE usuarios SET primer_ingreso=true WHERE id=:id'),{'id':user.id})
+        elif change=='cancelled_round': c.execute(text("UPDATE aari_rondas_presupuesto SET estado='cancelada'"))
+        elif change=='withdrawn_authorization': c.execute(text('DELETE FROM reclamo_autorizaciones'))
+    assert case.portal.discover_portal()==0
+    assert case.portal.publish(case.claim)['publicadas']==0
+    assert scalar(case,'SELECT count(*) FROM aari_solicitudes_presupuesto')==0
+
+
+@pytest.mark.parametrize('expired',[False,True])
+def test_recovery_never_reopens_a_round_that_already_had_publications(portal_case,expired):
+    case=eligible(portal_case)
+    active_provider(case)
+    pid=provider(case,phone='+15555550200')
+    case.portal.publish(case.claim)
+    if expired:
+        past_deadline(case)
+        case.portal.finalize_due_portal()
+    activate_provider(case,pid,1)
+    assert case.portal.discover_portal()==0
+    assert case.portal.publish(case.claim)['repetida']
+    assert scalar(case,'SELECT count(*) FROM aari_solicitudes_presupuesto')==1
+
+
+def test_failed_recovery_rolls_back_without_erasing_original_review(portal_case):
+    case=eligible(portal_case)
+    pid=provider(case)
+    case.portal.publish(case.claim)
+    with case.db.connect() as c:
+        before=dict(c.execute(text('SELECT * FROM aari_rondas_presupuesto')).mappings().one())
+        events=c.execute(text('SELECT id FROM aari_presupuesto_eventos')).scalars().all()
+    activate_provider(case,pid)
+    with case.db.begin() as c:
+        c.exec_driver_sql('''CREATE FUNCTION hu19_fail_recovery() RETURNS trigger LANGUAGE plpgsql AS
+            $$ BEGIN RAISE EXCEPTION 'synthetic recovery error'; END $$;
+            CREATE TRIGGER hu19_fail_recovery BEFORE INSERT ON aari_presupuesto_eventos
+            FOR EACH ROW EXECUTE FUNCTION hu19_fail_recovery();''')
+    with pytest.raises(SQLAlchemyError): case.portal.publish(case.claim)
+    with case.db.connect() as c:
+        assert dict(c.execute(text('SELECT * FROM aari_rondas_presupuesto')).mappings().one())==before
+        assert c.execute(text('SELECT id FROM aari_presupuesto_eventos')).scalars().all()==events
+    assert scalar(case,'SELECT count(*) FROM aari_solicitudes_presupuesto')==0
+    assert scalar(case,"SELECT count(*) FROM notificaciones WHERE destinatario_tipo='proveedor'")==0
+
+
+def test_waiting_access_round_does_not_starve_later_recovery_with_batch_limit_one(portal_case):
+    case=eligible(portal_case)
+    provider(case,area='Centro')
+    case.portal.publish(case.claim)
+    with case.db.begin() as c:
+        prop=c.execute(text('''INSERT INTO propiedades
+            (direccion,provincia,localidad,barrio,tipo,propietario_id)
+            SELECT 'Otra unidad sintética',provincia,localidad,'Otro Barrio',tipo,propietario_id
+            FROM propiedades WHERE id=(SELECT propiedad_id FROM reclamos WHERE id=:id) RETURNING id'''),
+            {'id':case.claim}).scalar_one()
+        uid=c.execute(text("INSERT INTO usuarios(email,password_hash,rol,primer_ingreso) VALUES ('later@example.com','unused','inquilino',false) RETURNING id")).scalar_one()
+        tenant=c.execute(text('''INSERT INTO inquilinos(nombre_completo,dni,email,telefono,propiedad_id,usuario_id)
+            VALUES ('Otro Inquilino Sintetico','80009999','later@example.com','00000000',:prop,:user) RETURNING id'''),
+            {'prop':prop,'user':uid}).scalar_one()
+        claim=c.execute(text('''INSERT INTO reclamos(descripcion,urgencia,inquilino_id,propiedad_id,tipo_id)
+            SELECT descripcion,urgencia,:tenant,:prop,tipo_id FROM reclamos WHERE id=:id RETURNING id'''),
+            {'id':case.claim,'tenant':tenant,'prop':prop}).scalar_one()
+    child=SimpleNamespace(**{**vars(case),'claim':claim,'actors':{**case.actors,
+        'inquilino':AuthenticatedUser(id=uid,email='later@example.com',rol='inquilino',primer_ingreso=False,perfil_id=tenant)}})
+    eligible(child)
+    pid=provider(case,phone='+15555550999',area='Otro Barrio')
+    case.portal.publish(child.claim)
+    user=activate_provider(case,pid)
+    global_portal=SqlAlchemyQuotePortal(sessionmaker(bind=case.db))
+    assert global_portal.discover_portal(limit=1)==1
+    assert scalar(case,'SELECT count(*) FROM aari_solicitudes_presupuesto')==1
+    assert global_portal.list_own(user)['items'][0]['reclamo_id']==child.claim
+    assert global_portal.discover_portal(limit=1)==0
+    assert scalar(case,'SELECT count(*) FROM aari_rondas_presupuesto')==2
+
+
 def test_many_providers_pagination_no_competitor_data(portal_case):
     case=eligible(portal_case)
     users=[active_provider(case,n) for n in range(30)]
@@ -268,6 +410,141 @@ def test_real_outbox_with_mock_smtp_preserves_publication_and_deadline(portal_ca
     assert service.deliver(notice)
     assert request(case,user)==before
     assert not service.deliver(notice) and sender.calls==2
+
+
+def invalidate_request(case,user,change):
+    if change=='answered':
+        case.portal.submit(request(case,user)['id'],user,budget())
+        return
+    with case.db.begin() as c:
+        if change=='deadline':
+            c.execute(text("UPDATE aari_solicitudes_presupuesto SET publicada_en=clock_timestamp()-interval '25 hours',vence_en=clock_timestamp()-interval '1 hour'"))
+        elif change=='round_deadline':
+            c.execute(text("UPDATE aari_rondas_presupuesto SET publicada_en=clock_timestamp()-interval '25 hours',vence_en=clock_timestamp()-interval '1 hour'"))
+        elif change=='closed_round': c.execute(text("UPDATE aari_rondas_presupuesto SET estado='revision',cerrada_en=clock_timestamp()"))
+        elif change=='cancelled_round': c.execute(text("UPDATE aari_rondas_presupuesto SET estado='cancelada'"))
+        elif change=='resolved': c.execute(text("UPDATE reclamos SET estado='Resuelto'"))
+        elif change=='inactive_provider': c.execute(text('UPDATE proveedores SET activo=false'))
+        elif change=='inactive_user': c.execute(text('UPDATE usuarios SET activo=false WHERE id=:id'),{'id':user.id})
+        elif change=='first_login': c.execute(text('UPDATE usuarios SET primer_ingreso=true WHERE id=:id'),{'id':user.id})
+        elif change=='unlinked': c.execute(text('UPDATE proveedores SET usuario_id=NULL'))
+        elif change=='email':
+            # HU32 exige que padrón y cuenta mantengan la misma identidad.
+            c.execute(text("UPDATE proveedores SET email='changed@example.com' WHERE id=:id"),{'id':user.perfil_id})
+            c.execute(text("UPDATE usuarios SET email='changed@example.com' WHERE id=:id"),{'id':user.id})
+        elif change=='coverage': c.execute(text("UPDATE proveedor_coberturas SET localidad='Otra ciudad'"))
+        elif change=='specialty': c.execute(text('DELETE FROM proveedor_especialidades'))
+        elif change=='description': c.execute(text("UPDATE reclamos SET descripcion='Una descripción sintética completamente diferente'"))
+        elif change=='withdrawn_authorization': c.execute(text('DELETE FROM reclamo_autorizaciones'))
+        else: raise AssertionError('Cambio de prueba desconocido')
+
+
+@pytest.mark.parametrize('timing',['before_reservation','after_reservation'])
+@pytest.mark.parametrize('change',[
+    'deadline','round_deadline','closed_round','cancelled_round','resolved','inactive_provider',
+    'inactive_user','first_login','unlinked','email','coverage','specialty','description',
+    'withdrawn_authorization','answered',
+])
+def test_obsolete_quote_notice_never_reaches_smtp_or_gets_reactivated(portal_case,timing,change):
+    from app.services.claim_notifications import ClaimNotificationService
+    from app.db.quote_portal_notices import OBSOLETE_NOTICE
+    case=eligible(portal_case,'extraordinario')
+    user=active_provider(case)
+    case.portal.publish(case.claim)
+    notice=scalar(case,'SELECT aviso_id FROM aari_solicitudes_presupuesto')
+    context=case.claims.claim_notification(notice) if timing=='after_reservation' else None
+    if timing=='after_reservation': assert context is not None
+    invalidate_request(case,user,change)
+    calls=[]
+    service=ClaimNotificationService(case.claims,SimpleNamespace(send=lambda **data:calls.append(data)))
+    assert not (service._deliver_claimed(context) if context else service.deliver(notice))
+    assert calls==[]
+    with case.db.connect() as c:
+        row=c.execute(text('SELECT * FROM notificaciones WHERE id=:id'),{'id':notice}).mappings().one()
+        assert row['estado_envio']=='fallido' and row['ultimo_error']==OBSOLETE_NOTICE
+        assert row['proximo_intento_en'] is None and row['bloqueado_hasta'] is None
+        assert row['enviado_en'] is None
+        assert row['intentos']==(1 if context else 0)
+    assert not service.deliver(notice)
+    if context:
+        assert not case.claims.mark_notification_result(notice,attempt_number=context.attempt_number,sent=True)
+        assert not case.claims.mark_notification_result(notice,attempt_number=context.attempt_number,sent=False)
+    assert calls==[]
+
+
+def test_second_notice_of_reserved_batch_is_rechecked_after_first_delivery(portal_case):
+    from app.services.claim_notifications import ClaimNotificationService
+    case=eligible(portal_case)
+    active_provider(case)
+    active_provider(case,1)
+    case.portal.publish(case.claim)
+    with case.db.begin() as c:
+        # Aislar sólo los dos avisos a proveedores, no enviar avisos del fixture.
+        c.execute(text("UPDATE notificaciones SET estado_envio='enviado' WHERE destinatario_tipo<>'proveedor'"))
+    calls=[]
+    def send(**data):
+        calls.append(data)
+        with case.db.begin() as c:
+            c.execute(text("UPDATE reclamos SET estado='Resuelto' WHERE id=:id"),{'id':case.claim})
+    service=ClaimNotificationService(case.claims,SimpleNamespace(send=send))
+    assert service.deliver_due(limit=10)==2
+    assert len(calls)==1
+    assert scalar(case,"SELECT count(*) FROM notificaciones WHERE destinatario_tipo='proveedor' AND estado_envio='fallido'")==1
+    assert scalar(case,"SELECT count(*) FROM notificaciones WHERE destinatario_tipo='proveedor' AND estado_envio='enviado'")==1
+
+
+def test_old_lease_cannot_dispatch_after_another_worker_recovers_it(portal_case):
+    from app.services.claim_notifications import ClaimNotificationService
+    case=eligible(portal_case)
+    active_provider(case)
+    case.portal.publish(case.claim)
+    notice=scalar(case,'SELECT aviso_id FROM aari_solicitudes_presupuesto')
+    old=case.claims.claim_notification(notice)
+    with case.db.begin() as c:
+        c.execute(text("UPDATE notificaciones SET bloqueado_hasta=clock_timestamp()-interval '1 second' WHERE id=:id"),{'id':notice})
+    calls=[]
+    service=ClaimNotificationService(case.claims,SimpleNamespace(send=lambda **data:calls.append(data)))
+    assert not service._deliver_claimed(old) and calls==[]
+    current=case.claims.claim_notification(notice)
+    assert current.attempt_number==old.attempt_number+1
+    assert not service._deliver_claimed(old) and calls==[]
+    assert service._deliver_claimed(current) and len(calls)==1
+
+
+def test_final_validation_rejects_lease_that_expires_during_compatibility_check(portal_case,monkeypatch):
+    from app.db import reclamos as claims_module
+    from app.services.claim_notifications import ClaimNotificationService
+    case=eligible(portal_case)
+    active_provider(case)
+    case.portal.publish(case.claim)
+    notice=scalar(case,'SELECT aviso_id FROM aari_solicitudes_presupuesto')
+    context=case.claims.claim_notification(notice)
+    original=claims_module.validate_portal_notice
+    def expire_after_check(session,notification_id):
+        result=original(session,notification_id)
+        session.execute(text("UPDATE notificaciones SET bloqueado_hasta=clock_timestamp()-interval '1 second' WHERE id=:id"),{'id':notification_id})
+        return result
+    monkeypatch.setattr(claims_module,'validate_portal_notice',expire_after_check)
+    calls=[]
+    service=ClaimNotificationService(case.claims,SimpleNamespace(send=lambda **data:calls.append(data)))
+    assert not service._deliver_claimed(context) and calls==[]
+
+
+def test_concurrent_mail_workers_dispatch_a_quote_notice_once(portal_case):
+    from app.services.claim_notifications import ClaimNotificationService
+    case=eligible(portal_case)
+    active_provider(case)
+    case.portal.publish(case.claim)
+    notice=scalar(case,'SELECT aviso_id FROM aari_solicitudes_presupuesto')
+    calls=[]
+    service=ClaimNotificationService(case.claims,SimpleNamespace(send=lambda **data:calls.append(data)))
+    barrier=Barrier(2)
+    def deliver(_):
+        barrier.wait(timeout=5)
+        return service.deliver(notice)
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        assert sum(pool.map(deliver,range(2)))==1
+    assert len(calls)==1
 
 
 def test_late_replay_returns_original_but_new_answer_cannot_replace_it(portal_case):
