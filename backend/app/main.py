@@ -11,6 +11,7 @@ from sqlalchemy import text
 
 from app.api.auth import require_admin, router as auth_router
 from app.api.provider_access import router as provider_access_router
+from app.api.quote_portal import router as quote_portal_router
 from app.api.expense_authorizations import router as authorizations_router
 from app.api.provider_choices import router as choices_router
 from app.api.coordination import get_coordination_service, router as coordination_router
@@ -20,6 +21,7 @@ from app.api.expensas import router as expenses_router
 from app.api.contratos import get_contract_clause_service, router as contratos_router
 from app.api.escalados import router as escalados_router
 from app.api.provider_candidates import router as candidates_router
+from app.api.whatsapp import router as whatsapp_router
 from app.services.contract_errors import ContractError
 from app.api.inquilinos import property_router as property_tenant_router
 from app.api.inquilinos import router as inquilinos_router
@@ -37,6 +39,9 @@ from app.services.contract_clause_service import run_contract_analysis_worker
 from app.services.coordination_service import run_coordination_worker
 from app.db.provider_candidates_jobs import SqlAlchemyProviderCandidatesJobs
 from app.services.provider_candidates_worker import ProviderCandidatesWorker, run_provider_candidates_worker
+from app.services.quote_requests import build_quote_requests_worker, run_quote_requests_worker
+from app.services.quote_responses import build_quote_responses_worker, run_quote_responses_worker
+from app.services.quote_portal import build_aari_quote_worker, run_aari_quote_worker
 
 
 def _notification_worker_enabled() -> bool:
@@ -60,12 +65,29 @@ def _provider_worker_enabled() -> bool:
     return os.getenv("PROVIDER_CANDIDATES_WORKER_ENABLED", "false").lower() in {"1", "true", "yes"} and "PYTEST_CURRENT_TEST" not in os.environ
 
 
+def _quote_requests_worker_enabled() -> bool:
+    return (os.getenv("QUOTE_REQUESTS_WORKER_ENABLED", "false").strip().lower() in {"1", "true", "yes"}
+            and "PYTEST_CURRENT_TEST" not in os.environ)
+
+
+def _quote_responses_worker_enabled() -> bool:
+    return (os.getenv("QUOTE_RESPONSES_WORKER_ENABLED", "false").strip().lower() in {"1", "true", "yes"}
+            and "PYTEST_CURRENT_TEST" not in os.environ)
+
+
 @asynccontextmanager
 async def lifespan(_: FastAPI):
     """Mantiene activa la bandeja de salida sin bloquear las peticiones."""
 
     workers = []
     stop_event = asyncio.Event()
+    portal_enabled = os.getenv('AARI_QUOTE_PORTAL_ENABLED','false').lower() in {'1','true','yes'}
+    if portal_enabled and os.getenv('AARI_QUOTE_WORKER_ENABLED','false').lower() in {'1','true','yes'} and 'PYTEST_CURRENT_TEST' not in os.environ:
+        workers.append(asyncio.create_task(run_aari_quote_worker(build_aari_quote_worker(), stop_event)))
+    if not portal_enabled and _quote_responses_worker_enabled():
+        workers.append(asyncio.create_task(run_quote_responses_worker(build_quote_responses_worker(), stop_event)))
+    if not portal_enabled and _quote_requests_worker_enabled():
+        workers.append(asyncio.create_task(run_quote_requests_worker(build_quote_requests_worker(), stop_event)))
     # HU21 no procesa sesiones históricas sin habilitación explícita.
     if _coordination_worker_enabled():
         workers.append(asyncio.create_task(
@@ -115,6 +137,7 @@ app.add_middleware(
 )
 app.include_router(auth_router)
 app.include_router(provider_access_router)
+app.include_router(quote_portal_router)
 app.include_router(agency_configuration_router)
 app.include_router(expenses_router)
 app.include_router(admin_home_router)
@@ -135,6 +158,7 @@ app.include_router(authorizations_router)
 app.include_router(choices_router)
 app.include_router(reclamos_router)
 app.include_router(contratos_router)
+app.include_router(whatsapp_router)
 
 
 @app.exception_handler(RequestValidationError)

@@ -38,7 +38,7 @@ class SqlAlchemyProveedoresRepository:
                   AND lower(trim(c.provincia)) = lower(:province)
                   AND lower(trim(c.localidad)) = lower(:city)
                   AND (c.cubre_toda_localidad OR (
-                    :area IS NOT NULL AND EXISTS (
+                    CAST(:area AS text) IS NOT NULL AND EXISTS (
                         SELECT 1 FROM proveedor_cobertura_barrios cb
                         WHERE cb.cobertura_id = c.id
                           AND lower(trim(cb.barrio)) = lower(:area)

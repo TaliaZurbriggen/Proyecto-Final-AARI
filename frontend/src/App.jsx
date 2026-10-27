@@ -34,6 +34,7 @@ import OwnerExpenseDecisionPage from './features/reclamos/pages/OwnerExpenseDeci
 import ProviderChoicePage from './features/reclamos/pages/ProviderChoicePage.jsx'
 import ProviderActivationPage from './features/proveedores/pages/ProviderActivationPage.jsx'
 import ProviderHomePage from './features/proveedores/pages/ProviderHomePage.jsx'
+import ProviderQuoteDetailPage from './features/proveedores/pages/ProviderQuoteDetailPage.jsx'
 import EscalatedClaimsPage from './features/reclamos/pages/EscalatedClaimsPage.jsx'
 import EscalatedClaimDetailPage from './features/reclamos/pages/EscalatedClaimDetailPage.jsx'
 import PendingAssignmentPage from './features/reclamos/pages/PendingAssignmentPage.jsx'
@@ -61,6 +62,7 @@ function App() {
         <Route element={<ProtectedRoute allowedRoles={['proveedor']} />}>
           <Route element={<RoleLayout />}>
             <Route path="proveedor" element={<ProviderHomePage />} />
+            <Route path="proveedor/solicitudes/:requestId" element={<ProviderQuoteDetailPage />} />
           </Route>
         </Route>
         <Route element={<ProtectedRoute allowFirstLogin />}>

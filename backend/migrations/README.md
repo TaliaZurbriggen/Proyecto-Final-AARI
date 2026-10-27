@@ -2,6 +2,22 @@
 
 Scripts SQL para crear y actualizar el esquema de Supabase.
 
+## HU19 — Canal AARI (aplicada en desarrollo el 27/10/2026)
+
+`20261027130000_hu19_canal_aari.sql` requiere HU16, HU17, coberturas/HU15 y las
+dos migraciones de HU32. No requiere las tres migraciones del intento Meta que
+se conservan más abajo como evidencia local. Agrega rondas/solicitudes/eventos
+privados y procedencia, moneda y tipo de importe exacto/mínimo a presupuestos.
+No etiqueta registros históricos con valores inventados. RLS y revocaciones
+quedan en el SQL, sin políticas públicas. El DDL no publica pedidos ni envía correo.
+
+Aplicada con autorización en Supabase AARI de desarrollo, con respaldo previo,
+DDL/historial atómicos y controles RLS. No repetir la migración al hacer pull.
+Se validó el recorrido con datos ficticios y un aviso real acotado; los workers
+generales permanecen apagados. El worker SMTP requiere autorización para envíos
+reales adicionales. Detalle y
+orden operativo: [HU19 AARI](../../docs/hu19_canal_aari_presupuestos.md).
+
 ## HU32 — Acceso de proveedores (aplicada en desarrollo el 26/10/2026)
 
 Orden obligatorio: `20261026180000_hu32_rol_proveedor.sql` y, en una transacción
@@ -706,6 +722,24 @@ El resultado detallado está en
 `docs/evaluaciones/hu30/flujo_asistido_2026-10-05.md`. El éxito técnico no acredita
 la precisión semántica de las interpretaciones propuestas por Gemini.
 
+## HU19 — transporte y solicitudes (pendientes de aplicar)
+
+- `20261019230000_hu19_whatsapp_base.sql`: bandeja de eventos entrantes autenticados,
+  unicidad, índices, RLS y revocaciones. Sin presupuestos ni decisiones automáticas.
+- `20261020120000_hu19_solicitudes_presupuesto.sql`: rondas por elección HU17,
+  solicitudes por proveedor y auditoría de preparación/reserva/envío. Depende de
+  HU15, HU16 y HU17. No modifica sus migraciones, tablas, estados ni datos previos.
+
+Ambas son versionadas de una sola ejecución. **No están aplicadas en Supabase**
+y no se ejecutan al iniciar FastAPI. Aplicar sólo con autorización, historial y
+preflight. Nuevas tablas privadas, RLS activo y sin permisos/políticas para
+PUBLIC/anon/authenticated. No agregar políticas anónimas para hacer funcionar el
+webhook: su firma se verifica en el backend antes de escribir con conexión privada.
+No hay seeds, envíos, plazos retroactivos ni llamadas de red dentro del DDL.
+
+Validación y límites: `docs/hu19_solicitudes_presupuesto.md`. Las pruebas usan
+bases PostgreSQL locales nuevas y descartables; nunca la base compartida.
+
 ## HU21 — Contexto persistente del agente
 
 `20261011222710_hu21_contexto_persistente.sql` agrega metadatos de sesión y
@@ -741,3 +775,35 @@ Reinstalar requirements antes de usar HU21 y mantener
 `COORDINATION_WORKER_ENABLED=false` hasta acordar su activación/integración.
 Más detalles y avisos previos del proyecto en
 [documentación HU21](../../docs/hu21_contexto_persistente.md).
+
+## HU19 — recepción y cierre de presupuestos (25/10/2026)
+
+`20261025160000_hu19_respuestas_presupuesto.sql` sigue a las dos migraciones HU19
+`20261019230000` y `20261020120000`. Agrega plazos/ronda, moneda y procedencia de
+presupuestos, FK compuesta y auditoría de procesamiento por mensaje. No atribuye
+moneda a presupuestos históricos ni cambia sus importes. RLS habilitado y permisos
+revocados a PUBLIC/anon/authenticated, sin políticas públicas.
+
+Las tres están pendientes de autorización/aplicación en Supabase. No ejecutar al
+hacer pull ni al iniciar FastAPI. Validar en PostgreSQL local antes de solicitar
+aplicación compartida y mantener ambos workers HU19 apagados.
+Detalle: [recepción HU19](../../docs/hu19_respuestas_presupuesto.md).
+
+## HU19 — canal privado AARI (27/10/2026)
+
+`20261027130000_hu19_canal_aari.sql` requiere HU16, HU17, HU32 y las coberturas
+HU15. Es independiente de las tres migraciones Meta anteriores: no aplicarlas
+para habilitar el canal AARI. Agrega rondas, solicitudes y eventos privados,
+procedencia y tipo de importe en presupuestos, sin reinterpretar precios antiguos.
+
+**Aplicada con autorización el 27/10/2026 en Supabase AARI de desarrollo**.
+Respaldo local privado, ensayo con rollback, DDL/historial atómicos, conteos de
+36 tablas existentes preservados y RLS/permisos verificados. No repetirla por
+integrante ni al cambiar de rama. No activa workers ni envía correos al aplicar.
+
+QA compartido: dos recorridos autenticados exacto/mínimo con datos ficticios y
+rollback; aviso puntual recibido según confirmación de Talía y recorrido visual
+con la cuenta real de prueba completado con un mínimo ficticio persistido.
+No se activaron envíos generales.
+Mantener `AARI_QUOTE_WORKER_ENABLED=false` hasta acordar la puesta en marcha.
+Detalle y límites: [canal AARI HU19](../../docs/hu19_canal_aari_presupuestos.md).
