@@ -823,6 +823,28 @@ Con Docker Compose podés levantar el backend y el frontend juntos, ya conectado
 
 ## Estado del proyecto
 
+### HU32 — Acceso del proveedor (entrega parcial para revisión, 26/10/2026)
+
+En `codex/AARI-347-acceso-proveedor` se agrega el rol proveedor sobre el padrón
+existente. Administración habilita/reenvía invitaciones desde **Proveedores →
+detalle → Acceso a AARI**; el proveedor elige su contraseña mediante un enlace
+con vencimiento y un solo uso y luego utiliza el login común. Desactivar el
+proveedor bloquea operaciones y sesiones existentes, sin borrar historial.
+
+Las migraciones HU32 ya fueron aplicadas con autorización al Supabase AARI de
+desarrollo el 26/10/2026: **no repetirlas por pull**. No crean cuentas ni envían
+correos automáticamente. Reutiliza SMTP y `APP_LOGIN_URL`; agrega la variable
+opcional `PROVIDER_INVITATION_HOURS=24`, independiente del plazo de presupuestos.
+Con URL localhost la invitación sirve en esta computadora, no acredita uso
+remoto ni el despliegue AARI-338.
+
+**Límite explícito:** el portal inicial está disponible, pero la bandeja de
+solicitudes reales queda pendiente de la adaptación/integración de HU19.
+Presupuestar corresponde a HU19 y conversar a HU33. No se da HU32 por cerrada
+ni se presenta el portal como recorrido completo. Esta entrega parcial se
+propone para revisión y merge sin cerrar la HU; después se integrará HU19.
+[Implementación, pruebas y pendientes](docs/hu32_acceso_proveedor.md).
+
 ### HU21 — Base de contexto persistente (Sprint 4)
 
 Implementación local aprobada el 11/10/2026 en

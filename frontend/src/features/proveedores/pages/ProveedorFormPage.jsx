@@ -208,7 +208,7 @@ function ProveedorFormPage() {
         {submitError ? <div className={styles.formAlert}><AlertMessage>{submitError}</AlertMessage></div> : null}
 
         <section className={styles.formSection} aria-labelledby="provider-contact-title">
-          <div className={styles.subheading}><h3 id="provider-contact-title">Contacto y disponibilidad</h3><p>El teléfono se usará para la futura coordinación por WhatsApp.</p></div>
+          <div className={styles.subheading}><h3 id="provider-contact-title">Contacto y disponibilidad</h3><p>El teléfono es un dato de contacto. Podés habilitar su acceso a AARI desde el detalle del proveedor.</p></div>
           <div className={styles.formGrid}>
             <FormField error={errors.nombre_razon_social} id="nombre_razon_social" label="Nombre o razón social" required><TextInput maxLength={150} name="nombre_razon_social" onChange={handleChange} placeholder="Ej. Servicios del Centro" value={values.nombre_razon_social} /></FormField>
             <FormField error={errors.matricula} hint="Opcional, según la actividad." id="matricula" label="Matrícula"><TextInput maxLength={80} name="matricula" onChange={handleChange} placeholder="Ej. MP 1234" value={values.matricula} /></FormField>

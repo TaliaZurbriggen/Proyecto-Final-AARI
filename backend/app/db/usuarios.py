@@ -32,7 +32,7 @@ class SqlAlchemyUsuariosRepository:
                 statement,
                 {"email": email, "password": password},
             ).mappings().one_or_none()
-        return dict(row) if row else None
+            return self._with_provider(session, row)
 
     def get_by_id(self, user_id: UUID) -> dict[str, object] | None:
         statement = text(
@@ -52,7 +52,18 @@ class SqlAlchemyUsuariosRepository:
                 statement,
                 {"user_id": str(user_id)},
             ).mappings().one_or_none()
-        return dict(row) if row else None
+            return self._with_provider(session, row)
+
+    @staticmethod
+    def _with_provider(session, row):
+        record = dict(row) if row else None
+        if record is not None and str(record["rol"]) == "proveedor":
+            provider = session.execute(text(
+                "SELECT id,activo FROM proveedores WHERE usuario_id=:user_id"
+            ), {"user_id": str(record["id"])}).mappings().one_or_none()
+            record["perfil_id"] = provider["id"] if provider else None
+            record["proveedor_activo"] = bool(provider and provider["activo"])
+        return record
 
     def record_failed_attempt(
         self,

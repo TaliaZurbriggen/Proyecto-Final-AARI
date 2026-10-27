@@ -19,6 +19,7 @@ import {
   StatusBadge,
 } from '../../../components/ui/index.js'
 import { getProveedor, updateProveedorEstado } from '../api/proveedoresApi.js'
+import ProviderAccessPanel from '../components/ProviderAccessPanel.jsx'
 import styles from './Proveedores.module.css'
 
 function formatTime(value) {
@@ -110,6 +111,8 @@ function ProveedorDetailPage() {
         <div className={styles.sectionHeading}><div><p className={styles.eyebrow}>Alcance geográfico</p><h2 id="provider-coverage-title">Zonas de cobertura</h2></div><MapPinned aria-hidden="true" className={styles.headingIcon} /></div>
         <div className={styles.coverageDetailGrid}>{provider.coberturas.map((coverage) => <article key={coverage.id}><h3>{coverage.localidad}, {coverage.provincia}</h3>{coverage.cubre_toda_localidad ? <p>Toda la localidad, incluso propiedades sin barrio informado.</p> : <><p>Barrios cubiertos:</p><div className={styles.badgeList}>{coverage.barrios.map((neighborhood) => <span key={neighborhood}>{neighborhood}</span>)}</div></>}</article>)}</div>
       </section>
+
+      <ProviderAccessPanel active={provider.activo} providerId={provider.id} />
 
       <section className={`${styles.statusZone} ${provider.activo ? '' : styles.statusZoneInactive}`} aria-labelledby="provider-status-title">
         <div><h2 id="provider-status-title">{provider.activo ? 'Desactivar proveedor' : 'Reactivar proveedor'}</h2><p>{provider.activo ? 'Dejará de aparecer como opción para nuevas asignaciones, pero se conservarán sus datos e historial.' : 'Volverá a estar disponible para nuevas asignaciones según su cobertura y especialidad.'}</p></div>

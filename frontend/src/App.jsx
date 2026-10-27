@@ -32,6 +32,8 @@ import PropertyClaimDetailPage from './features/reclamos/pages/PropertyClaimDeta
 import OwnerExpensesPage from './features/reclamos/pages/OwnerExpensesPage.jsx'
 import OwnerExpenseDecisionPage from './features/reclamos/pages/OwnerExpenseDecisionPage.jsx'
 import ProviderChoicePage from './features/reclamos/pages/ProviderChoicePage.jsx'
+import ProviderActivationPage from './features/proveedores/pages/ProviderActivationPage.jsx'
+import ProviderHomePage from './features/proveedores/pages/ProviderHomePage.jsx'
 import EscalatedClaimsPage from './features/reclamos/pages/EscalatedClaimsPage.jsx'
 import EscalatedClaimDetailPage from './features/reclamos/pages/EscalatedClaimDetailPage.jsx'
 import PendingAssignmentPage from './features/reclamos/pages/PendingAssignmentPage.jsx'
@@ -55,6 +57,12 @@ function App() {
     <AuthProvider>
       <Routes>
         <Route path="login" element={<LoginPage />} />
+        <Route path="activar-proveedor" element={<ProviderActivationPage />} />
+        <Route element={<ProtectedRoute allowedRoles={['proveedor']} />}>
+          <Route element={<RoleLayout />}>
+            <Route path="proveedor" element={<ProviderHomePage />} />
+          </Route>
+        </Route>
         <Route element={<ProtectedRoute allowFirstLogin />}>
           <Route path="cambiar-contrasena" element={<ChangePasswordPage />} />
         </Route>

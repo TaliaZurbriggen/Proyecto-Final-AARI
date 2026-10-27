@@ -3,11 +3,14 @@ import os
 from contextlib import asynccontextmanager
 
 from fastapi import Depends, FastAPI
+from fastapi.exceptions import RequestValidationError
+from fastapi.exception_handlers import request_validation_exception_handler
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
 
 from app.api.auth import require_admin, router as auth_router
+from app.api.provider_access import router as provider_access_router
 from app.api.expense_authorizations import router as authorizations_router
 from app.api.provider_choices import router as choices_router
 from app.api.coordination import get_coordination_service, router as coordination_router
@@ -111,6 +114,7 @@ app.add_middleware(
     expose_headers=["X-Total-Count"],
 )
 app.include_router(auth_router)
+app.include_router(provider_access_router)
 app.include_router(agency_configuration_router)
 app.include_router(expenses_router)
 app.include_router(admin_home_router)
@@ -131,6 +135,18 @@ app.include_router(authorizations_router)
 app.include_router(choices_router)
 app.include_router(reclamos_router)
 app.include_router(contratos_router)
+
+
+@app.exception_handler(RequestValidationError)
+async def safe_provider_activation_validation(request, error):
+    # FastAPI incluye el valor recibido en errores Pydantic. No reflejar tokens
+    # ni contraseñas del formulario público, ni siquiera en un 422.
+    if request.url.path == "/auth/proveedores/activar":
+        return JSONResponse(status_code=422, content={"detail": {
+            "code": "invalid_activation_form",
+            "message": "Revisá el enlace y la contraseña: al menos 8 caracteres, un número y confirmación coincidente.",
+        }})
+    return await request_validation_exception_handler(request, error)
 
 
 @app.exception_handler(ContractError)
