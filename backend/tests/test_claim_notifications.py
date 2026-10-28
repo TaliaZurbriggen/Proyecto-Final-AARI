@@ -16,6 +16,8 @@ class FakeRepository:
     accept_results: bool = True
     results: list[tuple[int, bool, str | None]] = field(default_factory=list)
     followup_batches: list[int] = field(default_factory=list)
+    delivery_allowed: bool = True
+    checked_attempts: list[int] = field(default_factory=list)
 
     def enqueue_due_responsible_followups(self, *, limit: int) -> int:
         self.followup_batches.append(limit)
@@ -39,6 +41,10 @@ class FakeRepository:
     ) -> bool:
         self.results.append((attempt_number, sent, safe_error))
         return self.accept_results
+
+    def prepare_notification_delivery(self, context):
+        self.checked_attempts.append(context.attempt_number)
+        return self.delivery_allowed
 
 
 class FakeSender:
@@ -113,3 +119,25 @@ def test_does_not_confirm_delivery_when_the_claimed_attempt_expired():
 
     assert ClaimNotificationService(repository, sender).deliver(uuid4()) is False
     assert repository.results == [(1, True, None)]
+
+
+def test_does_not_send_or_retry_a_notice_rejected_by_final_validation():
+    repository = FakeRepository(notification_context(), delivery_allowed=False)
+    sender = FakeSender()
+    assert not ClaimNotificationService(repository, sender).deliver(repository.context.id)
+    assert sender.calls == [] and repository.results == []
+    assert repository.checked_attempts == [1]
+
+
+def test_each_item_of_a_batch_is_revalidated_at_dispatch_time():
+    repository = FakeRepository(notification_context())
+    second = notification_context()
+    repository.claim_due_notifications = lambda **_: [repository.context, second]
+    class Sender(FakeSender):
+        def send(self, **data):
+            super().send(**data)
+            repository.delivery_allowed = False
+    sender = Sender()
+    assert ClaimNotificationService(repository, sender).deliver_due(limit=2) == 2
+    assert len(sender.calls) == 1 and len(repository.results) == 1
+    assert repository.checked_attempts == [1, 1]

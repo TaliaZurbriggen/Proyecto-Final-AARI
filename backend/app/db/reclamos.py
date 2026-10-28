@@ -15,6 +15,9 @@ from app.db.expensas import enqueue_expense_report
 from app.db.provider_choice_jobs import (
     cancel_obsolete_choice_notices, choices_available, enqueue_choice_followups,
 )
+from app.db.quote_portal_notices import (
+    cancel_obsolete_portal_notices, validate_portal_notice,
+)
 from app.services.expense_notifications import agency_email, expense_report
 from app.schemas.reclamos import (
     AgentClassificationResult,
@@ -452,6 +455,7 @@ class SqlAlchemyClaimsRepository:
             # pendientes/reintentos y sus resultados tardíos no lo reactivan.
             if choices_available(session):
                 cancel_obsolete_choice_notices(session)
+            cancel_obsolete_portal_notices(session, notification_id=notification_id)
             session.execute(text("""
                 UPDATE notificaciones n SET estado_envio='fallido',
                     ultimo_error='Pedido de autorización finalizado; aviso obsoleto.',
@@ -500,6 +504,38 @@ class SqlAlchemyClaimsRepository:
             )
             for row in rows
         ]
+
+    def prepare_notification_delivery(self, context: ClaimNotificationContext) -> bool:
+        """Revalidar el intento y HU19 justo antes de contactar al canal.
+
+        No mantiene una transacción abierta durante SMTP. Un cambio posterior
+        a esta comprobación no puede retirar un correo que el canal ya aceptó.
+        """
+        with self.session_factory.begin() as session:
+            claim_id = session.execute(text('SELECT reclamo_id FROM notificaciones WHERE id=:id'),
+                                       {'id':context.id}).scalar_one_or_none()
+            if claim_id is None:
+                return False
+            # Orden compatible con publicar/responder/cerrar: reclamo -> aviso.
+            session.execute(text('SELECT id FROM reclamos WHERE id=:id FOR UPDATE'), {'id':claim_id})
+            row = session.execute(text('''SELECT estado_envio,intentos,destinatario_contacto,
+                canal,asunto,mensaje,bloqueado_hasta>clock_timestamp() AS vigente
+                FROM notificaciones WHERE id=:id FOR UPDATE'''), {'id':context.id}).mappings().one()
+            if (row['estado_envio']!='procesando' or row['intentos']!=context.attempt_number
+                    or not row['vigente'] or row['destinatario_contacto']!=context.recipient
+                    or row['canal']!=context.channel or row['asunto']!=context.subject
+                    or row['mensaje']!=context.message):
+                return False
+            if not validate_portal_notice(session, context.id):
+                return False
+            # Renovar sólo el intento aún vigente; no enviar con una reserva
+            # que haya vencido durante la comprobación de compatibilidad.
+            return session.execute(text('''UPDATE notificaciones
+                SET bloqueado_hasta=clock_timestamp()+make_interval(secs => :seconds)
+                WHERE id=:id AND estado_envio='procesando' AND intentos=:attempt
+                  AND bloqueado_hasta>clock_timestamp() RETURNING id'''),
+                {'id':context.id,'attempt':context.attempt_number,
+                 'seconds':notification_lease_seconds()}).scalar_one_or_none() is not None
 
     def mark_notification_result(
         self,

@@ -62,6 +62,8 @@ class ClaimNotificationRepository(Protocol):
         self, *, limit: int
     ) -> list[ClaimNotificationContext]: ...
 
+    def prepare_notification_delivery(self, context: ClaimNotificationContext) -> bool: ...
+
     def mark_notification_result(
         self,
         notification_id: UUID,
@@ -164,7 +166,7 @@ class ClaimNotificationService:
         return self._deliver_claimed(context)
 
     def deliver_due(self, *, limit: int = 10) -> int:
-        """Materializa vencimientos y procesa un lote sin envíos duplicados."""
+        """Materializa vencimientos y revalida cada aviso al despacharlo."""
 
         self.repository.enqueue_due_responsible_followups(limit=limit)
         contexts = self.repository.claim_due_notifications(limit=limit)
@@ -173,6 +175,8 @@ class ClaimNotificationService:
         return len(contexts)
 
     def _deliver_claimed(self, context: ClaimNotificationContext) -> bool:
+        if not self.repository.prepare_notification_delivery(context):
+            return False
         sender = self.senders.get(context.channel)
         if sender is None:
             safe_error = "El canal de notificación no está soportado."

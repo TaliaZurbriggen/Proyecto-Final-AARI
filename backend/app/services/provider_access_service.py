@@ -97,4 +97,6 @@ class ProviderAccessService:
                                  now=now or datetime.now(UTC))
 
     def profile(self, user):
-        return ProviderProfileResponse(**self.repository.profile(user))
+        record = self.repository.profile(user)
+        enabled = os.getenv('AARI_QUOTE_PORTAL_ENABLED', 'false').lower() in {'1','true','yes'}
+        return ProviderProfileResponse(**record, solicitudes_disponibles=enabled)

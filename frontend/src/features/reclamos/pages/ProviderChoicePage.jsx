@@ -7,6 +7,7 @@ import { chooseProviderType, getProviderChoice } from '../api/providerChoicesApi
 import { claimStatusTone, formatClaimDate, formatClaimNumber } from '../presentation.js'
 import { useHistoryResource } from '../useHistoryResource.js'
 import styles from './ProviderChoicePage.module.css'
+import ClaimQuoteSummary from '../../proveedores/components/ClaimQuoteSummary.jsx'
 
 export default function ProviderChoicePage({ ownerView = false }) {
   const { reclamoId } = useParams()
@@ -67,7 +68,7 @@ function ChoiceContent({ reclamoId, ownerView }) {
         <h2 id="choice-result">Elección registrada: proveedor {saved.tipo_proveedor}</h2>
         <p>{saved.actor_nombre} · {formatClaimDate(saved.decidido_en)}</p>
         <AlertMessage tone="success">{saved.tipo_proveedor === 'fidelizado'
-          ? 'La elección quedó preparada para solicitar presupuestos a proveedores fidelizados (HU19). Todavía no se envió ninguna solicitud ni se contrató un proveedor.'
+          ? 'El agente publicará solicitudes para los proveedores compatibles con acceso activo. Consultá abajo su estado; la elección no contrata a un proveedor.'
           : 'La elección quedó preparada para registrar los datos de tu proveedor (HU18). Todavía no se registró el contacto ni se derivó el reclamo.'}</AlertMessage>
       </section> : claim.puede_elegir ? <div className={styles.options}>
         <article className={styles.option} aria-labelledby="trusted-provider">
@@ -87,6 +88,7 @@ function ChoiceContent({ reclamoId, ownerView }) {
             onClick={() => choose('propio')}>{busy && lockedChoice === 'propio' ? 'Guardando…' : 'Elegir proveedor propio'}</Button>
         </article>
       </div> : <AlertMessage tone="warning">Esta solicitud ya no admite una elección. El plazo pudo vencer o la etapa pudo cambiar; contactá a la inmobiliaria para continuar.</AlertMessage>}
+      {saved?.tipo_proveedor === 'fidelizado' ? <ClaimQuoteSummary claimId={reclamoId} /> : null}
     </>}
   </PageContainer>
 }

@@ -5,6 +5,12 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import ProviderChoicePage from './ProviderChoicePage.jsx'
 import OwnerExpenseDecisionPage from './OwnerExpenseDecisionPage.jsx'
 
+// HU17 no prueba la carga económica de HU19; sus componentes reales tienen
+// regresiones separadas en QuotePortal.test.jsx.
+vi.mock('../../proveedores/api/quotePortalApi.js', () => ({
+  getClaimQuotes: vi.fn(() => Promise.resolve({ items: [] })),
+}))
+
 const claim = { reclamo_id: '1c604bda-c38b-4621-b6cf-1458ce7fcdae', numero: 26,
   descripcion: 'Problema sintético para elegir cómo continuar.', estado: 'Pendiente de respuesta del responsable',
   propiedad: { direccion: 'Unidad Sintética', localidad: 'Localidad de prueba' },
@@ -49,7 +55,7 @@ describe('HU17 elección de proveedor', () => {
     const user = userEvent.setup()
     await user.click(await screen.findByRole('button', { name: `Elegir proveedor ${choice}` }))
     expect(await screen.findByRole('heading', { name: `Elección registrada: proveedor ${choice}` })).toBeInTheDocument()
-    expect(screen.getByText(choice === 'propio' ? /Todavía no se registró el contacto/ : /Todavía no se envió ninguna solicitud/)).toBeInTheDocument()
+    expect(screen.getByText(choice === 'propio' ? /Todavía no se registró el contacto/ : /la elección no contrata a un proveedor/)).toBeInTheDocument()
     const [, options] = fetch.mock.calls.find(([, opts]) => opts?.method === 'POST')
     expect(JSON.parse(options.body)).toEqual({ request_id: expect.any(String), solicitud_id: claim.solicitud_id,
       expected_updated_at: claim.updated_at, tipo_proveedor: choice })

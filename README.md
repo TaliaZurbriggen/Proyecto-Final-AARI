@@ -74,6 +74,67 @@ La identidad visual de AARI está centralizada para que los agentes y el equipo 
 
 La referencia aprobada se conserva dentro de la skill. Si una historia necesita apartarse de esa dirección, la decisión debe acordarse antes de implementarla.
 
+### Solicitudes de presupuesto en AARI (HU19 / AARI-206 — en curso, 27/10/2026)
+
+Tras integrar HU32 (PR #37), HU19 incorpora una bandeja privada para proveedores
+con acceso activado y aviso por correo desacoplado. El agente publica sólo tras
+la elección fidelizada/autorización correspondiente y guarda un plazo de 24 h.
+El proveedor confirma importe, moneda, alcance y si es **exacto** o **mínimo**.
+Un mínimo se muestra como «Desde»: no es precio final ni máximo autorizado.
+El responsable puede consultar las respuestas; HU20 realiza la elección, no HU19.
+
+Corrección de revisión del PR #38: el worker recupera rondas que nunca publicaron
+solicitudes cuando aparece acceso activo y todo el contexto sigue vigente. Se
+conserva el historial y no se reabren rondas ya publicadas. Los correos a
+proveedores se revalidan al reservarlos y justo antes de enviarlos; los obsoletos
+quedan auditados sin reintento. No requiere otra migración ni dependencias.
+
+La nueva migración `20261027130000_hu19_canal_aari.sql` es independiente del
+intento Meta y fue **aplicada con autorización el 27/10/2026 en Supabase AARI de
+desarrollo**, con respaldo previo, ensayo con rollback, historial y RLS
+verificados. No repetirla al hacer pull. El recorrido compartido de precio exacto
+y mínimo pasó con datos ficticios y rollback. Talía confirmó la recepción del
+aviso puntual y el recorrido visual con la cuenta de prueba permitió confirmar
+un mínimo, verificarlo tras recargar y verlo sólo en Enviadas. Lista para revisión,
+no cerrada ni mergeada.
+`AARI_QUOTE_PORTAL_ENABLED` y `AARI_QUOTE_WORKER_ENABLED` permanecen apagados por
+defecto; no se habilitaron envíos generales. `APP_LOGIN_URL` define
+el origen de los enlaces; SMTP utiliza la bandeja de salida existente. No activar
+notificaciones reales durante pruebas sin autorización.
+
+Decisiones, API, límites y validación: [HU19 — canal AARI](docs/hu19_canal_aari_presupuestos.md).
+
+#### Intento anterior WhatsApp — evidencia preservada, no canal entregado
+
+La base prepara una solicitud por candidato vigente sólo después de una elección
+fidelizada válida de HU17 y de la autorización de HU16 cuando corresponde. Guarda
+referencia, problema, ubicación, plazo de 24 horas, eventos e intento de envío.
+Revalida antes de enviar; un resultado incierto no se reintenta automáticamente.
+Preparar un pedido **no selecciona ni contrata al proveedor** y no cambia la
+clasificación ni el estado del reclamo.
+
+Incluye un receptor `GET/POST /webhooks/whatsapp` con firma de Meta, guardado
+transaccional y deduplicación. **Worker, recepción y envío están apagados por
+defecto**; la lista local admite hasta cinco destinatarios de prueba y no registra
+números en Meta. No hay envío al hacer pull ni un botón público para invocarlo.
+
+La recepción ya correlaciona respuestas con solicitudes, valida importe/moneda/
+trabajo y conserva ambigüedades para revisión. Guarda origen, presupuesto y aviso
+atómicamente, sin duplicar ni sobrescribir cotizaciones. Procesa plazos de 24 h
+desde la aceptación de Meta, presupuestos parciales y alertas al operador.
+No confunde canal bloqueado con silencio del proveedor. El nuevo worker
+`QUOTE_RESPONSES_WORKER_ENABLED=false` también está apagado por defecto.
+
+Las tres migraciones del intento Meta están preparadas, **no aplicadas en Supabase**. Su
+aplicación, un callback HTTPS público y una prueba real requieren autorización.
+La cuenta Meta sigue pendiente de habilitación efectiva; los mocks no acreditan
+entrega real. La selección corresponde a HU20; no se contrata automáticamente.
+No hay todavía pantalla de corrección manual de cotizaciones.
+
+Detalles: [solicitudes HU19](docs/hu19_solicitudes_presupuesto.md) y
+[base de transporte](docs/hu19_whatsapp_base.md). Variables en `backend/.env.example`.
+Recepción, decisiones y límites: [respuestas y plazos HU19](docs/hu19_respuestas_presupuesto.md).
+
 ### Proveedores candidatos para un reclamo (HU15)
 
 El acceso **Candidatos** abre `/pendientes-asignacion` (administrador) o
@@ -823,7 +884,7 @@ Con Docker Compose podés levantar el backend y el frontend juntos, ya conectado
 
 ## Estado del proyecto
 
-### HU32 — Acceso del proveedor (entrega parcial para revisión, 26/10/2026)
+### HU32 — Acceso del proveedor (base integrada mediante PR #37, 27/10/2026)
 
 En `codex/AARI-347-acceso-proveedor` se agrega el rol proveedor sobre el padrón
 existente. Administración habilita/reenvía invitaciones desde **Proveedores →
@@ -841,8 +902,9 @@ remoto ni el despliegue AARI-338.
 **Límite explícito:** el portal inicial está disponible, pero la bandeja de
 solicitudes reales queda pendiente de la adaptación/integración de HU19.
 Presupuestar corresponde a HU19 y conversar a HU33. No se da HU32 por cerrada
-ni se presenta el portal como recorrido completo. Esta entrega parcial se
-propone para revisión y merge sin cerrar la HU; después se integrará HU19.
+ni se presenta el portal como recorrido completo. La base ya se integró en main
+(`c3adc8f`); el recorrido integrado se validó con HU19, pendiente de revisión y
+merge de esa entrega antes del cierre formal.
 [Implementación, pruebas y pendientes](docs/hu32_acceso_proveedor.md).
 
 ### HU21 — Base de contexto persistente (Sprint 4)
