@@ -10,6 +10,7 @@ from app.db.quote_requests import COLUMNS, SOURCE, ELIGIBLE, SqlAlchemyQuoteRequ
 from app.db.reclamos import SqlAlchemyClaimsRepository
 from app.services.quote_requests import request_content
 from app.services.quote_portal import QuotePortalError, portal_link
+from app.services.conversations import conversations_enabled
 
 
 REQUEST_FROM = """ FROM public.aari_solicitudes_presupuesto s
@@ -31,6 +32,16 @@ class SqlAlchemyQuotePortal(SqlAlchemyQuoteRequests):
         s.execute(text('''INSERT INTO aari_presupuesto_eventos(ronda_id,solicitud_id,actor_id,tipo)
             VALUES (:round,:request,:actor,:kind)'''),
             {'round':round_id,'request':request_id,'actor':actor,'kind':kind})
+        if conversations_enabled():
+            from app.db.conversations import sync_round_events
+            sync_round_events(s, round_id, request_id=request_id)
+
+    @staticmethod
+    def _conversation_counts(s, rows, user):
+        if not conversations_enabled():
+            return {}
+        from app.db.conversations import unread_counts
+        return unread_counts(s, [row['id'] for row in rows], user.id)
 
     @staticmethod
     def _mail(s, claim_id, role, email, key, message):
@@ -162,6 +173,7 @@ class SqlAlchemyQuotePortal(SqlAlchemyQuoteRequests):
         return {'id':row['id'],'reclamo_id':row['reclamo_id'],'numero':row['numero'],
             'descripcion':row['contexto']['descripcion'],'ubicacion':row['contexto']['ubicacion'],
             'publicada_en':row['publicada_en'],'vence_en':row['vence_en'],'estado':state,
+            'conversacion_habilitada':conversations_enabled(),
             'puede_responder':state=='pendiente' and (self._current(s,row) if can_respond is None else can_respond),
             'presupuesto':None if not row['presupuesto_id'] else {
                 'id':row['presupuesto_id'],'monto':str(row['monto']),'moneda':row['moneda'],
@@ -212,7 +224,9 @@ class SqlAlchemyQuotePortal(SqlAlchemyQuoteRequests):
                     where+=' AND b.id IS NOT NULL'
                 total=s.execute(text('SELECT count(*)'+REQUEST_FROM+where),params).scalar_one()
                 rows=s.execute(text(REQUEST_SELECT+where+' ORDER BY s.publicada_en DESC,s.id DESC LIMIT :limit OFFSET :offset'),params).mappings().all()
-            return {'items':[self._view(s,r,now,can_respond=True if status=='pendientes' else None) for r in rows],
+            counts=self._conversation_counts(s,rows,user)
+            return {'items':[{**self._view(s,r,now,can_respond=True if status=='pendientes' else None),
+                'conversacion_no_leidos':counts.get(r['id'],0)} for r in rows],
                 'total':total,'page':page,'page_size':page_size,'estado':status}
 
     @staticmethod
@@ -226,7 +240,12 @@ class SqlAlchemyQuotePortal(SqlAlchemyQuoteRequests):
     def get_own(self, request_id, user):
         with self.transaction() as s:
             row=self._own(s,request_id,user)
-            return self._view(s,row,s.execute(text('SELECT clock_timestamp()')).scalar_one())
+            result=self._view(s,row,s.execute(text('SELECT clock_timestamp()')).scalar_one())
+            if conversations_enabled():
+                questions=s.execute(text('''SELECT id,consultas_cerradas_en FROM aari_conversaciones
+                    WHERE solicitud_id=:id AND finalidad='consulta_tecnica' '''), {'id':request_id}).mappings().one_or_none()
+                result['consulta_tecnica']=dict(questions) if questions else None
+            return result
 
     def submit(self, request_id, user, payload):
         try:
@@ -243,6 +262,10 @@ class SqlAlchemyQuotePortal(SqlAlchemyQuoteRequests):
                     raise QuotePortalError('Esta solicitud ya tiene un presupuesto confirmado.',code='already_quoted')
                 if self._state(row,now)!='pendiente' or not self._current(s,row):
                     raise QuotePortalError('La solicitud venció o ya no está habilitada para responder.',code='request_unavailable')
+                if conversations_enabled() and s.execute(text('''SELECT id FROM aari_conversaciones
+                    WHERE solicitud_id=:id AND finalidad='consulta_tecnica'
+                    AND consultas_cerradas_en IS NULL'''), {'id': request_id}).scalar_one_or_none():
+                    raise QuotePortalError('Finalizá las consultas con el inquilino antes de enviar el presupuesto.',code='questions_open')
                 s.execute(text('''INSERT INTO presupuestos(reclamo_id,proveedor_id,monto,moneda,tipo_importe,
                     descripcion,recibido_en,solicitud_aari_id,presentado_por)
                     VALUES (:claim,:provider,:amount,:currency,:kind,:description,:now,:request,:user)'''),
@@ -282,7 +305,9 @@ class SqlAlchemyQuotePortal(SqlAlchemyQuoteRequests):
             rows=s.execute(text(REQUEST_SELECT+' WHERE s.reclamo_id=:id'+scope+' ORDER BY s.publicada_en DESC,s.id'),
                 {'id':claim_id,'actor':user.id,'cycle':claim['solicitado_en']}).mappings().all()
             now=s.execute(text('SELECT clock_timestamp()')).scalar_one()
+            counts=self._conversation_counts(s,rows,user)
             return {'items':[{**self._view(s,r,now),'puede_responder':False,'proveedor':r['proveedor_nombre'],
+                'conversacion_no_leidos':counts.get(r['id'],0),
                 **({'aviso_estado':r['aviso_estado']} if user.rol in {'administrador','operador'} else {})} for r in rows]}
 
     def finalize_due_portal(self, limit=20):

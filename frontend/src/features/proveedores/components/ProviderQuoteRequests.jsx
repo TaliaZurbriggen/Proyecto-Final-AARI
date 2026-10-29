@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { RefreshCw } from 'lucide-react'
 import { Link, useSearchParams } from 'react-router'
 import { AlertMessage, Button, EmptyState, LoadingState, StatusBadge } from '../../../components/ui/index.js'
@@ -13,6 +13,11 @@ function ProviderQuoteRequests() {
   const page = /^\d+$/.test(raw) && Number(raw) >= 1 && Number(raw) <= 2147483647 ? Number(raw) : 1
   const estado = quoteListFilter(params.get('estado'))
   const [refresh, setRefresh] = useState(0)
+  useEffect(() => {
+    const update = () => setRefresh((value) => value + 1)
+    window.addEventListener('aari:mensajes-leidos', update)
+    return () => window.removeEventListener('aari:mensajes-leidos', update)
+  }, [])
   const load = useCallback((signal) => listQuoteRequests(page, estado, { signal }), [page, estado])
   const { data, error, isLoading: loading } = useHistoryResource(`${estado}:${page}:${refresh}`, load)
   const pages = Math.max(1, Math.ceil((data?.total ?? 0) / 10))
@@ -42,6 +47,7 @@ function ProviderQuoteRequests() {
             <p>{item.descripcion}</p>
             <p className={styles.muted}>{item.ubicacion}</p>
             <p className={styles.muted}>Vence: {quoteDate(item.vence_en)} (Argentina)</p>
+            {item.conversacion_habilitada && item.conversacion_no_leidos > 0 ? <p><StatusBadge tone="info">{item.conversacion_no_leidos} mensajes sin leer</StatusBadge></p> : null}
           </div>
           <Link className={styles.viewRequest} aria-describedby={`quote-request-${item.id}`}
             to={`/proveedor/solicitudes/${item.id}?${new URLSearchParams({ page: String(page), estado })}`}>

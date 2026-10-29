@@ -1,8 +1,9 @@
-import { useCallback } from 'react'
+import { useCallback, useState } from 'react'
 import { ArrowLeft, CalendarClock, ClipboardList, Home } from 'lucide-react'
 import { Link, useLocation, useParams } from 'react-router'
 import { PageContainer, PageHeading } from '../../../components/layout/index.js'
-import { AlertMessage, LoadingState, StatusBadge } from '../../../components/ui/index.js'
+import { AlertMessage, Button, LoadingState, StatusBadge } from '../../../components/ui/index.js'
+import ClaimQuoteSummary from '../../proveedores/components/ClaimQuoteSummary.jsx'
 import { getPropertyClaim } from '../api/propertyClaimsApi.js'
 import { claimStatusTone, formatClaimDate, formatClaimNumber, urgencyLabel } from '../presentation.js'
 import { claimPropertyLabel } from '../validation.js'
@@ -13,6 +14,7 @@ import styles from './Reclamos.module.css'
 function PropertyClaimDetailPage({ tenantView = false }) {
   const { propiedadId, reclamoId } = useParams()
   const location = useLocation()
+  const [showRequests, setShowRequests] = useState(false)
   const load = useCallback(
     (signal) => getPropertyClaim(propiedadId, reclamoId, { signal }),
     [propiedadId, reclamoId],
@@ -28,6 +30,8 @@ function PropertyClaimDetailPage({ tenantView = false }) {
       {claim ? (
         <>
           <PageHeading title={`Reclamo ${formatClaimNumber(claim.numero)}`} eyebrow="Historial de la propiedad" description={claimPropertyLabel(claim.propiedad)} />
+          {!tenantView ? <div><Button variant="secondary" aria-expanded={showRequests} onClick={() => setShowRequests((value) => !value)}>Ver presupuestos y conversaciones</Button>
+            {showRequests ? <ClaimQuoteSummary key={reclamoId} claimId={reclamoId} /> : null}</div> : null}
           <section className={styles.currentStatus} aria-labelledby="property-claim-status">
             <div><p className={styles.eyebrow}>Estado actual</p><h2 id="property-claim-status">{claim.estado}</h2><p>Última actualización: {formatClaimDate(claim.updated_at)}</p></div>
             <StatusBadge tone={claimStatusTone(claim.estado)}>{claim.estado}</StatusBadge>

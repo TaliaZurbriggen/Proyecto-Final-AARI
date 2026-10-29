@@ -10,6 +10,7 @@ import { claimPropertyLabel } from '../validation.js'
 import { useHistoryResource } from '../useHistoryResource.js'
 import shared from './Escalados.module.css'
 import styles from './ProviderCandidates.module.css'
+import ClaimQuoteSummary from '../../proveedores/components/ClaimQuoteSummary.jsx'
 
 function SearchForm({ claim, specialties, onSaved }) {
   const [specialty, setSpecialty] = useState(claim.especialidad?.id || '')
@@ -57,6 +58,7 @@ function ProviderCandidatesPage({ operatorView = false }) {
   const [params, setParams] = useSearchParams()
   const [refresh, setRefresh] = useState(0)
   const [notice, setNotice] = useState(null)
+  const [showRequests, setShowRequests] = useState(false)
   const page = positivePage(params.get('cpage'))
   const auditPage = positivePage(params.get('apage'))
   const query = new URLSearchParams({ page: String(page), audit_page: String(auditPage) }).toString()
@@ -88,6 +90,8 @@ function ProviderCandidatesPage({ operatorView = false }) {
     {error ? <AlertMessage>{error}</AlertMessage> : null}
     {isLoading ? <LoadingState label="Cargando proveedores candidatos" lines={5} /> : null}
     {claim && !error ? <div className={styles.sections}>
+      <div><Button variant="secondary" aria-expanded={showRequests} onClick={() => setShowRequests((value) => !value)}>Ver presupuestos y conversaciones</Button>
+        {showRequests ? <ClaimQuoteSummary key={reclamoId} claimId={reclamoId} /> : null}</div>
       {notice?.reclamoId === reclamoId ? <AlertMessage tone={notice.resultado === 'candidatos_encontrados' ? 'success' : 'warning'}>
         {candidateOutcome[notice.resultado]}. {operatorAlert[notice.aviso_operador]}
       </AlertMessage> : null}
