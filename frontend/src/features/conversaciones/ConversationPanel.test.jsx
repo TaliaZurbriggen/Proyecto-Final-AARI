@@ -45,6 +45,130 @@ describe('conversación privada HU33', () => {
     expect(body.hasta_numero).toBe(2)
   })
 
+  it('abre desde el primer pendiente y no salta las páginas iniciales de 66 mensajes', async () => {
+    let through = 0
+    const reads = []
+    const fetch = vi.spyOn(globalThis, 'fetch').mockImplementation(async (url, options = {}) => {
+      if (String(url).endsWith('/lectura')) {
+        through = JSON.parse(options.body).hasta_numero
+        reads.push(through)
+        return json({ leido_hasta: through, no_leidos: 66 - through })
+      }
+      const after = new URL(String(url), 'http://aari.test').searchParams.get('despues')
+      const start = after == null ? 37 : Number(after) + 1
+      const end = Math.min(start + 29, 66)
+      return json(conversation(Array.from({ length: end - start + 1 }, (_, index) => msg(start + index)), {
+        leido_hasta: through, no_leidos: 66 - through, ultimo_numero: 66,
+        hay_anteriores: after == null, hay_nuevos: after != null && end < 66,
+      }))
+    })
+    render(<ConversationPanel requestId={rid} />)
+    expect(await screen.findByText('Consulta 1')).toBeVisible()
+    await waitFor(() => expect(reads).toEqual([30]))
+    expect(screen.getByText(/36 sin leer/)).toBeVisible()
+    expect(screen.queryByText('Consulta 66')).not.toBeInTheDocument()
+    await userEvent.click(screen.getByRole('button', { name: 'Ver mensajes nuevos' }))
+    await waitFor(() => expect(reads).toEqual([30, 60]))
+    expect(screen.getByText(/6 sin leer/)).toBeVisible()
+    await userEvent.click(screen.getByRole('button', { name: 'Ver mensajes nuevos' }))
+    await waitFor(() => expect(reads).toEqual([30, 60, 66]))
+    expect(screen.getByText('Consulta 66')).toBeVisible()
+    expect(screen.getByText(/0 sin leer/)).toBeVisible()
+    expect(fetch.mock.calls.some(([url]) => String(url).includes('despues=0'))).toBe(true)
+  })
+
+  it('respeta una lectura previa y conserva la navegación de historia ya leída', async () => {
+    let through = 40
+    const reads = []
+    vi.spyOn(globalThis, 'fetch').mockImplementation(async (url, options = {}) => {
+      if (String(url).endsWith('/lectura')) {
+        through = JSON.parse(options.body).hasta_numero
+        reads.push(through)
+        return json({ leido_hasta: through, no_leidos: 96 - through })
+      }
+      const query = new URL(String(url), 'http://aari.test').searchParams
+      const older = query.has('antes')
+      const start = older ? 11 : query.has('despues') ? Number(query.get('despues')) + 1 : 67
+      const end = Math.min(start + 29, 96)
+      return json(conversation(Array.from({ length: end - start + 1 }, (_, i) => msg(start + i)), {
+        leido_hasta: through, no_leidos: 96 - through, ultimo_numero: 96,
+        hay_anteriores: older || !query.has('despues'), hay_nuevos: !older && end < 96,
+      }))
+    })
+    render(<ConversationPanel requestId={rid} />)
+    expect(await screen.findByText('Consulta 41')).toBeVisible()
+    await waitFor(() => expect(reads).toEqual([70]))
+    await userEvent.click(screen.getByRole('button', { name: 'Ver mensajes anteriores' }))
+    expect(await screen.findByText('Consulta 11')).toBeVisible()
+    expect(reads).toEqual([70])
+    await userEvent.click(screen.getByRole('button', { name: 'Ver mensajes nuevos' }))
+    await waitFor(() => expect(reads).toEqual([70, 96]))
+  })
+
+  it('no confirma la página final si falla recuperar el primer tramo pendiente', async () => {
+    let retry = false
+    const fetch = mock((url) => {
+      if (!url.includes('despues=0')) return json(conversation([msg(37), msg(66)], { hay_anteriores: true }))
+      if (!retry) return Promise.reject(new TypeError('network'))
+      return json(conversation(Array.from({ length: 30 }, (_, i) => msg(i + 1)), { hay_nuevos: true }))
+    })
+    render(<ConversationPanel requestId={rid} />)
+    expect(await screen.findByText(/No pudimos conectarnos/)).toBeVisible()
+    expect(fetch.mock.calls.some(([url]) => String(url).endsWith('/lectura'))).toBe(false)
+    retry = true
+    await userEvent.click(screen.getByRole('button', { name: 'Reintentar conversación' }))
+    expect(await screen.findByText('Consulta 1')).toBeVisible()
+    await waitFor(() => expect(fetch.mock.calls.some(([url]) => String(url).endsWith('/lectura'))).toBe(true))
+    const reads = fetch.mock.calls.filter(([url]) => String(url).endsWith('/lectura'))
+    expect(reads.map(([, options]) => JSON.parse(options.body).hasta_numero)).toEqual([30])
+  })
+
+  it('avanza sólo por secuencias contiguas aunque una respuesta venga incompleta', async () => {
+    const fetch = mock((url) => json(url.includes('despues=2')
+      ? conversation([msg(3), msg(4)])
+      : conversation([msg(1), msg(2), msg(4)], { hay_nuevos: true })))
+    render(<ConversationPanel requestId={rid} />)
+    await waitFor(() => expect(fetch.mock.calls.some(([url]) => String(url).endsWith('/lectura'))).toBe(true))
+    let reads = fetch.mock.calls.filter(([url]) => String(url).endsWith('/lectura'))
+    expect(JSON.parse(reads[0][1].body).hasta_numero).toBe(2)
+    await userEvent.click(screen.getByRole('button', { name: 'Ver mensajes nuevos' }))
+    expect(await screen.findByText('Consulta 3')).toBeVisible()
+    await waitFor(() => {
+      reads = fetch.mock.calls.filter(([url]) => String(url).endsWith('/lectura'))
+      expect(reads.map(([, options]) => JSON.parse(options.body).hasta_numero)).toEqual([2, 4])
+    })
+  })
+
+  it('consulta después de cero si se abrió vacío y luego llegan muchas novedades', async () => {
+    let arrived = false
+    const fetch = mock((url) => !arrived ? json(conversation([])) : json(url.includes('despues=0')
+      ? conversation(Array.from({ length: 30 }, (_, i) => msg(i + 1)), { hay_nuevos: true })
+      : conversation([msg(37), msg(66)], { hay_anteriores: true })))
+    render(<ConversationPanel requestId={rid} />)
+    await screen.findByText('Todavía no hay mensajes')
+    arrived = true
+    await userEvent.click(screen.getByRole('button', { name: 'Actualizar conversación' }))
+    expect(await screen.findByText('Consulta 1')).toBeVisible()
+    const reads = fetch.mock.calls.filter(([url]) => String(url).endsWith('/lectura'))
+    expect(reads.map(([, options]) => JSON.parse(options.body).hasta_numero)).toEqual([30])
+  })
+
+  it('cancela la recuperación inicial sin confirmar lectura al cerrar el hilo', async () => {
+    let resolvePage
+    let signal
+    const fetch = mock((url, options) => {
+      if (!url.includes('despues=0')) return json(conversation([msg(37), msg(66)], { hay_anteriores: true }))
+      signal = options.signal
+      return new Promise((resolve) => { resolvePage = resolve })
+    })
+    const view = render(<ConversationPanel requestId={rid} />)
+    await waitFor(() => expect(resolvePage).toBeTypeOf('function'))
+    view.unmount()
+    expect(signal.aborted).toBe(true)
+    await act(async () => resolvePage(json(conversation([msg(1)]))))
+    expect(fetch.mock.calls.some(([url]) => String(url).endsWith('/lectura'))).toBe(false)
+  })
+
   it('conserva borrador e identificador ante una respuesta perdida, sin duplicar confirmaciones', async () => {
     let posts = 0
     const fetch = mock((_url, options) => {
@@ -86,8 +210,8 @@ describe('conversación privada HU33', () => {
 
   it('carga historia anterior sin duplicar y conserva la ventana nueva', async () => {
     const fetch = mock((url) => json(url.includes('antes=31')
-      ? conversation([msg(1), msg(30), msg(31)], { hay_anteriores: false })
-      : conversation([msg(31), msg(32)], { hay_anteriores: true })))
+      ? conversation(Array.from({ length: 30 }, (_, i) => msg(i + 1)), { leido_hasta: 32, ultimo_numero: 32, hay_anteriores: false })
+      : conversation([msg(31), msg(32)], { leido_hasta: 30, hay_anteriores: true })))
     render(<ConversationPanel requestId={rid} />)
     await userEvent.click(await screen.findByRole('button', { name: 'Ver mensajes anteriores' }))
     expect(await screen.findByText('Consulta 1')).toBeVisible()

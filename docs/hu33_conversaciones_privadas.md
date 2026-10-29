@@ -5,10 +5,13 @@ Rama `codex/AARI-348-conversacion-solicitudes`, desde main `67b3c90` (HU19,
 PR #38). Implementación, regresión local y validación transaccional en Supabase
 completas. El 29/10 Talía autorizó migración, publicación y creación de PR para
 revisión de Tobías. HU y ocho subtareas En curso; cierre pendiente del merge.
-Estimación de 12 HH conservada; 8 HH reales informadas y registradas sólo en
-subtareas. Commit/push/PR autorizados; no se autoriza fusión ni cierre.
-Commit de implementación y pruebas: `f0118bb`. La documentación de entrega se
-versiona en un segundo commit; el enlace del PR se registra en Jira y Notion.
+Estimación de 12 HH conservada; 10 HH reales informadas y registradas sólo en
+subtareas. Entrega inicial publicada con autorización; no se autoriza fusión ni
+cierre. Commits publicados: implementación/pruebas `f0118bb` y documentación
+`627339c`, en el [PR #39](https://github.com/TaliaZurbriggen/Proyecto-Final-AARI/pull/39).
+Las correcciones posteriores de revisión están verificadas localmente; el 29/10
+Talía autorizó commit/push y otras 2 HH, distribuidas y registradas en las
+subtareas, sin autorizar merge ni cierre.
 
 ## Decisión vigente: reemplaza el chat compartido inicial
 
@@ -246,8 +249,10 @@ en el chat no es código integrado ni funcionalidad entregada por HU33.
 
 ## Registro de esfuerzo autorizado
 
-Total informado por Talía: **8 HH**, distribuido aproximadamente por actividad
-el 29/10. Sin duplicar worklogs en AARI-348 ni cambiar estimaciones/estados.
+Primera entrega informada por Talía: **8 HH**, distribuida aproximadamente por
+actividad el 29/10. Correcciones posteriores: **2 HH adicionales** autorizadas el
+mismo día. Total acumulado: **10 HH**, sólo en subtareas, sin duplicar worklogs
+en AARI-348 ni cambiar estimaciones/estados.
 
 | Subtarea | Actividad | Tiempo |
 | --- | --- | --- |
@@ -260,6 +265,18 @@ el 29/10. Sin duplicar worklogs en AARI-348 ni cambiar estimaciones/estados.
 | AARI-361 | Seguridad, concurrencia, recuperación y QA | 1 h 30 min |
 | AARI-362 | Documentación y preparación de revisión | 45 min |
 
+Distribución adicional de las correcciones del PR #39:
+
+| Subtarea | Actividad | Tiempo adicional |
+| --- | --- | --- |
+| AARI-358 | Cierre del panel, scroll/foco y accesos secundarios | 30 min |
+| AARI-360 | Recuperación de pendientes y cursores contiguos | 30 min |
+| AARI-361 | Regresiones y revisión visual de escritorio/móvil | 45 min |
+| AARI-362 | Documentación, diff y preparación de publicación | 15 min |
+
+Jira confirmó los cuatro nuevos registros de trabajo (10343 a 10346), por
+**120 minutos**. No se volvieron a registrar las 8 HH anteriores.
+
 ## Puesta en marcha y próximos pasos
 
 `AARI_CONVERSATIONS_ENABLED=false` por defecto. No activa otros workers,
@@ -267,8 +284,9 @@ Gemini/SMTP/Meta ni aplica DDL al iniciar. La migración compartida ya fue aplic
 después de HU19 con preflight de esquema/permisos. No habilitar automáticamente
 por hacer pull. La retención/purga futura requiere una decisión aparte.
 
-Pendiente: revisión independiente del PR por Tobías, merge autorizado y cierre
-expreso de HU/subtareas. Conservar En curso mientras tanto. HU20/HU23 y acceso
+Pendiente: nueva revisión del PR por Tobías tras la publicación autorizada,
+merge autorizado y cierre expreso de HU/subtareas.
+Conservar En curso mientras tanto. HU20/HU23 y acceso
 remoto real siguen fuera de esta entrega. Diff/secretos se revisan antes del commit.
 README y guía de migraciones describen el alcance vigente. El 29/10 se actualizaron
 mediante reemplazos puntuales los resúmenes de [Hub](https://app.notion.com/p/3a0f9f68a0c180cfa9d8ef06ef7da616),
@@ -276,6 +294,64 @@ mediante reemplazos puntuales los resúmenes de [Hub](https://app.notion.com/p/3
 [decisiones](https://app.notion.com/p/3a6f9f68a0c181e793f4dcfe66867b4e) de Notion:
 las tres escrituras confirmaron éxito sin advertencias, conservando antecedentes
 y páginas hijas, sin crear nuevos bloques ni activar planes de pago.
+
+## Correcciones de revisión del PR #39 — 29/10/2026
+
+Tobías encontró dos casos de borde en la entrega `627339c`; Talía aprobó la
+propuesta de corregirlos en esta misma rama. Cambios limitados a
+`ConversationPanel.jsx`, `ConversationDock.jsx`, sus pruebas y documentación;
+sin cambios de backend, API, dependencias, esquema o feature flag.
+
+1. **Historial pendiente mayor que una página.** El primer GET devuelve los
+   últimos 30 mensajes. Si deja pendientes anteriores, el panel descarta esa
+   ventana inicial y recupera desde `leido_hasta` mediante `despues`, incluido
+   el valor cero. Sólo confirma una secuencia contigua efectivamente cargada;
+   no adelanta el cursor ante huecos ni por un mensaje propio del POST.
+   La navegación por historia ya leída se conserva. Con 66 pendientes se
+   confirman 30, 60 y 66, quedando 36, 6 y 0 sin leer respectivamente.
+2. **Desactivación con el panel abierto.** El bloqueo del fondo depende de que
+   el diálogo esté realmente habilitado y visible. Deshabilitar HU33 cierra y
+   limpia el panel, cancela las consultas pendientes, impide reabrirlo desde
+   accesos secundarios y restaura el valor previo de `body.style.overflow`.
+   Si el disparador desapareció o quedó deshabilitado, devuelve el foco a un
+   control disponible de la página. Se contempla la respuesta tardía del primer
+   sondeo y la desactivación detectada desde solicitud, hilo o confirmación de
+   lectura, sin requerir que la bandeja la detecte primero.
+
+### Evidencia de regresión
+
+- Se agregaron **10 pruebas**: seis de recuperación/cursores y cuatro de cierre,
+  foco, respuestas tardías y accesos secundarios. Antes de corregir el código:
+  **10 fallidas / 24 aprobadas**. Después:
+  `npm test -- --pool=forks --maxWorkers=1 --testTimeout=20000 src/features/conversaciones/ConversationPanel.test.jsx src/features/conversaciones/ConversationDock.test.jsx`
+  → **34 aprobadas**, dos archivos, 10,07 s. No se relajaron las aserciones; un
+  fixture anterior se ajustó a una historia contigua y un cursor de lectura
+  coherente con la API real.
+- Frontend completo:
+  `npm test -- --pool=forks --maxWorkers=1 --testTimeout=20000 --reporter=json --outputFile=tmp/hu33-review-tests.json`
+  → **429 aprobadas / 0 fallidas / 0 omitidas**, 42 archivos, 168,97 s.
+  El informe generado queda en una carpeta temporal ignorada por Git. Los 34
+  casos focalizados son un subconjunto, no se suman a las 429 pruebas.
+- `npm run lint`, `npm run build` y `git diff --check`: correctos. Persiste la
+  advertencia no bloqueante del bundle: **536,10 kB / 149,94 kB gzip**; no se
+  cambió el umbral para ocultarla.
+- Revisión de navegador con **componentes reales y API simulada**, totalmente
+  local y con datos ficticios: se observaron las confirmaciones 30 → 60 → 66 y
+  los 66 mensajes sin saltos. Al desactivar con el panel abierto desaparece el
+  diálogo, el acceso secundario queda deshabilitado y el foco vuelve a una
+  acción de la página. Se verificó el desplazamiento con PageDown en móvil.
+  Escritorio solicitado 1280 × 900 y móvil 390 × 844: sin desbordamiento
+  horizontal; el ancho de contenido coincide con scrollWidth antes y después
+  del cierre. Se restauró el tamaño normal del navegador.
+
+Esta tanda **no** repite el backend completo ni las cinco comprobaciones previas
+en Supabase; su evidencia se conserva arriba. No se usaron credenciales, SMTP,
+Gemini ni servicios externos para probar las correcciones. La vista de QA y las
+capturas son artefactos locales, no código de producción ni datos para el PR.
+La skill `aari-frontend` guio la revisión responsive y de teclado, sin modificar
+la estética aprobada. El 29/10 Talía autorizó publicar estos ajustes y registrar
+otras 2 HH (detalle arriba). Pendiente nueva revisión del PR; HU y subtareas
+continúan En curso, con 10 HH reales acumuladas y sin cambios de estimación.
 
 ## Anexo histórico — prototipo inicial SUPERADO
 

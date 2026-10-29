@@ -25,7 +25,7 @@ const fixture = (handler) => vi.spyOn(globalThis, 'fetch').mockImplementation(as
   return json(thread())
 })
 const mount = (children = <p>Otra pantalla</p>, user = provider) => render(<MemoryRouter><ConversationDockProvider user={user}>{children}</ConversationDockProvider></MemoryRouter>)
-afterEach(() => { vi.restoreAllMocks(); vi.useRealTimers() })
+afterEach(() => { vi.restoreAllMocks(); vi.useRealTimers(); document.body.style.overflow = '' })
 
 describe('bandeja flotante HU33', () => {
   it('avisa con contador sin abrir ni marcar como leído y no cambia el foco', async () => {
@@ -122,6 +122,68 @@ describe('bandeja flotante HU33', () => {
     fixture(() => json({ detail: { code: 'conversations_disabled', message: 'Deshabilitado' } }, 503))
     mount()
     await waitFor(() => expect(screen.queryByRole('button', { name: /^Mensajes/ })).not.toBeInTheDocument())
+  })
+
+  it('al deshabilitarse abierto restaura scroll previo, foco seguro y limpia los accesos', async () => {
+    let count = 0
+    let resolveDisabled
+    fixture((url) => {
+      if (!url.includes('/bandeja?')) return null
+      count++
+      return count === 1 ? json(inbox()) : new Promise((resolve) => { resolveDisabled = resolve })
+    })
+    document.body.style.overflow = 'auto'
+    mount(<main><button>Acción principal</button><ConversationLauncher requestId={rid} /></main>)
+    await userEvent.click(await screen.findByRole('button', { name: 'Mensajes, 2 sin leer' }))
+    expect(screen.getByRole('dialog')).toBeVisible()
+    expect(document.body.style.overflow).toBe('hidden')
+    await act(async () => resolveDisabled(json({ detail: { code: 'conversations_disabled' } }, 503)))
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /^Mensajes/ })).not.toBeInTheDocument()
+    expect(document.body.style.overflow).toBe('auto')
+    expect(screen.getByRole('button', { name: 'Acción principal' })).toHaveFocus()
+    expect(screen.getByRole('button', { name: 'Ver avisos del agente' })).toBeDisabled()
+  })
+
+  it('no deja scroll bloqueado si se abre antes de conocer el flag ni revive con una respuesta vieja', async () => {
+    const pendingInbox = []
+    fixture((url, options) => url.includes('/bandeja?') ? new Promise((resolve) => pendingInbox.push({ resolve, signal: options.signal })) : null)
+    mount(<main><button>Acción principal</button></main>)
+    fireEvent.click(screen.getByRole('button', { name: 'Mensajes', exact: true }))
+    expect(screen.getByRole('dialog')).toBeVisible()
+    expect(document.body.style.overflow).toBe('hidden')
+    expect(pendingInbox).toHaveLength(2)
+    await act(async () => pendingInbox[1].resolve(json({ detail: { code: 'conversations_disabled' } }, 503)))
+    await act(async () => pendingInbox[0].resolve(json(inbox())))
+    expect(pendingInbox[0].signal.aborted).toBe(true)
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /^Mensajes/ })).not.toBeInTheDocument()
+    expect(document.body.style.overflow).toBe('')
+    expect(screen.getByRole('button', { name: 'Acción principal' })).toHaveFocus()
+  })
+
+  it('cierra también si el acceso desde la solicitud descubre que HU33 fue deshabilitada', async () => {
+    fixture((url) => url.includes('/solicitudes/') ? json({ detail: { code: 'conversations_disabled' } }, 503) : null)
+    mount(<main><button>Acción principal</button><ConversationLauncher requestId={rid} /></main>)
+    await userEvent.click(screen.getByRole('button', { name: 'Ver avisos del agente' }))
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
+    expect(document.body.style.overflow).toBe('')
+    expect(screen.getByRole('button', { name: 'Acción principal' })).toHaveFocus()
+  })
+
+  it('libera el panel si la deshabilitación llega desde el hilo y no desde la bandeja', async () => {
+    let disabled = false
+    fixture((url) => disabled && url.includes('/hilos/') && !url.endsWith('/lectura')
+      ? json({ detail: { code: 'conversations_disabled' } }, 503) : null)
+    mount(<main><button>Acción principal</button></main>)
+    await userEvent.click(await screen.findByRole('button', { name: 'Mensajes, 2 sin leer' }))
+    await userEvent.click(screen.getByRole('button', { name: /Reclamo #000033/ }))
+    await screen.findByText('Aviso individual del agente')
+    disabled = true
+    await userEvent.click(screen.getByRole('button', { name: 'Actualizar conversación' }))
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
+    expect(document.body.style.overflow).toBe('')
+    expect(screen.getByRole('button', { name: 'Acción principal' })).toHaveFocus()
   })
 
   it('acceso desde resumen resuelve el hilo individual pero no envía texto libre', async () => {

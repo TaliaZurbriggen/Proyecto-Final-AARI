@@ -97,7 +97,11 @@ el canal y separa las finalidades; no da HU20/HU23 por implementadas.
 [Permisos, API, decisiones y validación](docs/hu33_conversaciones_privadas.md).
 
 Regresión vigente: **1534 backend aprobadas / 62 omitidas** (PostgreSQL local),
-**419 frontend aprobadas**, lint/build correctos. Recorridos locales de proveedor,
+**429 frontend aprobadas** tras las correcciones de revisión del PR #39,
+lint/build correctos. El panel recupera los pendientes sin saltar páginas y
+libera scroll/foco al deshabilitar HU33. Publicación de ajustes autorizada;
+pendiente nueva revisión de Tobías, sin merge ni cierre de la HU.
+Recorridos locales de proveedor,
 inquilino, propietario y administración, escritorio/móvil, comprobados. Validación
 compartida: cinco controles con rollback, 42 tablas sin cambios y numeración
 preservada. Seis nuevas pruebas de salvaguardas del ejecutor, junto con la API:

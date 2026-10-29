@@ -9,12 +9,21 @@ const date = (value) => new Intl.DateTimeFormat('es-AR', {
 }).format(new Date(value))
 const merge = (previous, incoming) => [...new Map([...previous, ...incoming].map((item) => [item.numero, item])).values()]
   .sort((left, right) => left.numero - right.numero)
-
-export default function ConversationPanel({ requestId, threadId, onRead, onFinished }) {
-  return <ConversationThread key={threadId || requestId} requestId={threadId || requestId} thread={Boolean(threadId)} onRead={onRead} onFinished={onFinished} />
+const contiguousThrough = (items, confirmed) => {
+  let through = confirmed
+  for (const item of items) {
+    if (item.numero <= through) continue
+    if (item.numero !== through + 1) break
+    through = item.numero
+  }
+  return through
 }
 
-function ConversationThread({ requestId, thread, onRead, onFinished }) {
+export default function ConversationPanel({ requestId, threadId, onRead, onFinished, onDisabled }) {
+  return <ConversationThread key={threadId || requestId} requestId={threadId || requestId} thread={Boolean(threadId)} onRead={onRead} onFinished={onFinished} onDisabled={onDisabled} />
+}
+
+function ConversationThread({ requestId, thread, onRead, onFinished, onDisabled }) {
   const id = useId()
   const [data, setData] = useState(null)
   const [items, setItems] = useState([])
@@ -28,6 +37,7 @@ function ConversationThread({ requestId, thread, onRead, onFinished }) {
   const content = useRef([])
   const cursor = useRef(0)
   const readThrough = useRef(0)
+  const initialized = useRef(false)
   const pending = useRef(null)
   const sending = useRef(false)
   const token = useRef(null)
@@ -51,15 +61,26 @@ function ConversationThread({ requestId, thread, onRead, onFinished }) {
     const task = (async () => {
       setUpdating(true)
       try {
-        const result = await getConversation(requestId, {
+        let result = await getConversation(requestId, {
           thread,
           before: mode === 'older' ? content.current[0]?.numero : undefined,
-          after: mode !== 'older' && cursor.current ? cursor.current : undefined,
+          after: mode !== 'older' && initialized.current ? cursor.current : undefined,
           signal: controller.signal,
         })
         if (!alive.current || controller.signal.aborted) return
+        const confirmed = Math.max(readThrough.current, result.leido_hasta ?? 0)
+        // El primer GET entrega el final del hilo. Si omite pendientes, empezar
+        // desde el cursor confirmado y no dar por leídas las páginas intermedias.
+        if (!initialized.current && result.items[0]?.numero > confirmed + 1) {
+          result = await getConversation(requestId, { thread, after: confirmed, signal: controller.signal })
+          if (!alive.current || controller.signal.aborted) return
+          result = { ...result, hay_anteriores: confirmed > 0 }
+        }
+        readThrough.current = Math.max(confirmed, result.leido_hasta ?? 0)
+        initialized.current = true
         content.current = merge(content.current, result.items)
-        if (mode !== 'older' && result.items.length) cursor.current = Math.max(cursor.current, ...result.items.map((item) => item.numero))
+        const through = contiguousThrough(content.current, readThrough.current)
+        cursor.current = Math.max(cursor.current, through)
         setItems(content.current)
         setData((previous) => ({ ...result,
           hay_anteriores: mode === 'older' || !previous ? result.hay_anteriores : previous.hay_anteriores,
@@ -67,21 +88,26 @@ function ConversationThread({ requestId, thread, onRead, onFinished }) {
         }))
         setError('')
         // No confirmar mensajes que aún están en páginas nuevas pendientes.
-        if (document.visibilityState !== 'hidden' && cursor.current > readThrough.current) {
+        if (document.visibilityState !== 'hidden' && through > readThrough.current) {
           try {
-            const read = await markConversationRead(requestId, cursor.current, { signal: controller.signal, thread })
+            const read = await markConversationRead(requestId, through, { signal: controller.signal, thread })
             if (!alive.current || controller.signal.aborted) return
-            readThrough.current = read.leido_hasta
+            readThrough.current = Math.max(readThrough.current, read.leido_hasta)
+            cursor.current = Math.max(cursor.current, readThrough.current)
             setData((previous) => previous ? { ...previous, no_leidos: read.no_leidos } : previous)
             setReadError('')
             onRead?.(requestId, read.no_leidos)
           } catch (failure) {
-            if ([401, 403, 404].includes(failure.status) && alive.current) {
+            const disabled = failure.body?.detail?.code === 'conversations_disabled'
+            if (([401, 403, 404].includes(failure.status) || disabled) && alive.current) {
               content.current = []
               cursor.current = 0
+              readThrough.current = 0
+              initialized.current = false
               setItems([])
               setData(null)
               setError(failure.message)
+              if (disabled) onDisabled?.()
               return
             }
             if (failure.name !== 'AbortError' && alive.current) setReadError('No pudimos registrar la lectura. Volveremos a intentarlo al actualizar.')
@@ -89,11 +115,15 @@ function ConversationThread({ requestId, thread, onRead, onFinished }) {
         }
       } catch (failure) {
         if (failure.name !== 'AbortError' && alive.current) {
-          if ([401, 403, 404].includes(failure.status)) {
+          const disabled = failure.body?.detail?.code === 'conversations_disabled'
+          if ([401, 403, 404].includes(failure.status) || disabled) {
             content.current = []
             cursor.current = 0
+            readThrough.current = 0
+            initialized.current = false
             setItems([])
             setData(null)
+            if (disabled) onDisabled?.()
           }
           setError(failure.message)
         }
@@ -104,7 +134,7 @@ function ConversationThread({ requestId, thread, onRead, onFinished }) {
     })()
     pending.current = task
     try { await task } finally { if (pending.current === task) pending.current = null }
-  }, [requestId, onRead, thread])
+  }, [requestId, onRead, onDisabled, thread])
 
   useEffect(() => {
     alive.current = true
@@ -154,6 +184,7 @@ function ConversationThread({ requestId, thread, onRead, onFinished }) {
     } catch (failure) {
       if (alive.current) {
         setSendError(failure.message)
+        if (failure.body?.detail?.code === 'conversations_disabled') onDisabled?.()
         if ([401, 403, 404, 409].includes(failure.status)) await load()
       }
     } finally {

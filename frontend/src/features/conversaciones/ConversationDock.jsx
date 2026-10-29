@@ -6,6 +6,14 @@ import { getConversation, getInbox, openQuestions, questionsChanged } from './co
 import styles from './ConversationDock.module.css'
 
 const DockContext = createContext(null)
+const focusable = 'button:not(:disabled), a[href], input:not(:disabled):not([type="hidden"]), textarea:not(:disabled), select:not(:disabled), [tabindex]'
+const canFocus = (element) => element?.isConnected && element.matches(focusable) && !element.disabled
+  && !element.closest('[hidden], [inert], [aria-hidden="true"]')
+  && getComputedStyle(element).display !== 'none' && getComputedStyle(element).visibility !== 'hidden'
+const restorePageFocus = (previous, launcher) => {
+  const candidates = [previous, launcher, ...(document.querySelector('main')?.querySelectorAll(focusable) || []), ...document.querySelectorAll(focusable)]
+  candidates.find(canFocus)?.focus()
+}
 
 export function ConversationDockProvider({ user, children }) {
   return <ConversationDockState key={`${user?.id}:${user?.rol}`} user={user}>{children}</ConversationDockState>
@@ -26,9 +34,27 @@ function ConversationDockState({ user, children }) {
   const returnFocus = useRef(null)
   const pending = useRef(null)
   const resolution = useRef(null)
+  const available = useRef(true)
   const session = `${user?.id}:${user?.rol}`
   const titleId = useId()
-  const valid = user && !user.primer_ingreso
+  const valid = Boolean(user && !user.primer_ingreso)
+  const dialogOpen = valid && enabled && open
+
+  const close = useCallback(() => {
+    resolution.current?.abort()
+    setResolving(false)
+    setOpen(false)
+    setSelected(null)
+  }, [])
+  const disable = useCallback(() => {
+    available.current = false
+    pending.current?.abort()
+    close()
+    setEnabled(false)
+    setData(null)
+    setLoading(false)
+    setError('')
+  }, [close])
 
   const refresh = useCallback(async () => {
     if (!user || user.primer_ingreso || document.visibilityState === 'hidden') return
@@ -41,17 +67,18 @@ function ConversationDockState({ user, children }) {
       setData(result)
       setPage(result.page)
       setError('')
+      available.current = true
       setEnabled(true)
     } catch (failure) {
       if (controller.signal.aborted || failure.name === 'AbortError') return
-      if (failure.body?.detail?.code === 'conversations_disabled') { setEnabled(false); setData(null) }
+      if (failure.body?.detail?.code === 'conversations_disabled') disable()
       else {
         setData(null)
         if ([401, 403, 404].includes(failure.status)) setSelected(null)
         setError(failure.message)
       }
     } finally { if (!controller.signal.aborted) setLoading(false) }
-  }, [user, page])
+  }, [user, page, disable])
 
   useEffect(() => {
     let stopped = false
@@ -75,12 +102,14 @@ function ConversationDockState({ user, children }) {
   }, [refresh])
 
   const show = useCallback(() => {
+    if (!valid || !enabled || !available.current) return false
     returnFocus.current = document.activeElement
     setOpen(true)
-  }, [])
-  const openThread = useCallback((id) => { show(); setSelected(id); setError('') }, [show])
+    return true
+  }, [valid, enabled])
+  const openThread = useCallback((id) => { if (show()) { setSelected(id); setError('') } }, [show])
   const openRequest = useCallback(async (id) => {
-    show()
+    if (!show()) return
     setSelected(null)
     setResolving(true)
     resolution.current?.abort()
@@ -89,26 +118,27 @@ function ConversationDockState({ user, children }) {
     try {
       const result = await getConversation(id, { signal: controller.signal })
       if (!controller.signal.aborted) { setSelected(result.id); setError('') }
-    } catch (failure) { if (!controller.signal.aborted) setError(failure.message) }
+    } catch (failure) {
+      if (!controller.signal.aborted) {
+        if (failure.body?.detail?.code === 'conversations_disabled') disable()
+        else setError(failure.message)
+      }
+    }
     finally { if (!controller.signal.aborted) setResolving(false) }
-  }, [show])
-  const close = useCallback(() => {
-    resolution.current?.abort()
-    setResolving(false)
-    setOpen(false)
-    setSelected(null)
-    const previous = returnFocus.current
-    if (previous?.isConnected) previous.focus()
-    else launcher.current?.focus()
-  }, [])
+  }, [show, disable])
 
   useEffect(() => {
-    if (!open) return
+    if (!dialogOpen) return
     const previous = document.body.style.overflow
+    const previousFocus = returnFocus.current
+    const trigger = launcher.current
     document.body.style.overflow = 'hidden'
     closeButton.current?.focus()
-    return () => { document.body.style.overflow = previous }
-  }, [open])
+    return () => {
+      document.body.style.overflow = previous
+      restorePageFocus(previousFocus, trigger)
+    }
+  }, [dialogOpen])
   const onRead = useCallback(() => {
     window.dispatchEvent(new Event('aari:mensajes-leidos'))
     refresh()
@@ -124,7 +154,7 @@ function ConversationDockState({ user, children }) {
     else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus() }
   }
 
-  return <DockContext.Provider key={session} value={{ openRequest, openThread }}>
+  return <DockContext.Provider key={session} value={{ openRequest, openThread, enabled: valid && enabled }}>
     {children}
     {valid && enabled ? <>
       <Button ref={launcher} className={styles.launcher} leadingIcon={<MessageSquare />} aria-label={`Mensajes${data?.no_leidos ? `, ${data.no_leidos} sin leer` : ''}`}
@@ -140,7 +170,7 @@ function ConversationDockState({ user, children }) {
           </header>
           <div className={styles.content}>
             {resolving ? <LoadingState label="Abriendo conversación" /> : selected ?
-              <ConversationPanel threadId={selected} onRead={onRead} onFinished={onFinished} /> : <>
+              <ConversationPanel threadId={selected} onRead={onRead} onFinished={onFinished} onDisabled={disable} /> : <>
                 {error ? <AlertMessage>{error}</AlertMessage> : null}
                 {loading ? <LoadingState label="Consultando mensajes" /> : data?.items?.length ? <ul className={styles.list}>
                   {data.items.map((item) => <li key={item.id}><button className={styles.thread} onClick={() => setSelected(item.id)}>
@@ -165,7 +195,7 @@ function ConversationDockState({ user, children }) {
 
 export function ConversationLauncher({ requestId, label = 'Ver avisos del agente' }) {
   const dock = useContext(DockContext)
-  return <Button variant="secondary" disabled={!dock} onClick={() => dock.openRequest(requestId)}>{label}</Button>
+  return <Button variant="secondary" disabled={!dock?.enabled} onClick={() => dock.openRequest(requestId)}>{label}</Button>
 }
 
 export function QuestionsButton({ request }) {
@@ -191,7 +221,7 @@ export function QuestionsButton({ request }) {
   }
   if (!request.conversacion_habilitada) return null
   return <div className={styles.questions}>
-    {questions || request.puede_responder ? <Button variant="secondary" disabled={busy || !dock} onClick={open}>
+    {questions || request.puede_responder ? <Button variant="secondary" disabled={busy || !dock?.enabled} onClick={open}>
       {busy ? 'Abriendo consultas…' : questions ? questions.consultas_cerradas_en ? 'Ver consultas finalizadas' : 'Continuar consultas con el inquilino' : 'Necesito hacer unas preguntas'}
     </Button> : null}
     {questions && !questions.consultas_cerradas_en ? <p>Finalizá las consultas desde Mensajes antes de enviar el presupuesto. El plazo de la solicitud no se amplía.</p> : null}
