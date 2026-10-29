@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { ArrowLeft, Send } from 'lucide-react'
 import { Link, useLocation, useParams } from 'react-router'
 import { PageContainer, PageHeading } from '../../../components/layout/index.js'
@@ -7,6 +7,7 @@ import { getQuoteRequest, submitQuote } from '../api/quotePortalApi.js'
 import { positiveAmount, quoteAmount, quoteDate, quoteLabels, quoteListFilter } from '../quotePresentation.js'
 import styles from './ProviderPortal.module.css'
 import { useHistoryResource } from '../../reclamos/useHistoryResource.js'
+import { ConversationLauncher, QuestionsButton } from '../../conversaciones/ConversationDock.jsx'
 
 function ProviderQuoteDetailPage() {
   const { requestId } = useParams()
@@ -30,9 +31,18 @@ function QuoteDetail({ requestId }) {
   const load = useCallback((signal) => getQuoteRequest(requestId, { signal }), [requestId])
   const { data: loaded, error: loadError, isLoading: loading } = useHistoryResource(`${requestId}:${refresh}`, load)
   const detail = request || loaded
+  useEffect(() => {
+    const update = (event) => { if (event.detail === requestId) { setError(''); setRefresh((value) => value + 1) } }
+    window.addEventListener('aari:consultas-cambiaron', update)
+    return () => window.removeEventListener('aari:consultas-cambiaron', update)
+  }, [requestId])
   const change = (e) => { setFields({ ...fields, [e.target.name]: e.target.value }); setErrors({ ...errors, [e.target.name]: '' }); setPreview(false); key.current = null }
   const review = (e) => {
     e.preventDefault()
+    if (detail?.consulta_tecnica && !detail.consulta_tecnica.consultas_cerradas_en) {
+      setError('Finalizá las consultas con el inquilino antes de enviar el presupuesto.')
+      return
+    }
     const invalid = {}
     if (!positiveAmount(fields.monto)) invalid.monto = 'Ingresá un importe positivo, sin separadores de miles y con hasta dos decimales.'
     if (!fields.moneda) invalid.moneda = 'Elegí la moneda.'
@@ -61,10 +71,12 @@ function QuoteDetail({ requestId }) {
 }
 
 function QuoteContent({ request, error, busy, fields, errors, change, review, send, preview, setPreview }) {
+  const questionsOpen = request.consulta_tecnica && !request.consulta_tecnica.consultas_cerradas_en
   return <>
       <PageHeading eyebrow="Solicitud de presupuesto" title={`Reclamo #${String(request.numero).padStart(6, '0')}`} description={request.ubicacion} />
       <section className={styles.panel}><div className={styles.panelHeading}><h2>Trabajo solicitado</h2><StatusBadge tone={request.estado === 'respondida' ? 'success' : 'neutral'}>{quoteLabels[request.estado]}</StatusBadge></div><div className={styles.panelBody}><p>{request.descripcion}</p><p className={styles.muted}>Plazo hasta: {quoteDate(request.vence_en)} (Argentina). La solicitud no confirma una contratación ni una visita.</p></div></section>
       {error ? <AlertMessage>{error}</AlertMessage> : null}
+      <QuestionsButton request={request} />
       {request.presupuesto ? <section className={styles.panel}><div className={styles.panelHeading}><h2>Tu presupuesto enviado</h2></div><div className={styles.panelBody}><strong>{quoteAmount(request.presupuesto)}</strong>{request.presupuesto.tipo_importe === 'minimo' ? <p className={styles.muted}>Importe mínimo: el precio final puede ser mayor. No es un máximo autorizado.</p> : <p className={styles.muted}>Importe exacto informado por el proveedor.</p>}<p>{request.presupuesto.descripcion}</p><p className={styles.muted}>Enviado: {quoteDate(request.presupuesto.recibido_en)}. No se puede sobrescribir desde esta pantalla.</p></div></section> : request.puede_responder ? <section className={styles.panel}><div className={styles.panelHeading}><h2>Prepará tu presupuesto</h2></div><form className={styles.panelBody} noValidate onSubmit={review}>
         <div className={styles.quoteGrid}>
           <FormField id="quote-kind" label="Tipo de importe" error={errors.tipo_importe} required><SelectInput name="tipo_importe" value={fields.tipo_importe} onChange={change} disabled={busy}><option value="">Seleccioná una opción</option><option value="exacto">Importe exacto</option><option value="minimo">Desde / importe mínimo</option></SelectInput></FormField>
@@ -73,8 +85,9 @@ function QuoteContent({ request, error, busy, fields, errors, change, review, se
         </div>
         {fields.tipo_importe === 'minimo' ? <p className={styles.deliveryNotice}>Se mostrará como «Desde». Es un piso del costo, no el precio final ni un máximo.</p> : null}
         <FormField id="quote-description" label="Descripción y alcance del trabajo" error={errors.descripcion} required><textarea className={styles.quoteText} name="descripcion" rows={4} maxLength={2000} value={fields.descripcion} onChange={change} disabled={busy} /></FormField>
-        {preview ? <div className={styles.quotePreview} aria-live="polite"><h3>Revisá antes de confirmar</h3><strong>{quoteAmount({ ...fields, monto: positiveAmount(fields.monto) })}</strong><p>{fields.descripcion.trim()}</p><p className={styles.muted}>Quedará registrado para la inmobiliaria y el responsable. No confirma contratación. El importe no se sobrescribirá después del envío.</p><div className={styles.actions}><Button disabled={busy} onClick={() => setPreview(false)} variant="secondary">Corregir</Button><Button disabled={busy} onClick={send} leadingIcon={<Send />}>{busy ? 'Enviando…' : 'Confirmar presupuesto'}</Button></div></div> : <div className={styles.actions}><Button type="submit" disabled={busy}>Revisar presupuesto</Button></div>}
+        {preview ? <div className={styles.quotePreview} aria-live="polite"><h3>Revisá antes de confirmar</h3><strong>{quoteAmount({ ...fields, monto: positiveAmount(fields.monto) })}</strong><p>{fields.descripcion.trim()}</p><p className={styles.muted}>Quedará registrado para la inmobiliaria y el responsable. No confirma contratación. El importe no se sobrescribirá después del envío.</p><div className={styles.actions}><Button disabled={busy} onClick={() => setPreview(false)} variant="secondary">Corregir</Button><Button disabled={busy || questionsOpen} onClick={send} leadingIcon={<Send />}>{busy ? 'Enviando…' : 'Confirmar presupuesto'}</Button></div></div> : <div className={styles.actions}><Button type="submit" disabled={busy || questionsOpen}>Revisar presupuesto</Button></div>}
       </form></section> : <AlertMessage tone="info">Esta solicitud ya no está habilitada para responder. Podés consultar su información sin reabrir el intento.</AlertMessage>}
+      {request.conversacion_habilitada ? <ConversationLauncher requestId={request.id} /> : null}
     </>
 }
 export default ProviderQuoteDetailPage

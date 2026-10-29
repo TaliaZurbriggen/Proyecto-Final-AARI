@@ -74,7 +74,41 @@ La identidad visual de AARI está centralizada para que los agentes y el equipo 
 
 La referencia aprobada se conserva dentro de la skill. Si una historia necesita apartarse de esa dirección, la decisión debe acordarse antes de implementarla.
 
-### Solicitudes de presupuesto en AARI (HU19 / AARI-206 — en curso, 27/10/2026)
+### Mensajes y consultas técnicas (HU33 / AARI-348 — validación local, 29/10/2026)
+
+La rama `codex/AARI-348-conversacion-solicitudes`, basada en main `67b3c90`,
+incorpora una bandeja flotante «Mensajes» con no leídos y avisos individuales del
+agente para proveedor/responsable. Antes de cotizar, el proveedor puede abrir
+consultas técnicas con el inquilino y finalizarlas explícitamente para continuar
+el presupuesto. No amplían el plazo; el historial se conserva en sólo lectura.
+La inmobiliaria sólo consulta; el propietario que paga no hereda ese chat técnico.
+No interpreta texto para aprobar presupuestos ni programar visitas.
+
+Requiere la migración aditiva `20261028210000_hu33_conversaciones.sql` después de
+HU19. **Aplicada y verificada en Supabase el 29/10/2026; no se ejecuta al iniciar
+la app**. Mantener `AARI_CONVERSATIONS_ENABLED=false` hasta acordar la activación
+del entorno; la aplicación del esquema no activa otros workers.
+No consume Gemini, no envía correos por mensaje ni activa otros workers.
+
+Regla acordada: el responsable del gasto selecciona el presupuesto en HU20;
+después el agente pide disponibilidad **al inquilino**, aun cuando pague el
+propietario, y la ofrece sólo al proveedor seleccionado en HU23. HU33 prepara
+el canal y separa las finalidades; no da HU20/HU23 por implementadas.
+[Permisos, API, decisiones y validación](docs/hu33_conversaciones_privadas.md).
+
+Regresión vigente: **1534 backend aprobadas / 62 omitidas** (PostgreSQL local),
+**429 frontend aprobadas** tras las correcciones de revisión del PR #39,
+lint/build correctos. El panel recupera los pendientes sin saltar páginas y
+libera scroll/foco al deshabilitar HU33. Publicación de ajustes autorizada;
+pendiente nueva revisión de Tobías, sin merge ni cierre de la HU.
+Recorridos locales de proveedor,
+inquilino, propietario y administración, escritorio/móvil, comprobados. Validación
+compartida: cinco controles con rollback, 42 tablas sin cambios y numeración
+preservada. Seis nuevas pruebas de salvaguardas del ejecutor, junto con la API:
+50 aprobadas en tanda posterior; no es otra ejecución completa. No consumió LLM
+ni envió correos. Pendiente revisión/merge de HU33.
+
+### Solicitudes de presupuesto en AARI (HU19 / AARI-206 — integrada, 28/10/2026)
 
 Tras integrar HU32 (PR #37), HU19 incorpora una bandeja privada para proveedores
 con acceso activado y aviso por correo desacoplado. El agente publica sólo tras
@@ -95,8 +129,10 @@ desarrollo**, con respaldo previo, ensayo con rollback, historial y RLS
 verificados. No repetirla al hacer pull. El recorrido compartido de precio exacto
 y mínimo pasó con datos ficticios y rollback. Talía confirmó la recepción del
 aviso puntual y el recorrido visual con la cuenta de prueba permitió confirmar
-un mínimo, verificarlo tras recargar y verlo sólo en Enviadas. Lista para revisión,
-no cerrada ni mergeada.
+un mínimo, verificarlo tras recargar y verlo sólo en Enviadas. PR #38 aprobado por
+Tobías y mergeado en `67b3c90`; HU19 y HU32 cerradas como Listo en Jira el
+28/10/2026. AARI-208 y AARI-211 canceladas por cambio de alcance, conservando
+horas/evidencia; no se presenta WhatsApp como funcionalidad entregada.
 `AARI_QUOTE_PORTAL_ENABLED` y `AARI_QUOTE_WORKER_ENABLED` permanecen apagados por
 defecto; no se habilitaron envíos generales. `APP_LOGIN_URL` define
 el origen de los enlaces; SMTP utiliza la bandeja de salida existente. No activar
@@ -884,7 +920,7 @@ Con Docker Compose podés levantar el backend y el frontend juntos, ya conectado
 
 ## Estado del proyecto
 
-### HU32 — Acceso del proveedor (base integrada mediante PR #37, 27/10/2026)
+### HU32 — Acceso del proveedor (integrada y cerrada, 28/10/2026)
 
 En `codex/AARI-347-acceso-proveedor` se agrega el rol proveedor sobre el padrón
 existente. Administración habilita/reenvía invitaciones desde **Proveedores →
@@ -899,12 +935,10 @@ opcional `PROVIDER_INVITATION_HOURS=24`, independiente del plazo de presupuestos
 Con URL localhost la invitación sirve en esta computadora, no acredita uso
 remoto ni el despliegue AARI-338.
 
-**Límite explícito:** el portal inicial está disponible, pero la bandeja de
-solicitudes reales queda pendiente de la adaptación/integración de HU19.
-Presupuestar corresponde a HU19 y conversar a HU33. No se da HU32 por cerrada
-ni se presenta el portal como recorrido completo. La base ya se integró en main
-(`c3adc8f`); el recorrido integrado se validó con HU19, pendiente de revisión y
-merge de esa entrega antes del cierre formal.
+La base se integró mediante PR #37 (`c3adc8f`) y la bandeja real de solicitudes y
+presupuestos mediante PR #38 (`67b3c90`). El recorrido integrado fue validado y
+HU32 quedó Listo junto con todas sus subtareas el 28/10/2026. Conversar corresponde
+a HU33; selección y visitas a HU20/HU23, sin declararlas terminadas por este cierre.
 [Implementación, pruebas y pendientes](docs/hu32_acceso_proveedor.md).
 
 ### HU21 — Base de contexto persistente (Sprint 4)

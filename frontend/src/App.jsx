@@ -40,6 +40,7 @@ import EscalatedClaimDetailPage from './features/reclamos/pages/EscalatedClaimDe
 import PendingAssignmentPage from './features/reclamos/pages/PendingAssignmentPage.jsx'
 import ProviderCandidatesPage from './features/reclamos/pages/ProviderCandidatesPage.jsx'
 import { useAuth } from './features/auth/authContext.js'
+import { ConversationDockProvider } from './features/conversaciones/ConversationDock.jsx'
 import { destinationForUser } from './features/auth/routing.js'
 import ContractsListPage from './features/contratos/pages/ContractsListPage.jsx'
 import ContractFormPage from './features/contratos/pages/ContractFormPage.jsx'
@@ -53,9 +54,15 @@ function SessionHomeRedirect() {
   return <Navigate replace to={destinationForUser(user)} />
 }
 
+function ConversationLayer({ children }) {
+  const { user } = useAuth()
+  return <ConversationDockProvider key={`${user?.id}:${user?.rol}`} user={user}>{children}</ConversationDockProvider>
+}
+
 function App() {
   return (
     <AuthProvider>
+      <ConversationLayer>
       <Routes>
         <Route path="login" element={<LoginPage />} />
         <Route path="activar-proveedor" element={<ProviderActivationPage />} />
@@ -182,6 +189,7 @@ function App() {
         </Route>
         <Route path="design-system" element={<DesignSystemPreview />} />
       </Routes>
+      </ConversationLayer>
     </AuthProvider>
   )
 }

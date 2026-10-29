@@ -163,9 +163,13 @@ describe('HU7 — listado', () => {
 describe('rutas de operadores', () => {
   it('impide al operador acceder a la gestión administrativa', async () => {
     const request = fetchMock({ user: { id: operator.id, email: operator.email, rol: 'operador', primer_ingreso: false } })
+    request.mockImplementation(async (url) => json(String(url).includes('/conversaciones/')
+      ? { items: [], total: 0, page: 1, page_size: 20, no_leidos: 0 }
+      : { user: { id: operator.id, email: operator.email, rol: 'operador', primer_ingreso: false } }))
     render(<MemoryRouter initialEntries={['/operadores']}><App /></MemoryRouter>)
     expect(await screen.findByText('Portal de operación')).toBeInTheDocument()
     expect(screen.queryByRole('link', { name: 'Nuevo operador' })).not.toBeInTheDocument()
-    expect(request).toHaveBeenCalledTimes(1)
+    expect(request.mock.calls.filter(([url]) => String(url).endsWith('/auth/me'))).toHaveLength(1)
+    expect(request.mock.calls.some(([url]) => String(url).split('?')[0].endsWith('/operadores'))).toBe(false)
   })
 })

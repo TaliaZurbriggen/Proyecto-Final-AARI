@@ -807,3 +807,32 @@ con la cuenta real de prueba completado con un mínimo ficticio persistido.
 No se activaron envíos generales.
 Mantener `AARI_QUOTE_WORKER_ENABLED=false` hasta acordar la puesta en marcha.
 Detalle y límites: [canal AARI HU19](../../docs/hu19_canal_aari_presupuestos.md).
+
+## HU33 — Mensajes y consultas técnicas (29/10/2026)
+
+`20261028210000_hu33_conversaciones.sql` requiere el canal AARI de HU19
+(`20261027130000`) y sus dependencias. Es una migración aditiva de una sola
+ejecución: hilos por solicitud/finalidad/audiencia, participante original,
+apertura/cierre explícitos de consultas, mensajes inmutables y lecturas por
+usuario. Avisos de agente individuales y consultas proveedor-inquilino separadas;
+administración sólo consulta. Incluye índices, RLS y revocación a PUBLIC/anon/authenticated; no crea
+políticas públicas. No modifica presupuestos, decisiones ni estados de reclamos.
+
+**Aplicada en Supabase el 29/10/2026 con autorización.** Preflight y huellas:
+39 tablas previas preservadas; 42 tras agregar HU33. QA con datos ficticios y
+rollback: cinco controles aprobados, todas las filas y numeración preservadas,
+sin envíos. Ejecutor `scripts/check_hu33_shared.py --authorized --env-root RUTA
+--apply --validate`; no expone configuración ni inicia workers. No volver a
+ejecutar el SQL directo: el ejecutor reconoce/verifica un esquema ya instalado.
+No renombrar ni volver a ejecutar las migraciones anteriores. No se aplica DDL
+al iniciar FastAPI. `AARI_CONVERSATIONS_ENABLED=false` por defecto; habilitar sólo
+después de verificar esquema y permisos. No requiere Gemini ni SMTP.
+
+La definición local se ajustó antes de su primera aplicación compartida. No
+repetir el SQL directo sobre una base con tablas HU33 ni improvisar cambios a
+mano; el ejecutor permite verificar la instalación existente sin reaplicarla.
+La finalidad `coordinacion` queda reservada en el modelo, sin acceso público ni
+activación automática; HU23 implementará sus acciones y permisos separados. La
+primera lectura de una solicitud histórica proyecta sus eventos HU19 de forma
+idempotente, conservando fecha de origen y sin notificaciones externas.
+Detalle: [HU33](../../docs/hu33_conversaciones_privadas.md).
