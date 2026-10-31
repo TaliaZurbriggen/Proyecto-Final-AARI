@@ -2,6 +2,21 @@
 
 Scripts SQL para crear y actualizar el esquema de Supabase.
 
+## HU18 — Proveedor externo (sólo validada localmente)
+
+`20261029235000_hu18_proveedor_externo.sql` amplía la tabla existente con
+elección, autor, idempotencia e historial de derivación. Requiere HU16/HU17 y
+HU19 AARI; no renombrar ni volver a ejecutar sus migraciones anteriores.
+Conserva los contactos históricos sin atribuirles una elección o usuario.
+Incluye RLS/revocaciones, índices y protección de auditoría/inmutabilidad.
+No crea cuentas/proveedores del padrón ni envía mensajes. La integración de
+eventos de HU33 respeta su flag, sin activarlo.
+
+**No aplicada en Supabase.** Requiere autorización y controles previos separados
+antes de habilitar el formulario en el entorno compartido; FastAPI no la aplica
+al iniciar. Pruebas realizadas con datos ficticios en PostgreSQL local.
+[Alcance, API y evidencia HU18](../../docs/hu18_proveedor_externo.md).
+
 ## HU19 — Canal AARI (aplicada en desarrollo el 27/10/2026)
 
 `20261027130000_hu19_canal_aari.sql` requiere HU16, HU17, coberturas/HU15 y las

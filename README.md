@@ -74,7 +74,29 @@ La identidad visual de AARI está centralizada para que los agentes y el equipo 
 
 La referencia aprobada se conserva dentro de la skill. Si una historia necesita apartarse de esa dirección, la decisión debe acordarse antes de implementarla.
 
-### Mensajes y consultas técnicas (HU33 / AARI-348 — validación local, 29/10/2026)
+### Proveedor externo (HU18 / AARI-199 — implementación local, 31/10/2026)
+
+En `codex/AARI-199-proveedor-externo`, desde main `2ff6e3e`, el responsable puede
+cargar nombre/teléfono y confirmar al proveedor externo en un solo paso. Valida
+permisos y versión, protege confirmaciones repetidas/simultáneas y conserva la
+auditoría. Administración consulta el contacto en el historial del reclamo; no
+se crea cuenta ni alta en el padrón, ni se envían mensajes al externo.
+
+HU y subtareas En curso, con 3 h 30 min registradas sólo en sus subtareas y
+publicación autorizada para revisión de Tobías. La migración
+`20261029235000_hu18_proveedor_externo.sql` está probada **sólo en PostgreSQL local**;
+no aplicada en Supabase. La entrada de proveedor propio HU17 está conectada;
+el endpoint admite la alternativa sin proveedor/presupuesto seleccionado para
+su integración posterior desde HU20. No se implementa esa comparación ni HU24.
+[Recorrido, permisos, pruebas y pendientes](docs/hu18_proveedor_externo.md).
+
+Regresión local de esta entrega: **1603 backend aprobadas / 62 omitidas** con
+PostgreSQL local y **454 frontend aprobadas** tras simplificar la confirmación;
+lint/build, dependencias y
+compilación correctos. Sin APIs externas ni correo real. QA visual y migración
+en Supabase pendientes; la compilación conserva el aviso conocido de bundle.
+
+### Mensajes y consultas técnicas (HU33 / AARI-348 — integrada, 29/10/2026)
 
 La rama `codex/AARI-348-conversacion-solicitudes`, basada en main `67b3c90`,
 incorpora una bandeja flotante «Mensajes» con no leídos y avisos individuales del
@@ -99,14 +121,15 @@ el canal y separa las finalidades; no da HU20/HU23 por implementadas.
 Regresión vigente: **1534 backend aprobadas / 62 omitidas** (PostgreSQL local),
 **429 frontend aprobadas** tras las correcciones de revisión del PR #39,
 lint/build correctos. El panel recupera los pendientes sin saltar páginas y
-libera scroll/foco al deshabilitar HU33. Publicación de ajustes autorizada;
-pendiente nueva revisión de Tobías, sin merge ni cierre de la HU.
+libera scroll/foco al deshabilitar HU33. Tobías aprobó y fusionó el PR #39
+(main `2ff6e3e`); HU y ocho subtareas Listo con cierre autorizado por Talía.
 Recorridos locales de proveedor,
 inquilino, propietario y administración, escritorio/móvil, comprobados. Validación
 compartida: cinco controles con rollback, 42 tablas sin cambios y numeración
 preservada. Seis nuevas pruebas de salvaguardas del ejecutor, junto con la API:
 50 aprobadas en tanda posterior; no es otra ejecución completa. No consumió LLM
-ni envió correos. Pendiente revisión/merge de HU33.
+ni envió correos. Se conserva esta evidencia previa; el cierre administrativo
+no agregó otra ejecución de pruebas ni activó flags.
 
 ### Solicitudes de presupuesto en AARI (HU19 / AARI-206 — integrada, 28/10/2026)
 
