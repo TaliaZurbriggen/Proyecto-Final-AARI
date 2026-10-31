@@ -4,6 +4,7 @@ import { Link, useLocation, useParams } from 'react-router'
 import { PageContainer, PageHeading } from '../../../components/layout/index.js'
 import { AlertMessage, Button, LoadingState, StatusBadge } from '../../../components/ui/index.js'
 import ClaimQuoteSummary from '../../proveedores/components/ClaimQuoteSummary.jsx'
+import { ExternalProviderHistory } from './ExternalProviderPage.jsx'
 import { getPropertyClaim } from '../api/propertyClaimsApi.js'
 import { claimStatusTone, formatClaimDate, formatClaimNumber, urgencyLabel } from '../presentation.js'
 import { claimPropertyLabel } from '../validation.js'
@@ -30,7 +31,7 @@ function PropertyClaimDetailPage({ tenantView = false }) {
       {claim ? (
         <>
           <PageHeading title={`Reclamo ${formatClaimNumber(claim.numero)}`} eyebrow="Historial de la propiedad" description={claimPropertyLabel(claim.propiedad)} />
-          {!tenantView ? <div><Button variant="secondary" aria-expanded={showRequests} onClick={() => setShowRequests((value) => !value)}>Ver presupuestos y conversaciones</Button>
+          {!tenantView ? <div className={styles.propertyQuoteActions}><Button variant="secondary" aria-expanded={showRequests} onClick={() => setShowRequests((value) => !value)}>Ver presupuestos y conversaciones</Button>
             {showRequests ? <ClaimQuoteSummary key={reclamoId} claimId={reclamoId} /> : null}</div> : null}
           <section className={styles.currentStatus} aria-labelledby="property-claim-status">
             <div><p className={styles.eyebrow}>Estado actual</p><h2 id="property-claim-status">{claim.estado}</h2><p>Última actualización: {formatClaimDate(claim.updated_at)}</p></div>
@@ -61,6 +62,8 @@ function PropertyClaimDetailPage({ tenantView = false }) {
               ) : <p>Este reclamo todavía no tiene cambios de estado registrados.</p>}
             </section>
           </div>
+          {!tenantView && (claim.estado === 'Derivado a proveedor externo' || claim.historial.some(item => item.estado_nuevo === 'Derivado a proveedor externo')) ?
+            <ExternalProviderHistory claimId={reclamoId} /> : null}
         </>
       ) : null}
     </PageContainer>

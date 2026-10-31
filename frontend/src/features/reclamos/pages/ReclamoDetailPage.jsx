@@ -68,6 +68,8 @@ function ReclamoDetailPage() {
         <Link className={styles.primaryLink} to={`/inquilino/reclamos/${reclamoId}/tipo-proveedor`}>
           {claim.estado === 'Pendiente de respuesta del responsable' ? 'Elegir tipo de proveedor' : 'Ver elección de proveedor'}
         </Link>}
+      {claim.tipo_gasto === 'ordinario' && claim.estado === 'Derivado a proveedor externo' ?
+        <Link className={styles.primaryLink} to={`/inquilino/reclamos/${reclamoId}/proveedor-externo`}>Ver datos del proveedor externo</Link> : null}
 
       <div className={styles.detailGrid}>
         <section className={styles.claimSummaryPanel} aria-labelledby="claim-detail-title">

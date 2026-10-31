@@ -69,7 +69,12 @@ function ChoiceContent({ reclamoId, ownerView }) {
         <p>{saved.actor_nombre} · {formatClaimDate(saved.decidido_en)}</p>
         <AlertMessage tone="success">{saved.tipo_proveedor === 'fidelizado'
           ? 'El agente publicará solicitudes para los proveedores compatibles con acceso activo. Consultá abajo su estado; la elección no contrata a un proveedor.'
-          : 'La elección quedó preparada para registrar los datos de tu proveedor (HU18). Todavía no se registró el contacto ni se derivó el reclamo.'}</AlertMessage>
+          : claim.estado === 'Derivado a proveedor externo' ? 'El contacto ya quedó registrado y el reclamo fue derivado a un proveedor externo.'
+            : 'Todavía no se registró el contacto. Cargá los datos para completar la derivación.'}</AlertMessage>
+        {saved.tipo_proveedor === 'propio' || claim.estado === 'Derivado a proveedor externo' ?
+          <Link className={styles.back} to={`/${ownerView ? 'propietario' : 'inquilino'}/reclamos/${reclamoId}/proveedor-externo`}>
+            {claim.estado === 'Derivado a proveedor externo' ? 'Ver datos del proveedor externo' : 'Cargar datos del proveedor'}
+          </Link> : null}
       </section> : claim.puede_elegir ? <div className={styles.options}>
         <article className={styles.option} aria-labelledby="trusted-provider">
           <Building2 aria-hidden="true" className={styles.icon} />
