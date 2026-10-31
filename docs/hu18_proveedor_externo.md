@@ -111,13 +111,14 @@ tabla/columnas y un trigger que exige auditoría para nuevos registros e impide
 modificar/borrar contactos nuevos confirmados.
 
 Requiere HU16/HU17 y HU19 AARI. El evento de conversación se integra cuando
-HU33 está habilitada, sin activar ese flag desde HU18. La migración **sólo se
-aplicó a bases locales descartables**. No se aplicó a Supabase; requiere permiso
-separado y preflight del entorno compartido. No se ejecuta al iniciar FastAPI.
+HU33 está habilitada, sin activar ese flag desde HU18. La migración se aplicó
+primero a bases locales descartables y, con autorización posterior de Talía,
+**en Supabase AARI el 31/10/2026** (detalle abajo). No se ejecuta al iniciar
+FastAPI ni se repite por pull/merge; no editar el SQL ya aplicado.
 
 ## Validación
 
-Sin Supabase, Gemini ni SMTP real. PostgreSQL 17 en un contenedor dedicado,
+Regresiones locales sin Supabase, Gemini ni SMTP real. PostgreSQL 17 en un contenedor dedicado,
 con base ficticia nueva por caso y eliminación posterior por el fixture.
 
 Comandos desde `backend/`, con `PYTHON_DOTENV_DISABLED=1`, `DATABASE_URL=sqlite://`,
@@ -185,6 +186,47 @@ Incidencia corregida durante la validación: una expresión de caracteres del
 nombre en JavaScript admitía un rango involuntario. Dos pruebas la detectaron;
 se corrigió y la repetición focalizada pasó completa. Sin cambiar dependencias.
 
+## Aplicación compartida autorizada — 31/10/2026
+
+El primer commit `748633e` ya había terminado de subirse cuando llegó la
+indicación de Talía de aplicar la migración antes de publicar. Se informó esa
+secuencia y se detuvo la creación del PR hasta completar la validación compartida.
+
+Ejecutor versionado `backend/scripts/check_hu18_shared.py`: exige `--authorized`,
+valida destino AARI antes de conectar, rechaza `-O`, aplica DDL e historial en una
+transacción con límites 5s/30s y comprueba preservación de los campos existentes.
+Verifica RLS/revocaciones de tabla/columnas/función, FK/CHECK/índices/trigger y
+función SECURITY INVOKER con search_path aislado. No repara estados parciales ni
+lee/imprime filas privadas, conexiones o huellas. No activa la aplicación/workers.
+La comparación de huellas no constituye un respaldo independiente de la base.
+
+```powershell
+python -m scripts.check_hu18_shared --authorized --env-root RUTA_CONFIGURADA
+python -m scripts.check_hu18_shared --authorized --env-root RUTA_CONFIGURADA --apply --validate
+```
+
+- Preflight compartido de sólo lectura: proyecto correcto, HU18 no instalada,
+  42 tablas comprobadas y sin cambios.
+- Aplicación confirmada: versión `20261029235000`, nombre
+  `hu18_proveedor_externo`, DDL e historial confirmados juntos. Las 42 tablas
+  mantuvieron conteos/huellas de columnas preexistentes; contactos legados sin
+  metadatos atribuidos ni creación de registros de negocio por el DDL.
+- Dos recorridos con repositorios reales en Supabase: responsable inquilino
+  ordinario y propietario extraordinario autorizado. Guardado normalizado,
+  transición, repetición idempotente, un contacto/un historial y administración
+  sólo lectura aprobados.
+- Los datos ficticios se revirtieron por completo; numeración de reclamos
+  preservada mediante números explícitos en la prueba. Cero envíos de correo,
+  Gemini o Meta. La demo visual sigue siendo local, no un login compartido validado.
+- Ejecutores/guardas y dominio HU18: **75 pruebas locales aprobadas**. Repetición
+  final del ejecutor: **12 aprobadas**, subconjunto de esas 75, sin sumarlas.
+  La suite completa de 1603/62 antecede a estas 12 pruebas nuevas y no se repitió
+  por el ejecutor operativo; no se informa un total completo nuevo calculado.
+- Antes de tocar Supabase, las pruebas del ejecutor detectaron la interpretación
+  de `%I` por el driver al pasar parámetros vacíos y un nombre ficticio con dígitos.
+  Se corrigieron ambos en el ejecutor/datos de prueba y se repitió con éxito. No
+  se cambió la migración ni la lógica de producto para hacer pasar estos controles.
+
 ## Demo y pendientes de aceptación
 
 Demo temporal ignorada por Git en `http://127.0.0.1:13609/tmp/hu18-review.html`:
@@ -196,6 +238,7 @@ datos temporales no forman parte de la entrega.
 La revisión visual automática se detuvo porque Computer Use no pudo identificar
 con seguridad la URL de Chrome. No se acredita QA visual escritorio/móvil ni
 aceptación del usuario por el solo hecho de levantar la demo. Pendiente esa
-revisión, autorización/aplicación compartida y el enlace de HU20 cuando esté
-integrada. Publicación/PR autorizados el 31/10, con estas limitaciones explícitas
+revisión y el enlace de HU20 cuando esté integrada. La aplicación compartida ya
+fue autorizada y validada, sin acreditar QA visual ni login normal por ello.
+Publicación/PR autorizados el 31/10, con estas limitaciones explícitas
 para Tobías; el cierre de Jira no está autorizado hasta aprobar/fusionar.

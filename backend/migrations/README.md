@@ -2,7 +2,7 @@
 
 Scripts SQL para crear y actualizar el esquema de Supabase.
 
-## HU18 — Proveedor externo (sólo validada localmente)
+## HU18 — Proveedor externo (aplicada en desarrollo el 31/10/2026)
 
 `20261029235000_hu18_proveedor_externo.sql` amplía la tabla existente con
 elección, autor, idempotencia e historial de derivación. Requiere HU16/HU17 y
@@ -12,9 +12,18 @@ Incluye RLS/revocaciones, índices y protección de auditoría/inmutabilidad.
 No crea cuentas/proveedores del padrón ni envía mensajes. La integración de
 eventos de HU33 respeta su flag, sin activarlo.
 
-**No aplicada en Supabase.** Requiere autorización y controles previos separados
-antes de habilitar el formulario en el entorno compartido; FastAPI no la aplica
-al iniciar. Pruebas realizadas con datos ficticios en PostgreSQL local.
+**Aplicada con autorización el 31/10/2026 en Supabase AARI de desarrollo**,
+historial `20261029235000_hu18_proveedor_externo`. No volver a ejecutarla por
+integrante, pull o merge ni modificar el SQL ya aplicado. FastAPI no la ejecuta
+al iniciar. Las 42 tablas anteriores conservaron conteos y huellas de campos
+preexistentes; RLS/revocaciones, restricciones, índices y trigger verificados.
+Dos recorridos con repositorios reales y datos ficticios (ordinario/extraordinario)
+aprobaron guardado, estado, reintento e historial administrativo de sólo lectura.
+Rollback completo y numeración preservada, sin correos ni LLM ni otros workers.
+Ejecutor `python -m scripts.check_hu18_shared --authorized --env-root RUTA_CONFIGURADA`
+(preflight de lectura); aplicación sólo con `--apply` y prueba aislada con
+`--validate`. El destino y la autorización se verifican antes de actuar; una
+instalación parcial no se repara automáticamente. Detalle y límites:
 [Alcance, API y evidencia HU18](../../docs/hu18_proveedor_externo.md).
 
 ## HU19 — Canal AARI (aplicada en desarrollo el 27/10/2026)

@@ -84,8 +84,9 @@ se crea cuenta ni alta en el padrón, ni se envían mensajes al externo.
 
 HU y subtareas En curso, con 3 h 30 min registradas sólo en sus subtareas y
 publicación autorizada para revisión de Tobías. La migración
-`20261029235000_hu18_proveedor_externo.sql` está probada **sólo en PostgreSQL local**;
-no aplicada en Supabase. La entrada de proveedor propio HU17 está conectada;
+`20261029235000_hu18_proveedor_externo.sql` fue **aplicada y verificada con
+autorización en Supabase el 31/10/2026**; no repetirla al hacer pull. La entrada
+de proveedor propio HU17 está conectada;
 el endpoint admite la alternativa sin proveedor/presupuesto seleccionado para
 su integración posterior desde HU20. No se implementa esa comparación ni HU24.
 [Recorrido, permisos, pruebas y pendientes](docs/hu18_proveedor_externo.md).
@@ -93,8 +94,10 @@ su integración posterior desde HU20. No se implementa esa comparación ni HU24.
 Regresión local de esta entrega: **1603 backend aprobadas / 62 omitidas** con
 PostgreSQL local y **454 frontend aprobadas** tras simplificar la confirmación;
 lint/build, dependencias y
-compilación correctos. Sin APIs externas ni correo real. QA visual y migración
-en Supabase pendientes; la compilación conserva el aviso conocido de bundle.
+compilación correctos. Las regresiones usaron servicios externos simulados.
+Validación compartida posterior: dos recorridos con repositorios reales,
+rollback de datos ficticios, 42 tablas previas y numeración preservadas; sin
+correo ni Gemini. QA visual final pendiente; aviso conocido de bundle conservado.
 
 ### Mensajes y consultas técnicas (HU33 / AARI-348 — integrada, 29/10/2026)
 
