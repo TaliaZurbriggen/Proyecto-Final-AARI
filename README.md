@@ -12,6 +12,23 @@ Universidad Tecnológica Nacional - Facultad Regional San Francisco
 
 Sistema web con agente de inteligencia artificial que automatiza el flujo completo de gestión de reclamos de mantenimiento en inmobiliarias: clasificación ordinario/extraordinario/expensa, selección de proveedores, coordinación de turnos y seguimiento hasta el cierre.
 
+## HU23 — Coordinación de visitas en desarrollo (01/11/2026)
+
+Rama `codex/AARI-250-coordinacion-visitas`, desde main `879fa07` con HU18
+integrada. Implementación local de disponibilidad del inquilino, confirmación
+del proveedor y negociación excepcional por Mensajes cuando ningún horario
+sirve. La otra persona debe confirmar una propuesta estructurada: texto libre
+no programa visitas ni reinicia las 24 horas. Avisos y recordatorios 24h/2h
+durables; no se envían correos al importar el módulo o aplicar su migración.
+
+La migración nueva `20261101110000_hu23_coordinacion_visitas.sql` se prueba sólo
+en PostgreSQL local, **sin aplicación autorizada en Supabase**. Mantener
+`AARI_VISITS_ENABLED=false` y `AARI_VISITS_WORKER_ENABLED=false` en el entorno
+compartido. Mensajes reutiliza `AARI_CONVERSATIONS_ENABLED`. Accesos nuevos:
+`/visitas` y `/visitas/:reclamoId`. HU20 todavía no integrada: falta validar el
+contrato definitivo de selección y el recorrido real completo; no se declara
+HU23 lista. Ver [documentación HU23](docs/hu23_coordinacion_visitas.md).
+
 ## Stack tecnológico
 
 - **Backend:** Python + FastAPI

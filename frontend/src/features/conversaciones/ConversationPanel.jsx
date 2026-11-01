@@ -1,8 +1,10 @@
 import { useCallback, useEffect, useId, useRef, useState } from 'react'
 import { MessageSquare, RefreshCw, Send } from 'lucide-react'
+import { Link } from 'react-router'
 import { AlertMessage, Button, EmptyState, FormField, LoadingState, StatusBadge } from '../../components/ui/index.js'
 import { finishQuestions, getConversation, markConversationRead, sendMessage } from './conversationsApi.js'
 import styles from './ConversationPanel.module.css'
+import { useConversationDock } from './conversationContext.js'
 
 const date = (value) => new Intl.DateTimeFormat('es-AR', {
   dateStyle: 'short', timeStyle: 'short', hourCycle: 'h23', timeZone: 'America/Argentina/Buenos_Aires',
@@ -24,6 +26,7 @@ export default function ConversationPanel({ requestId, threadId, onRead, onFinis
 }
 
 function ConversationThread({ requestId, thread, onRead, onFinished, onDisabled }) {
+  const dock = useConversationDock()
   const id = useId()
   const [data, setData] = useState(null)
   const [items, setItems] = useState([])
@@ -213,8 +216,8 @@ function ConversationThread({ requestId, thread, onRead, onFinished, onDisabled 
 
   return <section className={styles.panel} aria-labelledby={`${id}-title`}>
     <div className={styles.heading}>
-      <div><h2 id={`${id}-title`}><MessageSquare aria-hidden="true" />{data?.finalidad === 'presupuesto' ? 'Avisos del agente' : 'Consultas técnicas'}</h2>
-        <p>{data ? `Reclamo #${String(data.numero_reclamo).padStart(6, '0')} · ` : ''}{data?.finalidad === 'presupuesto' ? 'Novedades de esta solicitud. No es un chat libre con IA.' : 'Proveedor e inquilino aclaran el problema antes del presupuesto.'}</p></div>
+      <div><h2 id={`${id}-title`}><MessageSquare aria-hidden="true" />{data?.finalidad === 'coordinacion' ? 'Coordinación de visita' : data?.finalidad === 'presupuesto' ? 'Avisos del agente' : 'Consultas técnicas'}</h2>
+        <p>{data ? `Reclamo #${String(data.numero_reclamo).padStart(6, '0')} · ` : ''}{data?.finalidad === 'coordinacion' ? 'Acuerden un horario. La visita requiere una confirmación explícita y el chat no amplía el plazo.' : data?.finalidad === 'presupuesto' ? 'Novedades de esta solicitud. No es un chat libre con IA.' : 'Proveedor e inquilino aclaran el problema antes del presupuesto.'}</p></div>
       <Button variant="secondary" leadingIcon={<RefreshCw />} disabled={loading || updating}
         onClick={() => load()}>Actualizar conversación</Button>
     </div>
@@ -223,7 +226,7 @@ function ConversationThread({ requestId, thread, onRead, onFinished, onDisabled 
       {readError ? <AlertMessage tone="info">{readError}</AlertMessage> : null}
       {loading ? <LoadingState label="Cargando conversación" /> : data ? <>
         <div className={styles.toolbar}><p className={styles.muted}>Horarios de Argentina · {data.no_leidos} sin leer</p>
-          <StatusBadge tone={data.puede_enviar ? 'success' : 'neutral'}>{data.puede_enviar ? 'Consultas abiertas' : 'Sólo lectura'}</StatusBadge></div>
+          <StatusBadge tone={data.puede_enviar ? 'success' : 'neutral'}>{data.puede_enviar ? data.finalidad === 'coordinacion' ? 'Coordinación abierta' : 'Consultas abiertas' : 'Sólo lectura'}</StatusBadge></div>
         {data.hay_anteriores ? <Button variant="secondary" disabled={updating} onClick={() => load('older')}>Ver mensajes anteriores</Button> : null}
         {items.length ? <ol className={styles.messages} aria-label="Mensajes de la conversación">
           {items.map((item) => <li key={item.id} className={[styles.message, item.propio ? styles.own : '', item.origen === 'agente' ? styles.agent : ''].join(' ')}>
@@ -234,7 +237,8 @@ function ConversationThread({ requestId, thread, onRead, onFinished, onDisabled 
           </li>)}
         </ol> : <EmptyState title="Todavía no hay mensajes" description="Podés hacer una consulta sobre este trabajo desde acá." />}
         {data.hay_nuevos ? <Button variant="secondary" disabled={updating} onClick={() => load()}>Ver mensajes nuevos</Button> : null}
-        {data.finalidad === 'consulta_tecnica' && data.puede_enviar ? <form className={styles.composer} onSubmit={send} noValidate>
+        {data.finalidad === 'coordinacion' && /^\/visitas\/[0-9a-f-]{36}$/i.test(data.coordinacion_url || '') ? <Link to={data.coordinacion_url} onClick={() => dock?.close?.()}>Proponer o confirmar fecha y hora</Link> : null}
+        {['consulta_tecnica', 'coordinacion'].includes(data.finalidad) && data.puede_enviar ? <form className={styles.composer} onSubmit={send} noValidate>
           <FormField id={`${id}-message`} label="Tu mensaje" error={sendError} hint="Hasta 2000 caracteres. El chat no aprueba presupuestos ni confirma visitas.">
             <textarea ref={input} className={styles.input} rows={3} maxLength={2000} value={draft} disabled={busy || Boolean(error)}
               onChange={(event) => { setDraft(event.target.value); setSendError('') }} />

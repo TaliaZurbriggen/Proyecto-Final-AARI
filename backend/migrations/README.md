@@ -2,6 +2,21 @@
 
 Scripts SQL para crear y actualizar el esquema de Supabase.
 
+## HU23 — Coordinación de visitas (sólo PostgreSQL local, 01/11/2026)
+
+`20261101110000_hu23_coordinacion_visitas.sql` requiere el esquema de coordinación
+base, HU16/HU17, HU19 AARI y HU33. Agrega coordinaciones, intervalos, acciones
+inmutables y vínculos de avisos. Extiende los hilos HU33 para asociarlos a una
+coordinación real sin crear solicitudes ficticias ni cambiar sus unicidades
+anteriores. Las visitas confirmadas se guardan en la tabla `visitas` existente.
+Incluye RLS y revocaciones para las tablas nuevas y `visitas`; no crea políticas
+públicas. No inicia trabajos ni envía correos al aplicar.
+
+**No aplicada ni autorizada en Supabase.** Preparada para validar sólo con datos
+ficticios en PostgreSQL local. Se conservarán las filas legadas; no se modifica
+ningún SQL ya desplegado. Mantener los flags HU23 apagados hasta revisión de su
+integración con HU20. Ver `docs/hu23_coordinacion_visitas.md`.
+
 ## HU18 — Proveedor externo (aplicada en desarrollo el 31/10/2026)
 
 `20261029235000_hu18_proveedor_externo.sql` amplía la tabla existente con

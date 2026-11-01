@@ -14,6 +14,9 @@ from app.api.provider_access import router as provider_access_router
 from app.api.quote_portal import router as quote_portal_router
 from app.api.quote_selections import router as quote_selections_router
 from app.api.conversations import router as conversations_router
+from app.api.visits import router as visits_router
+from app.db.visits import SqlAlchemyVisits
+from app.services.visits import visits_enabled, run_visit_worker
 from app.api.expense_authorizations import router as authorizations_router
 from app.api.provider_choices import router as choices_router
 from app.api.external_providers import router as external_providers_router
@@ -85,6 +88,8 @@ async def lifespan(_: FastAPI):
     workers = []
     stop_event = asyncio.Event()
     portal_enabled = os.getenv('AARI_QUOTE_PORTAL_ENABLED','false').lower() in {'1','true','yes'}
+    if visits_enabled() and os.getenv('AARI_VISITS_WORKER_ENABLED','false').lower() in {'1','true','yes'} and 'PYTEST_CURRENT_TEST' not in os.environ:
+        workers.append(asyncio.create_task(run_visit_worker(SqlAlchemyVisits(),stop_event)))
     if portal_enabled and os.getenv('AARI_QUOTE_WORKER_ENABLED','false').lower() in {'1','true','yes'} and 'PYTEST_CURRENT_TEST' not in os.environ:
         workers.append(asyncio.create_task(run_aari_quote_worker(build_aari_quote_worker(), stop_event)))
     if not portal_enabled and _quote_responses_worker_enabled():
@@ -143,6 +148,7 @@ app.include_router(provider_access_router)
 app.include_router(quote_portal_router)
 app.include_router(quote_selections_router)
 app.include_router(conversations_router)
+app.include_router(visits_router)
 app.include_router(external_providers_router)
 app.include_router(agency_configuration_router)
 app.include_router(expenses_router)
