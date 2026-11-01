@@ -437,6 +437,10 @@
 
 .propertyHistoryLinks a { overflow-wrap: anywhere; min-width: 0; }
 
+.propertyQuoteActions {
+  margin-bottom: var(--aari-space-5);
+}
+
 .claimCard,
 .currentStatus,
 .claimSummaryPanel,

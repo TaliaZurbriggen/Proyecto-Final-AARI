@@ -15,6 +15,7 @@ from app.api.quote_portal import router as quote_portal_router
 from app.api.conversations import router as conversations_router
 from app.api.expense_authorizations import router as authorizations_router
 from app.api.provider_choices import router as choices_router
+from app.api.external_providers import router as external_providers_router
 from app.api.coordination import get_coordination_service, router as coordination_router
 from app.api.admin_home import router as admin_home_router
 from app.api.configuracion import router as agency_configuration_router
@@ -140,6 +141,7 @@ app.include_router(auth_router)
 app.include_router(provider_access_router)
 app.include_router(quote_portal_router)
 app.include_router(conversations_router)
+app.include_router(external_providers_router)
 app.include_router(agency_configuration_router)
 app.include_router(expenses_router)
 app.include_router(admin_home_router)
