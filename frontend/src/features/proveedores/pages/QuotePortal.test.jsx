@@ -42,6 +42,15 @@ describe('importes explícitos',()=>{
 })
 
 describe('formulario del proveedor',()=>{
+  it('informa en AARI sólo la selección de su propio presupuesto, sin afirmar una visita',async()=>{
+    vi.spyOn(globalThis,'fetch').mockResolvedValue(json({...item,estado:'respondida',seleccionado:true,
+      puede_responder:false,presupuesto:saved}))
+    show()
+    expect(await screen.findByText(/El responsable seleccionó tu presupuesto/)).toBeVisible()
+    expect(screen.getByText(/no programa una fecha ni realiza un pago/)).toBeVisible()
+    expect(screen.queryByRole('button',{name:'Revisar presupuesto'})).not.toBeInTheDocument()
+  })
+
   it.each(['exacto','minimo'])('revisa y confirma importe %s sin contratar',async(kind)=>{
     const fetch=vi.spyOn(globalThis,'fetch').mockImplementation((_url,opts)=>Promise.resolve(json(opts?.method==='POST' ? {...item,estado:'respondida',puede_responder:false,presupuesto:{...saved,tipo_importe:kind}} : item)))
     show()

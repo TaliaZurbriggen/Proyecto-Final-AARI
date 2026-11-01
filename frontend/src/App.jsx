@@ -33,6 +33,7 @@ import OwnerExpensesPage from './features/reclamos/pages/OwnerExpensesPage.jsx'
 import OwnerExpenseDecisionPage from './features/reclamos/pages/OwnerExpenseDecisionPage.jsx'
 import ProviderChoicePage from './features/reclamos/pages/ProviderChoicePage.jsx'
 import ExternalProviderPage from './features/reclamos/pages/ExternalProviderPage.jsx'
+import BudgetComparisonPage from './features/reclamos/pages/BudgetComparisonPage.jsx'
 import ProviderActivationPage from './features/proveedores/pages/ProviderActivationPage.jsx'
 import ProviderHomePage from './features/proveedores/pages/ProviderHomePage.jsx'
 import ProviderQuoteDetailPage from './features/proveedores/pages/ProviderQuoteDetailPage.jsx'
@@ -150,6 +151,7 @@ function App() {
             <Route path="propietario/reclamos/:reclamoId/autorizar" element={<OwnerExpenseDecisionPage />} />
             <Route path="propietario/reclamos/:reclamoId/tipo-proveedor" element={<ProviderChoicePage ownerView />} />
             <Route path="propietario/reclamos/:reclamoId/proveedor-externo" element={<ExternalProviderPage ownerView />} />
+            <Route path="propietario/reclamos/:reclamoId/presupuestos" element={<BudgetComparisonPage ownerView />} />
             <Route path="propietario/contratos" element={<ContractsListPage />} />
             <Route path="propietario/contratos/:contractId" element={<ContractDetailPage />} />
           </Route>
@@ -159,6 +161,7 @@ function App() {
             <Route path="inquilino" element={<RoleHomePage />} />
             <Route path="inquilino/reclamos/:reclamoId/tipo-proveedor" element={<ProviderChoicePage />} />
             <Route path="inquilino/reclamos/:reclamoId/proveedor-externo" element={<ExternalProviderPage />} />
+            <Route path="inquilino/reclamos/:reclamoId/presupuestos" element={<BudgetComparisonPage />} />
             <Route path="inquilino/propiedades/:propiedadId/reclamos" element={<PropertyClaimsHistoryPage tenantView />} />
             <Route path="inquilino/propiedades/:propiedadId/reclamos/:reclamoId" element={<PropertyClaimDetailPage tenantView />} />
             <Route path="inquilino/contratos" element={<ContractsListPage />} />

@@ -12,6 +12,7 @@ from sqlalchemy import text
 from app.api.auth import require_admin, router as auth_router
 from app.api.provider_access import router as provider_access_router
 from app.api.quote_portal import router as quote_portal_router
+from app.api.quote_selections import router as quote_selections_router
 from app.api.conversations import router as conversations_router
 from app.api.expense_authorizations import router as authorizations_router
 from app.api.provider_choices import router as choices_router
@@ -140,6 +141,7 @@ app.add_middleware(
 app.include_router(auth_router)
 app.include_router(provider_access_router)
 app.include_router(quote_portal_router)
+app.include_router(quote_selections_router)
 app.include_router(conversations_router)
 app.include_router(external_providers_router)
 app.include_router(agency_configuration_router)

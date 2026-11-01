@@ -860,3 +860,27 @@ activación automática; HU23 implementará sus acciones y permisos separados. L
 primera lectura de una solicitud histórica proyecta sus eventos HU19 de forma
 idempotente, conservando fecha de origen y sin notificaciones externas.
 Detalle: [HU33](../../docs/hu33_conversaciones_privadas.md).
+
+## HU20 — selección confirmada (01/11/2026)
+
+`20261029120000_hu20_seleccion_presupuesto.sql` requiere HU17 y el canal AARI
+HU19 (`20261027130000`). Agrega una única tabla privada de auditoría y una
+clave compuesta en presupuestos, sin reinterpretar registros históricos ni
+modificar HU17. La selección conserva FK de reclamo/elección/ronda/proveedor,
+importe positivo, moneda y tipo; UUID de petición único y una decisión por
+elección/ronda. Incluye índices de FK, RLS y revocación a PUBLIC/anon/authenticated,
+sin políticas públicas.
+
+**Pendiente de autorización y aplicación compartida.** La validación utiliza
+bases PostgreSQL locales descartables; no acredita instalación en Supabase.
+Es una migración de una sola ejecución, transaccional y con tiempos de espera
+acotados. No repetir automáticamente ni ejecutarla al iniciar FastAPI. Antes
+de aplicar: verificar destino/historial, respaldo y ensayo con rollback; luego
+comprobar instalación, permisos, conservación de datos y registrar el resultado.
+
+HU18 ya está integrada en main `879fa07`; la navegación desde HU20 reutiliza su
+formulario y su confirmación, no crea otro estado intermedio ni modifica su DDL.
+HU33 es opcional para el aviso de chat, pero su esquema debe existir antes de
+habilitar `AARI_CONVERSATIONS_ENABLED`. La confirmación no envía SMTP dentro de
+la transacción ni activa workers.
+Detalle: [HU20](../../docs/hu20_seleccion_presupuestos.md).

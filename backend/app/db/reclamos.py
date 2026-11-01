@@ -18,6 +18,9 @@ from app.db.provider_choice_jobs import (
 from app.db.quote_portal_notices import (
     cancel_obsolete_portal_notices, validate_portal_notice,
 )
+from app.db.quote_selection_notices import (
+    cancel_obsolete_selection_notices, validate_selection_notice,
+)
 from app.services.expense_notifications import agency_email, expense_report
 from app.schemas.reclamos import (
     AgentClassificationResult,
@@ -456,6 +459,7 @@ class SqlAlchemyClaimsRepository:
             if choices_available(session):
                 cancel_obsolete_choice_notices(session)
             cancel_obsolete_portal_notices(session, notification_id=notification_id)
+            cancel_obsolete_selection_notices(session, notification_id=notification_id)
             session.execute(text("""
                 UPDATE notificaciones n SET estado_envio='fallido',
                     ultimo_error='Pedido de autorización finalizado; aviso obsoleto.',
@@ -527,6 +531,8 @@ class SqlAlchemyClaimsRepository:
                     or row['mensaje']!=context.message):
                 return False
             if not validate_portal_notice(session, context.id):
+                return False
+            if not validate_selection_notice(session, context.id):
                 return False
             # Renovar sólo el intento aún vigente; no enviar con una reserva
             # que haya vencido durante la comprobación de compatibilidad.
