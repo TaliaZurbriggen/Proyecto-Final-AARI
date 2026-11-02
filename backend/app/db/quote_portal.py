@@ -21,7 +21,7 @@ REQUEST_FROM = """ FROM public.aari_solicitudes_presupuesto s
     LEFT JOIN public.presupuestos b ON b.solicitud_aari_id=s.id """
 
 REQUEST_SELECT = """SELECT s.*, rp.contexto, rp.huella, rp.eleccion_id, rp.estado AS ronda_estado,
-    rp.cerrada_en, r.numero, p.nombre_razon_social AS proveedor_nombre,
+    rp.cerrada_en, r.numero, r.presupuesto_seleccionado_id, p.nombre_razon_social AS proveedor_nombre,
     n.estado_envio AS aviso_estado, b.id AS presupuesto_id, b.monto, b.moneda,
     b.tipo_importe, b.descripcion AS trabajo, b.recibido_en""" + REQUEST_FROM
 
@@ -171,6 +171,7 @@ class SqlAlchemyQuotePortal(SqlAlchemyQuoteRequests):
     def _view(self, s, row, now, *, can_respond=None):
         state = self._state(row,now)
         return {'id':row['id'],'reclamo_id':row['reclamo_id'],'numero':row['numero'],
+            'seleccionado':bool(row['presupuesto_id'] and row['presupuesto_id']==row['presupuesto_seleccionado_id']),
             'descripcion':row['contexto']['descripcion'],'ubicacion':row['contexto']['ubicacion'],
             'publicada_en':row['publicada_en'],'vence_en':row['vence_en'],'estado':state,
             'conversacion_habilitada':conversations_enabled(),
@@ -302,7 +303,7 @@ class SqlAlchemyQuotePortal(SqlAlchemyQuoteRequests):
             scope='' if agency else ''' AND EXISTS (SELECT 1 FROM reclamo_elecciones_proveedor ep
                 WHERE ep.id=rp.eleccion_id AND ep.usuario_id=:actor
                 AND ep.solicitud_responsable_en=:cycle)'''
-            rows=s.execute(text(REQUEST_SELECT+' WHERE s.reclamo_id=:id'+scope+' ORDER BY s.publicada_en DESC,s.id'),
+            rows=s.execute(text(REQUEST_SELECT+' WHERE s.reclamo_id=:id'+scope+' ORDER BY b.moneda NULLS LAST,b.monto NULLS LAST,s.id'),
                 {'id':claim_id,'actor':user.id,'cycle':claim['solicitado_en']}).mappings().all()
             now=s.execute(text('SELECT clock_timestamp()')).scalar_one()
             counts=self._conversation_counts(s,rows,user)

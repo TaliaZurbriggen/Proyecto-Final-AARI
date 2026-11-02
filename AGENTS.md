@@ -46,7 +46,10 @@ Jira un comentario breve con rama, commit, validaciones y estado de revisión.
 
 ## Documentación
 
-Registrar en Notion las decisiones técnicas o de producto que cambien el rumbo
-del proyecto, incluyendo contexto, alternativas consideradas y motivo de la
-decisión. Mantener el README actualizado cuando cambie la forma de levantar el
+Mantener la documentación versionada en el repositorio de GitHub: registrar en
+`docs/` las decisiones técnicas o de producto que cambien el rumbo del proyecto,
+incluyendo contexto, alternativas consideradas y motivo de la decisión. Enlazar
+esa documentación desde el README y resumir los cambios y validaciones en el PR
+cuando se autorice su publicación. Notion no es un requisito ni un pendiente de
+cierre. Mantener el README actualizado cuando cambie la forma de levantar el
 proyecto, su estructura o el estado relevante del Sprint.

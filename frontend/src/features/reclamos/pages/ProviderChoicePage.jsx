@@ -93,7 +93,10 @@ function ChoiceContent({ reclamoId, ownerView }) {
             onClick={() => choose('propio')}>{busy && lockedChoice === 'propio' ? 'Guardando…' : 'Elegir proveedor propio'}</Button>
         </article>
       </div> : <AlertMessage tone="warning">Esta solicitud ya no admite una elección. El plazo pudo vencer o la etapa pudo cambiar; contactá a la inmobiliaria para continuar.</AlertMessage>}
-      {saved?.tipo_proveedor === 'fidelizado' ? <ClaimQuoteSummary claimId={reclamoId} /> : null}
+      {saved?.tipo_proveedor === 'fidelizado' ? <>
+        <Link className={styles.back} to={`/${ownerView ? 'propietario' : 'inquilino'}/reclamos/${reclamoId}/presupuestos`}>Comparar y elegir presupuestos</Link>
+        <ClaimQuoteSummary claimId={reclamoId} />
+      </> : null}
     </>}
   </PageContainer>
 }

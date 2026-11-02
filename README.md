@@ -19,7 +19,8 @@ Sistema web con agente de inteligencia artificial que automatiza el flujo comple
 - **Base de datos:** PostgreSQL
 - **Frontend:** React
 - **Infraestructura:** AWS Free Tier / Railway
-- **Gestión del proyecto:** Jira + Notion
+- **Gestión del proyecto:** Jira
+- **Documentación técnica:** GitHub (`README.md`, `docs/` y pull requests)
 - **Control de versiones:** GitHub
 
 ## Estructura del proyecto
@@ -73,6 +74,30 @@ La identidad visual de AARI está centralizada para que los agentes y el equipo 
 - `frontend/src/pages/DesignSystemPreview.jsx`: vista ejecutable para revisar la dirección visual y los estados principales.
 
 La referencia aprobada se conserva dentro de la skill. Si una historia necesita apartarse de esa dirección, la decisión debe acordarse antes de implementarla.
+
+### Comparación y selección (HU20 / AARI-220 — validación local, 01/11/2026)
+
+La rama `codex/AARI-220-seleccion-presupuestos`, actualizada sobre main `879fa07`,
+permite al responsable comparar las propuestas de HU19 y revisar una elección
+antes de confirmarla. Se agrupan por moneda y ordenan por importe, sin conversión
+ni selección automática. Los mínimos conservan «Desde» y nunca representan un
+precio final ni un máximo autorizado.
+
+La confirmación guarda proveedor, presupuesto, importe, moneda, tipo y auditoría
+en una sola transacción; protege versiones, permisos, concurrencia y reintentos.
+Informa al proveedor dentro de su solicitud AARI y encola un correo privado.
+Si HU33 está habilitada, agrega además un aviso sólo en los hilos individuales
+de esa propuesta. No programa visitas (HU23) ni realiza pagos.
+
+La alternativa propia enlaza el formulario HU18 integrado por PR #40. Abrirlo
+no cambia el reclamo ni cierra la ronda: sólo confirmar el contacto en HU18
+produce la derivación. No se altera la decisión histórica de HU17.
+
+Requiere `20261029120000_hu20_seleccion_presupuesto.sql`, **validada sólo en
+PostgreSQL local y todavía no aplicada en Supabase**. Aplicación compartida,
+prueba con correo real y publicación requieren autorización separada. No se
+agregaron dependencias ni nuevas claves al `.env`; no activar workers generales.
+[API, decisiones, pruebas y pendientes HU20](docs/hu20_seleccion_presupuestos.md).
 
 ### Proveedor externo (HU18 / AARI-199 — implementación local, 31/10/2026)
 
