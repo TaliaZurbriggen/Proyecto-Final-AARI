@@ -88,6 +88,11 @@ function Comparison({ claimId, ownerView }) {
         <p>Estado al confirmar la selección: {decision.estado_resultante}</p>
         <h3>{decision.proveedor_nombre}</h3><p>{quoteAmount(decision)}</p><AlertMessage tone="success">La elección quedó guardada. El aviso al proveedor se procesa por separado; esto no confirma su recepción ni programa una visita.</AlertMessage>
         {decision.tipo_importe === 'minimo' && <p>Elegiste un importe mínimo: es un piso, no un precio final ni un máximo autorizado.</p>}
+        {!error && !isLoading && data?.decision?.id === decision.id
+          && data.coordinacion_url === `/visitas/${claimId}`
+          && ['Proveedor seleccionado', 'Visita programada'].includes(data.estado)
+          ? <><p>{ownerView ? 'El inquilino acuerda el horario con el proveedor. Podés consultar cómo avanza.' : 'El agente solicitará tus horarios para recibir al proveedor. Podés consultar la coordinación desde acá.'}</p>
+            <Link className={styles.ownLink} to={data.coordinacion_url}>Ver coordinación</Link></> : null}
       </section> : data && !error && !isLoading && <>
         <AlertMessage tone="info">Un importe “desde…” es un mínimo, no un precio final ni un máximo autorizado. Las monedas se muestran por separado, sin conversión ni selección automática.</AlertMessage>
         {data.recepcion_abierta && <p>Todavía pueden llegar otras propuestas. Si confirmás una elección, finalizará la recepción de este intento.</p>}

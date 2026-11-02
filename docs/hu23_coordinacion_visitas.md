@@ -3,7 +3,12 @@
 Inicio autorizado: 01/11/2026. Rama `codex/AARI-250-coordinacion-visitas`, desde
 main `879fa07`. Estimación vigente 6 HH, sin reestimación. Talía informó y
 autorizó registrar 2 HH de implementación el 01/11/2026, distribuidas abajo.
-Implementación en curso; no acredita una entrega integrada con HU20.
+Rama rebaseada el 02/11/2026 sobre main `e5aa612` (PR #41, HU20). La base
+rebaseada es `6007c59`; esta entrega incluye la integración posterior con HU20.
+El recorrido funcional HU20→HU23 se validó localmente con módulos reales y,
+después de autorización específica, en Supabase el 02/11/2026 con login real y
+rollback. Las tres migraciones requeridas quedaron instaladas. No acredita
+cierre del checkpoint de AARI-345 ni autorización de publicación/cierre de Jira.
 
 ## Decisión aprobada y recorrido
 
@@ -25,19 +30,45 @@ vencer se conserva historial y se avisa al responsable; cancelar/reseleccionar
 corresponde a HU24. Confirmación de visita, historial, estado y avisos atómicos.
 Recordatorios 24h y 2h, sin retroactivos ni avisos de intentos obsoletos.
 
-## Paralelo con HU20 y HU21
+## Entrada real de HU20 y compatibilidad con HU21
 
-Contrato de entrada provisional, usando columnas ya existentes: reclamo en
-`Proveedor seleccionado`, presupuesto y proveedor coherentes, solicitud HU19,
-responsable original y participantes activos. Se conserva `updated_at` de la
-selección y el contexto de participantes para rechazar resultados tardíos.
-HU23 no decide ni simula selección en producción. La selección de prueba sólo
-se prepara en PostgreSQL local. Cuando HU20 se integre hay que revisar este
-contrato contra su versión/intento definitivo y repetir el flujo con módulos
-reales. Integración multi-HU del checkpoint permanece en AARI-345 de Tobías.
+El contrato provisional del 01/11 queda reemplazado por la decisión auditada
+de `reclamo_selecciones_presupuesto`. Cada coordinación nueva guarda su
+`seleccion_id`; una FK compuesta vincula decisión/reclamo/presupuesto/proveedor.
+La fuente comprueba elección, ronda, actor, importe, moneda y tipo exacto/mínimo.
+No basta con cargar «Proveedor seleccionado» o sus IDs directamente en reclamos.
+Se conserva además `updated_at` como guarda del contexto, no como única prueba
+de que hubo selección. Cambiar importe, moneda o tipo invalida nuevas acciones
+y detiene avisos obsoletos, sin reescribir la decisión histórica.
 
-Migración nueva `20261101110000_hu23_coordinacion_visitas.sql` sólo local hasta
-autorización específica para Supabase. No editar migraciones ya desplegadas.
+El worker descubre decisiones confirmadas después de su commit; inicia el
+pedido al inquilino y encola un único aviso durable. Dos workers o un reinicio
+no duplican coordinaciones ni pedidos. No se agrega un envío de red dentro de
+la elección HU20, ni se necesita Gemini para manejar horarios estructurados.
+El intervalo normal es 30 s; requiere ambos flags de visitas habilitados y
+el esquema completo. No se activaron en el entorno compartido.
+
+El GET de comparación sólo ofrece `coordinacion_url` con la función y el
+esquema disponibles, selección coincidente y estado vigente. «Ver coordinación»
+respeta el rol: inquilino propone; propietario sólo consulta. La interfaz usa
+los componentes/tokens AARI, no ofrece el enlace sobre un reclamo resuelto,
+tras error/recarga pendiente o para una URL ajena al reclamo.
+
+HU21 fue instalado y probado localmente con el mismo reclamo: retoma la
+selección real y conserva presupuesto/proveedor; su expirador de 72h no pisa
+la espera específica de HU23. Al confirmar la visita, el GET de HU21 informa
+`requiere_sincronizacion=true` y el estado actual «Visita programada».
+**Límite comprobado:** `resume` no admite estados terminales; no se escribió
+el checkpoint a mano ni se lo presenta como sincronizado. El adaptador de
+eventos/sincronización terminal sigue pendiente en AARI-345 de Tobías.
+
+Migraciones HU23 `20261101110000_hu23_coordinacion_visitas.sql` y
+`20261102103000_hu23_seleccion_auditada.sql`, aplicadas con autorización en
+Supabase el 02/11/2026 junto con su requisito HU20. La segunda agrega el vínculo sin
+editar los SQL anteriores. Conserva filas/acciones legadas sin atribuirles una
+decisión retrospectiva: el worker las deja inactivas al preparar un intento
+vinculado real. Sólo sustituye el índice de unicidad de selección para no
+bloquear ese reemplazo; no borra filas, mensajes ni visitas.
 Workers y funcionalidad opt-in; no se activa SMTP ni Gemini para implementar.
 
 ## Implementación local
@@ -142,12 +173,14 @@ comprobados. No acredita login normal ni selección HU20 real.
 
 La herramienta de navegador agotó dos intentos de conexión; no se acredita
 revisión visual automatizada de escritorio/móvil. Talía puede revisar la demo.
-No se aplicó la migración en Supabase ni se enviaron mensajes externos.
+En esa demostración inicial no se aplicó la migración en Supabase ni se
+enviaron mensajes externos; la validación compartida posterior consta abajo.
 
-Antes de declarar HU23 terminada: conectar el contrato definitivo de HU20,
-validar la proyección/checkpoint y convivencia de plazos con HU21/AARI-345,
-repetir el flujo integrado, completar aceptación visual, autorizar/verificar
-el despliegue compartido y obtener revisión del PR. No se implementa la
+Antes de declarar HU23 terminada: completar el adaptador de checkpoint
+terminal HU21/AARI-345 y su validación multi-HU, y obtener revisión del PR.
+El esquema compartido y login real se verificaron posteriormente, como se
+detalla abajo; no se acredita un recorrido manual completo con todas las
+cuentas reales. No se implementa la
 cancelación/reselección de HU24 ni se expira por cuenta propia la espera del
 inquilino mediante un plazo nuevo no acordado. La actividad en el chat no
 renueva las 24 horas específicas del acuerdo.
@@ -174,3 +207,154 @@ La distribución es orientativa del total informado, no una medición automátic
 
 Worklogs `10356`–`10366`, del 01/11/2026. HU y subtareas permanecen En curso.
 No se alteran estimaciones, decisiones de alcance ni los pendientes anteriores.
+
+## Integración HU20 aprobada el 02/11/2026
+
+Rebase local sobre main `e5aa612`, conservando los validadores de avisos HU20
+y HU23 en `prepare_notification_delivery`. Backup anterior `ce15adc` en la
+rama local `codex/backup-AARI-250-pre-rebase-20261102`. Al finalizar la validación
+el rebase seguía local, sin autorización nueva de publicación ni horas adicionales.
+La autorización posterior para commit/push/PR consta al final de este documento.
+
+Resultados posteriores, sin sumar tandas solapadas:
+
+- `python -m pytest -q -p no:cacheprovider --tb=short tests/test_visits_postgres.py tests/test_visits_hu20_integration_postgres.py tests/test_quote_selections_postgres.py tests/test_visits.py tests/test_quote_selections.py`
+  → **110 aprobadas**, 49,51 s, con PostgreSQL local. Incluye ocho recorridos
+  HTTP (ordinario/extraordinario × exacto/mínimo × directo/negociación), selección
+  real, replay, workers simultáneos, recreación, FK cruzada, migración aditiva
+  con historia legada, importes alterados y contrato de compatibilidad HU21.
+  En HTTP se sustituye sólo la identidad de sesión por cuentas ficticias; los
+  repositorios, permisos de dominio, transacciones y subgrafos son reales.
+- Regresión PostgreSQL de HU33, HU21 y portal HU19:
+  `python -m pytest -q -p no:cacheprovider --tb=short tests/test_conversations_postgres.py tests/test_coordination_postgres.py tests/test_quote_portal_postgres.py`
+  → **141 aprobadas**, 96,74 s. Tanda independiente, no otra suite backend
+  completa. Incluye los checks de persistencia/recovery existentes de HU21.
+- `python -m pytest tests -q -p no:cacheprovider --tb=short`
+  → **1222 aprobadas / 565 omitidas**, 20,85 s; 18 advertencias SQLite previas.
+  Sin `AARI_TEST_POSTGRES_URL`, dotenv deshabilitado y Supabase desactivado.
+  No equivale a ejecutar toda la suite de integraciones PostgreSQL.
+- `npm test -- --pool=forks --maxWorkers=1 --testTimeout=20000 --reporter=json --outputFile=tmp/hu23-integracion-frontend.json`
+  → **488 aprobadas, 0 fallidas**, `success=true`. Tanda focal de comparación,
+  visitas y navegación desde Mensajes: **33 aprobadas**. `npm run lint` y
+  `npm run build` correctos; bundle 566,28/157,83 kB gzip, aviso >500 kB vigente.
+  `compileall` y formato correctos al escribir este registro.
+
+Diagnóstico conservado: la primera tanda de fixtures nuevos tuvo 36 aprobadas,
+3 fallidas y 24 errores porque buscaba la solicitud ya respondida con el filtro
+predeterminado «pendientes». Se corrigió sólo la consulta del fixture a «todas»;
+las 27 de visitas pasaron después y luego se ejecutó la tanda integrada de 110.
+La primera regresión backend sin ruta explícita intentó recolectar la copia
+temporal de main dentro de `tmp/hu23-baseline` y falló por módulos duplicados;
+se repitió apuntando a la carpeta oficial `tests`, sin excluir pruebas de ella.
+
+En esas tandas locales no se usaron Supabase, SMTP, Meta ni Gemini.
+Documentación versionada en el repo,
+según la actualización de AGENTS.md incorporada desde HU20; Notion no es un
+requisito ni un pendiente de cierre. HU/subtareas continúan En curso.
+
+### Revisión visual aislada de la integración
+
+Vista temporal ignorada por Git:
+`http://127.0.0.1:13610/tmp/hu23-integracion-visual.html`. Usa los componentes
+reales de comparación/coordinación y una API simulada explícita, sin cuentas
+reales ni persistencia de formularios. No es el recorrido PostgreSQL de arriba.
+Verificados: escritorio 1440 px, móvil 390 px (ancho de documento 1425/375 px,
+respectivamente, sin desborde horizontal), foco de teclado en «Ver coordinación»,
+navegación al formulario de tres fechas y variante del propietario sin formulario
+de disponibilidad. Se mantuvieron componentes, tokens y estilos AARI.
+
+El primer Enter tuvo una recarga transitoria en la vista de QA; el clic posterior
+mostró el formulario esperado. El selector auxiliar se consultó por su rol
+accesible después de que el locator de etiqueta exacta no lo encontrara.
+La sesión del navegador se interrumpió al terminar: no se acredita la comprobación
+visual final de «Resuelto» ni la restauración del tamaño, aunque la ocultación del
+enlace para ese estado sí está cubierta por las pruebas automatizadas.
+
+## Supabase y autenticación real — 02/11/2026
+
+Talía autorizó aplicar/verificar las migraciones y probar con login real.
+No se autorizó ni ejecutó un envío real de SMTP, Gemini o Meta. Se leyó la
+configuración privada existente sin copiar claves al repositorio ni imprimirlas.
+
+El preflight confirmó la ausencia de los tres cambios y de instalaciones
+parciales. Antes de escribir se creó un respaldo privado con `pg_dump` en
+`backend/tmp/` (ignorado por Git; contiene datos privados y no se publica).
+Se ensayó la operación con rollback y luego se aplicaron, en una transacción:
+
+1. `20261029120000_hu20_seleccion_presupuesto.sql`.
+2. `20261101110000_hu23_coordinacion_visitas.sql`.
+3. `20261102103000_hu23_seleccion_auditada.sql`.
+
+Se registraron las tres versiones en el historial. Los conteos de las 42 tablas
+públicas previas y el estado de sus secuencias se preservaron. Se verificaron
+RLS, ausencia de permisos/políticas públicas, índices válidos y FK compuesta.
+La consulta posterior confirmó las tres instaladas, sin repetir DDL.
+No se borraron ni se completaron retrospectivamente decisiones existentes.
+
+Comprobador versionado: `backend/scripts/check_visits_postgres.py`. Desde
+`backend/`, con la ruta a la configuración privada sólo en el equipo:
+
+```text
+python scripts/check_visits_postgres.py --env-file <ruta-privada> --mode check
+python scripts/check_visits_postgres.py --env-file <ruta-privada> --mode test
+```
+
+`check` sólo inspecciona. `dry-run` ensaya y revierte. `apply` requiere
+autorización, `--pg-dump <ejecutable>` y respaldo correcto antes de escribir;
+una instalación coherente ya aplicada no se repite. Rechaza destinos ajenos a
+Supabase, historial inconsistente, objetos parciales y dependencias fuera de
+orden. No es un migrador global ni habilita workers. `test` también requiere
+autorización explícita y sólo ejecuta los casos HU23 acotados.
+
+`backend/tests/test_visits_supabase_integration.py` → **4 aprobadas**, 428,93 s:
+ordinario/extraordinario × confirmación directa/negociación excepcional. Usan
+PostgreSQL compartido, repositorios reales, hash de contraseña real y cookies
+JWT emitidas por `/auth/login`; no se sustituye `get_current_user`. La fábrica
+de sesiones se enlaza a una transacción exterior para revertir cada caso.
+Comprueban 401 sin sesión, identidad, selección HU20, tres intervalos, aceptación
+ajena, visita única y plazo sin reinicio. Los casos de negociación usan mínimo;
+los directos, importe exacto. No es una nueva evaluación de clasificación LLM.
+
+Los registros ficticios usan IDs propios y número explícito, sin consumir la
+secuencia pública. Cada caso revierte y comprueba inventario/secuencias y
+ausencia del reclamo de QA. El inicio de coordinación se limita al reclamo
+ficticio; no se ejecutó un worker global sobre reclamos existentes. Los correos
+son ficticios y SMTP está bloqueado por la prueba.
+
+Aceptación en navegador integrado: Talía ingresó con su cuenta administradora
+en la app normal `http://localhost:5173`; se verificaron Inicio y `/visitas`
+contra el backend normal `http://localhost:8000`, sin API simulada ni reemplazo
+de autenticación. El listado real cargó sin errores y quedó vacío: las pruebas
+no dejaron visitas ficticias. Esto acredita login/lectura reales, no un recorrido
+manual de todos los roles. Se restauró el tamaño normal del navegador.
+
+Para esta sesión se habilitaron visitas, portal y Mensajes sólo en el proceso
+local. Se mantuvieron desactivados todos los workers generales y envíos; no se
+editó el `.env` compartido. El despliegue/activación automática y el adaptador
+terminal HU21 de AARI-345 no se presentan como resueltos por estas pruebas.
+Al cerrar esta validación aún no se habían hecho nuevos commits, push, PR,
+horas o cierres de Jira.
+
+Regresión final después de agregar el comprobador y la prueba compartida:
+`python -m pytest tests -q -p no:cacheprovider --tb=short` → **1230 aprobadas /
+569 omitidas**, 20,80 s; 18 advertencias SQLite previas. Dotenv y Supabase
+deshabilitados, sin URL PostgreSQL local ni opt-in compartido: las cuatro
+pruebas externas quedan omitidas en esta tanda, no se vuelven a ejecutar.
+Incluye ocho guardas nuevas sin red (`test_check_visits_postgres.py`): rechazo
+de destinos ajenos/sufijos engañosos, parámetros ocultos, conexión acotada y
+envoltorios SQL compatibles con la transacción exterior. La evidencia previa
+de 1222/565 corresponde a la tanda anterior, sin estas nuevas pruebas.
+
+## Publicación autorizada para revisión — 02/11/2026
+
+Talía autorizó subir los cambios y crear el PR con contexto para Tobías.
+Se publica la rama rebaseada sobre main `e5aa612`, sin reemplazar cambios ajenos:
+la actualización remota verifica la cabeza anterior esperada. Se incluyen la
+integración HU20, migración aditiva, comprobador compartido, regresiones y esta
+evidencia. El respaldo, configuración privada y lanzadores temporales siguen
+ignorados por Git. No se repiten migraciones ni se consume cuota al publicar.
+
+El PR solicita revisión de la entrega HU23, no certifica el cierre de AARI-345.
+Se deja explícito el límite de sincronización terminal HU21 y los workers
+generales desactivados. HU/subtareas continúan En curso, sin horas adicionales
+ni autorización de merge o cierre en esta publicación.

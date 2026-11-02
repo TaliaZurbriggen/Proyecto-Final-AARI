@@ -1,4 +1,4 @@
-"""HU23 PostgreSQL local. La selección se prepara como fixture, no simula HU20 real."""
+"""HU23 con selección real HU20, PostgreSQL local y sin envíos externos."""
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta, timezone
 import os
@@ -7,11 +7,14 @@ from uuid import uuid4
 
 import pytest
 from sqlalchemy import text
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import sessionmaker
 
 from app.db.visits import SqlAlchemyVisits, validate_visit_notice
 from app.db.conversations import SqlAlchemyConversations
+from app.db.quote_selections import SqlAlchemyQuoteSelections
 from app.schemas.conversations import ConversationMessageRequest
+from app.schemas.quote_selections import QuoteSelectionRequest
 from app.schemas.visits import AvailabilityRequest, VisitAction, VisitConfirmationRequest, VisitOption, VisitProposalRequest
 from app.services.visits import VisitError
 from tests.test_quote_portal_postgres import portal_case, eligible, active_provider, budget, scalar
@@ -21,27 +24,45 @@ from tests.test_responsible_actor_postgres import local_engine, claim_case, MIGR
 pytestmark=pytest.mark.skipif(not os.getenv('AARI_TEST_POSTGRES_URL'),reason='PostgreSQL local dedicado.')
 
 
-@pytest.fixture
-def visit_case(portal_case,monkeypatch,request):
-    case=eligible(portal_case,getattr(request,'param','ordinario'))
+def prepare_visits(portal_case, monkeypatch, expense='ordinario', *, kind='exacto', count=1, linked=True):
+    case=eligible(portal_case,expense)
     monkeypatch.setenv('AARI_VISITS_ENABLED','true')
+    monkeypatch.setenv('AARI_QUOTE_PORTAL_ENABLED','true')
     monkeypatch.setenv('AARI_CONVERSATIONS_ENABLED','true')
     with case.db.connect() as c:
         cursor=c.connection.cursor()
-        for name in ('20261028210000_hu33_conversaciones.sql','20261101110000_hu23_coordinacion_visitas.sql'):
+        names=['20261029120000_hu20_seleccion_presupuesto.sql',
+                     '20261028210000_hu33_conversaciones.sql',
+                     '20261101110000_hu23_coordinacion_visitas.sql']
+        if linked: names.append('20261102103000_hu23_seleccion_auditada.sql')
+        for name in names:
             cursor.execute((MIGRATIONS/name).read_text(encoding='utf-8'))
         c.commit()
         cursor.close()
-    case.provider=active_provider(case)
+    case.providers=[active_provider(case,i) for i in range(count)]
+    case.provider=case.providers[0]
     case.portal.publish(case.claim)
-    rid=case.portal.list_own(case.provider)['items'][0]['id']
-    case.portal.submit(rid,case.provider,budget())
-    with case.db.begin() as c:
-        bid=c.execute(text('SELECT id FROM presupuestos WHERE solicitud_aari_id=:id'),{'id':rid}).scalar_one()
-        c.execute(text("UPDATE reclamos SET estado='Proveedor seleccionado',presupuesto_seleccionado_id=:b,proveedor_seleccionado_id=:p,monto_seleccionado=10000.50 WHERE id=:id"),{'id':case.claim,'b':bid,'p':case.provider.perfil_id})
+    for provider in case.providers:
+        rid=case.portal.list_own(provider)['items'][0]['id']
+        case.portal.submit(rid,provider,budget().model_copy(update={'tipo_importe':kind}))
     case.visits=SqlAlchemyVisits(sessionmaker(bind=case.db))
+    case.selection=SqlAlchemyQuoteSelections(sessionmaker(bind=case.db))
     case.tenant=case.actors['inquilino']
-    case.cid=case.visits.start(case.claim)
+    rid=case.portal.list_own(case.provider,status='todas')['items'][0]['id']
+    bid=scalar(case,'SELECT id FROM presupuestos WHERE solicitud_aari_id=:id',id=rid)
+    view=case.selection.get(case.claim,case.actor)
+    case.selection_payload=QuoteSelectionRequest(request_id=uuid4(),ronda_id=view['ronda_id'],
+        expected_updated_at=view['updated_at'],modalidad='fidelizado',presupuesto_id=bid)
+    return case
+
+
+@pytest.fixture
+def visit_case(portal_case,monkeypatch,request):
+    case=prepare_visits(portal_case,monkeypatch,getattr(request,'param','ordinario'))
+    case.decision=case.selection.choose(case.claim,case.actor,case.selection_payload)
+    # Mismo descubrimiento durable que usa el worker, no un UPDATE de fixture.
+    case.visits.tick()
+    case.cid=scalar(case,'SELECT id FROM aari_visita_coordinaciones')
     return case
 
 
@@ -65,6 +86,7 @@ def publish(case):
 def test_schedule_from_selected_quote_no_llm_owner_does_not_replace_tenant(visit_case):
     c=visit_case
     assert c.cid and c.visits.start(c.claim)==c.cid
+    assert scalar(c,'SELECT seleccion_id FROM aari_visita_coordinaciones')==c.decision['id']
     assert c.visits.get(c.claim,c.tenant)['acciones']==['disponibilidad']
     if c.actor.rol=='propietario':
         assert c.visits.get(c.claim,c.actor)['acciones']==[]
@@ -223,3 +245,101 @@ def test_real_notification_repository_revalidates_visit_before_delivery(visit_ca
     with c.db.begin() as s: s.execute(text("UPDATE reclamos SET estado='Resuelto'"))
     assert not c.claims.prepare_notification_delivery(context)
     assert scalar(c,'SELECT estado_envio FROM notificaciones WHERE id=:id',id=nid)=='fallido'
+
+
+def test_claim_fields_without_hu20_audit_never_start_a_coordination(portal_case,monkeypatch):
+    c=prepare_visits(portal_case,monkeypatch)
+    with c.db.begin() as s:
+        s.execute(text("UPDATE reclamos SET estado='Proveedor seleccionado',presupuesto_seleccionado_id=:b,proveedor_seleccionado_id=:p,monto_seleccionado=10000.50 WHERE id=:id"),
+                  {'id':c.claim,'b':c.selection_payload.presupuesto_id,'p':c.provider.perfil_id})
+    assert c.visits.start(c.claim) is None
+    c.visits.tick()
+    assert scalar(c,'SELECT count(*) FROM aari_visita_coordinaciones')==0
+    assert scalar(c,"SELECT count(*) FROM notificaciones WHERE clave_idempotencia LIKE 'visita:%'")==0
+
+
+def test_workers_discover_same_real_selection_once_and_recover_after_recreation(portal_case,monkeypatch):
+    c=prepare_visits(portal_case,monkeypatch)
+    decision=c.selection.choose(c.claim,c.actor,c.selection_payload)
+    assert c.selection.get(c.claim,c.actor)['coordinacion_url']==f'/visitas/{c.claim}'
+    assert scalar(c,'SELECT count(*) FROM aari_visita_coordinaciones')==0
+    barrier=Barrier(2)
+    def tick(_):
+        barrier.wait(timeout=10)
+        return SqlAlchemyVisits(sessionmaker(bind=c.db)).tick()
+    with ThreadPoolExecutor(max_workers=2) as pool: list(pool.map(tick,range(2)))
+    fresh=SqlAlchemyVisits(sessionmaker(bind=c.db))
+    fresh.tick()
+    assert fresh.get(c.claim,c.tenant)['acciones']==['disponibilidad']
+    assert scalar(c,'SELECT seleccion_id FROM aari_visita_coordinaciones')==decision['id']
+    assert scalar(c,'SELECT count(*) FROM aari_visita_coordinaciones')==1
+    assert scalar(c,"SELECT count(*) FROM aari_visita_avisos WHERE evento='inicio'")==1
+    assert c.selection.choose(c.claim,c.actor,c.selection_payload)['repetida']
+    fresh.tick()
+    assert scalar(c,'SELECT count(*) FROM aari_visita_coordinaciones')==1
+
+
+@pytest.mark.parametrize('change',['claim_amount','quote_amount','quote_currency','quote_kind'])
+def test_money_changed_after_hu20_cannot_be_confirmed_as_original_selection(visit_case,change):
+    c=visit_case
+    with c.db.begin() as s:
+        if change=='claim_amount': s.execute(text('UPDATE reclamos SET monto_seleccionado=20000'))
+        elif change=='quote_amount': s.execute(text('UPDATE presupuestos SET monto=20000'))
+        elif change=='quote_currency': s.execute(text("UPDATE presupuestos SET moneda='USD'"))
+        else: s.execute(text("UPDATE presupuestos SET tipo_importe='minimo'"))
+    assert not c.visits.get(c.claim,c.tenant)['acciones']
+    assert c.visits.start(c.claim) is None
+    with c.db.begin() as s:
+        nid=s.execute(text("SELECT notificacion_id FROM aari_visita_avisos WHERE evento='inicio'")).scalar_one()
+        assert not validate_visit_notice(s,nid)
+
+
+def test_selection_fk_rejects_another_budget_of_same_claim(portal_case,monkeypatch):
+    c=prepare_visits(portal_case,monkeypatch,count=2)
+    c.selection.choose(c.claim,c.actor,c.selection_payload)
+    c.visits.tick()
+    with c.db.connect() as s:
+        other=s.execute(text('SELECT id,proveedor_id,solicitud_aari_id FROM presupuestos WHERE id<>:id'),
+                        {'id':c.selection_payload.presupuesto_id}).mappings().one()
+    with pytest.raises(IntegrityError):
+        with c.db.begin() as s:
+            s.execute(text('UPDATE aari_visita_coordinaciones SET presupuesto_id=:b,proveedor_id=:p,solicitud_id=:s'),
+                      {'b':other['id'],'p':other['proveedor_id'],'s':other['solicitud_aari_id']})
+    assert scalar(c,'SELECT presupuesto_id FROM aari_visita_coordinaciones')==c.selection_payload.presupuesto_id
+
+
+def test_comparison_hides_visit_link_when_disabled_or_claim_finalized(visit_case,monkeypatch):
+    c=visit_case
+    assert c.selection.get(c.claim,c.actor)['coordinacion_url']==f'/visitas/{c.claim}'
+    monkeypatch.setenv('AARI_VISITS_ENABLED','false')
+    assert c.selection.get(c.claim,c.actor)['coordinacion_url'] is None
+    monkeypatch.setenv('AARI_VISITS_ENABLED','true')
+    with c.db.begin() as s: s.execute(text("UPDATE reclamos SET estado='Resuelto'"))
+    assert c.selection.get(c.claim,c.actor)['coordinacion_url'] is None
+
+
+def test_additive_link_preserves_legacy_history_without_inventing_an_audit(portal_case,monkeypatch):
+    c=prepare_visits(portal_case,monkeypatch,linked=False)
+    decision=c.selection.choose(c.claim,c.actor,c.selection_payload)
+    assert c.selection.get(c.claim,c.actor)['coordinacion_url'] is None
+    assert c.visits.start(c.claim) is None
+    assert c.visits.tick()==0
+    with c.db.begin() as s:
+        legacy=s.execute(text('''INSERT INTO aari_visita_coordinaciones(reclamo_id,presupuesto_id,proveedor_id,
+            solicitud_id,inquilino_id,inquilino_usuario_id,proveedor_usuario_id,responsable_usuario_id,contexto,seleccion_version)
+            SELECT r.id,b.id,b.proveedor_id,b.solicitud_aari_id,r.inquilino_id,:tu,:pu,:actor,'{}',r.updated_at
+            FROM reclamos r JOIN presupuestos b ON b.id=r.presupuesto_seleccionado_id RETURNING id'''),
+            {'tu':c.tenant.id,'pu':c.provider.id,'actor':c.actor.id}).scalar_one()
+        s.execute(text("INSERT INTO aari_visita_acciones(coordinacion_id,request_id,usuario_id,accion,datos,huella,version) VALUES (:id,:key,:user,'legado','{}','historica',0)"),
+                  {'id':legacy,'key':uuid4(),'user':c.tenant.id})
+    with c.db.connect() as conn:
+        cursor=conn.connection.cursor()
+        cursor.execute((MIGRATIONS/'20261102103000_hu23_seleccion_auditada.sql').read_text(encoding='utf-8'))
+        conn.commit()
+        cursor.close()
+    assert scalar(c,'SELECT seleccion_id FROM aari_visita_coordinaciones WHERE id=:id',id=legacy) is None
+    c.visits.tick()
+    assert scalar(c,'SELECT etapa FROM aari_visita_coordinaciones WHERE id=:id',id=legacy)=='invalidada'
+    assert scalar(c,'SELECT count(*) FROM aari_visita_acciones WHERE coordinacion_id=:id',id=legacy)==1
+    assert c.visits.get(c.claim,c.tenant)['id']!=legacy
+    assert scalar(c,'SELECT count(*) FROM aari_visita_coordinaciones WHERE seleccion_id=:id',id=decision['id'])==1

@@ -22,7 +22,11 @@ SOURCE = '''SELECT r.id,r.numero,r.estado,r.updated_at,r.fecha_visita,r.tipo_gas
     tu.activo AND NOT tu.primer_ingreso AND tu.rol='inquilino' AS tenant_active,
     pu.activo AND NOT pu.primer_ingreso AND pu.rol='proveedor' AS provider_active_account,
     au.activo AND NOT au.primer_ingreso AND au.rol::text=ep.actor_tipo AS actor_active,
-    a.decision AS autorizacion,rp.eleccion_id,rp.huella AS ronda_huella
+    a.decision AS autorizacion,rp.eleccion_id,rp.huella AS ronda_huella,
+    sp.id AS seleccion_id,sp.decidido_en AS seleccion_decidida_en,
+    (sp.usuario_id=ep.usuario_id AND sp.monto=b.monto AND sp.monto=r.monto_seleccionado
+        AND sp.moneda=b.moneda AND sp.tipo_importe=b.tipo_importe
+        AND sp.modalidad='fidelizado') AS seleccion_consistente
     FROM reclamos r JOIN propiedades p ON p.id=r.propiedad_id
     JOIN inquilinos i ON i.id=r.inquilino_id JOIN propietarios owner ON owner.id=p.propietario_id
     JOIN presupuestos b ON b.id=r.presupuesto_seleccionado_id AND b.reclamo_id=r.id
@@ -30,6 +34,9 @@ SOURCE = '''SELECT r.id,r.numero,r.estado,r.updated_at,r.fecha_visita,r.tipo_gas
     JOIN aari_solicitudes_presupuesto s ON s.id=b.solicitud_aari_id AND s.reclamo_id=r.id AND s.proveedor_id=b.proveedor_id
     JOIN aari_rondas_presupuesto rp ON rp.id=s.ronda_id
     JOIN reclamo_elecciones_proveedor ep ON ep.id=rp.eleccion_id
+    JOIN reclamo_selecciones_presupuesto sp ON sp.reclamo_id=r.id
+        AND sp.eleccion_id=ep.id AND sp.ronda_id=rp.id
+        AND sp.presupuesto_id=b.id AND sp.proveedor_id=b.proveedor_id
     JOIN reclamo_responsables rr ON rr.reclamo_id=r.id AND rr.solicitado_en=ep.solicitud_responsable_en
     JOIN proveedores pr ON pr.id=b.proveedor_id
     LEFT JOIN usuarios tu ON tu.id=i.usuario_id LEFT JOIN usuarios pu ON pu.id=pr.usuario_id
@@ -38,7 +45,8 @@ SOURCE = '''SELECT r.id,r.numero,r.estado,r.updated_at,r.fecha_visita,r.tipo_gas
         AND a.usuario_id=ep.usuario_id WHERE r.id=:id'''
 CONTEXT_KEYS = ('propiedad_id','inquilino_id','propietario_id','tenant_user','provider_user','actor_user',
                 'actor_tipo','current_actor','owner_user','direccion','localidad','provincia','budget',
-                'proveedor_id','solicitud_id','eleccion_id','ronda_huella','monto','moneda','tipo_importe')
+                'proveedor_id','solicitud_id','eleccion_id','ronda_huella','monto','moneda','tipo_importe',
+                'seleccion_id','seleccion_decidida_en')
 
 
 def _context(source):
@@ -47,6 +55,7 @@ def _context(source):
 
 def _eligible(source):
     return bool(source and source['estado'] in {'Proveedor seleccionado', 'Visita programada'}
+        and source['seleccion_consistente']
         and source['tenant_active'] and source['provider_active_account'] and source['actor_active']
         and source['provider_active'] and source['provider_user'] == source['request_provider_user']
         and source['tenant_state'] == 'activo' and source['tenant_property'] == source['propiedad_id']
@@ -59,7 +68,10 @@ def _eligible(source):
 
 def available(session):
     return getattr(session, 'bind', session).dialect.name == 'postgresql' and session.execute(text(
-        "SELECT to_regclass('public.aari_visita_coordinaciones') IS NOT NULL")).scalar_one()
+        """SELECT to_regclass('public.reclamo_selecciones_presupuesto') IS NOT NULL
+            AND EXISTS(SELECT 1 FROM pg_attribute
+                WHERE attrelid=to_regclass('public.aari_visita_coordinaciones')
+                AND attname='seleccion_id' AND NOT attisdropped)""")).scalar_one()
 
 
 class SqlAlchemyVisits(SqlAlchemyQuoteRequests):
@@ -76,7 +88,8 @@ class SqlAlchemyVisits(SqlAlchemyQuoteRequests):
             source=''' FROM aari_visita_coordinaciones v JOIN reclamos r ON r.id=v.reclamo_id
                 JOIN inquilinos i ON i.id=v.inquilino_id JOIN propiedades p ON p.id=r.propiedad_id
                 JOIN propietarios owner ON owner.id=p.propietario_id JOIN proveedores pr ON pr.id=v.proveedor_id
-                WHERE v.presupuesto_id=r.presupuesto_seleccionado_id AND v.proveedor_id=r.proveedor_seleccionado_id
+                WHERE v.seleccion_id IS NOT NULL
+                AND v.presupuesto_id=r.presupuesto_seleccionado_id AND v.proveedor_id=r.proveedor_seleccionado_id
                 AND v.id=(SELECT x.id FROM aari_visita_coordinaciones x WHERE x.reclamo_id=r.id ORDER BY x.creada_en DESC,x.id DESC LIMIT 1)
                 AND ('''+scopes.get(user.rol,'false')+')'
             params={'user':user.id,'profile':user.perfil_id}
@@ -88,7 +101,7 @@ class SqlAlchemyVisits(SqlAlchemyQuoteRequests):
 
     @staticmethod
     def _source(session, claim):
-        source=session.execute(text(SOURCE+' FOR SHARE OF p,i,owner,b,s,rp,ep,rr,pr'), {'id': claim}).mappings().one_or_none()
+        source=session.execute(text(SOURCE+' FOR SHARE OF p,i,owner,b,s,rp,ep,rr,pr,sp'), {'id': claim}).mappings().one_or_none()
         if source:
             session.execute(text('SELECT id FROM usuarios WHERE id IN (:tenant,:provider,:actor) ORDER BY id FOR SHARE'),
                 {'tenant':source['tenant_user'],'provider':source['provider_user'],'actor':source['actor_user']}).all()
@@ -102,7 +115,8 @@ class SqlAlchemyVisits(SqlAlchemyQuoteRequests):
 
     @staticmethod
     def _current(row, source):
-        if not _eligible(source) or row['contexto'] != _context(source):
+        if (not _eligible(source) or row['seleccion_id'] != source['seleccion_id']
+                or row['contexto'] != _context(source)):
             return False
         if row['etapa'] == 'confirmada':
             return source['estado'] == 'Visita programada' and source['fecha_visita'] == row['propuesta_fecha']
@@ -198,6 +212,7 @@ class SqlAlchemyVisits(SqlAlchemyQuoteRequests):
         from app.services.visits import visits_enabled
         if not visits_enabled(): return None
         with self.transaction() as session:
+            if not available(session): return None
             session.execute(text('SELECT id FROM reclamos WHERE id=:id FOR UPDATE'), {'id':claim})
             source = self._source(session, claim)
             if not _eligible(source) or source['estado'] != 'Proveedor seleccionado': return None
@@ -206,15 +221,15 @@ class SqlAlchemyVisits(SqlAlchemyQuoteRequests):
             if old and old['etapa'] in {'esperando_disponibilidad','esperando_confirmacion','negociando','confirmada'}:
                 session.execute(text("UPDATE aari_visita_coordinaciones SET etapa='invalidada',version=version+1 WHERE id=:id"), {'id':old['id']})
                 self._event(session,old,'La selección o sus participantes cambiaron. Este intento queda sólo para consulta.','invalidada')
-            existing=session.execute(text('SELECT id FROM aari_visita_coordinaciones WHERE reclamo_id=:id AND presupuesto_id=:budget AND seleccion_version=:version'),
-                                     {'id':claim,'budget':source['budget'],'version':source['updated_at']}).scalar_one_or_none()
+            existing=session.execute(text('SELECT id FROM aari_visita_coordinaciones WHERE reclamo_id=:id AND seleccion_id=:selection AND seleccion_version=:version'),
+                                     {'id':claim,'selection':source['seleccion_id'],'version':source['updated_at']}).scalar_one_or_none()
             if existing: return existing
             row=session.execute(text('''INSERT INTO aari_visita_coordinaciones(reclamo_id,presupuesto_id,proveedor_id,
-                solicitud_id,inquilino_id,inquilino_usuario_id,proveedor_usuario_id,responsable_usuario_id,contexto,seleccion_version)
-                VALUES (:claim,:budget,:provider,:request,:tenant,:tu,:pu,:actor,CAST(:context AS jsonb),:version) RETURNING *'''),
+                solicitud_id,inquilino_id,inquilino_usuario_id,proveedor_usuario_id,responsable_usuario_id,contexto,seleccion_version,seleccion_id)
+                VALUES (:claim,:budget,:provider,:request,:tenant,:tu,:pu,:actor,CAST(:context AS jsonb),:version,:selection) RETURNING *'''),
                 {'claim':claim,'budget':source['budget'],'provider':source['proveedor_id'],'request':source['solicitud_id'],
                  'tenant':source['inquilino_id'],'tu':source['tenant_user'],'pu':source['provider_user'],'actor':source['actor_user'],
-                 'context':json.dumps(_context(source)),'version':source['updated_at']}).mappings().one()
+                 'context':json.dumps(_context(source)),'version':source['updated_at'],'selection':source['seleccion_id']}).mappings().one()
             for audience, participant in [('inquilino',source['tenant_user'])]+([('responsable',source['actor_user'])] if source['actor_user']!=source['tenant_user'] else []):
                 session.execute(text('''INSERT INTO aari_conversaciones(finalidad,audiencia,participante_usuario_id,responsable_usuario_id,coordinacion_visita_id)
                     VALUES ('coordinacion',:audience,:user,:actor,:id)'''), {'audience':audience,'user':participant,'actor':source['actor_user'],'id':row['id']})
@@ -289,10 +304,14 @@ class SqlAlchemyVisits(SqlAlchemyQuoteRequests):
         # Lectura de candidatos sin reservas por lote: cada start/action vuelve a
         # bloquear y revalidar el reclamo, sin efectos externos bajo la reserva.
         with self.transaction() as session:
-            ids=session.execute(text("""SELECT r.id FROM reclamos r WHERE r.estado='Proveedor seleccionado'
+            if not available(session): return 0
+            ids=session.execute(text("""SELECT r.id FROM reclamos r
+                JOIN reclamo_selecciones_presupuesto sp ON sp.reclamo_id=r.id
+                    AND sp.presupuesto_id=r.presupuesto_seleccionado_id AND sp.proveedor_id=r.proveedor_seleccionado_id
+                WHERE r.estado='Proveedor seleccionado'
                 AND r.id>CAST(:cursor AS uuid)
                 AND NOT EXISTS(SELECT 1 FROM aari_visita_coordinaciones c WHERE c.reclamo_id=r.id
-                    AND c.presupuesto_id=r.presupuesto_seleccionado_id AND c.seleccion_version=r.updated_at)
+                    AND c.seleccion_id=sp.id AND c.seleccion_version=r.updated_at)
                 ORDER BY r.id LIMIT :limit"""), {'limit':max(1,min(limit,100)),
                     'cursor':str(getattr(self,'_discovery_cursor','00000000-0000-0000-0000-000000000000'))}).scalars().all()
         for claim in ids: self.start(claim)
@@ -413,7 +432,8 @@ def inbox_select(user):
         JOIN propiedades p ON p.id=r.propiedad_id JOIN propietarios owner ON owner.id=p.propietario_id
         JOIN proveedores pr ON pr.id=v.proveedor_id
         LEFT JOIN aari_conversacion_lecturas l ON l.conversacion_id=c.id AND l.usuario_id=:user
-        WHERE v.id=(SELECT x.id FROM aari_visita_coordinaciones x WHERE x.reclamo_id=r.id ORDER BY x.creada_en DESC,x.id DESC LIMIT 1)
+        WHERE v.seleccion_id IS NOT NULL
+        AND v.id=(SELECT x.id FROM aari_visita_coordinaciones x WHERE x.reclamo_id=r.id ORDER BY x.creada_en DESC,x.id DESC LIMIT 1)
         AND ('''+scopes.get(user.rol,'false')+')'
 
 

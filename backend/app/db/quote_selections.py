@@ -116,12 +116,21 @@ class SqlAlchemyQuoteSelections(SqlAlchemyQuotePortal):
                     'moneda': request['moneda'], 'tipo_importe': request['tipo_importe'],
                     'descripcion': request['trabajo'], 'recibido_en': request['recibido_en'],
                     'puede_elegir': bool(valid and enabled and request['proveedor_id'] in candidates)})
+            coordination_url = None
+            if (previous and row['estado'] in {'Proveedor seleccionado', 'Visita programada'}
+                and row['presupuesto_seleccionado_id'] == previous['presupuesto_id']
+                and row['proveedor_seleccionado_id'] == previous['proveedor_id']):
+                from app.db.visits import available
+                from app.services.visits import visits_enabled
+                if visits_enabled() and available(s):
+                    coordination_url = '/visitas/' + str(claim_id)
             return {'reclamo_id': claim_id, 'numero': row['numero'], 'descripcion': row['descripcion'],
                 'estado': row['estado'], 'updated_at': row['updated_at'],
                 'ronda_id': round_row['id'] if round_row else None, 'puede_elegir': bool(valid),
                 'puede_cargar_propio': can_register_own,
                 'recepcion_abierta': bool(round_row and not round_row['cerrada_en'] and now < round_row['vence_en']),
-                'decision': selection_result(previous) if previous else None, 'items': items}
+                'decision': selection_result(previous) if previous else None, 'items': items,
+                'coordinacion_url': coordination_url}
 
     def choose(self, claim_id, user, payload):
         try:
