@@ -70,20 +70,25 @@ function Comparison({ claimId, ownerView }) {
     <Link to={back} className={styles.back}>Volver a la elección de proveedor</Link>
     <PageHeading eyebrow="Revisá las propuestas" title="Elegí un presupuesto"
       description="Compará el alcance informado y confirmá cómo querés continuar. La visita se coordina después." />
-    {isLoading && <LoadingState label="Cargando presupuestos" />}
-    {(error || failure) && <AlertMessage>{error || failure}</AlertMessage>}
-    {error && <Button variant="secondary" onClick={() => setRevision((n) => n + 1)}>Volver a intentar</Button>}
-    {data && !error && !isLoading && <>
-      <section className={styles.summary} aria-label="Reclamo">
-        <h2>Reclamo {formatClaimNumber(data.numero)}</h2><p>{data.descripcion}</p>
-        <StatusBadge>{decision?.estado_resultante || data.estado}</StatusBadge>
-      </section>
-      {decision ? <section className={styles.summary} aria-label="Selección registrada">
+    {isLoading && <LoadingState label={decision ? 'Actualizando estado del reclamo' : 'Cargando presupuestos'} />}
+    {failure && <AlertMessage>{failure}</AlertMessage>}
+    {error && <>
+      <AlertMessage tone={decision ? 'warning' : 'error'}>{decision
+        ? `La selección está guardada, pero no pudimos actualizar el estado del reclamo. ${error}`
+        : error}</AlertMessage>
+      <Button variant="secondary" onClick={() => setRevision((n) => n + 1)}>{decision ? 'Reintentar actualización' : 'Volver a intentar'}</Button>
+    </>}
+    {data && !error && !isLoading && <section className={styles.summary} aria-label="Reclamo">
+      <h2>Reclamo {formatClaimNumber(data.numero)}</h2><p>{data.descripcion}</p>
+      <StatusBadge>{data.estado}</StatusBadge>
+    </section>}
+    {decision ? <section className={styles.summary} aria-label="Selección registrada">
         <h2 ref={savedHeading} tabIndex={-1}>Presupuesto seleccionado</h2>
         <p>{decision.actor_nombre} · {formatClaimDate(decision.decidido_en)}</p>
+        <p>Estado al confirmar la selección: {decision.estado_resultante}</p>
         <h3>{decision.proveedor_nombre}</h3><p>{quoteAmount(decision)}</p><AlertMessage tone="success">La elección quedó guardada. El aviso al proveedor se procesa por separado; esto no confirma su recepción ni programa una visita.</AlertMessage>
         {decision.tipo_importe === 'minimo' && <p>Elegiste un importe mínimo: es un piso, no un precio final ni un máximo autorizado.</p>}
-      </section> : <>
+      </section> : data && !error && !isLoading && <>
         <AlertMessage tone="info">Un importe “desde…” es un mínimo, no un precio final ni un máximo autorizado. Las monedas se muestran por separado, sin conversión ni selección automática.</AlertMessage>
         {data.recepcion_abierta && <p>Todavía pueden llegar otras propuestas. Si confirmás una elección, finalizará la recepción de este intento.</p>}
         {!canChoose && <AlertMessage tone="warning">Esta etapa no admite una nueva selección. El contexto o los permisos pudieron cambiar; consultá a la inmobiliaria.</AlertMessage>}
@@ -112,6 +117,5 @@ function Comparison({ claimId, ownerView }) {
           <Button variant="secondary" onClick={() => setRevision((n) => n + 1)}>Actualizar presupuestos</Button>
         </>}
       </>}
-    </>}
   </PageContainer>
 }

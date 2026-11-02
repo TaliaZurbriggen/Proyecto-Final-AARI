@@ -183,6 +183,45 @@ confirmación, selección guardada, vacío y navegación a HU18; escritorio/móv
 teclado y foco. La revisión móvil detectó y corrigió el botón con nombre largo.
 Este recorrido no equivale a un login real ni valida instalación compartida.
 
+## Correcciones de revisión del PR #41 — 01/11/2026
+
+Se atendieron los dos hallazgos de presentación del
+[comentario de Talía](https://github.com/TaliaZurbriggen/Proyecto-Final-AARI/pull/41#issuecomment-6567297227),
+con alcance limitado al componente de comparación y sus pruebas; sin cambios de
+API, backend, base, dependencias ni estilos compartidos.
+
+- La confirmación obtenida del POST se renderiza fuera del bloque dependiente
+  del GET. Continúa visible mientras se actualiza y si falla la consulta. Se
+  distingue una advertencia de actualización de un error al guardar; el botón
+  «Reintentar actualización» sólo repite el GET, nunca la selección.
+- El resumen del reclamo muestra exclusivamente `data.estado`, su estado
+  vigente consultado. El snapshot se conserva en el detalle con la etiqueta
+  «Estado al confirmar la selección». Si no se pudo actualizar el reclamo, no
+  se presenta ese valor histórico como un estado actual verificado.
+- Se conserva el foco en la confirmación aun durante la recarga y se reutilizan
+  `AlertMessage`, `LoadingState`, `Button`, `StatusBadge` y layouts existentes.
+
+Cinco regresiones nuevas reprodujeron los fallos antes de modificar el
+componente; tras la corrección pasan las **17 pruebas del componente**. Incluyen
+inquilino/propietario, POST exitoso + GET fallido, reintento sólo de lectura,
+estado actual «Resuelto» con selección histórica y consulta aún pendiente.
+Comando: `npm run test -- --pool=threads --maxWorkers=1 --testTimeout=20000
+src/features/reclamos/pages/BudgetComparisonPage.test.jsx`.
+
+Regresión completa del frontend: **472 aprobadas en 44 archivos**, sin fallos,
+con `npm run test -- --pool=threads --maxWorkers=1 --testTimeout=20000`.
+`npm run lint`, `npm run build` y `git diff --check` correctos; se conserva el
+aviso conocido de bundle >500 kB. No se repitió el backend: esta corrección no
+modifica su código ni atribuye a esta ejecución nuevas pruebas de PostgreSQL.
+
+QA aislado escritorio (1440 px), móvil (390 px) y teclado con API simulada:
+confirmación visible tras 503, reintento sin incrementar el contador de POST y
+consulta de selección histórica con estado vigente «Resuelto». Sin desbordes
+horizontales en móvil. Evidencias ignoradas en `backend/artifacts/hu20/`:
+`review-red.json`, `review-green.json`, `review-frontend-all.json`, `review-refresh-error-desktop.jpg`,
+`review-refresh-error-mobile.jpg` y `review-current-state-desktop.jpg`. Vista
+temporal y servidor de QA retirados al finalizar; no se usó Supabase ni SMTP.
+
 ## Pendientes de cierre
 
 - Aplicación/verificación autorizada del esquema HU20 en Supabase y recorrido

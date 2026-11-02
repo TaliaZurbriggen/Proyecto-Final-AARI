@@ -1,4 +1,4 @@
-import { act, render, screen, waitFor } from '@testing-library/react'
+import { act, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
@@ -121,5 +121,57 @@ describe('Comparación y selección HU20', () => {
     expect(screen.getByRole('button', { name: 'Guardando…' })).toBeDisabled()
     await act(async () => complete(saved))
     expect(await screen.findByRole('heading', { name: 'Presupuesto seleccionado' })).toBeInTheDocument()
+  })
+
+  it.each([false, true])('conserva el guardado si falla la recarga y reintenta sólo la consulta (propietario=%s)', async (ownerView) => {
+    getQuoteSelection.mockResolvedValueOnce(view)
+      .mockRejectedValueOnce(new Error('No pudimos actualizar los datos.'))
+      .mockResolvedValueOnce({ ...view, estado: 'Proveedor seleccionado', decision: saved, puede_elegir: false })
+    const user = setup({ ownerView })
+    await user.click(await screen.findByRole('button', { name: 'Revisar propuesta de Servicio Uno' }))
+    await user.click(screen.getByRole('button', { name: 'Confirmar elección' }))
+    const retry = await screen.findByRole('button', { name: 'Reintentar actualización' })
+    const confirmation = screen.getByRole('region', { name: 'Selección registrada' })
+    expect(within(confirmation).getByRole('heading', { name: 'Presupuesto seleccionado' })).toBeInTheDocument()
+    expect(within(confirmation).getByRole('heading', { name: 'Servicio Uno' })).toBeInTheDocument()
+    expect(within(confirmation).getByText(/Desde .*10.000,50.*ARS/)).toBeInTheDocument()
+    expect(screen.getByText(/La selección está guardada, pero no pudimos actualizar el estado del reclamo/)).toBeInTheDocument()
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Confirmar elección' })).not.toBeInTheDocument()
+    expect(selectQuote).toHaveBeenCalledTimes(1)
+    await user.click(retry)
+    const claim = await screen.findByRole('region', { name: 'Reclamo' })
+    expect(within(claim).getByText('Proveedor seleccionado')).toBeInTheDocument()
+    expect(screen.getByRole('region', { name: 'Selección registrada' })).toBeInTheDocument()
+    expect(getQuoteSelection).toHaveBeenCalledTimes(3)
+    expect(selectQuote).toHaveBeenCalledTimes(1)
+  })
+
+  it.each([false, true])('distingue el estado actual del reclamo de la selección histórica (propietario=%s)', async (ownerView) => {
+    getQuoteSelection.mockResolvedValue({ ...view, estado: 'Resuelto', decision: saved, puede_elegir: false })
+    setup({ ownerView })
+    const claim = await screen.findByRole('region', { name: 'Reclamo' })
+    expect(within(claim).getByText('Resuelto')).toBeInTheDocument()
+    expect(within(claim).queryByText('Proveedor seleccionado')).not.toBeInTheDocument()
+    const confirmation = screen.getByRole('region', { name: 'Selección registrada' })
+    expect(within(confirmation).getByRole('heading', { name: 'Servicio Uno' })).toBeInTheDocument()
+    expect(within(confirmation).getByText('Estado al confirmar la selección: Proveedor seleccionado')).toBeInTheDocument()
+    expect(selectQuote).not.toHaveBeenCalled()
+  })
+
+  it('mantiene visible la confirmación mientras consulta el estado vigente', async () => {
+    let completeReload
+    getQuoteSelection.mockResolvedValueOnce(view).mockImplementationOnce(() => new Promise((resolve) => { completeReload = resolve }))
+    const user = setup()
+    await user.click(await screen.findByRole('button', { name: 'Revisar propuesta de Servicio Uno' }))
+    await user.click(screen.getByRole('button', { name: 'Confirmar elección' }))
+    await waitFor(() => expect(getQuoteSelection).toHaveBeenCalledTimes(2))
+    expect(screen.getByRole('heading', { name: 'Presupuesto seleccionado' })).toHaveFocus()
+    expect(screen.getByRole('region', { name: 'Selección registrada' })).toBeInTheDocument()
+    expect(screen.getByText('Actualizando estado del reclamo')).toBeInTheDocument()
+    expect(screen.queryByRole('region', { name: 'Reclamo' })).not.toBeInTheDocument()
+    await act(async () => completeReload({ ...view, estado: 'Resuelto', decision: saved, puede_elegir: false }))
+    expect(within(screen.getByRole('region', { name: 'Reclamo' })).getByText('Resuelto')).toBeInTheDocument()
+    expect(selectQuote).toHaveBeenCalledTimes(1)
   })
 })
