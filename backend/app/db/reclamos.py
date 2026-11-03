@@ -21,6 +21,7 @@ from app.db.quote_portal_notices import (
 from app.db.quote_selection_notices import (
     cancel_obsolete_selection_notices, validate_selection_notice,
 )
+from app.db.cancellation_notices import validate_cancellation_notice
 from app.services.expense_notifications import agency_email, expense_report
 from app.schemas.reclamos import (
     AgentClassificationResult,
@@ -536,6 +537,8 @@ class SqlAlchemyClaimsRepository:
                 return False
             from app.db.visits import validate_visit_notice
             if not validate_visit_notice(session, context.id):
+                return False
+            if not validate_cancellation_notice(session, context.id):
                 return False
             # Renovar sólo el intento aún vigente; no enviar con una reserva
             # que haya vencido durante la comprobación de compatibilidad.

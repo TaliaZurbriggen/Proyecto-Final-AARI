@@ -4,6 +4,7 @@ from sqlalchemy import bindparam, text
 
 from app.db.quote_portal import SqlAlchemyQuotePortal
 from app.services.conversations import ConversationError, EVENT_MESSAGES, budget_write_reason
+from app.db.cancelled_visit_history import CancelledVisitHistory, inbox_select as cancelled_visit_inbox
 
 CONTEXT_FROM = ''' FROM aari_solicitudes_presupuesto s
     JOIN aari_rondas_presupuesto rp ON rp.id=s.ronda_id
@@ -210,6 +211,9 @@ class SqlAlchemyConversations(SqlAlchemyQuotePortal):
             return rid
 
     def thread_messages(self, thread_id, user, **kwargs):
+        history=CancelledVisitHistory(self).messages(thread_id,user,**kwargs)
+        if history is not None:
+            return history
         visit = self._visit_repository(thread_id)
         if visit:
             return visit.thread_messages(thread_id, user, **kwargs)
@@ -242,6 +246,7 @@ class SqlAlchemyConversations(SqlAlchemyQuotePortal):
             return {'mensaje': self._message(row, user.id), 'repetido': False}
 
     def thread_send(self, thread_id, user, payload):
+        CancelledVisitHistory(self).reject_write(thread_id,user)
         visit = self._visit_repository(thread_id)
         if visit:
             return visit.thread_send(thread_id, user, payload)
@@ -260,6 +265,9 @@ class SqlAlchemyConversations(SqlAlchemyQuotePortal):
             return {'leido_hasta': last, 'no_leidos': self._reader(session, thread, user.id, audit=roles['agency'])[1]}
 
     def thread_read(self, thread_id, user, through):
+        history=CancelledVisitHistory(self).read(thread_id,user,through)
+        if history is not None:
+            return history
         visit = self._visit_repository(thread_id)
         if visit:
             return visit.thread_read(thread_id, user, through)
@@ -397,6 +405,9 @@ class SqlAlchemyConversations(SqlAlchemyQuotePortal):
                 from app.db.visits import available, inbox_select
                 if available(session):
                     selection += ' UNION ALL ' + inbox_select(user)
+            cancelled = cancelled_visit_inbox(session,user,has_visit_reader=hasattr(self,'_visit_repository'))
+            if cancelled:
+                selection += ' UNION ALL ' + cancelled
             combined = '(' + selection + ') inbox'
             stats = session.execute(text('SELECT count(*) AS total,coalesce(sum(no_leidos),0) AS unread FROM ' + combined), params).mappings().one()
             last_page = max(1, (stats['total'] + page_size - 1) // page_size)

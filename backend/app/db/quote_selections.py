@@ -127,10 +127,16 @@ class SqlAlchemyQuoteSelections(SqlAlchemyQuotePortal):
             return {'reclamo_id': claim_id, 'numero': row['numero'], 'descripcion': row['descripcion'],
                 'estado': row['estado'], 'updated_at': row['updated_at'],
                 'ronda_id': round_row['id'] if round_row else None, 'puede_elegir': bool(valid),
+                'cancelacion_habilitada': responsible and self._cancellation_enabled(s),
                 'puede_cargar_propio': can_register_own,
                 'recepcion_abierta': bool(round_row and not round_row['cerrada_en'] and now < round_row['vence_en']),
                 'decision': selection_result(previous) if previous else None, 'items': items,
                 'coordinacion_url': coordination_url}
+
+    @staticmethod
+    def _cancellation_enabled(session):
+        from app.db.provider_choices import SqlAlchemyProviderChoicesRepository
+        return SqlAlchemyProviderChoicesRepository._cancellation_enabled(session)
 
     def choose(self, claim_id, user, payload):
         try:

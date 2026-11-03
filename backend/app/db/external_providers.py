@@ -4,6 +4,7 @@ from sqlalchemy import text
 from sqlalchemy.exc import IntegrityError
 
 from app.db.database import SessionLocal
+from app.db.current_provider_choice import CURRENT_CHOICE
 from app.db.quote_portal import SqlAlchemyQuotePortal
 from app.db.quote_requests import COLUMNS as QUOTE_COLUMNS, SOURCE as QUOTE_SOURCE
 from app.schemas.external_providers import ExternalProviderDetail, ExternalProviderRecord, ExternalProviderResult
@@ -18,6 +19,7 @@ SOURCE = """
     LEFT JOIN reclamo_responsables rr ON rr.reclamo_id=r.id
     LEFT JOIN reclamo_elecciones_proveedor ep ON ep.reclamo_id=r.id
         AND ep.solicitud_responsable_en=rr.solicitado_en AND ep.actor_tipo=rr.actor_tipo
+        AND """ + CURRENT_CHOICE + """
     WHERE r.id=:id AND (:role='administrador' OR (ep.usuario_id=u.id AND (
         (:role='inquilino' AND i.usuario_id=u.id AND i.id=:profile AND i.estado='activo'
          AND i.propiedad_id=p.id AND r.tipo_gasto='ordinario' AND rr.actor_tipo='inquilino')

@@ -5,6 +5,7 @@ from sqlalchemy.exc import IntegrityError
 
 from app.agents.provider_choice import provider_choice_graph
 from app.db.database import SessionLocal
+from app.db.current_provider_choice import CURRENT_CHOICE
 from app.schemas.provider_choices import ProviderChoiceDetail, ProviderChoiceResult
 from app.services.provider_choices_service import (
     ProviderChoiceConflict, ProviderChoiceForbidden, ProviderChoiceNotFound,
@@ -17,6 +18,7 @@ SOURCE = """
     JOIN reclamo_responsables rr ON rr.reclamo_id=r.id
     JOIN reclamo_elecciones_proveedor ep ON ep.reclamo_id=r.id
         AND ep.solicitud_responsable_en=rr.solicitado_en AND ep.actor_tipo=rr.actor_tipo
+        AND """ + CURRENT_CHOICE + """
     JOIN propiedades p ON p.id=r.propiedad_id
     JOIN inquilinos i ON i.id=r.inquilino_id
     JOIN propietarios pr ON pr.id=p.propietario_id
@@ -77,8 +79,15 @@ class SqlAlchemyProviderChoicesRepository:
                     "provincia": row["provincia"], "localidad": row["localidad"], "barrio": row["barrio"],
                     "tipo": row["propiedad_tipo"], "piso": row["piso"], "numero": row["propiedad_numero"]},
                 puede_elegir=can_choose(row, now),
+                cancelacion_habilitada=self._cancellation_enabled(session),
                 decision=choice_result(row) if row["solicitud_estado"] == "decidida" else None,
             )
+
+    @staticmethod
+    def _cancellation_enabled(session):
+        from app.services.coordination_cancellations import cancellations_enabled
+        return bool(cancellations_enabled() and session.execute(text(
+            "SELECT to_regclass('public.reclamo_cancelaciones_coordinacion') IS NOT NULL")).scalar_one())
 
     def choose(self, claim_id, user, request):
         try:
