@@ -5,6 +5,13 @@ Rama: `codex/AARI-220-seleccion-presupuestos`; base actualizada: main `879fa07`.
 Estado: implementación validada localmente; publicación autorizada para revisión
 de Talía. Pendiente validación compartida; sin cierre de HU/subtareas.
 
+**Actualización 02/11/2026:** la migración HU20 fue aplicada y verificada con
+autorización en Supabase durante la integración HU23. Cuatro recorridos HTTP
+HU20→HU23 aprobaron con autenticación real de cuentas ficticias y rollback, sin
+SMTP, Gemini ni Meta. Este resultado actualiza el pendiente compartido del
+01/11, no modifica su evidencia histórica ni estados de Jira.
+Ver [registro compartido HU23](hu23_coordinacion_visitas.md#supabase-y-autenticación-real--02112026).
+
 ## Alcance y decisiones
 
 Se mantiene el alcance aprobado: propuestas estructuradas de HU19 con importe
@@ -107,7 +114,8 @@ chat opcional. Agrega clave única compuesta a presupuestos y la auditoría con
 sus índices, RLS y permisos revocados a PUBLIC/anon/authenticated. No modifica
 importes históricos, no agrega contactos reales ni aplica DDL al arrancar.
 
-**No aplicada a Supabase desde esta entrega.** Antes de habilitar la comparación
+**No aplicada desde la entrega del 01/11; aplicada posteriormente con HU23 el
+02/11/2026, con autorización y verificación.** Antes de habilitar la comparación
 en una base, aplicar/verificar la migración con autorización expresa, respaldo
 y ensayo con rollback. No ejecutar el SQL nuevamente si ya existe: revisar
 historial/esquema primero. No se requiere reinstalar dependencias ni agregar
@@ -222,10 +230,10 @@ horizontales en móvil. Evidencias ignoradas en `backend/artifacts/hu20/`:
 `review-refresh-error-mobile.jpg` y `review-current-state-desktop.jpg`. Vista
 temporal y servidor de QA retirados al finalizar; no se usó Supabase ni SMTP.
 
-## Pendientes de cierre
+## Pendientes registrados al 01/11/2026
 
 - Aplicación/verificación autorizada del esquema HU20 en Supabase y recorrido
-  autenticado compartido, con envío real sólo si se autoriza.
+  autenticado compartido: cubiertos el 02/11 desde HU23, sin envío real.
 - Revisión de Talía en el PR; commit/push/publicación autorizados por el usuario.
 - Tiempo real por confirmar con el usuario; no se registró tiempo nuevo ni se
   cerraron HU/subtareas en Jira durante esta implementación.

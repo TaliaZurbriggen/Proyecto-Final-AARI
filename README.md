@@ -12,6 +12,35 @@ Universidad Tecnológica Nacional - Facultad Regional San Francisco
 
 Sistema web con agente de inteligencia artificial que automatiza el flujo completo de gestión de reclamos de mantenimiento en inmobiliarias: clasificación ordinario/extraordinario/expensa, selección de proveedores, coordinación de turnos y seguimiento hasta el cierre.
 
+## HU23 — Coordinación de visitas en desarrollo (02/11/2026)
+
+Rama `codex/AARI-250-coordinacion-visitas`, rebaseada sobre main `e5aa612` con
+HU20 integrada. Implementación local de disponibilidad del inquilino, confirmación
+del proveedor y negociación excepcional por Mensajes cuando ningún horario
+sirve. La otra persona debe confirmar una propuesta estructurada: texto libre
+no programa visitas ni reinicia las 24 horas. Avisos y recordatorios 24h/2h
+durables; no se envían correos al importar el módulo o aplicar su migración.
+
+Las migraciones `20261101110000_hu23_coordinacion_visitas.sql` y
+`20261102103000_hu23_seleccion_auditada.sql`, junto con su requisito HU20
+`20261029120000`, fueron **aplicadas y verificadas con autorización en Supabase
+el 02/11/2026**. Respaldo privado previo, ensayo con rollback, historial,
+RLS/permisos y conservación de las 42 tablas previas y secuencias verificados.
+No repetirlas al hacer pull. La segunda vincula la decisión auditada a la
+coordinación sin borrar historia ni modificar los SQL previos.
+Los workers generales siguen apagados. La sesión local de aceptación habilita
+visitas y Mensajes, sin editar el `.env` ni activar envíos automáticos.
+Mensajes reutiliza `AARI_CONVERSATIONS_ENABLED`. Accesos nuevos:
+`/visitas` y `/visitas/:reclamoId`, también desde «Ver coordinación» en el
+presupuesto seleccionado. El recorrido HTTP real HU20→HU23 pasó localmente:
+110 pruebas focalizadas; backend general final 1230 aprobadas/569 omitidas y frontend
+488 aprobadas. Además, cuatro recorridos HTTP contra Supabase aprobaron con
+login/cookies reales de cuentas ficticias y rollback; el navegador integrado
+verificó el login administrador y el listado real. Sin SMTP, Gemini ni Meta.
+No sumar tandas solapadas. Falta el adaptador de checkpoint terminal de AARI-345
+y la revisión del PR; no se declara HU23 lista.
+Ver [documentación HU23](docs/hu23_coordinacion_visitas.md).
+
 ## Stack tecnológico
 
 - **Backend:** Python + FastAPI
@@ -93,9 +122,9 @@ La alternativa propia enlaza el formulario HU18 integrado por PR #40. Abrirlo
 no cambia el reclamo ni cierra la ronda: sólo confirmar el contacto en HU18
 produce la derivación. No se altera la decisión histórica de HU17.
 
-Requiere `20261029120000_hu20_seleccion_presupuesto.sql`, **validada sólo en
-PostgreSQL local y todavía no aplicada en Supabase**. Aplicación compartida,
-prueba con correo real y publicación requieren autorización separada. No se
+Requiere `20261029120000_hu20_seleccion_presupuesto.sql`, **aplicada y verificada
+con autorización en Supabase el 02/11/2026 junto con HU23**; no repetirla al
+hacer pull. La prueba con correo real y publicación requieren autorización separada. No se
 agregaron dependencias ni nuevas claves al `.env`; no activar workers generales.
 [API, decisiones, pruebas y pendientes HU20](docs/hu20_seleccion_presupuestos.md).
 

@@ -10,6 +10,7 @@ from app.db.conversations import SqlAlchemyConversations
 from app.schemas.auth import AuthenticatedUser
 from app.schemas.conversations import ConversationActionRequest, ConversationMessageRequest, ConversationReadRequest
 from app.services.conversations import ConversationError, conversations_enabled
+from app.services.visits import VisitError
 
 
 def ensure_enabled():
@@ -29,7 +30,7 @@ def call(response, operation):
     response.headers['Cache-Control'] = 'no-store'
     try:
         return operation()
-    except ConversationError as error:
+    except (ConversationError, VisitError) as error:
         raise HTTPException(error.status, detail={'code': error.code, 'message': str(error)}, headers={'Cache-Control': 'no-store'}) from None
     except SQLAlchemyError:
         raise HTTPException(503, detail={'code': 'conversations_unavailable',

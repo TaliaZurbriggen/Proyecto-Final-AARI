@@ -1,11 +1,11 @@
-import { createContext, useCallback, useContext, useEffect, useId, useRef, useState } from 'react'
+import { useCallback, useContext, useEffect, useId, useRef, useState } from 'react'
+import { DockContext } from './conversationContext.js'
 import { ArrowLeft, MessageSquare, X } from 'lucide-react'
 import { AlertMessage, Button, EmptyState, IconButton, LoadingState, StatusBadge } from '../../components/ui/index.js'
 import ConversationPanel from './ConversationPanel.jsx'
 import { getConversation, getInbox, openQuestions, questionsChanged } from './conversationsApi.js'
 import styles from './ConversationDock.module.css'
 
-const DockContext = createContext(null)
 const focusable = 'button:not(:disabled), a[href], input:not(:disabled):not([type="hidden"]), textarea:not(:disabled), select:not(:disabled), [tabindex]'
 const canFocus = (element) => element?.isConnected && element.matches(focusable) && !element.disabled
   && !element.closest('[hidden], [inert], [aria-hidden="true"]')
@@ -154,7 +154,7 @@ function ConversationDockState({ user, children }) {
     else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus() }
   }
 
-  return <DockContext.Provider key={session} value={{ openRequest, openThread, enabled: valid && enabled }}>
+  return <DockContext.Provider key={session} value={{ openRequest, openThread, close, enabled: valid && enabled }}>
     {children}
     {valid && enabled ? <>
       <Button ref={launcher} className={styles.launcher} leadingIcon={<MessageSquare />} aria-label={`Mensajes${data?.no_leidos ? `, ${data.no_leidos} sin leer` : ''}`}
@@ -175,7 +175,7 @@ function ConversationDockState({ user, children }) {
                 {loading ? <LoadingState label="Consultando mensajes" /> : data?.items?.length ? <ul className={styles.list}>
                   {data.items.map((item) => <li key={item.id}><button className={styles.thread} onClick={() => setSelected(item.id)}>
                     <strong>Reclamo #{String(item.numero).padStart(6, '0')}</strong>
-                    <span>{item.finalidad === 'consulta_tecnica' ? user.rol === 'proveedor' ? 'Consultas técnicas con el inquilino' : 'Consultas técnicas con el proveedor' : `Agente AARI · ${item.audiencia === 'proveedor' ? 'Avisos al proveedor' : 'Avisos al responsable'}`}</span>
+                    <span>{item.finalidad === 'coordinacion' ? 'Coordinación de visita' : item.finalidad === 'consulta_tecnica' ? user.rol === 'proveedor' ? 'Consultas técnicas con el inquilino' : 'Consultas técnicas con el proveedor' : `Agente AARI · ${item.audiencia === 'proveedor' ? 'Avisos al proveedor' : 'Avisos al responsable'}`}</span>
                     <span>{item.proveedor}</span>
                     {item.no_leidos > 0 ? <StatusBadge tone="info">{item.no_leidos} sin leer</StatusBadge> : null}
                   </button></li>)}

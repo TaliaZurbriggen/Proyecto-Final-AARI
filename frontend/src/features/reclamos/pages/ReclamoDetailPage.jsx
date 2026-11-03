@@ -54,6 +54,7 @@ function ReclamoDetailPage() {
         title={`Reclamo ${formatClaimNumber(claim.numero)}`}
       />
       {error ? <AlertMessage>{error}</AlertMessage> : null}
+      {['Proveedor seleccionado', 'Visita programada'].includes(claim.estado) ? <div className={styles.claimDetailActions}><Link className={styles.primaryLink} to={`/visitas/${reclamoId}`}>Ver coordinación de visita</Link></div> : null}
 
       <section className={styles.currentStatus} aria-labelledby="current-status-title">
         <div>

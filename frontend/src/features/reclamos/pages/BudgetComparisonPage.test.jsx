@@ -174,4 +174,42 @@ describe('Comparación y selección HU20', () => {
     expect(within(screen.getByRole('region', { name: 'Reclamo' })).getByText('Resuelto')).toBeInTheDocument()
     expect(selectQuote).toHaveBeenCalledTimes(1)
   })
+
+  it.each([false, true])('enlaza la coordinación vigente sin volver a elegir (propietario=%s)', async (ownerView) => {
+    getQuoteSelection.mockResolvedValue({ ...view, estado: 'Proveedor seleccionado', decision: saved,
+      puede_elegir: false, coordinacion_url: '/visitas/claim-1' })
+    setup({ ownerView })
+    expect(await screen.findByRole('link', { name: 'Ver coordinación' }))
+      .toHaveAttribute('href', '/visitas/claim-1')
+    expect(screen.getByText(ownerView
+      ? 'El inquilino acuerda el horario con el proveedor. Podés consultar cómo avanza.'
+      : 'El agente solicitará tus horarios para recibir al proveedor. Podés consultar la coordinación desde acá.')).toBeVisible()
+    expect(selectQuote).not.toHaveBeenCalled()
+  })
+
+  it.each([null, 'https://example.com/externo', '/visitas/otro-reclamo'])('no ofrece una coordinación ausente o ajena: %s', async (coordinacion_url) => {
+    getQuoteSelection.mockResolvedValue({ ...view, estado: 'Proveedor seleccionado', decision: saved,
+      puede_elegir: false, coordinacion_url })
+    setup()
+    await screen.findByRole('heading', { name: 'Presupuesto seleccionado' })
+    expect(screen.queryByRole('link', { name: 'Ver coordinación' })).not.toBeInTheDocument()
+  })
+
+  it('no usa la selección histórica para ofrecer coordinación de un reclamo resuelto', async () => {
+    getQuoteSelection.mockResolvedValue({ ...view, estado: 'Resuelto', decision: saved,
+      puede_elegir: false, coordinacion_url: '/visitas/claim-1' })
+    setup()
+    await screen.findByRole('heading', { name: 'Presupuesto seleccionado' })
+    expect(screen.queryByRole('link', { name: 'Ver coordinación' })).not.toBeInTheDocument()
+  })
+
+  it('no presenta el acceso mientras falla la consulta posterior a la selección', async () => {
+    getQuoteSelection.mockResolvedValueOnce(view).mockRejectedValueOnce(new Error('Sin conexión'))
+    const user = setup()
+    await user.click(await screen.findByRole('button', { name: 'Revisar propuesta de Servicio Uno' }))
+    await user.click(screen.getByRole('button', { name: 'Confirmar elección' }))
+    await screen.findByRole('button', { name: 'Reintentar actualización' })
+    expect(screen.getByRole('heading', { name: 'Presupuesto seleccionado' })).toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: 'Ver coordinación' })).not.toBeInTheDocument()
+  })
 })

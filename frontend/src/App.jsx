@@ -43,6 +43,8 @@ import PendingAssignmentPage from './features/reclamos/pages/PendingAssignmentPa
 import ProviderCandidatesPage from './features/reclamos/pages/ProviderCandidatesPage.jsx'
 import { useAuth } from './features/auth/authContext.js'
 import { ConversationDockProvider } from './features/conversaciones/ConversationDock.jsx'
+import VisitCoordinationPage from './features/visitas/VisitCoordinationPage.jsx'
+import VisitsListPage from './features/visitas/VisitsListPage.jsx'
 import { destinationForUser } from './features/auth/routing.js'
 import ContractsListPage from './features/contratos/pages/ContractsListPage.jsx'
 import ContractFormPage from './features/contratos/pages/ContractFormPage.jsx'
@@ -54,6 +56,11 @@ import ExpenseDetailPage from './features/expensas/ExpenseDetailPage.jsx'
 function SessionHomeRedirect() {
   const { user } = useAuth()
   return <Navigate replace to={destinationForUser(user)} />
+}
+
+function VisitLayout() {
+  const { user } = useAuth()
+  return user?.rol === 'administrador' ? <AdminLayout /> : <RoleLayout />
 }
 
 function ConversationLayer({ children }) {
@@ -79,6 +86,10 @@ function App() {
         </Route>
         <Route element={<ProtectedRoute />}>
           <Route index element={<SessionHomeRedirect />} />
+          <Route element={<VisitLayout />}>
+            <Route path="visitas" element={<VisitsListPage />} />
+            <Route path="visitas/:reclamoId" element={<VisitCoordinationPage />} />
+          </Route>
         </Route>
         <Route element={<ProtectedRoute allowedRoles={['administrador', 'operador']} />}>
           <Route element={<ExpenseLayout />}>

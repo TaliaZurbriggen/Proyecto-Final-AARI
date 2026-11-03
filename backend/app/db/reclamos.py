@@ -534,6 +534,9 @@ class SqlAlchemyClaimsRepository:
                 return False
             if not validate_selection_notice(session, context.id):
                 return False
+            from app.db.visits import validate_visit_notice
+            if not validate_visit_notice(session, context.id):
+                return False
             # Renovar sólo el intento aún vigente; no enviar con una reserva
             # que haya vencido durante la comprobación de compatibilidad.
             return session.execute(text('''UPDATE notificaciones

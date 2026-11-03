@@ -2,6 +2,41 @@
 
 Scripts SQL para crear y actualizar el esquema de Supabase.
 
+## HU23 — Coordinación de visitas (aplicada en Supabase, 02/11/2026)
+
+Actualización 02/11/2026: el esquema integrado requiere, en este orden,
+`20261029120000_hu20_seleccion_presupuesto.sql` (si no existe),
+`20261101110000_hu23_coordinacion_visitas.sql` (si no existe) y
+`20261102103000_hu23_seleccion_auditada.sql`. Verificar historial/esquema antes
+de ejecutar: no se reaplican automáticamente. La última agrega `seleccion_id`
+con FK compuesta a la auditoría HU20 y reemplaza sólo el índice de unicidad
+de selección. Filas anteriores mantienen historia y vínculo nulo; el servicio
+no les inventa una decisión, y sólo permite actuar en un intento vinculado real.
+No se modificó ningún SQL anterior, no hay DDL al arrancar ni envíos al aplicar.
+**Las tres migraciones quedaron aplicadas y registradas con autorización en
+Supabase AARI de desarrollo el 02/11/2026. No repetirlas por integrante ni pull.**
+El worker requiere el enlace auditado completo antes de descubrir/iniciar casos.
+
+`20261101110000_hu23_coordinacion_visitas.sql` requiere el esquema de coordinación
+base, HU16/HU17, HU19 AARI y HU33. Agrega coordinaciones, intervalos, acciones
+inmutables y vínculos de avisos. Extiende los hilos HU33 para asociarlos a una
+coordinación real sin crear solicitudes ficticias ni cambiar sus unicidades
+anteriores. Las visitas confirmadas se guardan en la tabla `visitas` existente.
+Incluye RLS y revocaciones para las tablas nuevas y `visitas`; no crea políticas
+públicas. No inicia trabajos ni envía correos al aplicar.
+
+Aplicación con respaldo privado, ensayo revertido y DDL/historial atómicos.
+Las 42 tablas previas y secuencias conservaron sus conteos/estado; índices, FK,
+RLS y ausencia de permisos/políticas públicas verificados. No se modifica
+ningún SQL anterior. El comprobador `scripts/check_visits_postgres.py` consulta
+con `--mode check`; `--mode apply` requiere autorización y respaldo con pg_dump,
+y rechaza instalaciones parciales en lugar de improvisar reparaciones.
+`--mode test` requiere autorización: aprobó cuatro recorridos con login real,
+cuentas/datos ficticios y rollback; no deja visitas ni consume numeración.
+Mantener workers generales apagados; no se enviaron correos ni se usó Gemini.
+La función sólo se habilitó en el proceso local de aceptación, sin editar `.env`.
+Ver `docs/hu23_coordinacion_visitas.md`.
+
 ## HU18 — Proveedor externo (aplicada en desarrollo el 31/10/2026)
 
 `20261029235000_hu18_proveedor_externo.sql` amplía la tabla existente con
@@ -871,8 +906,10 @@ importe positivo, moneda y tipo; UUID de petición único y una decisión por
 elección/ronda. Incluye índices de FK, RLS y revocación a PUBLIC/anon/authenticated,
 sin políticas públicas.
 
-**Pendiente de autorización y aplicación compartida.** La validación utiliza
-bases PostgreSQL locales descartables; no acredita instalación en Supabase.
+**Aplicada y verificada con autorización en Supabase el 02/11/2026**, junto con
+las dos migraciones HU23 y después de respaldo/ensayo con rollback. No repetirla
+al hacer pull. Los recorridos HTTP compartidos HU20→HU23 aprobaron con cuentas
+ficticias, autenticación real y rollback; no enviaron correos.
 Es una migración de una sola ejecución, transaccional y con tiempos de espera
 acotados. No repetir automáticamente ni ejecutarla al iniciar FastAPI. Antes
 de aplicar: verificar destino/historial, respaldo y ensayo con rollback; luego

@@ -210,7 +210,17 @@ class SqlAlchemyConversations(SqlAlchemyQuotePortal):
             return rid
 
     def thread_messages(self, thread_id, user, **kwargs):
+        visit = self._visit_repository(thread_id)
+        if visit:
+            return visit.thread_messages(thread_id, user, **kwargs)
         return self.messages(self._request_for_thread(thread_id), user, thread_id=thread_id, **kwargs)
+
+    def _visit_repository(self, thread_id):
+        from app.db.visits import coordination_thread, SqlAlchemyVisits
+        with self.transaction() as session:
+            if coordination_thread(session, thread_id):
+                return SqlAlchemyVisits(self.session_factory)
+        return None
 
     def send(self, request_id, user, payload, *, thread_id=None):
         with self.transaction() as session:
@@ -232,6 +242,9 @@ class SqlAlchemyConversations(SqlAlchemyQuotePortal):
             return {'mensaje': self._message(row, user.id), 'repetido': False}
 
     def thread_send(self, thread_id, user, payload):
+        visit = self._visit_repository(thread_id)
+        if visit:
+            return visit.thread_send(thread_id, user, payload)
         return self.send(self._request_for_thread(thread_id), user, payload, thread_id=thread_id)
 
     def mark_read(self, request_id, user, through, *, thread_id=None):
@@ -247,6 +260,9 @@ class SqlAlchemyConversations(SqlAlchemyQuotePortal):
             return {'leido_hasta': last, 'no_leidos': self._reader(session, thread, user.id, audit=roles['agency'])[1]}
 
     def thread_read(self, thread_id, user, through):
+        visit = self._visit_repository(thread_id)
+        if visit:
+            return visit.thread_read(thread_id, user, through)
         return self.mark_read(self._request_for_thread(thread_id), user, through, thread_id=thread_id)
 
     def open_questions(self, request_id, user, payload):
@@ -373,13 +389,20 @@ class SqlAlchemyConversations(SqlAlchemyQuotePortal):
                     AND m.autor_id IS DISTINCT FROM :user) unread ON true
                 WHERE c.finalidad IN ('presupuesto','consulta_tecnica') AND (''' + scope + ')'
             params = {'user': user.id, 'profile': user.perfil_id, 'audit': audit, 'limit': page_size}
-            stats = session.execute(text('SELECT count(*) AS total,coalesce(sum(CASE WHEN :audit THEN 0 ELSE unread.unread END),0) AS unread' + source), params).mappings().one()
+            selection = '''SELECT c.id,c.solicitud_id,c.finalidad,c.audiencia,r.numero,
+                p.nombre_razon_social AS proveedor,c.actualizada_en,c.consultas_cerradas_en,
+                CASE WHEN :audit THEN 0 ELSE unread.unread END AS no_leidos''' + source
+            from app.services.visits import visits_enabled
+            if visits_enabled():
+                from app.db.visits import available, inbox_select
+                if available(session):
+                    selection += ' UNION ALL ' + inbox_select(user)
+            combined = '(' + selection + ') inbox'
+            stats = session.execute(text('SELECT count(*) AS total,coalesce(sum(no_leidos),0) AS unread FROM ' + combined), params).mappings().one()
             last_page = max(1, (stats['total'] + page_size - 1) // page_size)
             page = min(page, last_page)
-            rows = session.execute(text('''SELECT c.id,c.solicitud_id,c.finalidad,c.audiencia,r.numero,
-                p.nombre_razon_social AS proveedor,c.actualizada_en,c.consultas_cerradas_en,
-                CASE WHEN :audit THEN 0 ELSE unread.unread END AS no_leidos''' + source +
-                ' ORDER BY c.actualizada_en DESC,c.id DESC LIMIT :limit OFFSET :offset'),
+            rows = session.execute(text('SELECT * FROM ' + combined +
+                ' ORDER BY actualizada_en DESC,id DESC LIMIT :limit OFFSET :offset'),
                 {**params, 'offset': (page - 1) * page_size}).mappings().all()
             return {'items': [dict(row) for row in rows], 'total': stats['total'], 'no_leidos': stats['unread'],
                     'page': page, 'page_size': page_size}

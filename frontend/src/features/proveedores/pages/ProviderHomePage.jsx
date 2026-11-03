@@ -26,6 +26,7 @@ function ProviderHomePage() {
     <PageHeading eyebrow="Espacio del proveedor" title="Mis solicitudes" description="Un lugar para seguir las solicitudes que te envía la inmobiliaria." />
     {loading ? <LoadingState label="Cargando tu espacio" /> : error ? <div className={styles.panelBody}><AlertMessage>{error}</AlertMessage><Button onClick={() => setRefresh((value) => value + 1)} variant="secondary">Reintentar</Button></div> : profile ? <>
       <section className={styles.welcome} aria-labelledby="provider-welcome-title"><div className={styles.welcomeIcon}><ShieldCheck aria-hidden="true" /></div><div><h2 id="provider-welcome-title">{profile.nombre_razon_social}</h2><p>{profile.email}</p></div><StatusBadge tone="success">Cuenta activa</StatusBadge></section>
+      <p className={styles.accountLink}><Link to="/visitas">Ver mis visitas y horarios pendientes</Link></p>
       {profile.solicitudes_disponibles ? <ProviderQuoteRequests /> : <section className={styles.panel}><EmptyState icon={ClipboardList} title="Tu acceso ya está preparado" description="La recepción de solicitudes de presupuesto todavía está en preparación. La inmobiliaria te avisará cuando puedas comenzar a responderlas desde acá." /></section>}
       <p className={styles.accountLink}><Link to="/cambiar-contrasena">Cambiar mi contraseña</Link></p>
     </> : null}
