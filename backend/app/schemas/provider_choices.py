@@ -40,4 +40,5 @@ class ProviderChoiceDetail(BaseModel):
     respuesta_vence_en: datetime
     updated_at: datetime
     puede_elegir: bool
+    cancelacion_habilitada: bool = False
     decision: ProviderChoiceResult | None = None

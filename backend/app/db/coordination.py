@@ -12,6 +12,7 @@ from psycopg.rows import dict_row
 from psycopg.types.json import Jsonb
 
 from app.agents.coordination.graph import build_coordination_graph
+from app.db.current_provider_choice import CURRENT_CHOICE
 from app.agents.coordination.state import (
     CoordinationResponse, CoordinationSnapshot, DomainContext, EXPIRABLE_STAGES,
     ResumeRequest, TERMINAL_STAGES, stage_for,
@@ -22,7 +23,7 @@ from app.services.coordination_service import CoordinationError
 
 # Mismo alcance de etapa que HU17: no proteger decisiones de otro pedido/actor
 # ni filas históricas. Constante SQL interna, nunca entrada del cliente.
-_CURRENT_PROVIDER_CHOICE = """ep.reclamo_id=r.id AND ep.estado='pendiente'
+_CURRENT_PROVIDER_CHOICE = CURRENT_CHOICE + """ AND ep.reclamo_id=r.id AND ep.estado='pendiente'
     AND ep.solicitud_responsable_en=rr.solicitado_en AND ep.actor_tipo=rr.actor_tipo
     AND ((r.tipo_gasto='ordinario' AND ep.actor_tipo='inquilino'
           AND r.estado='Pendiente de respuesta del responsable')

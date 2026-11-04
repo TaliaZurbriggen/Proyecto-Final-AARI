@@ -94,6 +94,8 @@ function ChoiceContent({ reclamoId, ownerView }) {
         </article>
       </div> : <AlertMessage tone="warning">Esta solicitud ya no admite una elección. El plazo pudo vencer o la etapa pudo cambiar; contactá a la inmobiliaria para continuar.</AlertMessage>}
       {saved?.tipo_proveedor === 'fidelizado' ? <>
+        {claim.cancelacion_habilitada && ['Pendiente de asignación', 'Proveedor seleccionado'].includes(claim.estado) && <Link className={styles.back}
+          to={`/${ownerView ? 'propietario' : 'inquilino'}/reclamos/${reclamoId}/cancelar-coordinacion`}>Cancelar y elegir otro proveedor</Link>}
         <Link className={styles.back} to={`/${ownerView ? 'propietario' : 'inquilino'}/reclamos/${reclamoId}/presupuestos`}>Comparar y elegir presupuestos</Link>
         <ClaimQuoteSummary claimId={reclamoId} />
       </> : null}

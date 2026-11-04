@@ -5,6 +5,7 @@ import json
 from uuid import uuid4
 
 from sqlalchemy import bindparam, text
+from app.db.current_provider_choice import CURRENT_CHOICE
 
 from app.core.whatsapp import canonical_recipient
 from app.db.proveedores import SqlAlchemyProveedoresRepository
@@ -20,6 +21,7 @@ SOURCE = """ FROM public.reclamos r
     JOIN public.reclamo_responsables rr ON rr.reclamo_id=r.id
     JOIN public.reclamo_elecciones_proveedor ep ON ep.reclamo_id=r.id
         AND ep.solicitud_responsable_en=rr.solicitado_en AND ep.actor_tipo=rr.actor_tipo
+        AND """ + CURRENT_CHOICE + """
     LEFT JOIN public.usuarios u ON u.id=ep.usuario_id
     LEFT JOIN public.reclamo_autorizaciones a ON a.reclamo_id=r.id
         AND a.solicitado_en=rr.solicitado_en AND a.usuario_id=ep.usuario_id

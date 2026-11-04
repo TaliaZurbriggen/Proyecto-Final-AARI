@@ -1305,3 +1305,19 @@ por el límite de bloques gratuitos, sin borrar contenido ni cambiar el plan.
 El estado del Hub de Notion sí se actualizó y verificó con el resumen del Sprint.
 Alcance, dependencias, fotografía inicial, desglose verificado y riesgos
 en [`docs/planificacion_sprint_4_propuesta.md`](docs/planificacion_sprint_4_propuesta.md).
+
+### HU24 — Cancelar coordinación y reelegir proveedor (03/11/2026)
+
+Implementación en `codex/AARI-262-cancelacion-coordinacion`, rebaseada sobre main
+`897b8bd` después de integrar el PR #42 aprobado de HU23.
+Permite al responsable confirmar la cancelación en las etapas previstas y volver
+a HU17 con una elección nueva, conservando reclamo, autorización vigente,
+presupuestos e historial. Invalida respuestas/avisos anteriores; bloquea visitas
+ya programadas. Avisos privados AARI/correo y alerta por tres cancelaciones.
+
+Nueva variable opt-in en `backend/.env.example`: `AARI_CANCELLATIONS_ENABLED=false`.
+Requiere la migración `20261103120000_hu24_cancelacion_coordinacion.sql` antes de
+habilitarse; todavía no aplicada en Supabase. No activa workers ni envíos.
+El historial de visitas canceladas se conserva en Mensajes en sólo lectura.
+HU24 y subtareas En curso, sin tiempo nuevo ni cierre; entrega para revisión.
+Decisiones, contrato y validaciones: [HU24](docs/hu24_cancelacion_coordinacion.md).

@@ -921,3 +921,24 @@ HU33 es opcional para el aviso de chat, pero su esquema debe existir antes de
 habilitar `AARI_CONVERSATIONS_ENABLED`. La confirmación no envía SMTP dentro de
 la transacción ni activa workers.
 Detalle: [HU20](../../docs/hu20_seleccion_presupuestos.md).
+
+## HU24 — cancelación y nuevo intento (03/11/2026)
+
+`20261103120000_hu24_cancelacion_coordinacion.sql` requiere HU17, HU19 AARI y
+HU20. Validada en PostgreSQL local; **todavía no aplicada en Supabase**.
+No editar ni repetir las migraciones anteriores. Aplicar una sola vez, con
+respaldo, ensayo con rollback y verificación autorizada del destino/historial.
+
+Conserva elecciones e intentos históricos: agrega `intento` (cero para la
+elección original) y amplía su clave única, sin cambiar el ciclo del responsable
+ni la autorización extraordinaria. Ajusta de forma acotada el arbitraje de
+duplicados del trigger de apertura HU17. Agrega auditoría privada inmutable
+en `reclamo_cancelaciones_coordinacion`, FK compuestas, índices, RLS y revocación
+a PUBLIC/anon/authenticated. Reemplaza el destinatario ficticio de la alerta
+de tres cancelaciones por una cuenta operativa activa, sin generar backfill.
+
+No ejecuta DDL al arrancar ni habilita funcionalidad, workers o envíos.
+`AARI_CANCELLATIONS_ENABLED=false` por defecto. HU33 y HU23 sólo se utilizan
+si sus módulos/esquemas están disponibles y se habilitaron por separado.
+La aplicación compartida y su validación requieren autorización propia.
+Detalle: [HU24](../../docs/hu24_cancelacion_coordinacion.md).

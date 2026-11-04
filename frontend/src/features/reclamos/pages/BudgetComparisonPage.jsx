@@ -81,6 +81,8 @@ function Comparison({ claimId, ownerView }) {
     {data && !error && !isLoading && <section className={styles.summary} aria-label="Reclamo">
       <h2>Reclamo {formatClaimNumber(data.numero)}</h2><p>{data.descripcion}</p>
       <StatusBadge>{data.estado}</StatusBadge>
+      {data.cancelacion_habilitada && ['Pendiente de asignación', 'Proveedor seleccionado'].includes(data.estado) && <Link className={styles.back}
+        to={`/${ownerView ? 'propietario' : 'inquilino'}/reclamos/${claimId}/cancelar-coordinacion`}>Cancelar y elegir otro proveedor</Link>}
     </section>}
     {decision ? <section className={styles.summary} aria-label="Selección registrada">
         <h2 ref={savedHeading} tabIndex={-1}>Presupuesto seleccionado</h2>

@@ -1,11 +1,12 @@
 """Plazos HU17. Se ejecutan desde el worker existente; nunca desde GET."""
 
 from sqlalchemy import text
+from app.db.current_provider_choice import CURRENT_CHOICE
 
 from app.services.responsible_actor_notifications import provider_choice_url
 
 
-CURRENT_STAGE = """ep.solicitud_responsable_en=rr.solicitado_en AND ep.actor_tipo=rr.actor_tipo AND (
+CURRENT_STAGE = CURRENT_CHOICE + """ AND ep.solicitud_responsable_en=rr.solicitado_en AND ep.actor_tipo=rr.actor_tipo AND (
     (r.tipo_gasto='ordinario' AND ep.actor_tipo='inquilino'
      AND r.estado='Pendiente de respuesta del responsable')
     OR (r.tipo_gasto='extraordinario' AND ep.actor_tipo='propietario' AND r.estado='Autorizado'))"""
@@ -38,7 +39,7 @@ def activate_existing(session, limit):
             INSERT INTO reclamo_elecciones_proveedor (reclamo_id,solicitud_responsable_en,actor_tipo,
                 solicitado_en,recordatorio_programado_en,respuesta_vence_en)
             VALUES (:id,:solicitado_en,:actor_tipo,:started,:started+interval '48 hours',:started+interval '72 hours')
-            ON CONFLICT (reclamo_id,solicitud_responsable_en) DO NOTHING
+            ON CONFLICT DO NOTHING
         """), dict(row))
 
 
