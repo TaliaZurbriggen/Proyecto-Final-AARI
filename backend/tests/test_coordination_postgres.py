@@ -322,10 +322,10 @@ def test_active_participant_can_only_access_linked_claim(coordination_case,role)
             RETURNING id"""),{"email":f"{role}@example.com","role":role}).scalar_one()
         table = {"inquilino":"inquilinos","propietario":"propietarios"}[role]
         # Tabla elegida por constante de prueba, no por una entrada HTTP.
-        conn.execute(text(f"UPDATE {table} SET usuario_id=:user_id"),
-                     {"user_id":account})
+        profile = conn.execute(text(f"UPDATE {table} SET usuario_id=:user_id RETURNING id"),
+                               {"user_id":account}).scalar_one()
     actor = AuthenticatedUser(id=account,email=f"{role}@example.com",
-                              rol=role,primer_ingreso=False)
+                              rol=role,primer_ingreso=False,perfil_id=profile)
     assert repo.get(claim_id,actor).contexto.reclamo_id == claim_id
     with db.begin() as conn:
         conn.execute(text(f"UPDATE {table} SET usuario_id=null"))

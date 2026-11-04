@@ -126,6 +126,45 @@ def test_recent_events_are_bounded():
     assert len(result["contexto"]["eventos_recientes"]) == 20
 
 
+@pytest.mark.parametrize('state,extra,expected', [
+    ('Pendiente de datos de proveedor propio', {}, 'esperando_datos_proveedor'),
+    ('Pendiente de asignación', {'estado_ronda': 'esperando'}, 'esperando_presupuestos'),
+    ('Pendiente de asignación', {'estado_ronda': 'disponibles'}, 'esperando_seleccion_presupuesto'),
+    ('Pendiente de asignación', {'estado_ronda': 'revision'}, 'intervencion_manual'),
+    ('Proveedor seleccionado', {'etapa_visita': 'esperando_confirmacion'}, 'esperando_confirmacion_visita'),
+    ('Proveedor seleccionado', {'etapa_visita': 'negociando'}, 'negociando_visita'),
+    ('Proveedor seleccionado', {'etapa_visita': 'sin_acuerdo'}, 'intervencion_manual'),
+])
+def test_real_module_stages_use_only_confirmed_facts(state, extra, expected):
+    assert stage_for(domain(state).model_copy(update=extra)) == expected
+
+
+def test_legacy_snapshot_without_workflow_fields_is_still_readable():
+    value = domain()
+    old = CoordinationSnapshot(reclamo_id=value.reclamo_id, intento_id=uuid4(),
+        version=1, etapa=stage_for(value), dominio=value).model_dump(mode='json')
+    for key in ('eleccion_id', 'ronda_id', 'estado_ronda', 'seleccion_id',
+                'coordinacion_visita_id', 'etapa_visita', 'version_visita'):
+        old['dominio'].pop(key)
+    assert CoordinationSnapshot.model_validate(old).dominio == value
+
+
+def test_existing_worker_reconciles_before_expiration():
+    import asyncio
+    from app.services.coordination_service import run_coordination_worker
+    async def run():
+        stop = asyncio.Event()
+        calls = []
+        class Service:
+            def synchronize_due(self): calls.append('synchronize')
+            def expire_due(self):
+                calls.append('expire')
+                stop.set()
+        await run_coordination_worker(Service(), stop)
+        return calls
+    assert asyncio.run(run()) == ['synchronize', 'expire']
+
+
 @pytest.fixture
 def fake_api():
     value = domain()

@@ -2,6 +2,12 @@
 
 ## Estado y alcance
 
+Estado actualizado al 04/11/2026: la base AARI-229 tiene su cierre acotado previo.
+La integración restante se desarrolla en AARI-345, con propuesta aprobada y
+pruebas sobre módulos reales. Ver [integración end-to-end](hu21_integracion_end_to_end.md)
+para decisiones, configuración, resultados y límites actuales. Las secciones
+siguientes conservan el contexto histórico de la entrega base.
+
 Propuesta aprobada el 11/10/2026. Rama `codex/AARI-229-contexto-persistente`
 desde main `fb3a496`. Base implementada localmente; **HU21 sigue En curso**.
 Commit, push y PR de esta base autorizados el 14/10/2026, para revisión de Talía;

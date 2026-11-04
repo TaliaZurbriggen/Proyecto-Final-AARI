@@ -4,6 +4,7 @@ from contextlib import contextmanager
 from datetime import datetime, timedelta, timezone
 import hashlib
 import json
+import logging
 from uuid import UUID, uuid4
 
 import psycopg
@@ -13,6 +14,7 @@ from psycopg.types.json import Jsonb
 
 from app.agents.coordination.graph import build_coordination_graph
 from app.db.current_provider_choice import CURRENT_CHOICE
+from app.db.coordination_domain import workflow_context
 from app.agents.coordination.state import (
     CoordinationResponse, CoordinationSnapshot, DomainContext, EXPIRABLE_STAGES,
     ResumeRequest, TERMINAL_STAGES, stage_for,
@@ -37,6 +39,7 @@ class PostgresCoordinationRepository:
     def __init__(self, connection_factory=None, *, clock=None):
         self.connection_factory = connection_factory or self._connect
         self.clock = clock or (lambda: datetime.now(timezone.utc))
+        self._sync_cursor = None
 
     @staticmethod
     def _connect():
@@ -78,6 +81,11 @@ class PostgresCoordinationRepository:
             if not account or account["rol"] != user.rol:
                 raise CoordinationError("La cuenta no está habilitada.", code="forbidden", status=403)
         choices = PostgresCoordinationRepository._has_provider_choices(conn)
+        if lock:
+            # Reservar antes de leer joins: una espera no debe mezclar el reclamo
+            # nuevo con una elección vieja del snapshot anterior al bloqueo.
+            conn.execute('SELECT id FROM public.reclamos WHERE id=%s FOR UPDATE',
+                         (claim_id,)).fetchone()
         choice_deadline = "ep.respuesta_vence_en" if choices else "NULL::timestamptz"
         choice_join = ("LEFT JOIN public.reclamo_elecciones_proveedor ep ON "
                        + _CURRENT_PROVIDER_CHOICE) if choices else ""
@@ -86,6 +94,7 @@ class PostgresCoordinationRepository:
                    r.inquilino_id, p.propietario_id, r.proveedor_seleccionado_id,
                    r.presupuesto_seleccionado_id, r.monto_seleccionado, r.fecha_visita,
                    r.operador_asignado_id, i.usuario_id AS tenant_user,
+                   i.estado AS tenant_state, i.propiedad_id AS tenant_property,
                    pr.usuario_id AS owner_user, rr.actor_tipo, rr.respuesta_vence_en,
                    {choice_deadline} AS eleccion_vence_en,
                    (SELECT c.id FROM public.cancelaciones c WHERE c.reclamo_id=r.id
@@ -97,13 +106,17 @@ class PostgresCoordinationRepository:
             LEFT JOIN public.reclamo_responsables rr ON rr.reclamo_id=r.id
             {choice_join}
             WHERE r.id=%s
-        """ + (" FOR UPDATE OF r" if lock else ""), (claim_id,)).fetchone()
+        """, (claim_id,)).fetchone()
         if row is None or (user is not None and not (
             user.rol in {"administrador", "operador"}
-            or user.rol == "inquilino" and row["tenant_user"] == user.id
-            or user.rol == "propietario" and row["owner_user"] == user.id
+            or (user.rol == "inquilino" and row["tenant_user"] == user.id
+                and row['tenant_state'] == 'activo' and row['tenant_property'] == row['propiedad_id']
+                and user.perfil_id == row['inquilino_id'])
+            or (user.rol == "propietario" and row["owner_user"] == user.id
+                and user.perfil_id == row['propietario_id'])
         )):
             raise CoordinationError("El reclamo no está disponible.", code="not_found", status=404)
+        row.update(workflow_context(conn, row))
         return row
 
     @staticmethod
@@ -118,9 +131,12 @@ class PostgresCoordinationRepository:
             presupuesto_id=row["presupuesto_seleccionado_id"],
             monto=str(row["monto_seleccionado"]) if row["monto_seleccionado"] is not None else None,
             fecha_visita=row["fecha_visita"], cancelacion_id=row["cancelacion_id"],
-            vencimiento_especifico=(row.get("eleccion_vence_en")
+            vencimiento_especifico=(row.get("plazo_modulo") or row.get("eleccion_vence_en")
                                    or (row["respuesta_vence_en"]
                                        if row["estado"] == "Pendiente de respuesta del responsable" else None)),
+            **{key: row.get(key) for key in (
+                "eleccion_id", "ronda_id", "estado_ronda", "seleccion_id",
+                "coordinacion_visita_id", "etapa_visita", "version_visita")},
         )
 
     @staticmethod
@@ -139,7 +155,8 @@ class PostgresCoordinationRepository:
         return CoordinationResponse(
             contexto=snapshot,
             ultima_actividad=session["ultima_actividad"], duplicado=duplicate,
-            requiere_sincronizacion=domain is not None and domain != snapshot.dominio,
+            requiere_sincronizacion=domain is not None and (
+                domain != snapshot.dominio or stage_for(domain) != snapshot.etapa),
             estado_reclamo_actual=domain.estado if domain is not None else snapshot.dominio.estado,
         )
 
@@ -227,6 +244,71 @@ class PostgresCoordinationRepository:
         }, config, durability="sync")
         return CoordinationSnapshot.model_validate(result["contexto"]).model_dump(mode="json")
 
+    def synchronize_due(self, *, limit=20):
+        """Reconcilia sesiones inicializadas; nunca crea decisiones ni renueva actividad.
+
+        El dominio confirmado es la cola durable. Paginación por UUID y vuelta
+        al inicio evitan que una página sin cambios o bloqueada acapare el lote.
+        Cada reclamo confirma checkpoint/sesión/evento en una transacción propia.
+        """
+        with self._transaction() as conn:
+            candidates = conn.execute("""SELECT r.id FROM public.reclamos r
+                JOIN public.sesiones_agente s ON s.reclamo_id=r.id
+                WHERE s.version>0 AND s.estado_grafo<>'{}'::jsonb
+                  AND r.tipo_gasto<>'expensa'
+                  AND (%s::uuid IS NULL OR r.id>%s::uuid)
+                ORDER BY r.id LIMIT %s""", (self._sync_cursor, self._sync_cursor,
+                max(1, min(limit, 100)))).fetchall()
+        if not candidates:
+            self._sync_cursor = None
+            return 0
+        count = 0
+        for candidate in candidates:
+            try:
+                with self._transaction() as conn:
+                    locked = conn.execute('''SELECT id FROM public.reclamos
+                        WHERE id=%s FOR UPDATE SKIP LOCKED''', (candidate['id'],)).fetchone()
+                    if locked:
+                        count += self._synchronize(conn, candidate['id'])
+            except (psycopg.Error, CoordinationError, ValueError):
+                # No registrar UUID, conversaciones, conexiones ni perfiles.
+                # El próximo recorrido vuelve a intentar los hechos no proyectados.
+                logging.getLogger(__name__).error('No se pudo sincronizar un contexto de coordinación.')
+            finally:
+                self._sync_cursor = candidate['id']
+        return count
+
+    def _synchronize(self, conn, claim_id):
+        domain = self._domain(self._claim(conn, claim_id))
+        session = self._session(conn, claim_id)
+        if not session or not session['estado_grafo'] or session['version'] <= 0:
+            return 0
+        old = self._response(session).contexto
+        stage = stage_for(domain)
+        state = ('finalizada' if stage in TERMINAL_STAGES else
+                 'expirada' if stage == 'expirada' else 'activa')
+        if old.dominio == domain and old.etapa == stage and session['estado_sesion'] == state:
+            return 0
+        attempt = old.intento_id
+        if old.dominio.cancelacion_id != domain.cancelacion_id:
+            attempt = uuid4()
+        elif session['estado_sesion'] != 'activa' and stage not in TERMINAL_STAGES | {'expirada', 'intervencion_manual'}:
+            attempt = uuid4()
+        event_id = uuid4()
+        snapshot = old.model_copy(update={'dominio': domain, 'etapa': stage,
+            'version': session['version']+1, 'intento_id': attempt})
+        result = self._checkpoint(conn, snapshot, event_id)
+        fingerprint = hashlib.sha256(json.dumps({'origen': 'dominio',
+            'contexto': snapshot.model_dump(mode='json')}, sort_keys=True).encode()).hexdigest()
+        conn.execute('''INSERT INTO aari_coordinacion.eventos
+            (reclamo_id,evento_id,usuario_id,fingerprint,version,intento_id)
+            VALUES (%s,%s,NULL,%s,%s,%s)''',
+            (claim_id, event_id, fingerprint, snapshot.version, attempt))
+        conn.execute('''UPDATE public.sesiones_agente SET estado_grafo=%s,
+            version=%s,intento_id=%s,estado_sesion=%s WHERE reclamo_id=%s''',
+            (Jsonb(result), snapshot.version, attempt, state, claim_id))
+        return 1
+
     def expire_due(self, *, limit=20):
         now = self.clock()
         count = 0
@@ -234,19 +316,31 @@ class PostgresCoordinationRepository:
             # Dejar todo vencimiento de la etapa HU17 (también si ya pasó) a su
             # job específico. Excluir antes de LIMIT evita bloquear otros casos.
             choice_filter = ""
+            selection_wait = ""
             if self._has_provider_choices(conn):
                 choice_filter = f"""AND NOT EXISTS (
                     SELECT 1 FROM public.reclamo_elecciones_proveedor ep
                     JOIN public.reclamo_responsables rr ON rr.reclamo_id=ep.reclamo_id
                     WHERE {_CURRENT_PROVIDER_CHOICE}
                 )"""
+                if conn.execute("SELECT to_regclass('public.aari_rondas_presupuesto') IS NOT NULL AS available").fetchone()['available']:
+                    # Sólo la ronda cerrada con presupuestos disponibles espera
+                    # decisión del responsable sin otro plazo de módulo vigente.
+                    selection_wait = f"""OR (r.estado='Pendiente de asignación' AND EXISTS (
+                        SELECT 1 FROM public.aari_rondas_presupuesto rp
+                        JOIN public.reclamo_elecciones_proveedor ep ON ep.id=rp.eleccion_id
+                        JOIN public.reclamo_responsables rr ON rr.reclamo_id=r.id
+                            AND rr.solicitado_en=ep.solicitud_responsable_en
+                            AND rr.actor_tipo=ep.actor_tipo
+                        WHERE rp.reclamo_id=r.id AND rp.estado='disponibles'
+                            AND rp.cerrada_en IS NOT NULL AND {CURRENT_CHOICE}))"""
             # Bloquear primero el reclamo, igual que retomar y el outbox.
             candidates = conn.execute(f"""
                 SELECT r.id FROM public.reclamos r
                 JOIN public.sesiones_agente s ON s.reclamo_id=r.id
                 WHERE s.estado_sesion='activa' AND s.ultima_actividad <= %s
                   AND s.version > 0 AND s.estado_grafo <> '{{}}'::jsonb
-                  AND r.estado IN ('Clasificado','Autorizado')
+                  AND (r.estado IN ('Clasificado','Autorizado') {selection_wait})
                   {choice_filter}
                 ORDER BY s.ultima_actividad, r.id
                 LIMIT %s FOR UPDATE OF r SKIP LOCKED

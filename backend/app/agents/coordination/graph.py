@@ -8,6 +8,7 @@ from .state import CoordinationSnapshot, CoordinationState, DomainContext, stage
 STAGES = (
     "esperando_autorizacion", "esperando_eleccion_proveedor",
     "esperando_presupuestos", "esperando_seleccion_presupuesto",
+    "esperando_datos_proveedor", "esperando_confirmacion_visita", "negociando_visita",
     "esperando_disponibilidad", "visita_programada", "derivado_externo",
     "rechazado", "expirada", "intervencion_manual", "finalizado",
 )

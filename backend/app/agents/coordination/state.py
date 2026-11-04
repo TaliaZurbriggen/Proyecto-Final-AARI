@@ -10,6 +10,7 @@ from pydantic import BaseModel, ConfigDict, Field
 Stage = Literal[
     "esperando_autorizacion", "esperando_eleccion_proveedor",
     "esperando_presupuestos", "esperando_seleccion_presupuesto",
+    "esperando_datos_proveedor", "esperando_confirmacion_visita", "negociando_visita",
     "esperando_disponibilidad", "visita_programada", "derivado_externo",
     "rechazado", "expirada", "intervencion_manual", "finalizado",
 ]
@@ -34,6 +35,13 @@ class DomainContext(BaseModel):
     fecha_visita: datetime | None = None
     cancelacion_id: UUID | None = None
     vencimiento_especifico: datetime | None = None
+    eleccion_id: UUID | None = None
+    ronda_id: UUID | None = None
+    estado_ronda: str | None = None
+    seleccion_id: UUID | None = None
+    coordinacion_visita_id: UUID | None = None
+    etapa_visita: str | None = None
+    version_visita: int | None = Field(default=None, ge=0)
 
 
 class CoordinationSnapshot(BaseModel):
@@ -94,9 +102,21 @@ def stage_for(domain: DomainContext) -> Stage:
                 else "esperando_eleccion_proveedor")
     if state in {"Clasificado", "Autorizado"}:
         return "esperando_eleccion_proveedor"
+    if state == "Pendiente de datos de proveedor propio":
+        return "esperando_datos_proveedor"
     if state == "Pendiente de asignación":
+        if domain.estado_ronda == "disponibles":
+            return "esperando_seleccion_presupuesto"
+        if domain.estado_ronda in {"revision", "sin_presupuestos", "cancelada"}:
+            return "intervencion_manual"
         return "esperando_presupuestos"
     if state == "Proveedor seleccionado":
+        if domain.etapa_visita == "esperando_confirmacion":
+            return "esperando_confirmacion_visita"
+        if domain.etapa_visita == "negociando":
+            return "negociando_visita"
+        if domain.etapa_visita in {"sin_acuerdo", "invalidada"}:
+            return "intervencion_manual"
         return "esperando_disponibilidad"
     # No inferir una acción ante estados que los módulos todavía no acordaron.
     return "intervencion_manual"

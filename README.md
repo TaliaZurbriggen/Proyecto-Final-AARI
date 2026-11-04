@@ -1319,5 +1319,20 @@ Nueva variable opt-in en `backend/.env.example`: `AARI_CANCELLATIONS_ENABLED=fal
 Requiere la migración `20261103120000_hu24_cancelacion_coordinacion.sql` antes de
 habilitarse; todavía no aplicada en Supabase. No activa workers ni envíos.
 El historial de visitas canceladas se conserva en Mensajes en sólo lectura.
-HU24 y subtareas En curso, sin tiempo nuevo ni cierre; entrega para revisión.
+PR #43 aprobado por Talía e integrado en main `82966cc` el 04/11/2026.
+HU24 y sus nueve subtareas listas por autorización de Tobías. Tiempo registrado:
+5 h 15 min de implementación + 1 h de revisión de Talía = 6 h 15 min del equipo.
 Decisiones, contrato y validaciones: [HU24](docs/hu24_cancelacion_coordinacion.md).
+
+### AARI-345 — Integración final del contexto HU21 (04/11/2026)
+
+Entrega para revisión en `codex/AARI-345-integracion-contexto`, desde main `82966cc`.
+Conecta autorización, elección, presupuestos, visita y cancelación reales con
+los checkpoints. El worker HU21 reconcilia las sesiones inicializadas, incluidos
+los terminales, sin repetir decisiones ni renovar actividad por consultar/sondear.
+Conserva identidad vigente, historial y plazos propios de cada módulo.
+
+Sin nuevas dependencias ni migraciones. `COORDINATION_WORKER_ENABLED=false`
+permanece como valor por defecto; su habilitación compartida requiere autorización.
+AARI-345 y subtareas En curso, sin horas nuevas ni cierre; publicación autorizada.
+Decisiones y pruebas: [integración HU21](docs/hu21_integracion_end_to_end.md).
