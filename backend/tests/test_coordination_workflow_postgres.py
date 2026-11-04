@@ -7,12 +7,14 @@ from threading import Barrier
 from uuid import uuid4
 
 import psycopg
+from langgraph.checkpoint.postgres import PostgresSaver
 from psycopg.rows import dict_row
 import pytest
 from sqlalchemy import text
 from sqlalchemy.orm import sessionmaker
 
 from app.agents.coordination.state import ResumeRequest
+from app.agents.coordination.graph import build_coordination_graph
 from app.db.coordination import PostgresCoordinationRepository
 from app.db.coordination_cancellations import SqlAlchemyCoordinationCancellations
 from app.db.conversations import SqlAlchemyConversations
@@ -384,3 +386,122 @@ def test_reconciliation_does_not_initialize_history_or_touch_expenses(workflow_c
     assert repository(c).synchronize_due() == 0
     assert repository(c).expire_due() == 0
     assert durable(c) == before
+
+
+def unprojected_reelection(c, expense):
+    """Avanza módulos reales sin reconciliar HU21 después de cancelar."""
+    begin(c, expense)
+    if expense == 'extraordinario': authorize(c)
+    choose(c)
+    quotes(c)
+    old = repository(c).get(c.claim, c.actor)
+    detail = c.cancel.get(c.claim, c.actor)
+    c.cancel.cancel(c.claim, c.actor, CoordinationCancellationRequest(request_id=uuid4(),
+        eleccion_id=detail['eleccion_id'], expected_updated_at=detail['updated_at'], confirmar=True))
+    choice = choice_body(c)
+    c.repo.choose(c.claim, c.actor, choice)
+    c.portal.publish(c.claim)
+    rid = c.portal.list_own(c.provider)['items'][0]['id']
+    c.portal.submit(rid, c.provider, budget())
+    round_id = scalar(c, 'SELECT id FROM aari_rondas_presupuesto WHERE eleccion_id=:id',
+                      id=choice.solicitud_id)
+    with c.db.begin() as conn:
+        conn.execute(text("""UPDATE aari_rondas_presupuesto
+            SET publicada_en=clock_timestamp()-interval '25 hours',
+                vence_en=clock_timestamp()-interval '1 hour' WHERE id=:id"""), {'id': round_id})
+    assert c.portal.finalize_one_portal(round_id, c.claim)
+    c.now = c.initial.ultima_actividad+timedelta(hours=73)
+    assert repository(c).get(c.claim, c.actor).requiere_sincronizacion
+    return old
+
+
+def assert_expired_attempt(c, old_attempt, expected_attempt=None):
+    repo = repository(c)
+    expired = repo.get(c.claim, c.actor)
+    attempt = expired.contexto.intento_id
+    assert attempt != old_attempt
+    if expected_attempt is not None:
+        assert attempt == expected_attempt
+    assert expired.contexto.etapa == 'expirada' and not expired.requiere_sincronizacion
+    assert expired.contexto.dominio.cancelacion_id == scalar(c, 'SELECT id FROM cancelaciones')
+    assert expired.ultima_actividad == c.initial.ultima_actividad
+    with c.connect() as conn:
+        conn.execute('SET LOCAL search_path=aari_coordinacion,pg_catalog')
+        session = conn.execute('SELECT * FROM public.sesiones_agente WHERE reclamo_id=%s',
+                               (c.claim,)).fetchone()
+        checkpoint = build_coordination_graph(PostgresSaver(conn)).get_state(
+            {'configurable': {'thread_id': str(c.claim)}}).values['contexto']
+        assert session['intento_id'] == attempt
+        assert session['estado_grafo'] == checkpoint == expired.contexto.model_dump(mode='json')
+        event = conn.execute('SELECT intento_id FROM aari_coordinacion.eventos '
+                             'WHERE reclamo_id=%s ORDER BY version DESC LIMIT 1', (c.claim,)).fetchone()
+        assert event['intento_id'] == attempt
+    key = f"hu21:{session['id']}:{attempt}:expiracion"
+    assert scalar(c, 'SELECT count(*) FROM notificaciones WHERE clave_idempotencia=:key', key=key) == 1
+    before = durable(c)
+    assert repo.synchronize_due() == 0 and repo.expire_due() == 0
+    assert durable(c) == before
+
+
+@pytest.mark.parametrize('expense', ['ordinario', 'extraordinario'])
+@pytest.mark.parametrize('already_synced', [False, True])
+def test_expiration_reconciles_same_claim_when_sync_page_missed_it(workflow_case, expense, already_synced):
+    c = workflow_case
+    old = unprojected_reelection(c, expense)
+    worker = repository(c)
+    worker._sync_cursor = type(c.claim)(int=(1 << 128)-1)
+    assert worker.synchronize_due(limit=1) == 0  # Quedó fuera del lote por el cursor.
+    expected = None
+    if already_synced:
+        assert worker.synchronize_due(limit=1) == 1  # Control: ya tiene el intento nuevo.
+        expected = worker.get(c.claim, c.actor).contexto.intento_id
+    assert worker.expire_due(limit=1) == 1
+    assert_expired_attempt(c, old.contexto.intento_id, expected)
+
+
+@pytest.mark.parametrize('expense', ['ordinario', 'extraordinario'])
+def test_expiration_rolls_back_its_reconciliation_if_alert_fails(workflow_case, expense):
+    c = workflow_case
+    old = unprojected_reelection(c, expense)
+    with c.connect() as conn:
+        conn.execute("""CREATE FUNCTION public.fail_expiration_alert() RETURNS trigger
+            LANGUAGE plpgsql AS $$ BEGIN
+            IF NEW.clave_idempotencia LIKE 'hu21:%:expiracion' THEN
+                RAISE EXCEPTION 'Fallo sintético al guardar alerta';
+            END IF; RETURN NEW; END $$""")
+        conn.execute('CREATE TRIGGER fail_expiration_alert BEFORE INSERT ON public.notificaciones '
+                     'FOR EACH ROW EXECUTE FUNCTION public.fail_expiration_alert()')
+    before = durable(c)
+    with pytest.raises(psycopg.Error): repository(c).expire_due()
+    assert durable(c) == before
+    with c.connect() as conn:
+        conn.execute('DROP TRIGGER fail_expiration_alert ON public.notificaciones')
+        conn.execute('DROP FUNCTION public.fail_expiration_alert()')
+    assert repository(c).expire_due() == 1
+    assert_expired_attempt(c, old.contexto.intento_id)
+
+
+@pytest.mark.parametrize('expense', ['ordinario', 'extraordinario'])
+def test_selection_competes_with_expiration_of_unprojected_reelection(workflow_case, expense):
+    c = workflow_case
+    old = unprojected_reelection(c, expense)
+    payload = selection(c)
+    barrier = Barrier(2)
+    def run(index):
+        barrier.wait(timeout=10)
+        if index == 0:
+            return repository(c).expire_due()
+        from app.services.quote_portal import QuotePortalError
+        try:
+            c.selection.choose(c.claim, c.actor, payload)
+            return 1
+        except QuotePortalError:
+            return 0
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        assert sum(pool.map(run, range(2))) == 1
+    if scalar(c, 'SELECT estado FROM reclamos') == 'Sesión expirada':
+        assert_expired_attempt(c, old.contexto.intento_id)
+    else:
+        result = sync(c, 'esperando_disponibilidad')
+        assert result.contexto.intento_id != old.contexto.intento_id
+        assert scalar(c, 'SELECT count(*) FROM reclamo_selecciones_presupuesto') == 1

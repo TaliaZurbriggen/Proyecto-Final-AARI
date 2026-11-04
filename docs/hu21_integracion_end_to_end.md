@@ -51,6 +51,9 @@ completa de decisiones permanece en sus módulos.
 El orden del worker es reconciliación y luego expiración. Sigue el intervalo
 existente de 30 segundos y el flag `COORDINATION_WORKER_ENABLED=false` por
 defecto. No se activó en el entorno compartido durante esta implementación.
+Cada candidato a vencimiento reconcilia además su propio contexto bajo el lock
+del reclamo y en la transacción de expiración: el orden de los lotes por sí solo
+no garantiza que ese reclamo ya haya sido proyectado.
 
 ## Proyección e invariantes
 
@@ -178,3 +181,44 @@ integrado no acredita aplicación de la migración HU24 ni QA compartido de esta
 integración. La revisión humana y la habilitación compartida siguen pendientes.
 
 La documentación se mantiene en GitHub. Notion no es un requisito de cierre.
+
+## Corrección P2 de revisión — coherencia del intento al expirar
+
+Talía señaló en la [revisión del PR #44](https://github.com/TaliaZurbriggen/Proyecto-Final-AARI/pull/44#issuecomment-6639894534)
+que los lotes de sincronización y vencimiento usan órdenes distintos. Si HU24
+cancelaba y se completaba una reelección/ronda antes de que pasara el reconciliador,
+el expirador podía copiar el nuevo `cancelacion_id` conservando el intento viejo.
+El contexto parecía actualizado y la reconciliación posterior ya no detectaba
+la necesidad de renovar ese intento.
+
+Se reprodujo el fallo con ambos tipos de gasto y el cursor del reconciliador
+fuera de la página: dos pruebas fallaron en la igualdad indebida del intento.
+La corrección reutiliza `_synchronize` por candidato dentro de `expire_due`,
+con el mismo lock y transacción, tras validar etapa/plazo/receptor. Luego relee
+la sesión validada antes de construir el snapshot de expiración y la alerta.
+Así sesión, checkpoint, contexto y clave idempotente del aviso comparten el
+intento vigente. Si ya estaba sincronizado no se renueva otra vez. Una proyección
+pendiente puede incrementar su versión y luego la de expiración, ambas atómicas;
+no renueva actividad ni cambia la regla de 72 horas.
+
+Las ocho regresiones nuevas cubren ordinario/extraordinario con y sin
+sincronización previa, rollback de la proyección/expiración si falla la alerta
+y concurrencia entre seleccionar un presupuesto y expirar. Usan los repositorios
+reales y comprueban también el checkpoint PostgresSaver, el intento de la alerta
+y que los sondeos posteriores no vuelvan a mutar el resultado.
+
+La tanda focalizada de la corrección aprobó **8 casos**. La regresión general
+posterior aprobó **1257 pruebas / 632 omitidas**, con las 18 advertencias SQLite
+previas. La primera pasada de esta revisión se detuvo con 359 aprobadas, 21
+omitidas y un fallo de `test_contract_direct_diagnostic`, fuera del diff; sus
+19 pruebas pasaron aisladas con temporales nuevos y también pasó la repetición
+general completa, sin modificar ni omitir el módulo.
+
+La tanda completa de PostgreSQL posterior a la corrección aprobó **90 casos**,
+sin omisiones, incluidas las 28 pruebas de integración AARI-345 (20 originales
+y las ocho de este P2), más las regresiones HU21/HU17/HU20/HU23/HU24. Se repitió
+el mismo comando de cinco suites indicado arriba, con temporales nuevos
+`--basetemp=artifacts/r44pg`. El backend general utilizó
+`--basetemp=artifacts/r44u2`. Compilación, formato y revisión de secretos de las
+adiciones correctos; no se ejecutaron servicios externos ni se activaron
+workers compartidos. Estos totales incluyen los casos focalizados: no sumarlos.

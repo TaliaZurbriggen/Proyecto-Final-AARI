@@ -1331,6 +1331,8 @@ Conecta autorización, elección, presupuestos, visita y cancelación reales con
 los checkpoints. El worker HU21 reconcilia las sesiones inicializadas, incluidos
 los terminales, sin repetir decisiones ni renovar actividad por consultar/sondear.
 Conserva identidad vigente, historial y plazos propios de cada módulo.
+Cada vencimiento reconcilia el intento de su reclamo dentro de la misma
+transacción, aunque ese reclamo haya quedado fuera del lote de sincronización.
 
 Sin nuevas dependencias ni migraciones. `COORDINATION_WORKER_ENABLED=false`
 permanece como valor por defecto; su habilitación compartida requiere autorización.

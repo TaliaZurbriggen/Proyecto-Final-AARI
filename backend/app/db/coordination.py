@@ -358,7 +358,6 @@ class PostgresCoordinationRepository:
                         or domain.vencimiento_especifico is not None
                         or stage_for(domain) not in EXPIRABLE_STAGES):
                     continue
-                snapshot = CoordinationSnapshot.model_validate(session["estado_grafo"])
                 operator = conn.execute("""
                     SELECT id, rol, email FROM public.usuarios
                     WHERE activo AND NOT primer_ingreso
@@ -369,6 +368,13 @@ class PostgresCoordinationRepository:
                 # Sin receptor habilitado no declarar un escalado atendido.
                 if not operator:
                     continue
+                # El lote anterior puede haber omitido este reclamo por cursor,
+                # límite o lock. Renovar su intento bajo el mismo lock y TX del
+                # vencimiento, antes de copiar el dominio o construir la alerta.
+                self._synchronize(conn, claim["id"])
+                session = self._session(conn, claim["id"])
+                snapshot = self._response(session).contexto
+                domain = snapshot.dominio
                 conn.execute("SELECT set_config('app.origen_reclamo', 'sistema', true)")
                 conn.execute("SELECT set_config('app.usuario_reclamo', '', true)")
                 conn.execute("UPDATE public.reclamos SET estado='Sesión expirada' WHERE id=%s",
