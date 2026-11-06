@@ -60,7 +60,11 @@ la espera específica de HU23. Al confirmar la visita, el GET de HU21 informa
 `requiere_sincronizacion=true` y el estado actual «Visita programada».
 **Límite comprobado:** `resume` no admite estados terminales; no se escribió
 el checkpoint a mano ni se lo presenta como sincronizado. El adaptador de
-eventos/sincronización terminal sigue pendiente en AARI-345 de Tobías.
+eventos/sincronización terminal quedó registrado en AARI-345 de Tobías.
+La implementación local posterior de AARI-345 incorpora esa reconciliación
+mediante el worker HU21, sin reabrir terminales ni convertir GET en escritura.
+Resultados y límites actuales en [integración HU21](hu21_integracion_end_to_end.md);
+esta evidencia original de HU23 por sí sola no acredita su despliegue compartido.
 
 Migraciones HU23 `20261101110000_hu23_coordinacion_visitas.sql` y
 `20261102103000_hu23_seleccion_auditada.sql`, aplicadas con autorización en

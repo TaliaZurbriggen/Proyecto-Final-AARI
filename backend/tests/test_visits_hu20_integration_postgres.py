@@ -130,10 +130,13 @@ def test_hu21_keeps_selection_and_does_not_expire_hu23_specific_wait(portal_case
     fresh=PostgresCoordinationRepository(connect,clock=lambda:now)
     latest=fresh.get(c.claim,c.actor)
     assert latest.requiere_sincronizacion and latest.estado_reclamo_actual=='Visita programada'
-    # HU21 informa la diferencia, pero resume no admite estados terminales.
-    # El adaptador automático de checkpoint terminal sigue siendo AARI-345;
-    # no se falsea una sincronización escribiendo sesiones/checkpoints a mano.
+    # Retomar no reabre un terminal. AARI-345 lo proyecta mediante el worker
+    # interno real; GET sigue sin escribir ni renovar actividad.
     with pytest.raises(CoordinationError):
         fresh.resume(c.claim,ResumeRequest(evento_id=uuid4(),version_esperada=selected.contexto.version,
             intento_id=selected.contexto.intento_id),c.actor)
     assert scalar(c,'SELECT estado FROM reclamos')=='Visita programada'
+    assert fresh.synchronize_due()==1
+    assert not fresh.get(c.claim,c.actor).requiere_sincronizacion
+    assert fresh.get(c.claim,c.actor).contexto.etapa=='visita_programada'
+    assert scalar(c,'SELECT estado_sesion FROM sesiones_agente')=='finalizada'

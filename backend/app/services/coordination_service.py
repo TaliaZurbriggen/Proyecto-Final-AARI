@@ -22,6 +22,7 @@ class CoordinationRepository(Protocol):
     def resume(self, claim_id: UUID, request: ResumeRequest,
                user: AuthenticatedUser) -> CoordinationResponse: ...
     def expire_due(self, *, limit: int = 20) -> int: ...
+    def synchronize_due(self, *, limit: int = 20) -> int: ...
 
 
 class CoordinationService:
@@ -37,6 +38,9 @@ class CoordinationService:
     def expire_due(self, *, limit=20):
         return self.repository.expire_due(limit=limit)
 
+    def synchronize_due(self, *, limit=20):
+        return self.repository.synchronize_due(limit=limit)
+
     @staticmethod
     def _call(method, *args):
         try:
@@ -49,13 +53,14 @@ class CoordinationService:
 
 
 async def run_coordination_worker(service, stop_event, *, poll_interval_seconds=30):
-    """Solo materializa vencimientos; SMTP queda en el outbox existente."""
+    """Proyecta hechos confirmados y vencimientos; SMTP queda en su outbox."""
     while not stop_event.is_set():
         try:
+            await asyncio.to_thread(service.synchronize_due)
             await asyncio.to_thread(service.expire_due)
         except Exception:
             # No imprimir conexiones, contexto, conversaciones ni datos personales.
-            logging.getLogger(__name__).error("No se pudo procesar el vencimiento de coordinación.")
+            logging.getLogger(__name__).error("No se pudo procesar la coordinación.")
         try:
             await asyncio.wait_for(stop_event.wait(), timeout=poll_interval_seconds)
         except TimeoutError:
