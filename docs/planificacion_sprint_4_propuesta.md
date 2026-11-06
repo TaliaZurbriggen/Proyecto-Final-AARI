@@ -368,3 +368,48 @@ Cada resumen incluirá HU/subtareas, rama/commit/PR, qué se implementó,
 decisiones, pruebas con resultados, límites o pendientes y horas reales.
 Iniciar el Sprint no autoriza implementar todas las HU sin sus propuestas
 y aprobaciones individuales.
+
+## 12. Adenda de seguimiento — cambio de canal y balance al 06/11/2026
+
+Las secciones anteriores conservan la planificación y fotografía del inicio,
+no describen el estado actual de las implementaciones. El cambio
+[SC-2026-10-26 / AARI-346](https://taliazurbriggen.atlassian.net/browse/AARI-346)
+adoptó solicitudes, presupuestos y conversación dentro de AARI, con correo
+como aviso y enlace autenticado; WhatsApp dejó de ser dependencia del recorrido
+principal. No se atribuye el cambio a un desbloqueo de Meta.
+
+Se agregaron HU32/AARI-347 (6 HH) y HU33/AARI-348 (12 HH), ambas para Talía,
+con autorización para incorporarlas al Sprint 4. El agregado es **46 + 18 =
+64 HH**, no 30 HH ni una nueva estimación retrospectiva de las nueve HU.
+Reparto estimado después del cambio: Talía 40 HH y Tobías 24 HH; no expresa
+horas efectivamente trabajadas por cada persona ni confirma capacidad previa.
+La previsión trasladada desde HU21 a AARI-345 no se suma por segunda vez.
+
+Al 06/11 las nueve HU originales, las dos nuevas y AARI-345 figuran Listo en
+Jira. Los PR #37, #38, #39, #41, #42, #43 y #44 están fusionados. El tiempo
+agregado de esas entregas y la integración es **78 h 35 min**, incluyendo
+revisiones y trabajo previo de Meta conservado dentro de HU19; no se vuelven
+a sumar subtareas. Son **14 h 35 min** sobre el alcance estimado de 64 HH.
+La planning conserva 4 HH aparte. No se cargó tiempo nuevo ni se modificaron
+estimaciones, puntos, fechas o responsables durante esta conciliación.
+
+AARI-208/AARI-211 fueron canceladas por decisión autorizada el 28/10, con
+historia y horas preservadas; no son WhatsApp implementado. AARI-338 sigue
+Por hacer y fuera del Sprint por el acuerdo previo. Requiere resolver el
+acceso remoto, esquema HU24, versiones HU21, activación segura de workers y
+correo antes de acreditar operación compartida. La QA local no cumple ese
+despliegue ni sustituye su validación. No se cambió el Sprint Goal ni se
+incorporó HU25: el incremento llega a Visita programada, no reparación resuelta.
+
+El registro de cambio se conserva completo y con la actualización fechada en
+[el acta de SC-2026-10-26](gestion/sprint_4/cambio_canal_aari_2026-10-26.md).
+[La fotografía del 06/11](gestion/sprint_4/cambio_canal_verificacion_2026-11-06.json)
+permite contrastar estados, merges y tiempos sin reescribir los JSON iniciales.
+AARI-346 registra la ratificación de Talía del acuerdo de ambos integrantes.
+Talía confirmó el 06/11 que el despliegue en la nube queda en AARI-338 para
+próximos sprints, sin contarlo como entregado ni condicionar a él el cierre
+administrativo del cambio. Restan publicación y revisión de esta actualización
+y del hotfix de compatibilidad de cancelación hallado al repetir las pruebas.
+Las ceremonias reales se documentarán en el cierre del Sprint cuando ocurran.
+No se documenta una Review o Retrospectiva que no haya ocurrido. Notion no es
+requisito ni pendiente de cierre según las instrucciones vigentes del repositorio.
