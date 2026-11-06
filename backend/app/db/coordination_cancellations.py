@@ -155,7 +155,7 @@ class SqlAlchemyCoordinationCancellations(SqlAlchemyQuotePortal):
                 if round_row:
                     recipients=s.execute(text('''SELECT DISTINCT p.id,p.email FROM aari_solicitudes_presupuesto q
                         JOIN proveedores p ON p.id=q.proveedor_id JOIN usuarios u ON u.id=p.usuario_id
-                        WHERE q.ronda_id=:round AND (:selected IS NULL OR p.id=CAST(:selected AS uuid))
+                        WHERE q.ronda_id=:round AND (CAST(:selected AS uuid) IS NULL OR p.id=CAST(:selected AS uuid))
                           AND p.activo AND u.activo AND NOT u.primer_ingreso AND u.rol='proveedor' AND u.email=p.email'''),
                         {'round':round_row['id'],'selected':str(selected) if selected else None}).mappings().all()
                     for recipient in recipients:

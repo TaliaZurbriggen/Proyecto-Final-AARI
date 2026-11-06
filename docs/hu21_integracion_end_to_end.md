@@ -1,5 +1,16 @@
 # AARI-345 — Integración final del contexto HU21
 
+## Estado conciliado al 06/11/2026
+
+PR #44 aprobado y fusionado con commit `9d38ca04698dec10a3c26478a983e7958c105865`.
+AARI-345 y AARI-236/AARI-237 figuran Listo en Jira. Tiempo agregado registrado:
+2 h 35 min; no se agregó tiempo por esta actualización. Las referencias a
+revisión/En curso del 04/11 se preservan como historia de la entrega.
+La validación compartida y habilitación del worker siguen como pendientes
+operativos: el merge no aplica la migración HU24 ni modifica variables privadas.
+Consultar [AARI-346](https://taliazurbriggen.atlassian.net/browse/AARI-346) y
+[el acta de cambio](gestion/sprint_4/cambio_canal_aari_2026-10-26.md).
+
 Propuesta aprobada por Tobías el 04/11/2026. Rama
 `codex/AARI-345-integracion-contexto` desde main `82966cc`, después del merge
 autorizado del PR #43 de HU24. AARI-345 y subtareas AARI-236/AARI-237 En curso.

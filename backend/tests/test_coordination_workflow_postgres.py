@@ -11,6 +11,7 @@ from langgraph.checkpoint.postgres import PostgresSaver
 from psycopg.rows import dict_row
 import pytest
 from sqlalchemy import text
+from sqlalchemy.engine import make_url
 from sqlalchemy.orm import sessionmaker
 
 from app.agents.coordination.state import ResumeRequest
@@ -247,6 +248,48 @@ def test_real_cancellation_reselection_and_new_visit_keep_history(workflow_case,
         history = c.messages.thread_messages(thread, c.tenant)
         assert not history['puede_enviar']
         assert any('canceló' in item['texto'] for item in history['items'])
+
+
+@pytest.fixture(params=['psycopg2', 'psycopg'])
+def cancellation_driver_case(request, monkeypatch):
+    # Elegir el controlador antes de construir la base descartable del fixture.
+    url = make_url(os.environ['AARI_TEST_POSTGRES_URL'])
+    assert url.get_backend_name() == 'postgresql'
+    assert url.host in {'127.0.0.1', 'localhost', '::1'}, 'Sólo PostgreSQL local.'
+    url = url.set(drivername=f'postgresql+{request.param}')
+    monkeypatch.setenv('AARI_TEST_POSTGRES_URL', url.render_as_string(hide_password=False))
+    case = request.getfixturevalue('workflow_case')
+    assert case.db.dialect.driver == request.param
+    return case
+
+
+@pytest.mark.parametrize('expense', ['ordinario', 'extraordinario'])
+@pytest.mark.parametrize('stage', ['recepcion', 'comparacion', 'seleccion'])
+def test_cancellation_recipient_uuid_is_typed_for_both_drivers(cancellation_driver_case, expense, stage):
+    c = cancellation_driver_case
+    begin(c, expense)
+    if expense == 'extraordinario':
+        authorize(c)
+    active_provider(c, n=1)
+    choose(c)
+    quotes(c, close=stage != 'recepcion')
+    if stage == 'seleccion':
+        select_and_start(c)
+    selected = scalar(c, 'SELECT proveedor_seleccionado_id FROM reclamos WHERE id=:id', id=c.claim)
+    assert (selected is not None) == (stage == 'seleccion')
+    detail = c.cancel.get(c.claim, c.actor)
+    payload = CoordinationCancellationRequest(request_id=uuid4(), eleccion_id=detail['eleccion_id'],
+        expected_updated_at=detail['updated_at'], confirmar=True)
+    result = c.cancel.cancel(c.claim, c.actor, payload)
+    assert result['repetida'] is False
+    assert scalar(c, 'SELECT count(*) FROM reclamo_cancelaciones_coordinacion') == 1
+    assert scalar(c, 'SELECT estado FROM reclamos WHERE id=:id', id=c.claim) == result['estado_resultante']
+    key = f"hu24:{result['id']}:proveedor:%"
+    expected = 1 if stage == 'seleccion' else 2
+    assert scalar(c, 'SELECT count(*) FROM notificaciones WHERE clave_idempotencia LIKE :key', key=key) == expected
+    before = durable(c)
+    assert c.cancel.cancel(c.claim, c.actor, payload)['repetida'] is True
+    assert durable(c) == before
 
 
 def test_real_rejection_sync_does_not_reopen_or_repeat_notifications(workflow_case):

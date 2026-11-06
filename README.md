@@ -12,10 +12,30 @@ Universidad Tecnológica Nacional - Facultad Regional San Francisco
 
 Sistema web con agente de inteligencia artificial que automatiza el flujo completo de gestión de reclamos de mantenimiento en inmobiliarias: clasificación ordinario/extraordinario/expensa, selección de proveedores, coordinación de turnos y seguimiento hasta el cierre.
 
-## HU23 — Coordinación de visitas en desarrollo (02/11/2026)
+## Estado del cambio de canal — 06/11/2026
 
-Rama `codex/AARI-250-coordinacion-visitas`, rebaseada sobre main `e5aa612` con
-HU20 integrada. Implementación local de disponibilidad del inquilino, confirmación
+AARI + correo reemplaza a WhatsApp como recorrido principal. HU19, HU20, HU23,
+HU24, HU32, HU33 y la integración AARI-345 están en main y Listo en Jira.
+Las tareas exclusivas de Meta AARI-208/AARI-211 están Cancelada: se conservan
+sus horas y evidencia, sin presentarlas como WhatsApp entregado.
+
+El control [AARI-346](https://taliazurbriggen.atlassian.net/browse/AARI-346)
+sigue En curso hasta publicar y revisar esta actualización y su hotfix.
+Talía ratificó el acuerdo del equipo para el nuevo canal, sin atribuir conformidad
+de Oikos/cátedra. También confirmó que el despliegue en la nube se hará en
+próximos sprints mediante AARI-338; no se presenta como entregado ni bloquea
+el cierre administrativo del cambio. Las ceremonias se registrarán al realizarse.
+Ver [acta y conciliación del cambio](docs/gestion/sprint_4/cambio_canal_aari_2026-10-26.md#10-conciliación-de-entrega-y-preparación-del-cierre--06112026).
+
+La verificación de esta rama también corrige el tipado UUID de la consulta
+de destinatarios HU24 para psycopg 3, con regresión para ambos controladores.
+Ese ajuste local requiere publicación y revisión; no se presenta como ya
+integrado en main por los merges anteriores.
+
+## HU23 — Coordinación de visitas integrada
+
+Rama `codex/AARI-250-coordinacion-visitas`, integrada por el PR #42 el 03/11/2026
+con HU20. Implementación de disponibilidad del inquilino, confirmación
 del proveedor y negociación excepcional por Mensajes cuando ningún horario
 sirve. La otra persona debe confirmar una propuesta estructurada: texto libre
 no programa visitas ni reinicia las 24 horas. Avisos y recordatorios 24h/2h
@@ -37,8 +57,11 @@ presupuesto seleccionado. El recorrido HTTP real HU20→HU23 pasó localmente:
 488 aprobadas. Además, cuatro recorridos HTTP contra Supabase aprobaron con
 login/cookies reales de cuentas ficticias y rollback; el navegador integrado
 verificó el login administrador y el listado real. Sin SMTP, Gemini ni Meta.
-No sumar tandas solapadas. Falta el adaptador de checkpoint terminal de AARI-345
-y la revisión del PR; no se declara HU23 lista.
+No sumar tandas solapadas. HU23 y sus once subtareas están Listo. El adaptador
+terminal de AARI-345 también quedó integrado por el PR #44 el 06/11/2026;
+su verificación compartida y la habilitación de workers son pendientes operativos,
+no otra implementación faltante del adaptador. Esta entrega no acredita un
+despliegue remoto ni envíos automáticos de extremo a extremo.
 Ver [documentación HU23](docs/hu23_coordinacion_visitas.md).
 
 ## Stack tecnológico
@@ -47,7 +70,7 @@ Ver [documentación HU23](docs/hu23_coordinacion_visitas.md).
 - **Orquestación agéntica:** LangGraph
 - **Base de datos:** PostgreSQL
 - **Frontend:** React
-- **Infraestructura:** AWS Free Tier / Railway
+- **Infraestructura actual:** Supabase; ejecución local de frontend/backend. Despliegue remoto pendiente en AARI-338.
 - **Gestión del proyecto:** Jira
 - **Documentación técnica:** GitHub (`README.md`, `docs/` y pull requests)
 - **Control de versiones:** GitHub
@@ -1282,29 +1305,27 @@ las reuniones no se cargaron en Jira durante esta actualización.
 El alcance, la secuencia, las dependencias y el criterio de estimación están
 documentados en [`docs/planificacion_sprint_3.md`](docs/planificacion_sprint_3.md).
 
-**Sprint 4 — Activo:** planning completada y período configurado en Jira
-del **09/10/2026 al 06/11/2026**, sin modificar su inicio. Nueve HU de coordinación
-con proveedores, aprobadas y cargadas en Jira
-por **46 HH de implementación**, con reuniones aparte, tras sumar 2 HH a cada
-historia sobre la primera carga de 28 HH. El nuevo total supera en 16 HH la
-capacidad orientativa inicial de 30 HH; el compromiso final es 46 HH.
-Se distribuyó el tiempo en las 81 subtareas, sin duplicarlo
-en las HU padre y conservando los story points originales. AARI-338 (4 HH)
-quedó fuera de esta carga y permanece pendiente. Se prioriza la coordinación del
-agente con proveedores hasta **Visita programada**, no reparación Resuelta.
-Sprint iniciado por Talía y estado activo verificado. Las nueve HU y sus 81
-subtareas están asignadas: **Talía 22 HH** (HU15, HU18, HU19, HU23) y **Tobías
-24 HH** (HU16, HU17, HU20, HU21, HU24). HU15 / AARI-170 está **En curso** desde
-el 09/10, con implementación aprobada en `codex/AARI-170-proveedores-candidatos`.
-Las demás permanecen Por hacer hasta iniciar cada implementación aprobada.
-La planning duró **2 horas entre ambos = 4 HH del equipo**, registradas una
-sola vez en [AARI-344](https://taliazurbriggen.atlassian.net/browse/AARI-344), lista.
-Se contabilizan aparte de las 46 HH; review/retrospectiva aún no realizadas.
-Acta completa en Jira y en el proyecto; publicación completa en Notion pendiente
-por el límite de bloques gratuitos, sin borrar contenido ni cambiar el plan.
-El estado del Hub de Notion sí se actualizó y verificó con el resumen del Sprint.
-Alcance, dependencias, fotografía inicial, desglose verificado y riesgos
-en [`docs/planificacion_sprint_4_propuesta.md`](docs/planificacion_sprint_4_propuesta.md).
+**Sprint 4 — Estado consultado el 06/11/2026:** Jira todavía lo informa activo,
+con período configurado **09/10/2026–06/11/2026**. No se cerró ni se cambiaron
+sus fechas por esta actualización. La línea base inicial fue **46 HH** en nueve
+HU; el cambio autorizado del 26/10 agregó HU32 (6 HH) y HU33 (12 HH): **64 HH**
+de alcance estimado, reuniones aparte. No se reemplazan los puntos ni las
+estimaciones históricas. El reparto inicial 22/24 HH pasó a 40/24 HH al agregar
+las dos HU a Talía; no es una medición de esfuerzo individual ni de capacidad.
+
+Las nueve HU iniciales, las dos nuevas y AARI-345 figuran Listo. La consulta
+actual de sus tiempos agregados suma **78 h 35 min**, sin duplicar subtareas
+ni agregar otra vez el trabajo Meta cancelado. La planning conserva **4 HH**
+aparte; no hay una nueva duración confirmada de Review/Retrospectiva por esta
+conciliación. AARI-338 conserva sus 4 HH históricas, Por hacer y fuera de este
+alcance. Visita programada no equivale a reparación Resuelta.
+
+La aceptación del cambio y la disposición del despliegue quedaron registradas
+en AARI-346. Publicación/revisión de estos ajustes pendiente. Notion no es
+requisito ni pendiente de cierre. Fuentes:
+[planning histórica y adenda](docs/planificacion_sprint_4_propuesta.md),
+[acta de cambio y balance](docs/gestion/sprint_4/cambio_canal_aari_2026-10-26.md)
+y [fotografía verificable del 06/11](docs/gestion/sprint_4/cambio_canal_verificacion_2026-11-06.json).
 
 ### HU24 — Cancelar coordinación y reelegir proveedor (03/11/2026)
 
@@ -1324,9 +1345,10 @@ HU24 y sus nueve subtareas listas por autorización de Tobías. Tiempo registrad
 5 h 15 min de implementación + 1 h de revisión de Talía = 6 h 15 min del equipo.
 Decisiones, contrato y validaciones: [HU24](docs/hu24_cancelacion_coordinacion.md).
 
-### AARI-345 — Integración final del contexto HU21 (04/11/2026)
+### AARI-345 — Integración final del contexto HU21 (merge 06/11/2026)
 
-Entrega para revisión en `codex/AARI-345-integracion-contexto`, desde main `82966cc`.
+Entrega en `codex/AARI-345-integracion-contexto`, desde main `82966cc`.
+PR #44 aprobado y fusionado en `9d38ca0`; AARI-345 y sus dos subtareas Listo.
 Conecta autorización, elección, presupuestos, visita y cancelación reales con
 los checkpoints. El worker HU21 reconcilia las sesiones inicializadas, incluidos
 los terminales, sin repetir decisiones ni renovar actividad por consultar/sondear.
@@ -1336,5 +1358,7 @@ transacción, aunque ese reclamo haya quedado fuera del lote de sincronización.
 
 Sin nuevas dependencias ni migraciones. `COORDINATION_WORKER_ENABLED=false`
 permanece como valor por defecto; su habilitación compartida requiere autorización.
-AARI-345 y subtareas En curso, sin horas nuevas ni cierre; publicación autorizada.
+Tiempo registrado en Jira: 2 h 35 min, sin carga adicional en esta actualización.
+Verificación compartida y habilitación operativa siguen pendientes; hacer pull
+no las ejecuta ni aplica la migración HU24.
 Decisiones y pruebas: [integración HU21](docs/hu21_integracion_end_to_end.md).

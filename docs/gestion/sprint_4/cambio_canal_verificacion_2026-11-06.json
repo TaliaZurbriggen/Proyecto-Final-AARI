@@ -1,0 +1,281 @@
+{
+  "fecha": "2026-11-06",
+  "momento": "Fotografía de verificación local previa a la publicación; autorización posterior y entrega en Jira/PR",
+  "zona_horaria": "America/Buenos_Aires",
+  "base_main": "9d38ca04698dec10a3c26478a983e7958c105865",
+  "rama_documental": "codex/AARI-346-cierre-canal",
+  "control": "AARI-346",
+  "estado_control": "En curso",
+  "alcance_estimado_hh": {
+    "linea_base": 46,
+    "hu32": 6,
+    "hu33": 12,
+    "total": 64,
+    "reuniones_incluidas": false
+  },
+  "tiempo_observado": {
+    "fuente": "Jira aggregatetimespent por padre, sin sumar nuevamente sus subtareas",
+    "total_segundos": 282900,
+    "total_formateado": "78 h 35 min",
+    "filas": [
+      {
+        "key": "AARI-170",
+        "segundos": 16200
+      },
+      {
+        "key": "AARI-180",
+        "segundos": 24000
+      },
+      {
+        "key": "AARI-191",
+        "segundos": 18000
+      },
+      {
+        "key": "AARI-199",
+        "segundos": 17400
+      },
+      {
+        "key": "AARI-206",
+        "segundos": 47700
+      },
+      {
+        "key": "AARI-220",
+        "segundos": 22200
+      },
+      {
+        "key": "AARI-229",
+        "segundos": 23400
+      },
+      {
+        "key": "AARI-250",
+        "segundos": 17400
+      },
+      {
+        "key": "AARI-262",
+        "segundos": 22500
+      },
+      {
+        "key": "AARI-347",
+        "segundos": 21600
+      },
+      {
+        "key": "AARI-348",
+        "segundos": 43200
+      },
+      {
+        "key": "AARI-345",
+        "segundos": 9300
+      }
+    ],
+    "nota": "Incluye AARI-345 como seguimiento separado de HU21. AARI-208/211 ya están dentro del agregado HU19."
+  },
+  "prs": [
+    {
+      "number": 37,
+      "merged": true,
+      "title": "feat(AARI-347): acceso de proveedores — entrega parcial de HU32",
+      "head_sha": "7160078290b494cfb68cb31cd6bfadb734256196",
+      "merge_sha": "c3adc8f80e5cd346eb91a03d854ef5e2c4afa888",
+      "merged_at": "2026-10-27T11:59:13Z",
+      "url": "https://github.com/TaliaZurbriggen/Proyecto-Final-AARI/pull/37",
+      "isError": false
+    },
+    {
+      "number": 38,
+      "merged": true,
+      "title": "feat(AARI-206): solicitudes y presupuestos en AARI con aviso por correo (HU19)",
+      "head_sha": "2afcec244e3eada51e20901d475ed5bfbcadccab",
+      "merge_sha": "67b3c909b6e05f6dc282162ca5e982531147c191",
+      "merged_at": "2026-10-28T19:39:44Z",
+      "url": "https://github.com/TaliaZurbriggen/Proyecto-Final-AARI/pull/38",
+      "isError": false
+    },
+    {
+      "number": 39,
+      "merged": true,
+      "title": "feat(AARI-348): mensajes del agente y consultas tecnicas (HU33)",
+      "head_sha": "e38ced00fee8f01116ae1f2af16335f6500b93fa",
+      "merge_sha": "2ff6e3e3f56764737cea68788f6430ab7d18aa40",
+      "merged_at": "2026-10-29T23:03:08Z",
+      "url": "https://github.com/TaliaZurbriggen/Proyecto-Final-AARI/pull/39",
+      "isError": false
+    },
+    {
+      "number": 41,
+      "merged": true,
+      "title": "HU20 / AARI-220 — Comparación y selección auditada de presupuestos",
+      "head_sha": "af47a74b6b161139c67f982ebd4bb3204467984b",
+      "merge_sha": "e5aa6120fcc17d1f80bb94b47e6e018c8094d46c",
+      "merged_at": "2026-11-02T12:45:07Z",
+      "url": "https://github.com/TaliaZurbriggen/Proyecto-Final-AARI/pull/41",
+      "isError": false
+    },
+    {
+      "number": 42,
+      "merged": true,
+      "title": "feat(AARI-250): coordinar visitas e integrar selección auditada HU20",
+      "head_sha": "43a0a99d17635c5864d25f4539937ed242b24971",
+      "merge_sha": "897b8bde3a4f33a7db1236e0d7f0b35d4c110be1",
+      "merged_at": "2026-11-03T21:46:17Z",
+      "url": "https://github.com/TaliaZurbriggen/Proyecto-Final-AARI/pull/42",
+      "isError": false
+    },
+    {
+      "number": 43,
+      "merged": true,
+      "title": "feat(AARI-262): cancelar coordinación y reelegir proveedor (HU24)",
+      "head_sha": "e73cc6d704ddcc045469dd1719b57e7fcc1a4e9e",
+      "merge_sha": "82966ccb24560668726d66bead18bc310ea6fb4b",
+      "merged_at": "2026-11-04T16:00:17Z",
+      "url": "https://github.com/TaliaZurbriggen/Proyecto-Final-AARI/pull/43",
+      "isError": false
+    },
+    {
+      "number": 44,
+      "merged": true,
+      "title": "feat(AARI-345): sincronizar contexto HU21 con el flujo real",
+      "head_sha": "54d5d3984ed4d6715300d51921e76615630c575a",
+      "merge_sha": "9d38ca04698dec10a3c26478a983e7958c105865",
+      "merged_at": "2026-11-06T19:36:46Z",
+      "url": "https://github.com/TaliaZurbriggen/Proyecto-Final-AARI/pull/44",
+      "isError": false
+    }
+  ],
+  "pendientes": [
+    "publicacion_revision_documentacion_y_hotfix",
+    "indicacion_cierre_AARI-346"
+  ],
+  "validacion_nueva": {
+    "estado": "aprobada_localmente",
+    "codigo_base": "main 9d38ca04698dec10a3c26478a983e7958c105865 más hotfix local no publicado",
+    "servicios_externos": false,
+    "antes": [
+      {
+        "driver": "psycopg 3.3.6",
+        "aprobadas": 71,
+        "fallidas": 19,
+        "segundos": 106.49
+      },
+      {
+        "driver": "psycopg2 2.9.12",
+        "aprobadas": 90,
+        "fallidas": 0,
+        "segundos": 110.74
+      }
+    ],
+    "regresion_antes": {
+      "aprobadas": 6,
+      "fallidas": 6,
+      "desseleccionadas": 28,
+      "segundos": 20.91
+    },
+    "despues": [
+      {
+        "driver_principal": "psycopg 3.3.6",
+        "aprobadas": 102,
+        "fallidas": 0,
+        "segundos": 133.01
+      },
+      {
+        "driver_principal": "psycopg2 2.9.12",
+        "aprobadas": 120,
+        "fallidas": 0,
+        "segundos": 124.76,
+        "nota": "Incluye 18 reglas/API adicionales"
+      }
+    ],
+    "no_sumar_tandas_solapadas": true,
+    "entorno": "PostgreSQL 17 temporal; datos ficticios, dependencias existentes y sin .env",
+    "bases_qa_restantes": 0,
+    "contenedor_temporal_retirado": true
+  },
+  "mutaciones_funcionales": true,
+  "horas_cargadas": 0,
+  "estimaciones_modificadas": false,
+  "incidencias": [
+    {
+      "key": "AARI-170",
+      "estado": "Listo"
+    },
+    {
+      "key": "AARI-180",
+      "estado": "Listo"
+    },
+    {
+      "key": "AARI-191",
+      "estado": "Listo"
+    },
+    {
+      "key": "AARI-199",
+      "estado": "Listo"
+    },
+    {
+      "key": "AARI-206",
+      "estado": "Listo"
+    },
+    {
+      "key": "AARI-208",
+      "estado": "Cancelada"
+    },
+    {
+      "key": "AARI-211",
+      "estado": "Cancelada"
+    },
+    {
+      "key": "AARI-220",
+      "estado": "Listo"
+    },
+    {
+      "key": "AARI-229",
+      "estado": "Listo"
+    },
+    {
+      "key": "AARI-250",
+      "estado": "Listo"
+    },
+    {
+      "key": "AARI-262",
+      "estado": "Listo"
+    },
+    {
+      "key": "AARI-338",
+      "estado": "Por hacer"
+    },
+    {
+      "key": "AARI-345",
+      "estado": "Listo"
+    },
+    {
+      "key": "AARI-347",
+      "estado": "Listo"
+    },
+    {
+      "key": "AARI-348",
+      "estado": "Listo"
+    }
+  ],
+  "aceptacion": {
+    "equipo": "Talía ratificó el acuerdo de ella y Tobías en este chat el 06/11/2026",
+    "motivo": "No se pudo completar la integración con Meta",
+    "aceptacion_externa_atribuida": false
+  },
+  "disposicion_despliegue": {
+    "tarea": "AARI-338",
+    "decision": "Despliegue en la nube en próximos sprints, confirmado por Talía el 06/11/2026",
+    "entregado": false,
+    "modifica_sprint_actual": false
+  },
+  "seguimiento_separado": [
+    "AARI-338: despliegue y verificación operativa compartida",
+    "Review/Retrospectiva del Sprint cuando se realicen"
+  ],
+  "hotfix": {
+    "autorizado": "Talía, 06/11/2026",
+    "archivo": "backend/app/db/coordination_cancellations.py",
+    "cambio": "Tipado explícito UUID del parámetro opcional antes de IS NULL",
+    "regresiones_nuevas": 12,
+    "migraciones_nuevas": false,
+    "dependencias_nuevas": false,
+    "publicado_en_el_momento_de_la_verificacion": false
+  }
+}

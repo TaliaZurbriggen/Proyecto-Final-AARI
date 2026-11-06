@@ -1,5 +1,17 @@
 # HU23 / AARI-250 — Coordinación de visitas
 
+## Estado conciliado al 06/11/2026
+
+HU23 y sus once subtareas están Listo; PR #42 integrado el 03/11 en `897b8bd`.
+La integración terminal que los registros históricos inferiores dejaban en
+AARI-345 ya fue implementada y fusionada por PR #44 en `9d38ca0` el 06/11;
+AARI-345 y sus dos subtareas también figuran Listo. Los apartados fechados
+anteriores conservan sus resultados y límites, no el estado administrativo actual.
+La verificación compartida, migración HU24 y habilitación segura de workers
+siguen como pendientes operativos; no se acredita SMTP ni despliegue por esos
+merges. Ver [integración HU21](hu21_integracion_end_to_end.md) y
+[seguimiento del cambio de canal](gestion/sprint_4/cambio_canal_aari_2026-10-26.md).
+
 Inicio autorizado: 01/11/2026. Rama `codex/AARI-250-coordinacion-visitas`, desde
 main `879fa07`. Estimación vigente 6 HH, sin reestimación. Talía informó y
 autorizó registrar 2 HH de implementación el 01/11/2026, distribuidas abajo.
