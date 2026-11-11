@@ -1,8 +1,8 @@
 """Acciones explícitas de HU23. El cliente no elige participantes ni etapas."""
-from datetime import datetime
+from typing import Annotated, Literal
 from uuid import UUID
 
-from pydantic import AwareDatetime, BaseModel, ConfigDict, Field, model_validator
+from pydantic import AwareDatetime, BaseModel, ConfigDict, Field, StringConstraints, model_validator
 
 
 class VisitOption(BaseModel):
@@ -42,3 +42,21 @@ class VisitConfirmationRequest(VisitAction):
         if (self.fecha is None) == (self.propuesta_version is None):
             raise ValueError('Confirmá una opción o una propuesta concreta.')
         return self
+
+
+VisitNote = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=500)]
+
+
+class VisitRescheduleRequest(VisitAction):
+    fecha: AwareDatetime
+    motivo: VisitNote
+
+
+class VisitRescheduleDecision(VisitAction):
+    propuesta_id: UUID
+    decision: Literal['aceptar', 'rechazar', 'retirar']
+
+
+class VisitAbsenceRequest(VisitAction):
+    tipo: Literal['no_realizada', 'contraparte_ausente']
+    observaciones: VisitNote

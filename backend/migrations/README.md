@@ -942,3 +942,14 @@ No ejecuta DDL al arrancar ni habilita funcionalidad, workers o envíos.
 si sus módulos/esquemas están disponibles y se habilitaron por separado.
 La aplicación compartida y su validación requieren autorización propia.
 Detalle: [HU24](../../docs/hu24_cancelacion_coordinacion.md).
+
+## HU36 — reprogramaciones y ausencias (11/11/2026)
+
+`20261111120000_hu36_reprogramacion_visitas.sql` requiere HU23 con selección
+auditada (`20261102103000_hu23_seleccion_auditada.sql`) y su requisito HU33.
+Agrega una revisión de horario con valor inicial cero, propuestas y reportes
+privados con RLS y permisos revocados a `PUBLIC`, `anon` y `authenticated`.
+Conserva las fechas, confirmaciones y avisos de HU23. Aplicar una vez después
+de actualizar las instancias que coordinan visitas y procesan sus avisos.
+Validada en PostgreSQL local. El despliegue compartido sigue pendiente.
+Detalle: [HU36](../../docs/hu36_reprogramacion_visitas.md).

@@ -18,6 +18,12 @@
 .input:focus-visible, .back:focus-visible { outline: 2px solid var(--aari-color-focus); outline-offset: var(--aari-space-1); }
 .options { list-style: none; margin: var(--aari-space-5) 0; padding: 0; display: grid; gap: var(--aari-space-4); }
 .options li { display: flex; align-items: start; gap: var(--aari-space-3); padding: var(--aari-space-4); background: var(--aari-color-surface-soft); border-radius: var(--aari-radius-md); }
+.proposal dt { color: var(--aari-color-muted); }
+.proposal dd { margin: 0; font-weight: var(--aari-font-weight-semibold); }
+.history { display: grid; gap: var(--aari-space-4); list-style: none; padding: 0; }
+.history li { border-top: 1px solid var(--aari-color-border); padding-block-start: var(--aari-space-3); }
+.history p { margin-block: var(--aari-space-2); }
+textarea.input { resize: vertical; }
 @media (max-width: 767px) {
   .fields, .proposal { grid-template-columns: 1fr; }
   .card { padding: var(--aari-space-5); }
