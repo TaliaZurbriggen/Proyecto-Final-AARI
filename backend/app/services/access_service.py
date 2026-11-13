@@ -1,10 +1,10 @@
 """Entrega segura y reintento de credenciales iniciales."""
 
 import os
-import smtplib
-from email.message import EmailMessage
 from typing import Protocol
 from uuid import UUID
+
+from app.services.email_transport import EmailDeliveryError, send_email
 
 
 class WelcomeEmailDeliveryError(Exception):
@@ -46,8 +46,8 @@ class WelcomeEmailSender(Protocol):
     ) -> None: ...
 
 
-class SmtpWelcomeEmailSender:
-    """Envía el correo sin registrar ni exponer la contraseña temporal."""
+class ConfiguredWelcomeEmailSender:
+    """Conserva la plantilla y delega en el transporte configurado del backend."""
 
     def send(
         self,
@@ -56,59 +56,28 @@ class SmtpWelcomeEmailSender:
         person_name: str,
         temporary_password: str,
     ) -> None:
-        host = os.getenv("SMTP_HOST", "").strip()
-        sender = os.getenv("SMTP_FROM", "").strip()
-        if not host or not sender:
-            raise WelcomeEmailDeliveryError(
-                "El servicio de correo no está configurado."
-            )
-
-        try:
-            port = int(os.getenv("SMTP_PORT", "587"))
-        except ValueError as error:
-            raise WelcomeEmailDeliveryError(
-                "La configuración del servicio de correo es inválida."
-            ) from error
-
-        username = os.getenv("SMTP_USERNAME", "").strip()
-        password = os.getenv("SMTP_PASSWORD", "")
         login_url = os.getenv("APP_LOGIN_URL", "http://localhost:5173/login").strip()
-        use_starttls = os.getenv("SMTP_STARTTLS", "true").lower() not in {
-            "0",
-            "false",
-            "no",
-        }
-
-        message = EmailMessage()
-        message["Subject"] = "Tus credenciales de acceso a AARI"
-        message["From"] = sender
-        message["To"] = recipient
-        message.set_content(
-            "\n".join(
-                [
-                    f"Hola {person_name},",
-                    "",
-                    "La inmobiliaria creó tu acceso a AARI.",
-                    f"Usuario: {recipient}",
-                    f"Contraseña temporal: {temporary_password}",
-                    f"Ingresá en: {login_url}",
-                    "",
-                    "Por seguridad, al ingresar deberás elegir una contraseña nueva.",
-                ]
-            )
+        body = "\n".join(
+            [
+                f"Hola {person_name},",
+                "",
+                "La inmobiliaria creó tu acceso a AARI.",
+                f"Usuario: {recipient}",
+                f"Contraseña temporal: {temporary_password}",
+                f"Ingresá en: {login_url}",
+                "",
+                "Por seguridad, al ingresar deberás elegir una contraseña nueva.",
+            ]
         )
 
         try:
-            with smtplib.SMTP(host, port, timeout=10) as smtp:
-                if use_starttls:
-                    smtp.starttls()
-                if username:
-                    smtp.login(username, password)
-                smtp.send_message(message)
-        except (OSError, smtplib.SMTPException) as error:
-            raise WelcomeEmailDeliveryError(
-                "No se pudo entregar el correo de bienvenida."
-            ) from error
+            send_email(recipient=recipient, subject="Tus credenciales de acceso a AARI", body=body)
+        except EmailDeliveryError as error:
+            raise WelcomeEmailDeliveryError(str(error)) from None
+
+
+# Compatibilidad de imports y dobles previos; no fuerza un fallback a SMTP.
+SmtpWelcomeEmailSender = ConfiguredWelcomeEmailSender
 
 
 class AccessInvitationService:

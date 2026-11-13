@@ -1,6 +1,10 @@
+.env
+.env.*
+.secrets/
 venv/
+.venv/
 __pycache__/
 *.pyc
-.env
+artifacts/
 .git
 .gitignore

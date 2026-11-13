@@ -26,7 +26,7 @@ from app.services.access_service import (
     AccessAlreadyActivatedError,
     AccessInvitationService,
     AccessNotFoundError,
-    SmtpWelcomeEmailSender,
+    ConfiguredWelcomeEmailSender,
 )
 
 router = APIRouter(prefix="/inquilinos", tags=["inquilinos"])
@@ -38,7 +38,7 @@ def get_inquilinos_service() -> InquilinosService:
         SqlAlchemyInquilinosRepository(),
         AccessInvitationService(
             SqlAlchemyAccessRepository(),
-            SmtpWelcomeEmailSender(),
+            ConfiguredWelcomeEmailSender(),
         ),
     )
 

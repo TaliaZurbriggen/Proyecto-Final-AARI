@@ -24,7 +24,7 @@ from app.services.access_service import (
     AccessAlreadyActivatedError,
     AccessInvitationService,
     AccessNotFoundError,
-    SmtpWelcomeEmailSender,
+    ConfiguredWelcomeEmailSender,
 )
 
 router = APIRouter(prefix="/propietarios", tags=["propietarios"])
@@ -35,7 +35,7 @@ def get_propietarios_service() -> PropietariosService:
         SqlAlchemyPropietariosRepository(),
         AccessInvitationService(
             SqlAlchemyAccessRepository(),
-            SmtpWelcomeEmailSender(),
+            ConfiguredWelcomeEmailSender(),
         ),
     )
 

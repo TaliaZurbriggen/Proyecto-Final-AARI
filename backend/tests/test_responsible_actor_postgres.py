@@ -77,7 +77,9 @@ def local_engine():
                         ('plazo_recordatorio_horas', '48'),
                         ('plazo_escalado_horas', '24');
                 """)
-                connection.commit()
+                # Los scripts usan un cursor DBAPI directo; SQLAlchemy puede no
+                # conocer la transacción del seed (especialmente con psycopg 3).
+                connection.connection.commit()
             finally:
                 cursor.close()
         yield db

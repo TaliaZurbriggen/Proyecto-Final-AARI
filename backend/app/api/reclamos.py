@@ -26,7 +26,7 @@ from app.schemas.reclamos import (
 )
 from app.services.claim_notifications import (
     ClaimNotificationService,
-    SmtpClaimEmailSender,
+    ConfiguredClaimEmailSender,
 )
 from app.services.claim_storage import SupabaseClaimPhotoStorage
 from app.services.classification_service import (
@@ -72,7 +72,7 @@ def get_claims_query_service() -> TenantClaimsQueryService:
 def get_claim_notification_service() -> ClaimNotificationService:
     return ClaimNotificationService(
         SqlAlchemyClaimsRepository(),
-        SmtpClaimEmailSender(),
+        ConfiguredClaimEmailSender(),
     )
 
 

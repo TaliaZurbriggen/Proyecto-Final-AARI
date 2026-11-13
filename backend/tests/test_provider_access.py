@@ -104,13 +104,15 @@ def test_email_contains_activation_fragment_not_password(monkeypatch):
         def __init__(self, *args, **kwargs): pass
         def __enter__(self): return self
         def __exit__(self, *args): pass
+        def quit(self): pass
+        def close(self): pass
         def starttls(self): pass
         def login(self, *args): pass
         def send_message(self, message): messages.append(message)
     monkeypatch.setenv("SMTP_HOST", "smtp.example.com")
     monkeypatch.setenv("SMTP_FROM", "AARI <agency@example.com>")
     monkeypatch.setenv("APP_LOGIN_URL", "https://aari.example.com/login")
-    monkeypatch.setattr("app.services.provider_access_service.smtplib.SMTP", SMTP)
+    monkeypatch.setattr("app.services.email_transport.smtplib.SMTP", SMTP)
     SmtpProviderInvitationSender().send(InvitationDelivery("i", "service@example.com", "Servicio", TOKEN))
     body = messages[0].get_content()
     assert "/activar-proveedor#token=" + TOKEN in body

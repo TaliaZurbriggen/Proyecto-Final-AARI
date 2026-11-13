@@ -513,7 +513,7 @@ class SqlAlchemyClaimsRepository:
     def prepare_notification_delivery(self, context: ClaimNotificationContext) -> bool:
         """Revalidar el intento y HU19 justo antes de contactar al canal.
 
-        No mantiene una transacción abierta durante SMTP. Un cambio posterior
+        No mantiene una transacción abierta durante el envío. Un cambio posterior
         a esta comprobación no puede retirar un correo que el canal ya aceptó.
         """
         with self.session_factory.begin() as session:
@@ -556,6 +556,7 @@ class SqlAlchemyClaimsRepository:
         attempt_number: int,
         sent: bool,
         safe_error: str | None = None,
+        retryable: bool = True,
     ) -> bool:
         with self.session_factory.begin() as session:
             context = session.execute(text("""
@@ -566,12 +567,17 @@ class SqlAlchemyClaimsRepository:
                 # Orden reclamo -> notificación, igual que la clasificación.
                 session.execute(text("SELECT id FROM reclamos WHERE id=:id FOR UPDATE"),
                                 {"id": str(context["reclamo_id"])})
+            # Un fallo terminal del intento aún actual no debe perderse por
+            # vencer la reserva: dejarlo procesando permitiría reenviarlo.
+            # Estado/número de intento siguen protegiendo contra resultados
+            # reemplazados o cancelados; el éxito de expensa conserva su lease.
             result = session.execute(
                 text(
                     """
                     UPDATE notificaciones
                     SET estado_envio = CASE
                             WHEN :sent THEN 'enviado'
+                            WHEN NOT :retryable THEN 'fallido'
                             WHEN intentos >= 3 THEN 'fallido'
                             ELSE 'pendiente'
                         END,
@@ -581,7 +587,7 @@ class SqlAlchemyClaimsRepository:
                             ELSE enviado_en
                         END,
                         proximo_intento_en = CASE
-                            WHEN NOT :sent AND intentos < 3
+                            WHEN NOT :sent AND :retryable AND intentos < 3
                                 THEN CURRENT_TIMESTAMP
                                      + make_interval(secs => :retry_seconds)
                             ELSE NULL
@@ -592,7 +598,8 @@ class SqlAlchemyClaimsRepository:
                       AND estado_envio = 'procesando'
                       AND intentos = :attempt_number
                       AND (tipo_evento <> 'expensa_reporte'
-                           OR bloqueado_hasta > clock_timestamp())
+                           OR bloqueado_hasta > clock_timestamp()
+                           OR (NOT :sent AND NOT :retryable))
                     """
                 ),
                 {
@@ -600,6 +607,7 @@ class SqlAlchemyClaimsRepository:
                     "notification_id": str(notification_id),
                     "safe_error": safe_error,
                     "sent": sent,
+                    "retryable": retryable,
                     "retry_seconds": RETRY_INTERVAL_SECONDS,
                 },
             )

@@ -10,7 +10,7 @@ from app.db.operadores import SqlAlchemyOperadoresRepository
 from app.schemas.operadores import (
     OperadorCreate, OperadorDesactivadoResponse, OperadorResponse, OperadoresPage,
 )
-from app.services.access_service import SmtpWelcomeEmailSender
+from app.services.access_service import ConfiguredWelcomeEmailSender
 from app.services.operadores_service import (
     DuplicateOperadorEmailError, OperadorAccessConflictError,
     OperadorNotFoundError, OperadoresService,
@@ -21,7 +21,7 @@ router = APIRouter(prefix="/usuarios/operadores", tags=["operadores"],
 
 
 def get_operadores_service() -> OperadoresService:
-    return OperadoresService(SqlAlchemyOperadoresRepository(), SmtpWelcomeEmailSender())
+    return OperadoresService(SqlAlchemyOperadoresRepository(), ConfiguredWelcomeEmailSender())
 
 
 def _unavailable() -> HTTPException:
