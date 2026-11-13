@@ -132,6 +132,19 @@ producción continúa pendiente. No se generó otra autorización ni otro envío
 | Timeout/rotura de comunicación después del POST, respuesta 5xx de envío o éxito sin ID confirmable | `fallido` con advertencia de envío incierto; revisar antes de reenviar. |
 | Aceptación con ID de Gmail | Se registra aceptación del canal. No acredita recepción por sí sola. |
 
+En la alternativa SMTP, un retorno exitoso de `send_message` fija la aceptación:
+un error posterior de `QUIT` o de cierre no la convierte en fallo. Los rechazos
+explícitos SMTP 4xx admiten reintento acotado; los 5xx y configuraciones no
+soportadas no. Una pérdida de conexión/respuesta durante el envío es incierta,
+no reintentable automáticamente. El cierre se ejecuta aparte y no reemplaza el
+resultado original ni guarda respuestas privadas del servidor.
+
+Para `expensa_reporte`, se conserva un resultado no reintentable aunque la
+reserva haya vencido si la fila sigue `procesando` con el mismo número de
+intento. Las filas ya canceladas/finalizadas y los intentos reemplazados siguen
+protegidos. La escritura de éxito y su transición de negocio conservan la
+comprobación de reserva vigente anterior; no se amplió esa excepción.
+
 La renovación del permiso permite nuevos envíos, **no reenvía automáticamente
 avisos que ya están fallidos**. Los de resultado incierto requieren revisión;
 no hay botón nuevo de reenvío masivo. Bienvenidas e invitaciones conservan sus
@@ -301,8 +314,11 @@ aprobadas. La tanda completa informada arriba es la repetición final exitosa.
 
 ## Estado de entrega
 
-Implementación validada; Talía autorizó commit, push y PR el 12/11/2026 para
-revisión cruzada. No se fusiona ni se cierra la HU en esta entrega. Sin cambios
+Entrega inicial publicada en el [PR #47](https://github.com/TaliaZurbriggen/Proyecto-Final-AARI/pull/47),
+commit `0720ff9`, para revisión cruzada. Las correcciones del 13/11 descritas al
+final de esta guía están validadas; Talía autorizó su commit y publicación en
+el mismo PR el 13/11. Queda pendiente la nueva revisión cruzada. No se fusiona
+ni se cierra la HU en esta entrega. Sin cambios
 visuales ni migraciones nuevas. Se conserva la renovación manual como limitación
 temporal aceptada; producción OAuth y despliegue remoto siguen pendientes. No se
 cierra HU35 en Jira antes de la revisión/merge ni se presenta AARI-338 como hecha.
@@ -387,6 +403,76 @@ La validación funcional de HU35 queda preparada para revisión. Commit, push y
 PR autorizados por Talía el 12/11; quedan pendientes revisión cruzada y merge.
 No se marca la HU como finalizada antes de ello. La renovación manual de OAuth continúa
 como limitación temporal aceptada y el despliegue en la nube sigue en AARI-338.
+
+## Correcciones de la revisión del PR #47 — 13/11/2026
+
+Talía aprobó corregir los dos hallazgos de Tobías sobre `0720ff9`:
+[cierre SMTP](https://github.com/TaliaZurbriggen/Proyecto-Final-AARI/pull/47#discussion_r4563334695)
+y [resultado terminal tardío de expensas](https://github.com/TaliaZurbriggen/Proyecto-Final-AARI/pull/47#discussion_r4563334713).
+
+### Cambios y alcance
+
+- `email_transport.py`: la conexión SMTP se prepara/envía y se cierra en fases
+  separadas. `QUIT`/`close` no transforman una aceptación en un error ni tapan
+  el rechazo o la incertidumbre original. Se conserva el mensaje seguro y se
+  distingue rechazo temporal, permanente, fallo previo al envío y respuesta
+  perdida durante el envío. No se reenvía dentro del transporte.
+- `db/reclamos.py`: el UPDATE admite el fallo no reintentable del intento aún
+  actual después del vencimiento. Conserva las condiciones de estado y número
+  de intento, el orden de locks y la protección de los éxitos de expensas.
+  No se quita globalmente la comprobación de reserva ni se avanza el reclamo
+  al guardar un error.
+- Se agregaron regresiones de transporte y persistencia; el doble SMTP de la
+  prueba HU32 se adaptó al cierre explícito. Sin dependencias nuevas, frontend,
+  migraciones, cambios de permisos ni configuración real.
+
+### Evidencia de reproducción y validación
+
+- Antes de corregir, los dobles reprodujeron aceptación seguida de `QUIT 421`
+  y pérdida de respuesta durante SMTP como errores recuperables incorrectos.
+- Antes de cambiar la condición SQL, las dos nuevas regresiones PostgreSQL
+  (autorización rechazada y envío Gmail incierto después de vencer la reserva)
+  fallaron porque el aviso quedaba `procesando`, en vez de `fallido`. Esas
+  ejecuciones intencionalmente rojas no se cuentan como validación aprobada.
+- Tanda final de correo/adaptadores/autorización/compatibilidad HU32:
+  **138 aprobadas**, sin red. Incluye cierre fallido tras aceptación, cierre
+  que no tapa el error de envío, rechazos explícitos y fallos previos al envío.
+- Backend completo: **1373 aprobadas / 660 omitidas**, sin fallos; los mismos
+  18 avisos preexistentes del adaptador datetime de SQLite. Los casos locales y
+  externos optativos omitidos aquí no se presentan como aprobados en esa tanda.
+- PostgreSQL 17 local descartable: **129 aprobadas con psycopg2** en outbox,
+  invitaciones, expensas y portal; **30 aprobadas con psycopg 3** en
+  outbox/invitaciones/expensas. Tandas solapadas: no sumar al total general.
+- La prueba de concurrencia vence la reserva mientras el resultado espera
+  el lock del reclamo. El fallo terminal se conserva si el intento sigue
+  siendo el mismo; se rechaza si otro worker ya adquirió un intento nuevo.
+  También se comprueba que no sobrescriba filas canceladas/finalizadas, que no
+  haya otro envío en el siguiente ciclo y que el éxito tardío de expensas siga
+  protegido por las regresiones anteriores.
+- Gmail se simuló con `httpx.MockTransport` y reloj controlado; SMTP con dobles.
+  No se enviaron correos reales, no se consultó Gmail ni se consumió Gemini,
+  no se modificó Supabase/OAuth y no se usaron sus credenciales. La base,
+  contenedor y volumen de pruebas fueron retirados.
+- `pip check`, compilación y `git diff --check`: correctos. Tras la validación,
+  Talía autorizó commit/push y comentario de contexto el 13/11. Los hilos de
+  revisión quedan pendientes de confirmación por Tobías; no se resuelven ni se
+  fusiona el PR en nombre del revisor.
+
+Comandos, desde `backend/`, con dotenv y servicios externos deshabilitados:
+
+```text
+../.venv/Scripts/python.exe -m pytest -q tests/test_email_transport.py tests/test_email_adapters.py tests/test_gmail_api_probe.py tests/test_provider_access.py
+../.venv/Scripts/python.exe -m pytest -q --durations=5 -o faulthandler_timeout=60
+../.venv/Scripts/python.exe -m pytest -q tests/test_email_delivery_postgres.py tests/test_email_invitations_postgres.py tests/test_expensas_postgres.py tests/test_quote_portal_postgres.py tests/test_provider_access_postgres.py
+../.venv/Scripts/python.exe -m pytest -q tests/test_email_delivery_postgres.py tests/test_email_invitations_postgres.py tests/test_expensas_postgres.py
+```
+
+Las dos últimas tandas requieren `AARI_TEST_POSTGRES_URL` exclusivamente local;
+se ejecutan con psycopg2 y psycopg respectivamente. No hay envíos reales al
+ejecutar pytest. Se mantiene el límite general de la outbox: no se garantiza
+entrega exactamente una vez ante cualquier caída o reserva ya reclamada por
+otro proceso; estas correcciones cierran los dos caminos reproducidos sin
+eliminar las protecciones de concurrencia.
 
 ## Fuentes oficiales consultadas
 

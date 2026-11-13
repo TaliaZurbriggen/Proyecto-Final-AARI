@@ -237,16 +237,47 @@ class SmtpEmailTransport:
                 raise ValueError
         except ValueError:
             raise _config_error() from None
+        smtp, sending = None, False
         try:
-            with smtplib.SMTP(host, port, timeout=10) as smtp:
-                if os.getenv("SMTP_STARTTLS", "true").lower() not in {"0", "false", "no"}:
-                    smtp.starttls()
-                username = os.getenv("SMTP_USERNAME", "").strip()
-                if username:
-                    smtp.login(username, os.getenv("SMTP_PASSWORD", ""))
-                smtp.send_message(message)
+            smtp = smtplib.SMTP(host, port, timeout=10)
+            if os.getenv("SMTP_STARTTLS", "true").lower() not in {"0", "false", "no"}:
+                smtp.starttls()
+            username = os.getenv("SMTP_USERNAME", "").strip()
+            if username:
+                smtp.login(username, os.getenv("SMTP_PASSWORD", ""))
+            sending = True
+            refused = smtp.send_message(message)
+            if refused:  # El MIME sólo admite un destinatario, no éxitos parciales.
+                raise smtplib.SMTPRecipientsRefused(refused)
+        except smtplib.SMTPRecipientsRefused as error:
+            retryable = bool(error.recipients) and all(
+                400 <= value[0] < 500 for value in error.recipients.values())
+            raise EmailDeliveryError("El servidor SMTP rechazó el destinatario.",
+                                      retryable=retryable) from None
+        except smtplib.SMTPResponseException as error:
+            raise EmailDeliveryError("El servidor SMTP rechazó el correo o la autorización.",
+                                      retryable=400 <= error.smtp_code < 500) from None
+        except smtplib.SMTPNotSupportedError:
+            raise EmailDeliveryError("El servidor SMTP no admite la configuración requerida.") from None
         except (OSError, smtplib.SMTPException):
-            raise EmailDeliveryError("No se pudo entregar el correo por SMTP.", retryable=True) from None
+            raise EmailDeliveryError(
+                "No se pudo confirmar el envío por SMTP; revisar antes de reenviar."
+                if sending else "No se pudo conectar o preparar el correo por SMTP.",
+                retryable=not sending, uncertain=sending,
+            ) from None
+        finally:
+            if smtp is not None:
+                # send_message ya determinó aceptación/rechazo/incertidumbre.
+                # Un fallo de QUIT/close no debe cambiar ese resultado ni taparlo.
+                try:
+                    smtp.quit()
+                except (OSError, smtplib.SMTPException):
+                    pass
+                finally:
+                    try:
+                        smtp.close()
+                    except (OSError, smtplib.SMTPException):
+                        pass
 
 
 @lru_cache(maxsize=4)

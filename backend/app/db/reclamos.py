@@ -567,6 +567,10 @@ class SqlAlchemyClaimsRepository:
                 # Orden reclamo -> notificación, igual que la clasificación.
                 session.execute(text("SELECT id FROM reclamos WHERE id=:id FOR UPDATE"),
                                 {"id": str(context["reclamo_id"])})
+            # Un fallo terminal del intento aún actual no debe perderse por
+            # vencer la reserva: dejarlo procesando permitiría reenviarlo.
+            # Estado/número de intento siguen protegiendo contra resultados
+            # reemplazados o cancelados; el éxito de expensa conserva su lease.
             result = session.execute(
                 text(
                     """
@@ -594,7 +598,8 @@ class SqlAlchemyClaimsRepository:
                       AND estado_envio = 'procesando'
                       AND intentos = :attempt_number
                       AND (tipo_evento <> 'expensa_reporte'
-                           OR bloqueado_hasta > clock_timestamp())
+                           OR bloqueado_hasta > clock_timestamp()
+                           OR (NOT :sent AND NOT :retryable))
                     """
                 ),
                 {

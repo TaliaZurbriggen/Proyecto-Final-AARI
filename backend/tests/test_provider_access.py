@@ -104,6 +104,8 @@ def test_email_contains_activation_fragment_not_password(monkeypatch):
         def __init__(self, *args, **kwargs): pass
         def __enter__(self): return self
         def __exit__(self, *args): pass
+        def quit(self): pass
+        def close(self): pass
         def starttls(self): pass
         def login(self, *args): pass
         def send_message(self, message): messages.append(message)

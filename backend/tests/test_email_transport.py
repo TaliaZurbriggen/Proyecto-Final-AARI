@@ -285,6 +285,8 @@ def test_smtp_remains_opt_in_compatible_and_closes_connection(monkeypatch):
         def __init__(self, *args, **kwargs): events.append("open")
         def __enter__(self): return self
         def __exit__(self, *args): events.append("close")
+        def quit(self): events.append("quit")
+        def close(self): events.append("close")
         def starttls(self): events.append("tls")
         def login(self, *args): events.append("login")
         def send_message(self, message):
@@ -295,7 +297,134 @@ def test_smtp_remains_opt_in_compatible_and_closes_connection(monkeypatch):
     monkeypatch.setenv("SMTP_USERNAME", "sender@example.com")
     monkeypatch.setattr(mail.smtplib, "SMTP", SMTP)
     mail.send_email(recipient="recipient@example.com", subject="Aviso", body="Texto")
-    assert events == ["open", "tls", "login", "Aviso", "close"]
+    assert events == ["open", "tls", "login", "Aviso", "quit", "close"]
+
+
+def smtp_double(monkeypatch, *, failure_at=None, failure=None, quit_error=None, close_error=None, refused=None):
+    """Incluye el cierre del context manager para reproducir la regresión previa."""
+    events = []
+
+    class SMTP:
+        def __init__(self, *args, **kwargs):
+            events.append("connect")
+            if failure_at == "connect":
+                raise failure
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *args):
+            try:
+                self.quit()
+            finally:
+                self.close()
+
+        def starttls(self):
+            events.append("tls")
+            if failure_at == "tls":
+                raise failure
+
+        def login(self, *args):
+            events.append("login")
+            if failure_at == "login":
+                raise failure
+
+        def send_message(self, message):
+            events.append("send")
+            if failure_at == "send":
+                raise failure
+            if refused:
+                return refused
+            events.append("accepted")
+            return {}
+
+        def quit(self):
+            events.append("quit")
+            if quit_error:
+                raise quit_error
+
+        def close(self):
+            events.append("close")
+            if close_error:
+                raise close_error
+
+    monkeypatch.setenv("SMTP_HOST", "smtp.example.com")
+    monkeypatch.setenv("SMTP_FROM", "sender@example.com")
+    monkeypatch.setenv("SMTP_USERNAME", "sender@example.com")
+    monkeypatch.setenv("SMTP_STARTTLS", "true")
+    monkeypatch.setattr(mail.smtplib, "SMTP", SMTP)
+    return events
+
+
+@pytest.mark.parametrize("error", [mail.smtplib.SMTPResponseException(421, b"private-close"),
+    mail.smtplib.SMTPServerDisconnected("private-close"), TimeoutError("private-close")])
+def test_smtp_accepted_message_is_not_failed_by_quit(monkeypatch, error, caplog):
+    events = smtp_double(monkeypatch, quit_error=error)
+    deliver(mail.SmtpEmailTransport())
+    assert events == ["connect", "tls", "login", "send", "accepted", "quit", "close"]
+    assert "private" not in caplog.text
+
+
+def test_smtp_accepted_message_is_not_failed_by_socket_cleanup(monkeypatch):
+    events = smtp_double(monkeypatch, close_error=OSError("private-close"))
+    deliver(mail.SmtpEmailTransport())
+    assert events.count("accepted") == events.count("close") == 1
+
+
+@pytest.mark.parametrize("error", [mail.smtplib.SMTPServerDisconnected("private-send"),
+    TimeoutError("private-send"), OSError("private-send")])
+def test_smtp_lost_send_response_is_uncertain_and_cleanup_cannot_replace_it(monkeypatch, error, caplog):
+    events = smtp_double(monkeypatch, failure_at="send", failure=error,
+                         quit_error=mail.smtplib.SMTPResponseException(421, b"private-quit"))
+    with pytest.raises(mail.EmailDeliveryError) as caught:
+        deliver(mail.SmtpEmailTransport())
+    assert caught.value.uncertain and not caught.value.retryable
+    assert events.count("send") == events.count("quit") == events.count("close") == 1
+    assert "accepted" not in events
+    assert "private" not in str(caught.value) and "private" not in caplog.text
+
+
+@pytest.mark.parametrize("error,retryable", [
+    (mail.smtplib.SMTPDataError(450, b"private-data"), True),
+    (mail.smtplib.SMTPDataError(550, b"private-data"), False),
+    (mail.smtplib.SMTPSenderRefused(450, b"private-sender", "sender@example.com"), True),
+    (mail.smtplib.SMTPSenderRefused(550, b"private-sender", "sender@example.com"), False),
+    (mail.smtplib.SMTPRecipientsRefused({"recipient@example.com": (450, b"private-recipient")}), True),
+    (mail.smtplib.SMTPRecipientsRefused({"recipient@example.com": (550, b"private-recipient")}), False),
+])
+def test_smtp_explicit_rejection_keeps_its_policy_even_if_quit_fails(monkeypatch, error, retryable):
+    events = smtp_double(monkeypatch, failure_at="send", failure=error,
+                         quit_error=mail.smtplib.SMTPResponseException(421, b"private-quit"))
+    with pytest.raises(mail.EmailDeliveryError) as caught:
+        deliver(mail.SmtpEmailTransport())
+    assert caught.value.retryable is retryable and not caught.value.uncertain
+    assert "private" not in str(caught.value)
+    assert events.count("send") == events.count("quit") == events.count("close") == 1
+
+
+@pytest.mark.parametrize("code,retryable", [(450, True), (550, False)])
+def test_smtp_refused_recipient_return_value_is_not_acceptance(monkeypatch, code, retryable):
+    events = smtp_double(monkeypatch, refused={"recipient@example.com": (code, b"private-rejection")})
+    with pytest.raises(mail.EmailDeliveryError) as caught:
+        deliver(mail.SmtpEmailTransport())
+    assert caught.value.retryable is retryable and not caught.value.uncertain
+    assert "accepted" not in events and events.count("send") == 1
+    assert "private" not in str(caught.value)
+
+
+@pytest.mark.parametrize("phase,error,retryable", [
+    ("connect", OSError("private-connect"), True),
+    ("tls", mail.smtplib.SMTPNotSupportedError("private-tls"), False),
+    ("login", mail.smtplib.SMTPAuthenticationError(435, b"private-auth"), True),
+    ("login", mail.smtplib.SMTPAuthenticationError(535, b"private-auth"), False),
+])
+def test_smtp_failure_before_send_is_not_an_uncertain_delivery(monkeypatch, phase, error, retryable):
+    events = smtp_double(monkeypatch, failure_at=phase, failure=error)
+    with pytest.raises(mail.EmailDeliveryError) as caught:
+        deliver(mail.SmtpEmailTransport())
+    assert caught.value.retryable is retryable and not caught.value.uncertain
+    assert "private" not in str(caught.value) and "send" not in events
+    assert events.count("close") == (0 if phase == "connect" else 1)
 
 
 def test_gmail_default_http_client_keeps_tls_and_does_not_use_ambient_proxy(monkeypatch):
