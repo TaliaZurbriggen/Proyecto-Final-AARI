@@ -3,12 +3,11 @@
 import asyncio
 import logging
 import os
-import smtplib
 from dataclasses import dataclass
-from email.message import EmailMessage
 from typing import Protocol
 from uuid import UUID
 
+from app.services.email_transport import EmailDeliveryError, send_email
 
 LOGGER = logging.getLogger(__name__)
 MAX_DELIVERY_ATTEMPTS = 3
@@ -19,7 +18,7 @@ MAX_DELIVERY_LEASE_SECONDS = 3600
 
 
 def notification_lease_seconds() -> int:
-    """Devuelve una reserva SMTP acotada y tolerante a configuración inválida."""
+    """Devuelve una reserva de entrega acotada y tolerante a configuración inválida."""
 
     configured = os.getenv(
         "NOTIFICATION_LEASE_SECONDS",
@@ -34,6 +33,10 @@ def notification_lease_seconds() -> int:
 
 class ClaimMessageDeliveryError(Exception):
     """El canal no pudo aceptar el mensaje."""
+
+    def __init__(self, message, *, retryable=True):
+        super().__init__(message)
+        self.retryable = retryable
 
 
 class ClaimEmailDeliveryError(ClaimMessageDeliveryError):
@@ -71,6 +74,7 @@ class ClaimNotificationRepository(Protocol):
         attempt_number: int,
         sent: bool,
         safe_error: str | None = None,
+        retryable: bool = True,
     ) -> bool: ...
 
 
@@ -85,8 +89,8 @@ class ClaimMessageSender(Protocol):
     ) -> None: ...
 
 
-class SmtpClaimEmailSender:
-    """Envía correo con un máximo de 10 segundos por operación SMTP."""
+class ConfiguredClaimEmailSender:
+    """Conserva la outbox y selecciona el transporte configurado en backend."""
 
     def send(
         self,
@@ -96,41 +100,13 @@ class SmtpClaimEmailSender:
         subject: str,
         message: str,
     ) -> None:
-        host = os.getenv("SMTP_HOST", "").strip()
-        sender = os.getenv("SMTP_FROM", "").strip()
-        if not host or not sender:
-            raise ClaimEmailDeliveryError("El servicio de correo no está configurado.")
         try:
-            port = int(os.getenv("SMTP_PORT", "587"))
-        except ValueError as error:
-            raise ClaimEmailDeliveryError(
-                "La configuración del servicio de correo es inválida."
-            ) from error
+            send_email(recipient=recipient, subject=subject, body=message)
+        except EmailDeliveryError as error:
+            raise ClaimEmailDeliveryError(str(error), retryable=error.retryable) from None
 
-        username = os.getenv("SMTP_USERNAME", "").strip()
-        password = os.getenv("SMTP_PASSWORD", "")
-        use_starttls = os.getenv("SMTP_STARTTLS", "true").lower() not in {
-            "0",
-            "false",
-            "no",
-        }
-        email = EmailMessage()
-        email["Subject"] = subject
-        email["From"] = sender
-        email["To"] = recipient
-        email.set_content(message)
 
-        try:
-            with smtplib.SMTP(host, port, timeout=10) as smtp:
-                if use_starttls:
-                    smtp.starttls()
-                if username:
-                    smtp.login(username, password)
-                smtp.send_message(email)
-        except (OSError, smtplib.SMTPException) as error:
-            raise ClaimEmailDeliveryError(
-                "No se pudo entregar la notificación por correo."
-            ) from error
+SmtpClaimEmailSender = ConfiguredClaimEmailSender
 
 
 class DisabledWhatsappSender:
@@ -188,6 +164,7 @@ class ClaimNotificationService:
             )
             return False
 
+        retryable = True
         try:
             sender.send(
                 recipient=context.recipient,
@@ -197,6 +174,7 @@ class ClaimNotificationService:
             )
         except ClaimMessageDeliveryError as error:
             safe_error = str(error)
+            retryable = error.retryable
         except Exception:
             LOGGER.exception(
                 "Fallo inesperado al enviar la notificación %s.", context.id
@@ -215,11 +193,13 @@ class ClaimNotificationService:
                 )
             return recorded
 
+        delivery_options = {} if retryable else {"retryable": False}
         self.repository.mark_notification_result(
             context.id,
             attempt_number=context.attempt_number,
             sent=False,
             safe_error=safe_error,
+            **delivery_options,
         )
         if context.attempt_number >= MAX_DELIVERY_ATTEMPTS:
             LOGGER.error(

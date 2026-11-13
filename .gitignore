@@ -2,6 +2,7 @@
 .env
 .env.local
 *.env
+backend/.secrets/
 
 # Python
 __pycache__/
@@ -10,6 +11,7 @@ __pycache__/
 venv/
 env/
 .venv/
+.venv-gmail/
 *.egg-info/
 
 # Node / React

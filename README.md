@@ -12,6 +12,23 @@ Universidad Tecnológica Nacional - Facultad Regional San Francisco
 
 Sistema web con agente de inteligencia artificial que automatiza el flujo completo de gestión de reclamos de mantenimiento en inmobiliarias: clasificación ordinario/extraordinario/expensa, selección de proveedores, coordinación de turnos y seguimiento hasta el cierre.
 
+## HU35 — Correo HTTPS con Gmail API (Sprint 5)
+
+Bienvenidas, invitaciones de proveedores y notificaciones reutilizan un transporte
+común. `EMAIL_PROVIDER=gmail_api` usa HTTPS con permiso sólo de envío; `smtp`
+mantiene la configuración anterior y sigue siendo el valor predeterminado.
+No hay fallback automático ni reenvío automático de resultados inciertos.
+La prueba real inicial fue recibida; el correo del emisor final fue aceptado por
+Google y recibido en Spam. Sus controles SPF, DKIM y DMARC pasaron, pero no se
+garantiza llegada a Recibidos. El MIME incluye fecha y un identificador único por mensaje.
+Una invitación adicional del flujo integrado fue recibida en Recibidos y se
+validaron su activación de un solo uso, el login y el perfil en una base ficticia.
+Las pruebas automáticas usan dobles y PostgreSQL local ficticio.
+OAuth continúa en modo Prueba, con renovación manual cada siete días aceptada
+para avanzar en desarrollo; no se presenta como operación definitiva desatendida
+ni como despliegue terminado. AARI-338 y la publicación/verificación OAuth siguen
+pendientes. Ver [configuración, renovación, seguridad y pruebas de HU35](docs/hu35_correo_https.md).
+
 ## Estado del cambio de canal — 06/11/2026
 
 AARI + correo reemplaza a WhatsApp como recorrido principal. HU19, HU20, HU23,
@@ -674,22 +691,23 @@ persona debe reemplazarla por una contraseña de al menos 8 caracteres y un
 número antes de acceder a su portal. Después del cambio, la contraseña temporal
 deja de ser válida y la navegación dirige a cada persona según su rol.
 
-El correo de bienvenida se configura con `SMTP_HOST`, `SMTP_PORT`,
-`SMTP_USERNAME`, `SMTP_PASSWORD`, `SMTP_FROM`, `SMTP_STARTTLS` y
-`APP_LOGIN_URL`. Si SMTP no está disponible, el alta y la cuenta se conservan:
+El correo usa el transporte indicado por `EMAIL_PROVIDER` y los enlaces de
+`APP_LOGIN_URL`. Para HTTPS, seguir la [guía de Gmail API HU35](docs/hu35_correo_https.md#configuración-de-aari-backend).
+Si el correo no está disponible, el alta y la cuenta se conservan:
 el estado queda como `fallido` y administración puede reintentar el envío desde
 la ficha del propietario o inquilino. Las pruebas automatizadas usan dobles y
 no envían correos reales.
 
-Para usar el correo institucional del proyecto en desarrollo, cada integrante
+Para conservar la alternativa SMTP anterior en desarrollo, cada integrante
 debe copiar estas variables únicamente en `backend/.env`:
 
 ```env
+EMAIL_PROVIDER=smtp
 SMTP_HOST=smtp.gmail.com
 SMTP_PORT=587
-SMTP_USERNAME=proyectofinalaari@gmail.com
+SMTP_USERNAME=cuenta-del-proyecto@example.com
 SMTP_PASSWORD=LA_CLAVE_DE_APLICACION
-SMTP_FROM=AARI <proyectofinalaari@gmail.com>
+SMTP_FROM=AARI <cuenta-del-proyecto@example.com>
 SMTP_STARTTLS=true
 APP_LOGIN_URL=http://localhost:5173/login
 NOTIFICATION_WORKER_ENABLED=true
@@ -705,15 +723,17 @@ Estas variables no pertenecen a `frontend/.env`. Para un entorno publicado,
 `APP_LOGIN_URL` debe reemplazarse por la URL real del login.
 
 Las actualizaciones de estado de los reclamos reutilizan la misma configuración
-SMTP. El backend procesa una bandeja de salida persistente y reintenta hasta tres
-veces, con un minuto entre intentos. `NOTIFICATION_WORKER_ENABLED=true` mantiene
+de correo. El backend procesa una bandeja de salida persistente y reintenta
+rechazos recuperables hasta tres veces, con un minuto entre intentos. Los errores
+permanentes y resultados inciertos quedan fallidos sin reenvío automático.
+`NOTIFICATION_WORKER_ENABLED=true` mantiene
 activo ese proceso; puede desactivarse temporalmente con `false` durante tareas
 de mantenimiento. Cada worker reserva el intento durante
 `NOTIFICATION_LEASE_SECONDS` (120 segundos por defecto, configurable entre 30 y
 3600) y solo puede guardar el resultado del mismo número de intento. Esto reduce
-duplicados y evita que un worker demorado sobrescriba otro intento, aunque SMTP
-mantiene una garantía de entrega al menos una vez. WhatsApp queda encapsulado
-como canal, pero su entrega real se incorporará en HU19.
+duplicados y evita que un worker demorado sobrescriba otro intento; no garantiza
+entrega exactamente una vez ni recepción por el destinatario. El canal vigente
+es AARI + correo: la integración real con WhatsApp no se presenta como entregada.
 
 El portal del inquilino consulta nuevamente el listado y el detalle del reclamo
 cada 30 segundos mientras la pantalla permanece abierta. Las consultas no se
