@@ -81,6 +81,12 @@ no otra implementación faltante del adaptador. Esta entrega no acredita un
 despliegue remoto ni envíos automáticos de extremo a extremo.
 Ver [documentación HU23](docs/hu23_coordinacion_visitas.md).
 
+HU36 agrega la reprogramación por acuerdo y los reportes de ausencia desde el
+detalle de una visita confirmada. Reutiliza los permisos de HU23, el hilo de
+coordinación de HU33 y la configuración existente de visitas. Requiere la
+migración aditiva `20261111120000_hu36_reprogramacion_visitas.sql`.
+Ver [documentación HU36](docs/hu36_reprogramacion_visitas.md).
+
 ## Stack tecnológico
 
 - **Backend:** Python + FastAPI

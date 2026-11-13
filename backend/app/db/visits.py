@@ -8,6 +8,10 @@ from sqlalchemy import text
 
 from app.agents.coordination.visits import visit_graph
 from app.db.quote_requests import SqlAlchemyQuoteRequests
+from app.db.visit_followups import (
+    FOLLOWUP_ACTIONS, apply_followup, expire_proposal, notice_matches_schedule,
+    read_followup, schedule_event,
+)
 from app.services.visits import ARGENTINA, VisitError, WAITING, reminder_due, valid_time, validate_options
 
 
@@ -165,6 +169,11 @@ class SqlAlchemyVisits(SqlAlchemyQuoteRequests):
                     actions.append('confirmar')
         thread = session.execute(text('''SELECT id FROM aari_conversaciones WHERE coordinacion_visita_id=:id
             AND audiencia=:audience'''), {'id':row['id'], 'audience':'inquilino' if roles['tenant'] or roles['provider'] or roles['agency'] else 'responsable'}).scalar_one_or_none()
+        followup, followup_actions = read_followup(session, row, user, roles, now, current)
+        actions.extend(followup_actions)
+        participant = roles['tenant'] or roles['provider']
+        can_chat = writable and participant and (row['etapa'] == 'negociando' or (
+            row['etapa'] == 'confirmada' and followup is not None))
         return {'id':row['id'],'reclamo_id':row['reclamo_id'],'numero':source['numero'],
             'etapa':row['etapa'],'version':row['version'],'proveedor':source['proveedor'],
             'urgencia':session.execute(text('SELECT urgencia::text FROM reclamos WHERE id=:id'), {'id':row['reclamo_id']}).scalar_one(),
@@ -174,7 +183,7 @@ class SqlAlchemyVisits(SqlAlchemyQuoteRequests):
                          'propia':row['propuesta_autor_id']==user.id} if row['propuesta_fecha'] else None),
             'opciones':[dict(v) for v in session.execute(text('SELECT id,desde,hasta FROM aari_visita_opciones WHERE coordinacion_id=:id ORDER BY desde,id'), {'id':row['id']}).mappings().all()],
             'acciones':actions,'vigente':current,'vencida':expired,'hilo_id':thread,
-            'puede_conversar':writable and row['etapa']=='negociando' and (roles['tenant'] or roles['provider']),
+            'puede_conversar':can_chat, 'seguimiento':followup,
             'motivo_solo_lectura':None if actions else ('La coordinación cambió; no admite nuevas acciones.' if not current else
                 'Finalizó el plazo para acordar la visita.' if expired and row['etapa']!='confirmada' else
                 'Podés consultar la coordinación; la acción corresponde al otro participante o la etapa ya finalizó.')}
@@ -184,9 +193,11 @@ class SqlAlchemyVisits(SqlAlchemyQuoteRequests):
             row, source, _, roles = self._scope(session, claim, user)
             return self._info(session, row, source, user, roles)
 
-    def _event(self, session, row, body, key):
+    def _event(self, session, row, body, key, *, participants_only=False):
         from app.db.conversations import _append
-        threads = session.execute(text('SELECT * FROM aari_conversaciones WHERE coordinacion_visita_id=:id ORDER BY id FOR UPDATE'), {'id':row['id']}).mappings().all()
+        threads = session.execute(text('''SELECT * FROM aari_conversaciones WHERE coordinacion_visita_id=:id
+            AND (NOT :restricted OR audiencia='inquilino') ORDER BY id FOR UPDATE'''),
+            {'id':row['id'], 'restricted':participants_only}).mappings().all()
         for thread in threads:
             if not session.execute(text('SELECT id FROM aari_conversacion_mensajes WHERE conversacion_id=:id AND clave_evento=:key'), {'id':thread['id'],'key':key}).scalar_one_or_none():
                 _append(session,thread,origin='agente',name='Agente AARI',body=body,event=key)
@@ -249,6 +260,12 @@ class SqlAlchemyVisits(SqlAlchemyQuoteRequests):
             if row['version']!=payload.version_esperada: raise VisitError('La coordinación cambió. Actualizá antes de continuar.')
             info=self._info(session,row,source,user,roles)
             if action not in info['acciones']: raise VisitError('Esta acción no está habilitada para tu cuenta o etapa.')
+            if action in FOLLOWUP_ACTIONS:
+                body = apply_followup(self, session, row, source, user, action, payload, info['seguimiento'])
+                updated = session.execute(text('''UPDATE aari_visita_coordinaciones SET version=version+1
+                    WHERE id=:id RETURNING *'''), {'id':row['id']}).mappings().one()
+                return self._record_action(session, updated, user, roles, action, payload, fingerprint, body,
+                    participants_only=True)
             now=self._now(session)
             values={'id':row['id'],'next':visit_graph.invoke({'etapa':row['etapa'],'accion':action})['etapa']}
             if action=='disponibilidad':
@@ -292,11 +309,15 @@ class SqlAlchemyVisits(SqlAlchemyQuoteRequests):
                 raise VisitError('Finalizó el plazo para confirmar la visita.')
             updated=session.execute(text('''UPDATE aari_visita_coordinaciones SET etapa=:next,version=version+1,
                 actualizada_en=clock_timestamp() WHERE id=:id RETURNING *'''),values).mappings().one()
-            self._event(session,updated,body,f"accion:{payload.request_id}")
-            session.execute(text('''INSERT INTO aari_visita_acciones(coordinacion_id,request_id,usuario_id,accion,datos,huella,version)
-                VALUES (:id,:key,:user,:action,CAST(:data AS jsonb),:fp,:version)'''), {'id':row['id'],'key':payload.request_id,'user':user.id,'action':action,
-                    'data':payload.model_dump_json(),'fp':fingerprint,'version':updated['version']})
-            return self._info(session,updated,self._source(session,claim),user,roles)|{'repetida':False}
+            return self._record_action(session, updated, user, roles, action, payload, fingerprint, body)
+
+    def _record_action(self, session, row, user, roles, action, payload, fingerprint, body, *, participants_only=False):
+        self._event(session, row, body, f"accion:{payload.request_id}", participants_only=participants_only)
+        session.execute(text('''INSERT INTO aari_visita_acciones(coordinacion_id,request_id,usuario_id,accion,datos,huella,version)
+            VALUES (:id,:key,:user,:action,CAST(:data AS jsonb),:fp,:version)'''),
+            {'id':row['id'],'key':payload.request_id,'user':user.id,'action':action,
+             'data':payload.model_dump_json(),'fp':fingerprint,'version':row['version']})
+        return self._info(session,row,self._source(session,row['reclamo_id']),user,roles)|{'repetida':False}
 
     def tick(self, *, limit=20):
         from app.services.visits import visits_enabled
@@ -330,6 +351,8 @@ class SqlAlchemyVisits(SqlAlchemyQuoteRequests):
             if not row: return
             session.execute(text('UPDATE aari_visita_coordinaciones SET revisada_en=clock_timestamp() WHERE id=:id'), {'id':row['id']})
             now=self._now(session)
+            if 'version_horario' in row and row['etapa']=='confirmada':
+                expire_proposal(session, row, now)
             if not self._current(row,source):
                 if row['etapa'] not in {'invalidada','sin_acuerdo'}:
                     session.execute(text("UPDATE aari_visita_coordinaciones SET etapa='invalidada',version=version+1,actualizada_en=clock_timestamp() WHERE id=:id"), {'id':row['id']})
@@ -344,8 +367,9 @@ class SqlAlchemyVisits(SqlAlchemyQuoteRequests):
                 for hours in (24,2):
                     if reminder_due(row['actualizada_en'],row['propuesta_fecha'],now,hours):
                         body='Recordatorio de visita: '+row['propuesta_fecha'].astimezone(ARGENTINA).strftime('%d/%m/%Y %H:%M')+' (Argentina). Dirección: '+source['direccion']+'.'
-                        for uid in (row['inquilino_usuario_id'],row['proveedor_usuario_id']): self._notice(session,row,source,uid,f'recordatorio_{hours}',body)
-                        self._event(session,row,body,f'recordatorio_{hours}')
+                        event = schedule_event(f'recordatorio_{hours}', row.get('version_horario', 0))
+                        for uid in (row['inquilino_usuario_id'],row['proveedor_usuario_id']): self._notice(session,row,source,uid,event,body)
+                        self._event(session,row,body,event)
 
     def _thread_scope(self, session, thread_id, user):
         thread=session.execute(text('SELECT * FROM aari_conversaciones WHERE id=:id AND coordinacion_visita_id IS NOT NULL'), {'id':thread_id}).mappings().one_or_none()
@@ -455,7 +479,7 @@ def validate_visit_notice(session, notification_id):
     if event=='inicio': valid=valid and row['etapa']=='esperando_disponibilidad'
     elif event in {'opciones','negociando'}: valid=valid and row['etapa'] in WAITING and now<row['vence_en']
     elif event=='sin_acuerdo': valid=valid and row['etapa']=='sin_acuerdo'
-    else: valid=valid and row['etapa']=='confirmada' and now<row['propuesta_fecha']
+    else: valid=valid and notice_matches_schedule(session, row, event, now)
     if not valid:
         session.execute(text('''UPDATE notificaciones SET estado_envio='fallido',ultimo_error='Coordinación de visita no vigente; aviso obsoleto.',
             proximo_intento_en=NULL,bloqueado_hasta=NULL,updated_at=clock_timestamp()

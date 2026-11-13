@@ -7,7 +7,10 @@ from sqlalchemy.exc import SQLAlchemyError
 from app.api.auth import require_roles
 from app.db.visits import SqlAlchemyVisits
 from app.schemas.auth import AuthenticatedUser
-from app.schemas.visits import AvailabilityRequest, VisitAction, VisitConfirmationRequest, VisitProposalRequest
+from app.schemas.visits import (
+    AvailabilityRequest, VisitAbsenceRequest, VisitAction, VisitConfirmationRequest,
+    VisitProposalRequest, VisitRescheduleDecision, VisitRescheduleRequest,
+)
 from app.services.visits import VisitError, visits_enabled
 
 
@@ -61,3 +64,21 @@ def propose(claim_id:UUID,payload:VisitProposalRequest,response:Response,user:Au
 @router.post('/{claim_id}/visita/confirmar')
 def confirm(claim_id:UUID,payload:VisitConfirmationRequest,response:Response,user:AuthenticatedUser=Depends(participant),repo=Depends(get_visits)):
     return call(response,lambda:repo.act(claim_id,user,'confirmar',payload))
+
+
+@router.post('/{claim_id}/visita/reprogramar')
+def reschedule(claim_id: UUID, payload: VisitRescheduleRequest, response: Response,
+               user: AuthenticatedUser = Depends(participant), repo=Depends(get_visits)):
+    return call(response, lambda: repo.act(claim_id, user, 'reprogramar', payload))
+
+
+@router.post('/{claim_id}/visita/decidir-reprogramacion')
+def decide_reschedule(claim_id: UUID, payload: VisitRescheduleDecision, response: Response,
+                      user: AuthenticatedUser = Depends(participant), repo=Depends(get_visits)):
+    return call(response, lambda: repo.act(claim_id, user, 'decidir-reprogramacion', payload))
+
+
+@router.post('/{claim_id}/visita/informar-ausencia')
+def report_absence(claim_id: UUID, payload: VisitAbsenceRequest, response: Response,
+                   user: AuthenticatedUser = Depends(participant), repo=Depends(get_visits)):
+    return call(response, lambda: repo.act(claim_id, user, 'informar-ausencia', payload))

@@ -5,6 +5,7 @@ import { PageContainer, PageHeading } from '../../components/layout/index.js'
 import { AlertMessage, Button, FormField, LoadingState, TextInput } from '../../components/ui/index.js'
 import { useConversationDock } from '../conversaciones/conversationContext.js'
 import { argentineTime, getVisit, visitAction, visitDate, visitLabels } from './visitsApi.js'
+import VisitFollowup from './VisitFollowup.jsx'
 import styles from './Visits.module.css'
 
 export default function VisitCoordinationPage() {
@@ -68,6 +69,10 @@ function VisitDetail({ claim }) {
         <p><strong>{data.proveedor}</strong> · {data.ubicacion}</p><p className={styles.muted}>Urgencia del reclamo: {data.urgencia}. La coordinación no cambia el presupuesto aprobado.</p>
         {data.vence_en && data.etapa !== 'confirmada' ? <p>Plazo para acordar: <strong>{visitDate(data.vence_en)}</strong>. Los mensajes no amplían este plazo.</p> : null}
         {data.etapa === 'confirmada' ? <div className={styles.notice}><AlertMessage tone="success">Visita confirmada: {visitDate(data.fecha_confirmada)} (Argentina). La reparación todavía no está marcada como resuelta.</AlertMessage></div> : null}
+        {data.etapa === 'confirmada' && data.puede_conversar && data.hilo_id && dock?.enabled ? <Button
+          variant="secondary" leadingIcon={<MessageSquare />} onClick={() => dock.openThread(data.hilo_id)}>
+          Abrir conversación de coordinación
+        </Button> : null}
         {!data.acciones.length && data.etapa !== 'confirmada' ? <p className={styles.muted}>{data.motivo_solo_lectura}</p> : null}
       </section>
       {data.acciones.includes('disponibilidad') ? <AvailabilityForm disabled={busy || uncertain} onSubmit={(values) => send('disponibilidad', values)} /> : null}
@@ -81,6 +86,7 @@ function VisitDetail({ claim }) {
         {data.acciones.includes('proponer') ? <ProposalForm disabled={busy || uncertain} onSubmit={(values) => send('proponer', values)} /> : null}
       </section> : null}
       {data.etapa === 'sin_acuerdo' ? <AlertMessage tone="warning">No se confirmó la visita en plazo. El responsable debe revisar cómo continuar. El historial se conserva; cancelar o elegir otro proveedor corresponde a ese recorrido.</AlertMessage> : null}
+      <VisitFollowup data={data} disabled={busy || uncertain} send={send} />
     </> : <div className={styles.actions}><Button variant="secondary" onClick={() => load()}>Volver a consultar</Button></div>}
   </PageContainer>
 }

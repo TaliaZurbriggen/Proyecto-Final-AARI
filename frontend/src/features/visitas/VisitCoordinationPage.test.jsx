@@ -9,6 +9,8 @@ const claim = '11111111-1111-4111-8111-111111111111'
 const coordinator = '22222222-2222-4222-8222-222222222222'
 const base = { id: coordinator, reclamo_id: claim, numero: 1, etapa: 'esperando_disponibilidad', version: 0, proveedor: 'Servicio Sintético', ubicacion: 'Unidad Sintética', urgencia: 'media', vence_en: null, fecha_confirmada: null, propuesta: null, opciones: [], acciones: ['disponibilidad'], vigente: true, vencida: false, hilo_id: '33333333-3333-4333-8333-333333333333', puede_conversar: false, motivo_solo_lectura: null }
 const slots = [1, 2, 3].map((n) => ({ id: `option-${n}`, desde: `2099-11-${10 + n}T14:00:00-03:00`, hasta: `2099-11-${10 + n}T17:00:00-03:00` }))
+const followup = { propuesta_pendiente: null, decisiones: [], reprogramaciones: [], ausencias: [] }
+const confirmed = { ...base, etapa: 'confirmada', version: 9, fecha_confirmada: slots[0].desde, seguimiento: followup }
 const json = (body, status = 200) => new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } })
 let current, fetch, posts, openThread
 beforeEach(() => {
@@ -20,6 +22,44 @@ beforeEach(() => {
 })
 afterEach(() => vi.restoreAllMocks())
 const show = () => render(<MemoryRouter initialEntries={[`/visitas/${claim}`]}><DockContext.Provider value={{ enabled: true, openThread }}><Routes><Route path="/visitas/:reclamoId" element={<VisitCoordinationPage />} /></Routes></DockContext.Provider></MemoryRouter>)
+
+it('propone una nueva fecha sin cambiar el horario que se muestra como confirmado', async () => {
+  current = { ...confirmed, acciones: ['reprogramar'], puede_conversar: true }
+  show()
+  expect(await screen.findByText(/Visita confirmada:.*11\/11\/99/)).toBeVisible()
+  await userEvent.click(screen.getByRole('button', { name: 'Abrir conversación de coordinación' }))
+  expect(openThread).toHaveBeenCalledWith(base.hilo_id)
+  fireEvent.change(screen.getByLabelText(/Nueva fecha/), { target: { value: '2099-11-20' } })
+  fireEvent.change(screen.getByLabelText(/Nueva hora/), { target: { value: '15:00' } })
+  await userEvent.type(screen.getByLabelText(/Motivo/), 'Cambio de disponibilidad')
+  await userEvent.click(screen.getByRole('button', { name: 'Enviar propuesta' }))
+  expect(posts[0]).toMatchObject({ version_esperada: 9, fecha: '2099-11-20T15:00:00-03:00', motivo: 'Cambio de disponibilidad' })
+})
+
+it('muestra ambos horarios y envía la decisión para la propuesta exacta', async () => {
+  current = { ...confirmed, acciones: ['decidir-reprogramacion'], seguimiento: { ...followup,
+    propuesta_pendiente: { id: 'proposal', fecha_anterior: slots[0].desde, fecha_propuesta: slots[1].desde,
+      vence_en: slots[0].desde, solicitante_rol: 'proveedor', motivo: 'Turno actualizado' }, decisiones: ['aceptar', 'rechazar'],
+  } }
+  show()
+  expect(await screen.findByText('Horario vigente')).toBeVisible()
+  expect(screen.getByText('Horario propuesto')).toBeVisible()
+  expect(screen.queryByRole('button', { name: 'Retirar propuesta' })).not.toBeInTheDocument()
+  await userEvent.click(screen.getByRole('button', { name: 'Aceptar nuevo horario' }))
+  expect(posts[0]).toMatchObject({ propuesta_id: 'proposal', decision: 'aceptar', version_esperada: 9 })
+})
+
+it('registra el reporte del usuario y muestra el de la otra parte con su autor', async () => {
+  current = { ...confirmed, acciones: ['informar-ausencia'], seguimiento: { ...followup, ausencias: [{
+    id: 'report', fecha_visita: slots[0].desde, creada_en: slots[0].hasta, autor_rol: 'proveedor', tipo: 'no_realizada', observaciones: 'No pude acceder.',
+  }] } }
+  show()
+  expect(await screen.findByText('Proveedor · La visita no se realizó')).toBeVisible()
+  await userEvent.selectOptions(screen.getByLabelText(/Resultado informado/), 'contraparte_ausente')
+  await userEvent.type(screen.getByLabelText(/Observaciones/), 'Esperé en la unidad.')
+  await userEvent.click(screen.getByRole('button', { name: 'Registrar reporte' }))
+  expect(posts[0]).toMatchObject({ tipo: 'contraparte_ausente', observaciones: 'Esperé en la unidad.', version_esperada: 9 })
+})
 
 it('rechaza formulario vacío y devuelve foco sin POST', async () => {
   show()
